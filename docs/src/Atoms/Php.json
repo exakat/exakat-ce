@@ -1,0 +1,7 @@
+{
+    "name": "Php",
+    "description": "A PHP script, inside its tags. This exclude the following and previous raw text in a PHP file. ",
+    "url": [
+        ""
+    ]
+}

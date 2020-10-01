@@ -1,0 +1,7 @@
+{
+    "name": "Variablearray",
+    "description": "A variable, when used to build an array syntax. For example, the `$x` in `$x[0]` or `$x[]`.",
+    "url": [
+        ""
+    ]
+}

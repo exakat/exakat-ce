@@ -1,0 +1,768 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>12. Configuration &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="13. Custom analysis" href="Development.html" />
+    <link rel="prev" title="11. Reports" href="Reports.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Features.html">2. Exakat features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">3. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">4. Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">5. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">6. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">7. Exakat commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rulesets.html">8. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">9. Rules list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cases.html">10. Real Code Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reports.html">11. Reports</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">12. Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">12.1. Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-behavior">12.2. Common Behavior</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-philosophy">12.2.1. General Philosophy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#precedence">12.2.2. Precedence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-options">12.2.3. Common Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#engine-configuration">12.3. Engine configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-file">12.3.1. Configuration File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-options">12.3.2. Available Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-rulesets">12.3.3. Custom rulesets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#project-configuration">12.4. Project Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">12.4.1. Available Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-excluding-files">12.5. Adding/Excluding files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#in-code-configuration">12.6. In-code Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#exakat-in-code-example">12.6.1. Exakat in-code example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exakat-in-code-skeleton">12.6.2. Exakat in-code skeleton</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">12.6.3. Available Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#commandline-configuration">12.7. Commandline Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#specific-analysis-configurations">12.8. Specific analysis configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-analysis-to-be-run">12.9. Configuring analysis to be run</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#required-rulesets">12.9.1. Required rulesets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#report-needed-rulesets">12.9.2. Report-needed rulesets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#late-reports">12.9.3. Late reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recommendations">12.9.4. Recommendations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">12.9.5. Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#check-install">12.10. Check Install</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Development.html">13. Custom analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Glossary.html">14. Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Definitions.html">15. Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribute.html">16. Ideas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributors.html">17. List of contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Annex.html">18. Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>12. Configuration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Configuration.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="configuration">
+<span id="id1"></span><h1>12. Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>12.1. Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#common-behavior">Common Behavior</a></li>
+<li><a class="reference internal" href="#engine-configuration">Engine configuration</a></li>
+<li><a class="reference internal" href="#project-configuration">Project Configuration</a></li>
+<li><a class="reference internal" href="#in-code-configuration">In-code Configuration</a></li>
+<li><a class="reference internal" href="#commandline-configuration">Commandline Configuration</a></li>
+<li><a class="reference internal" href="#configuring-analysis-to-be-run">Configuring analysis to be run</a></li>
+<li><a class="reference internal" href="#specific-analysis-configurations">Specific analysis configurations</a></li>
+</ul>
+</div>
+<div class="section" id="common-behavior">
+<h2>12.2. Common Behavior<a class="headerlink" href="#common-behavior" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="general-philosophy">
+<h3>12.2.1. General Philosophy<a class="headerlink" href="#general-philosophy" title="Permalink to this headline">¶</a></h3>
+<p>Exakat tries to avoid configuration as much as possible, so as to focus on working out of the box, rather than spend time on pre-requisite.</p>
+<p>As such, it probably does more work, but that may be dismissed later, at reading time.</p>
+<p>More configuration options appear with the evolution of the engine.</p>
+</div>
+<div class="section" id="precedence">
+<h3>12.2.2. Precedence<a class="headerlink" href="#precedence" title="Permalink to this headline">¶</a></h3>
+<p>The exakat engine read directives from three places :</p>
+<ol class="arabic simple">
+<li>The command line options</li>
+<li>The .exakat.ini file at the root of the code</li>
+<li>The config.ini file in the project directory</li>
+<li>The exakat.ini file in the config directory</li>
+<li>The default values in the code</li>
+</ol>
+<p>The precedence of the directives is the same as the list above : command line options always have highest priority, config.ini files are in second, when command line are not available, and finally, the default values are read in the code.</p>
+<p>Some of the directives are only available in the config.ini files.</p>
+</div>
+<div class="section" id="common-options">
+<h3>12.2.3. Common Options<a class="headerlink" href="#common-options" title="Permalink to this headline">¶</a></h3>
+<p>All options are the same, whatever the command provided to exakat. -f always means files, and -q always means quick.</p>
+<p>Any option that a command doesn’t understand is ignored.</p>
+<p>Any option that is not recognized is ignored and reported (with visibility).</p>
+</div>
+</div>
+<div class="section" id="engine-configuration">
+<h2>12.3. Engine configuration<a class="headerlink" href="#engine-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Engine configuration is were the exakat engine general configuration are stored. For example, the php binaries or the neo4j folder are there. Engine configurations affect all projects.</p>
+<div class="section" id="configuration-file">
+<h3>12.3.1. Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this headline">¶</a></h3>
+<p>The Exakat engine is configured in the ‘config/exakat.ini’ file.</p>
+<p>This file is created with the ‘doctor’ command, or simply by copying another such file from another installation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">doctor</span>
+</pre></div>
+</div>
+<p>When the doctor can’t find the ‘config/config.ini’ file, it attempts to create one, with reasonable values. It is recommended to use this to create the exakat.ini skeleton, and later, modify it.</p>
+</div>
+<div class="section" id="available-options">
+<h3>12.3.2. Available Options<a class="headerlink" href="#available-options" title="Permalink to this headline">¶</a></h3>
+<p>Here are the currently available options in Exakat’s configuration file : config/config.ini</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="81%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>graphdb</td>
+<td>The graph database to use.
+Currently, it may be gsneo4j, or tinkergraph.</td>
+</tr>
+<tr class="row-odd"><td>gsneo4j_host</td>
+<td>The host to connect to reach the graph database, when using gsneo4j driver.
+The default value is ‘localhost’</td>
+</tr>
+<tr class="row-even"><td>gsneo4j_host</td>
+<td>The port to use on the host to reach the graph database, when using gsneo4j driver..
+The default value is ‘8182’</td>
+</tr>
+<tr class="row-odd"><td>gsneo4j_folder</td>
+<td>The folder where the code for the graph database resides, when using gsneo4j driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</td>
+</tr>
+<tr class="row-even"><td>tinkergraph_host</td>
+<td>The host to connect to reach the graph database, when using tinkergraph driver.
+The default value is ‘localhost’</td>
+</tr>
+<tr class="row-odd"><td>tinkergraph_port</td>
+<td>The port to use on the host to reach the graph database, when using tinkergraph driver.
+The default value is ‘8182’</td>
+</tr>
+<tr class="row-even"><td>tinkergraph_folder</td>
+<td>The folder where the code for the graph database resides, when using tinkergraph driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</td>
+</tr>
+<tr class="row-odd"><td>gsneo4jv3_host</td>
+<td>The host to connect to reach the graph database, when using gsneo4j driver.
+The default value is ‘localhost’</td>
+</tr>
+<tr class="row-even"><td>gsneo4jve_host</td>
+<td>The port to use on the host to reach the graph database, when using gsneo4j driver..
+The default value is ‘8182’</td>
+</tr>
+<tr class="row-odd"><td>gsneo4jv3_folder</td>
+<td>The folder where the code for the graph database resides, when using gsneo4j driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</td>
+</tr>
+<tr class="row-even"><td>tinkergraphv3_host</td>
+<td>The host to connect to reach the graph database, when using tinkergraph driver.
+The default value is ‘localhost’</td>
+</tr>
+<tr class="row-odd"><td>tinkergraphv3_port</td>
+<td>The port to use on the host to reach the graph database, when using tinkergraph driver.
+The default value is ‘8182’</td>
+</tr>
+<tr class="row-even"><td>tinkergraphv3_folder</td>
+<td>The folder where the code for the graph database resides, when using tinkergraph driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</td>
+</tr>
+<tr class="row-odd"><td>project_rulesets</td>
+<td>List of analysis rulesets to be run. The list may include extra rulesets that are not
+used by the default reports : you can then summon them manually.
+project_themes[] = ‘Theme’, one per line.</td>
+</tr>
+<tr class="row-even"><td>project_themes</td>
+<td>Obsolete. Use the one above : project_rulesets</td>
+</tr>
+<tr class="row-odd"><td>project_reports</td>
+<td>The list of reports that can be produced when running ‘project’ command.
+This list may automatically add extra rulesets if a report requires them. For example,
+the ‘Ambassador’ report requires ‘Security’ ruleset, while ‘Text’ has no pre-requisite.
+project_reports is ‘Ambassador’, by default.
+project_reports[] = ‘Report’, one per line.</td>
+</tr>
+<tr class="row-even"><td>token_limit</td>
+<td>Maximum size of the analyzed project, in number of PHP tokens (excluding whitespace).
+Use this to avoid running a really long analyze without knowing it.
+Default is 1 million.</td>
+</tr>
+<tr class="row-odd"><td>php</td>
+<td>Link to the PHP binary. This binary is the one that runs Exakat. It is recommended to use
+PHP 7.3, or 7.4. The same binary may be used with the following options.</td>
+</tr>
+<tr class="row-even"><td>php80</td>
+<td>Path to the PHP 8.0.x binary. This binary is needed to test the compilation with the 8.0
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-odd"><td>php74</td>
+<td>Path to the PHP 7.4.x binary. This binary is needed to test the compilation with the 7.4
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-even"><td>php73</td>
+<td>Path to the PHP 7.3.x binary. This binary is needed to test the compilation with the 7.3
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-odd"><td>php72</td>
+<td>Path to the PHP 7.2.x binary. This binary is needed to test the compilation with the 7.2
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-even"><td>php71</td>
+<td>Path to the PHP 7.1.x binary. This binary is needed to test the compilation with the 7.1
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-odd"><td>php70</td>
+<td>Path to the PHP 7.0.x binary. This binary is needed to test the compilation with the 7.0
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-even"><td>php56</td>
+<td>Path to the PHP 5.6.x binary. This binary is needed to test the compilation with the 5.6
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-odd"><td>php55</td>
+<td>Path to the PHP 5.5.x binary. This binary is needed to test the compilation with the 5.5
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-even"><td>php54</td>
+<td>Path to the PHP 5.4.x binary. This binary is needed to test the compilation with the 5.4
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-odd"><td>php53</td>
+<td>Path to the PHP 5.3.x binary. This binary is needed to test the compilation with the 5.3
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-even"><td>php52</td>
+<td>Path to the PHP 5.2.x binary. This binary is needed to test the compilation with the 5.2
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</td>
+</tr>
+<tr class="row-odd"><td>php_extensions</td>
+<td>List of PHP extensions to use when spotting functions, methods, constants, classes, etc.
+Default to ‘all’, which are all in the source code
+Can be set to ‘none’ to skip the detection</td>
+</tr>
+</tbody>
+</table>
+<p>Note : php** configuration may be either a valid PHP binary path, or a valid Docker image. The path on the system may be <cite>/usr/bin/php</cite>, <cite>/usr/sbin/php80</cite>, or <cite>/usr/local/Cellar/php71/7.1.30/bin/php</cite>. The Docker configuration must have the form <cite>abc/def:tag</cite>. The image’s name may be any value, as long as Exakat manage to run it, and get the valid PHP signature, with <cite>php -v</cite>. When using Docker, the docker server must be running.</p>
+</div>
+<div class="section" id="custom-rulesets">
+<h3>12.3.3. Custom rulesets<a class="headerlink" href="#custom-rulesets" title="Permalink to this headline">¶</a></h3>
+<p>Create custom rulesets by creating a ‘config/themes.ini’ directive files.</p>
+<p>This file is a .INI file, build with several sections. Each section is the name of a ruleset : for example, ‘mine’ is the name for the ruleset below.</p>
+<p>There may be several sections, as long as the names are distinct.</p>
+<p>It is recommended to use all low-case names for custom rulesets. Exakat uses names with a first capital letter, which prevents conflicts. Behavior is undefined if a custom ruleset has the same name as a default ruleset.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;mine&#39;</span><span class="p">]</span>
+<span class="n">analyzer</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Structures/AddZero&#39;</span><span class="p">;</span>
+<span class="n">analyzer</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Performances/ArrayMergeInLoops&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The list of analyzer in the ruleset is based on the ‘analyzer’ array. The analyzer is identified by its ‘shortname’. Analyzer shortname may be found in the documentation (<a class="reference internal" href="Rules.html#rules"><span class="std std-ref">Rules list</span></a> or within the Ambassador report). Analyzers names have a ‘A/B’ structure.</p>
+<p>The list of available rulesets, including the custom ones, is listed with the <cite>doctor</cite> command.</p>
+</div>
+</div>
+<div class="section" id="project-configuration">
+<h2>12.4. Project Configuration<a class="headerlink" href="#project-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Project configuration are were the project specific configuration are stored. For example, the project name, the ignored directories or its external libraries are kept. Configurations only affect one project and not the others.</p>
+<p>Project configuration file are called ‘config.ini’. They are located, one per project, in the ‘projects/&amp;lt;project name&amp;gt;/config.ini’ file.</p>
+<div class="section" id="id2">
+<h3>12.4.1. Available Options<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Here are the currently available options in Exakat’s project configuration file : projects/&amp;lt;project name&amp;gt;/config.ini</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>phpversion</td>
+<td>Version with which to run the analyze.
+It may be one of : 7.3, 7.2, 7.1, 7.0, 5.6, 5.5, 5.4, 5.3, 5.2.
+Default is 7.2 or the CLI version used to init the project.
+5.* versions are available, but are less tested.
+7.3 is actually the current dev version.</td>
+</tr>
+<tr class="row-odd"><td>include_dirs[]</td>
+<td>This is the list of files and dir to include in the project’s directory. It is chrooted
+in the project’s folder. Values provided with a starting / are used as a path prefix.
+Values without / are used as a substring, anywhere in the path.
+include_dirs are added AFTER ignore_dirs, so as to partially ignore a folder, such as
+the vendor folder from composer.</td>
+</tr>
+<tr class="row-even"><td>ignore_dirs[]</td>
+<td>This is the list of files and dir to ignore in the project’s directory. It is chrooted in
+the project’s folder. Values provided with a starting / are used as a path prefix. Values
+without / are used as a substring, anywhere in the path.</td>
+</tr>
+<tr class="row-odd"><td>ignore_dirs[]</td>
+<td>This is the list of files and dir to ignore in the project’s directory. It is chrooted in
+the project’s folder. Values provided with a starting / are used as a path prefix. Values
+without / are used as a substring, anywhere in the path.</td>
+</tr>
+<tr class="row-even"><td>file_extensions</td>
+<td>This is the list of file extensions that is considered as PHP scripts. All others are
+ignored. All files bearing those extensions are subject to check, though they are
+scanned first for PHP tags before being analyzed. The extensions are comma separated,
+without dot.
+The default are : php, php3, inc, tpl, phtml, tmpl, phps, ctp</td>
+</tr>
+<tr class="row-odd"><td>project_name</td>
+<td>This is the project name, as it appears at the top left in the Ambassador report.</td>
+</tr>
+<tr class="row-even"><td>project_url</td>
+<td>This is the repository URL for the project. It is used to get the source for the project.</td>
+</tr>
+<tr class="row-odd"><td>project_vcs</td>
+<td>This is the VCS used to fetch the project source.</td>
+</tr>
+<tr class="row-even"><td>project_description</td>
+<td>This is the description of the project.</td>
+</tr>
+<tr class="row-odd"><td>project_packagist</td>
+<td>This is the packagist name for the code, when the code is fetched with composer.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="adding-excluding-files">
+<h2>12.5. Adding/Excluding files<a class="headerlink" href="#adding-excluding-files" title="Permalink to this headline">¶</a></h2>
+<p>ignore_dirs and include_dirs are the option used to select files within a folder. Here are some tips to choose</p>
+<ul class="simple">
+<li>From the full list of files, ignore_dirs[] is applied, then include_dirs is applied. The remaining list is processed.</li>
+<li>ignore one file :
+<cite>ignore_dirs[] = “/path/to/file.php”</cite></li>
+<li>ignore one dir :
+<cite>ignore_dirs[] = “/path/to/dir/”</cite></li>
+<li>ignore siblings but include one dir :
+<cite>ignore_dirs[] = “/path/to/parent/”;</cite>
+<cite>include_dirs[] = “/path/to/parent/dir/”</cite></li>
+<li>ignore every name containing ‘test’ :
+<cite>ignore_dirs[] = “test”;</cite></li>
+<li>only include one dir (and exclude the rest):
+<cite>include_dirs[] = “/path/to/dir/”;</cite></li>
+<li>omitting include_dirs defaults to <cite>“include_dirs[] = “”</cite></li>
+<li>omitting ignore_dirs defaults to <cite>“ignore_dirs[] = “”</cite></li>
+<li>including or ignoring files multiple times only has effect once</li>
+</ul>
+<p>include_dirs has priority over the <cite>config.cache</cite> configuration file. If a folder has been marked for exclusion in the <cite>config.cache</cite> file, it may be forced to be included by configuring its value with include_dirs in the <cite>config.ini</cite> file.</p>
+</div>
+<div class="section" id="in-code-configuration">
+<h2>12.6. In-code Configuration<a class="headerlink" href="#in-code-configuration" title="Permalink to this headline">¶</a></h2>
+<p>In-code configuration is a configuration file that sits at the root of the code. When exakat finds it, it uses it for in-code auditing.</p>
+<p>The file is <cite>.exakat.yaml</cite>, and is a valid YAML file. <cite>.exakat.yml</cite> is also valid, but not recommended.</p>
+<p>In case the file is found but not valid, Exakat reverts to default values.</p>
+<p>Unrecognized values are ignored.</p>
+<div class="section" id="exakat-in-code-example">
+<h3>12.6.1. Exakat in-code example<a class="headerlink" href="#exakat-in-code-example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="p">:</span> <span class="n">exakat</span>
+<span class="n">project_name</span><span class="p">:</span> <span class="n">exakat</span>
+<span class="n">project_rulesets</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">my_ruleset</span>
+<span class="o">-</span> <span class="n">Security</span>
+<span class="n">project_report</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">Ambassador</span>
+<span class="n">file_extensions</span><span class="p">:</span> <span class="n">php</span><span class="p">,</span><span class="n">php3</span><span class="p">,</span><span class="n">phtml</span>
+<span class="n">include_dirs</span><span class="p">:</span>
+  <span class="o">-</span> <span class="o">/</span>
+<span class="n">ignore_dirs</span><span class="p">:</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">tests</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">vendor</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">docs</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">media</span>
+<span class="n">ignore_rules</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">Structures</span><span class="o">/</span><span class="n">AddZero</span>
+<span class="n">rulesets</span><span class="p">:</span>
+  <span class="n">my_ruleset</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">Structures</span><span class="o">/</span><span class="n">AddZero</span>
+      <span class="o">-</span> <span class="n">Structures</span><span class="o">/</span><span class="n">MultiplyByOne</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="exakat-in-code-skeleton">
+<h3>12.6.2. Exakat in-code skeleton<a class="headerlink" href="#exakat-in-code-skeleton" title="Permalink to this headline">¶</a></h3>
+<p>Copy-paste this YAML code into a file called <cite>.exakat.yaml</cite>, located at the root of your repository.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">file_extensions</span><span class="p">:</span> <span class="n">php</span><span class="p">,</span><span class="n">php3</span><span class="p">,</span><span class="n">phtml</span>
+<span class="n">project</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">project</span> <span class="n">short</span> <span class="n">name</span><span class="o">&gt;</span>
+<span class="n">project_name</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">project</span> <span class="n">name</span><span class="p">,</span> <span class="k">as</span> <span class="n">displayed</span> <span class="ow">in</span> <span class="n">reports</span><span class="o">&gt;</span>
+<span class="n">project_rulesets</span><span class="p">:</span>
+<span class="o">-</span> <span class="o">&lt;</span><span class="nb">list</span> <span class="n">of</span> <span class="n">rulesets</span> <span class="n">to</span> <span class="n">apply</span><span class="o">&gt;</span>
+<span class="o">-</span> <span class="n">Analysis</span>
+<span class="n">file_extensions</span><span class="p">:</span> <span class="n">php</span><span class="p">,</span><span class="n">php3</span><span class="p">,</span><span class="n">phtml</span>
+<span class="n">project_report</span><span class="p">:</span>
+<span class="o">-</span> <span class="o">&lt;</span><span class="nb">list</span> <span class="n">of</span> <span class="n">reports</span> <span class="n">to</span> <span class="n">build</span><span class="o">&gt;</span>
+<span class="o">-</span> <span class="n">Ambassador</span>
+<span class="n">include_dirs</span><span class="p">:</span>
+  <span class="o">-</span> <span class="o">/</span>
+<span class="n">ignore_rules</span><span class="p">:</span>
+  <span class="o">-</span>
+<span class="n">ignore_dirs</span><span class="p">:</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">tests</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">vendor</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">docs</span>
+  <span class="o">-</span> <span class="o">/</span><span class="n">media</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>12.6.3. Available Options<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>Here are the currently available options in Exakat’s project configuration file : projects/&amp;lt;project name&amp;gt;/config.ini</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>include_dirs[]</td>
+<td>This is the list of files and dir to include in the project’s directory. It is chrooted
+in the project’s folder. Values provided with a starting / are used as a path prefix.
+Values without / are used as a substring, anywhere in the path.
+include_dirs are added AFTER ignore_dirs, so as to partially ignore a folder, such as
+the vendor folder from composer.</td>
+</tr>
+<tr class="row-odd"><td>ignore_dirs[]</td>
+<td>This is the list of files and dir to ignore in the project’s directory. It is chrooted in
+the project’s folder. Values provided with a starting / are used as a path prefix. Values
+without / are used as a substring, anywhere in the path.</td>
+</tr>
+<tr class="row-even"><td>ignore_rules[]</td>
+<td>The rules mentioned in this list are ignored when running the audit. Rules are ignored
+after loading the rulesets configuration : as such, it is possible to ignore rules inside
+a ruleset, without ignoring the whole ruleset.
+The rules in this list are Exakat’s short name : ignore_rules[] = “Structures/AddZero”</td>
+</tr>
+<tr class="row-odd"><td>file_extensions</td>
+<td>This is the list of file extensions that is considered as PHP scripts. All others are
+ignored. All files bearing those extensions are subject to check, though they are
+scanned first for PHP tags before being analyzed. The extensions are comma separated,
+without dot.
+The default are : php, php3, inc, tpl, phtml, tmpl, phps, ctp</td>
+</tr>
+<tr class="row-even"><td>project_name</td>
+<td>This is the project name, as it appears at the top left in the Ambassador report.</td>
+</tr>
+<tr class="row-odd"><td>project_url</td>
+<td>This is the repository URL for the project. It is used to get the source for the project.</td>
+</tr>
+<tr class="row-even"><td>project_vcs</td>
+<td>This is the VCS used to fetch the project source.</td>
+</tr>
+<tr class="row-odd"><td>project_description</td>
+<td>This is the description of the project.</td>
+</tr>
+<tr class="row-even"><td>project_packagist</td>
+<td>This is the packagist name for the code, when the code is fetched with composer.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="commandline-configuration">
+<h2>12.7. Commandline Configuration<a class="headerlink" href="#commandline-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Commandline configurations are detailled with each command, in the _Commands section.</p>
+</div>
+<div class="section" id="specific-analysis-configurations">
+<h2>12.8. Specific analysis configurations<a class="headerlink" href="#specific-analysis-configurations" title="Permalink to this headline">¶</a></h2>
+<p>Some analyzer may be configured individually. Those parameters are then specific to one analyzer, and it only affects their behavior.</p>
+<p>Analyzers may be configured in the <cite>project/*/config.ini</cite>; they may also be configured globally in the <cite>config/exakat.ini</cite> file.</p>
+</div>
+<div class="section" id="configuring-analysis-to-be-run">
+<h2>12.9. Configuring analysis to be run<a class="headerlink" href="#configuring-analysis-to-be-run" title="Permalink to this headline">¶</a></h2>
+<p>Exakat builds a list of analysis to run, based on two directives : <cite>project_reports</cite> and <cite>projects_themes</cite>. Both are list of rulesets. Unknown rulesets are omitted.</p>
+<p>project_reports makes sure you can extract those reports, while <cite>projects_themes</cite> allow you to build reports a la carte later, and avoid running the whole audit again.</p>
+<div class="section" id="required-rulesets">
+<h3>12.9.1. Required rulesets<a class="headerlink" href="#required-rulesets" title="Permalink to this headline">¶</a></h3>
+<p>First, analysis are very numerous, and it is very tedious to sort them by hand. Exakat only handles ‘themes’ which are groups of analysis. There are several list of rulesets available by default, and it is possible to customize those lists.</p>
+<p>When using the <cite>projects_themes</cite> directive, you can configure which rulesets must be processed by exakat, each time a ‘project’ command is run. Those rulesets are always run.</p>
+</div>
+<div class="section" id="report-needed-rulesets">
+<h3>12.9.2. Report-needed rulesets<a class="headerlink" href="#report-needed-rulesets" title="Permalink to this headline">¶</a></h3>
+<p>Reports are build based on results found during the auditing phase. Some reports, like ‘Ambassador’ or ‘Drillinstructor’ needs the results of specific rulesets. Others, like ‘Text’ or ‘Json’ build reports at the last moment.</p>
+<p>As such, exakat uses the project_reports directive to collect the list of necessary rulesets, and add them to the <cite>projects_themes</cite> results.</p>
+</div>
+<div class="section" id="late-reports">
+<h3>12.9.3. Late reports<a class="headerlink" href="#late-reports" title="Permalink to this headline">¶</a></h3>
+<p>It is possible de extract a report, even if the configuration has not been explicitly set for it.</p>
+<p>For example, it is possible to build the Owasp report after telling exakat to build a ‘Ambassador’ report, as Ambassador includes all the analysis needed for Owasp. On the other hand, the contrary is not true : one can’t get the Ambassador report after running exakat for the Owasp report, as Owasp only covers the security rulesets, and Ambassador requires other rulesets.</p>
+</div>
+<div class="section" id="recommendations">
+<h3>12.9.4. Recommendations<a class="headerlink" href="#recommendations" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The ‘Ambassador’ report has all the classic rulesets, it’s the most comprehensive choice.</li>
+<li>To collect everything possible, use the ruleset ‘All’. It’s also the longest-running ruleset of all.</li>
+<li>To get one report, simply configure project_report with that report.</li>
+<li>You may configure several rulesets, like ‘Security’, ‘Suggestions’, ‘CompatibilityPHP73’, and later extract independant results with the ‘Text’ or ‘Json’ format.</li>
+<li>If you just want one compulsory report and two optional reports (total of three), simply configure all of them with project_report. It’s better to produce extra reports, than run again a whole audit to collect missing informations.</li>
+<li>It is possible to configure customized rulesets, and use them in project_rulesets</li>
+<li>Excluding one analyzer is not supported. Use custom rulesets to build a new one instead.</li>
+</ul>
+</div>
+<div class="section" id="example">
+<h3>12.9.5. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project_reports</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Drillinstructor&#39;</span><span class="p">;</span>
+<span class="n">project_reports</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Owasp&#39;</span><span class="p">;</span>
+
+<span class="n">project_themes</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Security&#39;</span><span class="p">;</span>
+<span class="n">project_themes</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Suggestions&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>With that configuration, the Drillinstructor and the Owasp report are created automatically when running ‘project’. Use the following command to get the specific rulesets ;</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">report</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="o">-</span><span class="nb">format</span> <span class="n">Text</span> <span class="o">-</span><span class="n">T</span> <span class="n">Security</span> <span class="o">-</span><span class="n">v</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="check-install">
+<h2>12.10. Check Install<a class="headerlink" href="#check-install" title="Permalink to this headline">¶</a></h2>
+<p>Once the prerequisite are installed, it is advised to run to check if all is found :</p>
+<p><cite>php exakat.phar doctor</cite></p>
+<p>After this run, you may edit ‘config/config.ini’ to change some of the default values. Most of the time, the default values will be OK for a quick start.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Development.html" class="btn btn-neutral float-right" title="13. Custom analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Reports.html" class="btn btn-neutral float-left" title="11. Reports" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2015-2020, Damien Seguy
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

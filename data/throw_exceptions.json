@@ -1,0 +1,51 @@
+[
+{"class":"Reflection", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionClass", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionClass", "method":"getStaticPropertyValue", "throw":["ReflectionException"]},
+{"class":"ReflectionZendExtension", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionExtension", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionFunction", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionFunctionAbstract", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionMethod", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionObject", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionParameter", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionProperty", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"Reflector", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionException", "method":"__construct", "throw":["ReflectionException"]},
+
+{"class":"PDO", "method":"__construct", "throw":["PDOexception"]},
+{"class":"PDO", "method":"beginTransaction", "throw":["PDOexception"]},
+{"class":"PDO", "method":"commit", "throw":["PDOexception"]},
+{"class":"PDO", "method":"query", "throw":["PDOexception"]},
+{"class":"PDO", "method":"rollback", "throw":["PDOexception"]},
+{"class":"PDO", "method":"prepare", "throw":["PDOexception"]},
+{"class":"PDO", "method":"exec", "throw":["PDOexception"]},
+{"class":"PDO", "method":"lastInsertId", "throw":["PDOexception"]},
+{"class":"PDO", "method":"quote", "throw":["PDOexception"]},
+
+{"class":"mysqli", "method":"query", "throw":["mysqli_sql_exception"]},
+
+{"class":"Phar", "method":"mungServer", "throw":["UnexpectedValueException"]},
+{"class":"Phar", "method":"webPhar", "throw":["PharException", "UnexpectedValueException"]},
+
+{"class":"Closure", "method":"fromcallable", "throw":["Typerror"]},
+{"class":"ArrayIterator", "method":"__construct", "throw":["InvalidArgumentException"]},
+{"class":"DateTimeZone", "method":"__construct", "throw":["Exception"]},
+
+{"class":"ImagickPixel", "method":"getColorCount", "throw":["ImagickPixelException"]},
+{"class":"Imagick", "method":"getimagegreenprimary", "throw":["ImagickException"]},
+
+{"class":"simplexmlelement", "method":"__construct", "throw":["Exception"]},
+
+{"class":"snmp", "method":"__construct", "throw":["Exception"]},
+
+{"class":"svm", "method":"setoptions", "throw":["SVMException"]},
+
+{"function":"timezone_open", "throw":["Exception"]},
+{"function":"sodium-crypto-kx-keypair", "throw":["Exception"]},
+{"function":"uopz_add_function", "throw":["Exception"]},
+{"function":"uopz_del_function", "throw":["Exception"]},
+{"function":"json_encode", "throw":["JsonException"]},
+{"function":"json_decode", "throw":["JsonException"]},
+{"function":"int_div", "throw":["DivisionByZero", "ArithmeticError"]}
+]

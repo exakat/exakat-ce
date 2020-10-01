@@ -1,0 +1,7 @@
+{
+    "name": "Logical",
+    "description": "A logical expression. This covers also bitwise operations. For example : `$a | $b`, `$a && $b`, `$a xor $b`.",
+    "url": [
+        ""
+    ]
+}

@@ -1,0 +1,1154 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>7. Exakat commands &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="8. Rulesets" href="Rulesets.html" />
+    <link rel="prev" title="6. Frequently Asked Questions" href="FAQ.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Features.html">2. Exakat features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">3. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">4. Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">5. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">6. Frequently Asked Questions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. Exakat commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-commands">7.1. List of commands :</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#anonymize">7.2. anonymize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#command">7.2.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options">7.2.2. Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tips">7.2.3. Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#baseline">7.3. baseline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">7.3.1. Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catalog">7.4. catalog</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">7.4.1. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#clean">7.5. clean</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">7.5.1. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cleandb">7.6. cleandb</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">7.6.1. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#doctor">7.7. doctor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">7.7.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results">7.7.2. Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">7.7.3. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#help">7.8. help</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">7.8.1. Results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#init">7.9. init</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id8">7.9.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">7.9.2. Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">7.9.3. Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">7.9.4. Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#project">7.10. project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id11">7.10.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">7.10.2. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#remove">7.11. remove</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id13">7.11.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">7.11.2. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#show">7.12. show</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id15">7.12.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">7.12.2. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#report">7.13. report</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id17">7.13.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18">7.13.2. Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#report-formats">7.13.3. Report formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#update">7.14. update</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id19">7.14.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20">7.14.2. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#upgrade">7.15. upgrade</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id21">7.15.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">7.15.2. Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#install">7.16. Install</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id23">7.16.1. Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">7.16.2. Options</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Rulesets.html">8. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">9. Rules list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cases.html">10. Real Code Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reports.html">11. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">12. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Development.html">13. Custom analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Glossary.html">14. Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Definitions.html">15. Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribute.html">16. Ideas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributors.html">17. List of contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Annex.html">18. Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>7. Exakat commands</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Commands.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="exakat-commands">
+<span id="commands"></span><h1>7. Exakat commands<a class="headerlink" href="#exakat-commands" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="list-of-commands">
+<h2>7.1. List of commands :<a class="headerlink" href="#list-of-commands" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#anonymize">anonymize</a></li>
+<li><a class="reference internal" href="#baseline">baseline</a></li>
+<li><a class="reference internal" href="#catalog">catalog</a></li>
+<li><a class="reference internal" href="#clean">clean</a></li>
+<li><a class="reference internal" href="#cleandb">cleandb</a></li>
+<li><a class="reference internal" href="#doctor">doctor</a></li>
+<li><a class="reference internal" href="#help">help</a></li>
+<li><a class="reference internal" href="#init">init</a></li>
+<li><a class="reference internal" href="#project">project</a></li>
+<li><a class="reference internal" href="#report">report</a></li>
+<li><a class="reference internal" href="#remove">remove</a></li>
+<li><a class="reference internal" href="#show">show</a></li>
+<li><a class="reference internal" href="#update">update</a></li>
+<li><a class="reference internal" href="#upgrade">upgrade</a></li>
+<li><a class="reference internal" href="#install">install</a></li>
+</ul>
+</div>
+<div class="section" id="anonymize">
+<h2>7.2. anonymize<a class="headerlink" href="#anonymize" title="Permalink to this headline">¶</a></h2>
+<p>Read files, directory or projects, and produce a anonymized version of the code.
+Consistence between variables and names is preserved ($a is always replaced with the same name).
+PHP language structures, such as eval, isset or unset are preserved, though other native functions are not.</p>
+<p>File structure is not preserved : all files are renamed, and the hiearchy is flattented in one folder.
+As such, code is probably un-runnable if it relies on inclusions.</p>
+<p>Non-PHP files, non-lintable or files that produces one PHP token are ignored.</p>
+<div class="section" id="command">
+<h3>7.2.1. Command<a class="headerlink" href="#command" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">anonymize</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span>
+<span class="n">exakat</span> <span class="n">anonymize</span> <span class="o">-</span><span class="n">d</span> <span class="o">&lt;</span><span class="n">directory</span><span class="o">&gt;</span>
+<span class="n">exakat</span> <span class="n">anonymize</span> <span class="o">-</span><span class="n">file</span> <span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="options">
+<h3>7.2.2. Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>No</td>
+<td>Project name. Should be filesystem compatible (avoid /, : or )
+This takes into account &lt;project&gt; configuration</td>
+</tr>
+<tr class="row-odd"><td>-d</td>
+<td>No</td>
+<td>Directory to anonymize. Results aree in &lt;directory&gt;.anon</td>
+</tr>
+<tr class="row-even"><td>-file</td>
+<td>No</td>
+<td>File to anonymize. Results are in &lt;file&gt;.anon</td>
+</tr>
+<tr class="row-odd"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="tips">
+<h3>7.2.3. Tips<a class="headerlink" href="#tips" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><cite>-R</cite> is not compulsory : you may omit it, then, provide PHP files in the <cite>projects/&lt;name&gt;/code</cite> folder by the mean you want.</li>
+</ul>
+<p>:: _baseline:</p>
+</div>
+</div>
+<div class="section" id="baseline">
+<h2>7.3. baseline<a class="headerlink" href="#baseline" title="Permalink to this headline">¶</a></h2>
+<p>Baseline manage previous audits that may be used as a baseline for new audits.</p>
+<p>A Baseline is a previous audit, that has already reviewed the code. It has identified issues and code. Later, after some code modification, a new audit is run. When we want to know the new issues, or the removed ones, it has to be compared to a baseline.</p>
+<p>This is a help command, to help find the available values for various options.</p>
+<div class="section" id="id1">
+<h3>7.3.1. Commands<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="88%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Command</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>list</td>
+<td>List all available baselines. Default action</td>
+</tr>
+<tr class="row-odd"><td>remove</td>
+<td>Removes a baseline, using its name or its auto-id</td>
+</tr>
+<tr class="row-even"><td>save</td>
+<td>Save the current audit, when it exists, as the last base, with the provided
+name.</td>
+</tr>
+</tbody>
+</table>
+<p>:: _catalog:</p>
+</div>
+</div>
+<div class="section" id="catalog">
+<h2>7.4. catalog<a class="headerlink" href="#catalog" title="Permalink to this headline">¶</a></h2>
+<p>Catalog list all available rulesets and reports with the current exakat.</p>
+<p>This is a help command, to help find the available values for various options.</p>
+<div class="section" id="id2">
+<h3>7.4.1. Options<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-json</td>
+<td>No</td>
+<td>Returns the catalog as JSON, for further processing.</td>
+</tr>
+</tbody>
+</table>
+<p>:: _clean:</p>
+</div>
+</div>
+<div class="section" id="clean">
+<h2>7.5. clean<a class="headerlink" href="#clean" title="Permalink to this headline">¶</a></h2>
+<p>Cleans the provided project of everything except the config.ini and the code.</p>
+<p>This is a maintenance command, that removes all produced files and folder, and restores a project to its initial state.</p>
+<div class="section" id="id3">
+<h3>7.5.1. Options<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>Yes</td>
+<td>Project name. Should be an existing project.</td>
+</tr>
+<tr class="row-odd"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+</tbody>
+</table>
+<p>:: _cleandb:</p>
+</div>
+</div>
+<div class="section" id="cleandb">
+<h2>7.6. cleandb<a class="headerlink" href="#cleandb" title="Permalink to this headline">¶</a></h2>
+<p>Cleans the graph database.</p>
+<p>This is a maintenance command, that removes all produced data and scripts, and restores the exakat database to its empty state.</p>
+<p>By default, the database is cleaned with graph commands, letting the server do the cleaning.</p>
+<p>The -Q option makes the same cleaning with a full restart of the server. This is cleaner, and faster if the database was big or in some instable state.</p>
+<div class="section" id="id4">
+<h3>7.6.1. Options<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-Q</td>
+<td>No</td>
+<td>Cleans the database by restarting it, and removing files.</td>
+</tr>
+<tr class="row-odd"><td>-stop</td>
+<td>No</td>
+<td>Stops gremlin server</td>
+</tr>
+<tr class="row-even"><td>-start</td>
+<td>No</td>
+<td>Starts gremlin server, without removing files.</td>
+</tr>
+<tr class="row-odd"><td>-restart</td>
+<td>No</td>
+<td>Restarts gremlin server, without removing files.</td>
+</tr>
+<tr class="row-even"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+</tbody>
+</table>
+<p>:: _doctor:</p>
+</div>
+</div>
+<div class="section" id="doctor">
+<h2>7.7. doctor<a class="headerlink" href="#doctor" title="Permalink to this headline">¶</a></h2>
+<p>Check the current installation of Exakat.</p>
+<div class="section" id="id5">
+<h3>7.7.1. Command<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">doctor</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="results">
+<h3>7.7.2. Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>PHP :
+    version              : 7.0.1
+    curl                 : Yes
+    sqlite3              : Yes
+    tokenizer            : Yes
+
+java :
+    installed            : Yes
+    type                 : Java(TM) SE Runtime Environment (build 1.8.0_40-b25)
+    version              : 1.8.0_40
+    $JAVA_HOME           : /Library/Java/JavaVirtualMachines/jdk1.8.0_40.jdk/Contents/Home
+
+neo4j :
+    version              : Neo4j 2.2.6
+    port                 : 7474
+    authentication       : Not enabled (Please, enable it)
+    gremlinPlugin        : Configured.
+    gremlinJar           : neo4j/plugins/gremlin-plugin/gremlin-java-2.7.0-SNAPSHOT.jar
+    scriptFolder         : Yes
+    pid                  : 20895
+    running              : Yes
+    running here         : Yes
+    gremlin              : Yes
+    $NEO4J_HOME          : /Users/famille/Desktop/analyze/neo4j
+
+folders :
+    config-folder        : Yes
+    config.ini           : Yes
+    projects folder      : Yes
+    progress             : Yes
+    in                   : Yes
+    out                  : Yes
+    projects/test        : Yes
+    projects/default     : Yes
+    projects/onepage     : Yes
+
+PHP 5.2 :
+    configured           : No
+
+PHP 5.3 :
+    configured           : Yes
+    installed            : Yes
+    version              : 5.3.29
+    short_open_tags      : Off
+    timezone             : Europe/Amsterdam
+    tokenizer            : Yes
+    memory_limit         : -1
+
+PHP 5.4 :
+    configured           : Yes
+    installed            : Yes
+    version              : 5.4.45
+    short_open_tags      : Off
+    timezone             : Europe/Amsterdam
+    tokenizer            : Yes
+    memory_limit         : 384M
+
+PHP 5.5 :
+    configured           : Yes
+    installed            : Yes
+    version              : 5.5.30
+    short_open_tags      : Off
+    timezone             : Europe/Amsterdam
+    tokenizer            : Yes
+    memory_limit         : -1
+
+PHP 5.6 :
+    configured           : /usr/local/sbin/php56
+    installed            : Yes
+    version              : 5.6.16
+    short_open_tags      : Off
+    timezone             : Europe/Amsterdam
+    tokenizer            : Yes
+    memory_limit         : -1
+
+PHP 7.0 :
+    configured           : Yes
+    version              : 7.0.1
+    short_open_tags      : Off
+    timezone             :
+    tokenizer            : Yes
+    memory_limit         : -1
+
+PHP 7.1 :
+    configured           : Yes
+    version              : 7.1.0-dev
+    short_open_tags      : Off
+    timezone             :
+    tokenizer            : Yes
+    memory_limit         : 128M
+
+git :
+    installed            : Yes
+    version              : 2.7.0
+
+hg :
+    installed            : Yes
+    version              : 3.6.3
+
+svn :
+    installed            : Yes
+    version              : 1.9.3
+
+bzr :
+    installed            : No
+    optional             : Yes
+
+composer :
+    installed            : Yes
+    version              : 1.0.0-alpha11
+
+wget :
+    installed            : Yes
+    version              : GNU Wget 1.17.1 built on darwin15.2.0.
+
+zip :
+    installed            : Yes
+    version              : 3.0
+</pre></div>
+</div>
+<p># Tips</p>
+<ul class="simple">
+<li>The <cite>PHP</cite> section is the PHP binary used to run Exakat.</li>
+<li>The <cite>PHP x.y</cite> sections are the PHP binaries used to check the code.</li>
+<li>Optional installations (such as svn, zip, etc.) are not necessarily reported if they are not installed.</li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h3>7.7.3. Options<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>No</td>
+<td>Displays the project-specific configuration.
+Otherwise, only displays general configuration.</td>
+</tr>
+<tr class="row-odd"><td>-json</td>
+<td>No</td>
+<td>Displays the project-specific configuration in json format, to stdout</td>
+</tr>
+<tr class="row-even"><td>-v</td>
+<td>No</td>
+<td>Verbose mode : include helpers configurations</td>
+</tr>
+<tr class="row-odd"><td>-q</td>
+<td>No</td>
+<td>Quiet mode : runs doctor, and install checks, but displays nothing.
+This is useful to automate installation finalization</td>
+</tr>
+</tbody>
+</table>
+<p>:: _help:</p>
+</div>
+</div>
+<div class="section" id="help">
+<h2>7.8. help<a class="headerlink" href="#help" title="Permalink to this headline">¶</a></h2>
+<p>Displays the help section.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">help</span>
+</pre></div>
+</div>
+<div class="section" id="id7">
+<h3>7.8.1. Results<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>This displays :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Usage</span><span class="p">]</span> <span class="p">:</span>   <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">Project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">R</span> <span class="o">&lt;</span><span class="n">Repository</span><span class="o">&gt;</span>
+            <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">Project</span> <span class="n">name</span><span class="o">&gt;</span>
+            <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">doctor</span>
+            <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">version</span>
+</pre></div>
+</div>
+<p>:: _init:</p>
+</div>
+</div>
+<div class="section" id="init">
+<h2>7.9. init<a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h2>
+<p>Initialize a new project.</p>
+<div class="section" id="id8">
+<h3>7.9.1. Command<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">R</span> <span class="n">vcs_url</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">git</span><span class="o">|-</span><span class="n">svn</span><span class="o">|-</span><span class="n">bzr</span><span class="o">|-</span><span class="n">hg</span><span class="o">|-</span><span class="n">composer</span><span class="o">|-</span><span class="n">symlink</span><span class="o">|-</span><span class="n">copy</span><span class="o">|-</span><span class="n">tgz</span><span class="o">|-</span><span class="mi">7</span><span class="n">z</span><span class="o">|-</span><span class="nb">zip</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">D</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id9">
+<h3>7.9.2. Options<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>Yes</td>
+<td>Project name. Should be filesystem compatible (avoid /, : or )</td>
+</tr>
+<tr class="row-odd"><td>-R</td>
+<td>No</td>
+<td>URL to the VCS repository. Anything compatible with the expected VCS.</td>
+</tr>
+<tr class="row-even"><td>-git</td>
+<td>No</td>
+<td>Use git client      (also, default value if no clue is given in the VCS URL)</td>
+</tr>
+<tr class="row-odd"><td>-svn</td>
+<td>No</td>
+<td>Use SVN client</td>
+</tr>
+<tr class="row-even"><td>-bzr</td>
+<td>No</td>
+<td>Use Bazar client</td>
+</tr>
+<tr class="row-odd"><td>-hg</td>
+<td>No</td>
+<td>Use Mercurial (hg) client</td>
+</tr>
+<tr class="row-even"><td>-composer</td>
+<td>No</td>
+<td>Use Composer client</td>
+</tr>
+<tr class="row-odd"><td>-symlink</td>
+<td>No</td>
+<td>-R path is symlinked. Directory is never accessed for writing.</td>
+</tr>
+<tr class="row-even"><td>-copy</td>
+<td>No</td>
+<td>-R path is recursively copied.</td>
+</tr>
+<tr class="row-odd"><td>-zip</td>
+<td>No</td>
+<td>-R is a ZIP archive, local or remote</td>
+</tr>
+<tr class="row-even"><td>-tgz</td>
+<td>No</td>
+<td>-R is a .tar.gzip archive, local or remote</td>
+</tr>
+<tr class="row-odd"><td>-tbz</td>
+<td>No</td>
+<td>-R is a .tar.bz2 archive, local or remote</td>
+</tr>
+<tr class="row-even"><td>-rar</td>
+<td>No</td>
+<td>-R is a .rar archive, local or remote</td>
+</tr>
+<tr class="row-odd"><td>-7z</td>
+<td>No</td>
+<td>-R is a .7z archive, local or remote</td>
+</tr>
+<tr class="row-even"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+<tr class="row-odd"><td>-D</td>
+<td>No</td>
+<td>First erase any pre-existing project with the same name</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id10">
+<h3>7.9.3. Tips<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><cite>-R</cite> is not compulsory : you may omit it, then, provide PHP files in the <cite>projects/&lt;name&gt;/code</cite> folder by the mean you want.</li>
+<li>Default VCS used is git.</li>
+<li><cite>-D</cite> removes any previous project before doing the init.</li>
+<li>Archives (zip, tar.gz, tar.bz, 7z, rar, etc.) depends on external tools to unpack them. They depends on PHP to reach the file, locally or remotely.</li>
+</ul>
+</div>
+<div class="section" id="examples">
+<h3>7.9.4. Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone Exakat with Git</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">exakat</span> <span class="o">-</span><span class="n">R</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="o">.</span><span class="n">git</span>
+
+<span class="c1"># Download Spip with Zip</span>
+<span class="n">php</span> <span class="n">exakat</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">spip2</span> <span class="o">-</span><span class="nb">zip</span> <span class="o">-</span><span class="n">R</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">files</span><span class="o">.</span><span class="n">spip</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">spip</span><span class="o">/</span><span class="n">stable</span><span class="o">/</span><span class="n">spip</span><span class="o">-</span><span class="mf">3.1</span><span class="o">.</span><span class="n">zip</span>
+
+<span class="c1"># Download PHPMyadmin,</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">pma2</span> <span class="o">-</span><span class="n">tgz</span> <span class="o">-</span><span class="n">R</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">files</span><span class="o">.</span><span class="n">phpmyadmin</span><span class="o">.</span><span class="n">net</span><span class="o">/</span><span class="n">phpMyAdmin</span><span class="o">/</span><span class="mf">4.6</span><span class="o">.</span><span class="mi">4</span><span class="o">/</span><span class="n">phpMyAdmin</span><span class="o">-</span><span class="mf">4.6</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="nb">all</span><span class="o">-</span><span class="n">languages</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+<span class="c1"># Make a local copy of PHPMyadmin,</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">copyProject</span> <span class="o">-</span><span class="n">copy</span> <span class="o">-</span><span class="n">R</span> <span class="n">projects</span><span class="o">/</span><span class="n">phpmyadmin</span><span class="o">/</span><span class="n">code</span><span class="o">/</span>
+
+<span class="c1"># Make a local symlink with the local webserver,</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">symlinkProject</span> <span class="o">-</span><span class="n">symlink</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">public_html</span>
+</pre></div>
+</div>
+<p>:: _project:</p>
+</div>
+</div>
+<div class="section" id="project">
+<h2>7.10. project<a class="headerlink" href="#project" title="Permalink to this headline">¶</a></h2>
+<p>Runs a new analyze on a project.</p>
+<p>The results of the analysis are available in the <cite>projects/&lt;name&gt;/</cite> folder. <cite>report</cite> and <cite>faceted</cite> are two HTML reports.</p>
+<div class="section" id="id11">
+<h3>7.10.1. Command<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id12">
+<h3>7.10.2. Options<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>Yes</td>
+<td>Project name. Should be filesystem compatible (avoid /, : or )</td>
+</tr>
+<tr class="row-odd"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+</tbody>
+</table>
+<p>:: _remove:</p>
+</div>
+</div>
+<div class="section" id="remove">
+<h2>7.11. remove<a class="headerlink" href="#remove" title="Permalink to this headline">¶</a></h2>
+<p>Destroy a project. All code source, configuration and any results from exakat are destroyed.</p>
+<div class="section" id="id13">
+<h3>7.11.1. Command<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">remove</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id14">
+<h3>7.11.2. Options<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>Yes</td>
+<td>Project name. Should be filesystem compatible (avoid /, : or )</td>
+</tr>
+<tr class="row-odd"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+</tbody>
+</table>
+<p>:: _remove:</p>
+</div>
+</div>
+<div class="section" id="show">
+<h2>7.12. show<a class="headerlink" href="#show" title="Permalink to this headline">¶</a></h2>
+<p>Displays the the full command line to create an exakat project.</p>
+<div class="section" id="id15">
+<h3>7.12.1. Command<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">show</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id16">
+<h3>7.12.2. Options<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>Yes</td>
+<td>Project name. Should be filesystem compatible (avoid /, : or )</td>
+</tr>
+</tbody>
+</table>
+<p>:: _report:</p>
+</div>
+</div>
+<div class="section" id="report">
+<h2>7.13. report<a class="headerlink" href="#report" title="Permalink to this headline">¶</a></h2>
+<p>Produce a report for a project.</p>
+<p>Reports may be produced as soon as exakat has reach the phase of ‘analysis’. If the analysis phase hasn’t finished, then some results may be unavailable. Run report again later to get the full report.
+For example, the ‘Uml’ report may be run fully as soon as exakat is in analysis phase.</p>
+<p>It is possible to extract a report even after the graph database has been cleaned. This allows running several projects one after each other, yet have access to several reports.</p>
+<div class="section" id="id17">
+<h3>7.13.1. Command<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">report</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="o">-</span><span class="nb">format</span> <span class="o">&lt;</span><span class="n">Format</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">file</span> <span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id18">
+<h3>7.13.2. Options<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>Yes</td>
+<td>Project name. Should be filesystem compatible (avoid /, : or )</td>
+</tr>
+<tr class="row-odd"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+<tr class="row-even"><td>-format</td>
+<td>No</td>
+<td>Which format to extract.
+Available formats : Devoops, Faceted, FacetedJson, Json, OnepageJson, Text,
+Uml, Xml
+Default is ‘Text’</td>
+</tr>
+<tr class="row-odd"><td>-file</td>
+<td>No</td>
+<td>File or directory name for the report. Adapted file extension is added.
+Report is located in the projects/&lt;project&gt;/ folder
+Default is ‘stdout’, but varies with format.</td>
+</tr>
+<tr class="row-even"><td>-T</td>
+<td>No</td>
+<td>Ruleset’s results. All the analyses in this ruleset are reported.
+Note that the report format may override this configuration : for example
+Ambassador manage its own list of analyses.
+Uses this with Text format.
+Has priority over the -P option</td>
+</tr>
+<tr class="row-odd"><td>-P</td>
+<td>No</td>
+<td>Analyzer’s results. Only one analysis’s is reported.
+Note that the report format may override this configuration : for example
+Ambassador manage its own list of analyses.
+Uses this with Text format.
+Has lower priority than the -T option</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="report-formats">
+<h3>7.13.3. Report formats<a class="headerlink" href="#report-formats" title="Permalink to this headline">¶</a></h3>
+<p>All reports are detailed in the ref:<cite>Reports &lt;reports&gt;</cite> section.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Report</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>Amabassador</td>
+<td>HTML format, with all available reports in one compact format.</td>
+</tr>
+<tr class="row-odd"><td>Devoops</td>
+<td>HTML format, deprecated.</td>
+</tr>
+<tr class="row-even"><td>Json</td>
+<td>JSON format.</td>
+</tr>
+<tr class="row-odd"><td>Text</td>
+<td>Text format. One issue per line, with description, file, line.</td>
+</tr>
+<tr class="row-even"><td>Codesniffer</td>
+<td>Text format, similar to Codesniffer report style.</td>
+</tr>
+<tr class="row-odd"><td>Uml</td>
+<td>Dot format. All classes/interfaces/traits hierarchies, and grouped by name-
+spaces.</td>
+</tr>
+<tr class="row-even"><td>Xml</td>
+<td>XML format.</td>
+</tr>
+<tr class="row-odd"><td>All</td>
+<td>All availble format, using default naming</td>
+</tr>
+</tbody>
+</table>
+<p>:: _update:</p>
+</div>
+</div>
+<div class="section" id="update">
+<h2>7.14. update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
+<p>Update the code base of a project.</p>
+<div class="section" id="id19">
+<h3>7.14.1. Command<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">update</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id20">
+<h3>7.14.2. Options<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-p</td>
+<td>Yes</td>
+<td>Project name. Should be filesystem compatible (avoid /, : or )</td>
+</tr>
+<tr class="row-odd"><td>-v</td>
+<td>No</td>
+<td>Verbose mode</td>
+</tr>
+</tbody>
+</table>
+<p>:: _upgrade:</p>
+</div>
+</div>
+<div class="section" id="upgrade">
+<h2>7.15. upgrade<a class="headerlink" href="#upgrade" title="Permalink to this headline">¶</a></h2>
+<p>Upgrade exakat itself. By default, this command only checks for the availability of a new version : it doesn’t upgrade immediately.</p>
+<p>Use -u option to actually replace the current phar archive.</p>
+<p>Use -version option to downgrade or upgrade to a specific version.</p>
+<p>In case the upgrade command file, you may also download manually the <cite>.phar</cite> from the exakat.io website : <a class="reference external" href="http://www.exakat.io/versions/">www.exakat.io</a>. Then replace the current version with the new one.</p>
+<div class="section" id="id21">
+<h3>7.15.1. Command<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">upgrade</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id22">
+<h3>7.15.2. Options<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-u</td>
+<td>Yes</td>
+<td>Actually upgrades exakat. Without it, it is a dry run.</td>
+</tr>
+<tr class="row-odd"><td>-version</td>
+<td>No</td>
+<td>Select a specific Exakat version and update to it. By default, it upgrades
+to the latest version, as published on the <a class="reference external" href="https://www.exakat.io/">https://www.exakat.io/</a> site.
+Example value : 1.8.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="install">
+<h2>7.16. Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>Install exakat’s graph dependency. This command is an integrated installation script, and it is only accessible once the .phar is downloaded locally.</p>
+<div class="section" id="id23">
+<h3>7.16.1. Command<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mkdir exakat
+cd exakat
+
+// Download exakat.phar, like this, or any other valid means
+curl -o exakat.phar https://www.exakat.io/versions/index.php?file=latest
+exakat.phar upgrade
+</pre></div>
+</div>
+</div>
+<div class="section" id="id24">
+<h3>7.16.2. Options<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="5%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option</td>
+<td>Req</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>-u</td>
+<td>Yes</td>
+<td>Actually upgrades exakat. Without it, it is a dry run.</td>
+</tr>
+<tr class="row-odd"><td>-version</td>
+<td>No</td>
+<td>Select a specific Exakat version and update to it. By default, it upgrades
+to the latest version, as published on the <a class="reference external" href="https://www.exakat.io/">https://www.exakat.io/</a> site.
+Example value : 1.8.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Rulesets.html" class="btn btn-neutral float-right" title="8. Rulesets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="FAQ.html" class="btn btn-neutral float-left" title="6. Frequently Asked Questions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2015-2020, Damien Seguy
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

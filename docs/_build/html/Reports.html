@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>11. Reports &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="12. Configuration" href="Configuration.html" />
+    <link rel="prev" title="10. Real Code Cases" href="Cases.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Features.html">2. Exakat features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">3. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">4. Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">5. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">6. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">7. Exakat commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rulesets.html">8. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">9. Rules list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cases.html">10. Real Code Cases</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">11. Reports</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-a-report-before-the-audit">11.1. Configuring a report before the audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generating-a-report-after-the-audit">11.2. Generating a report after the audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-behavior">11.3. Common behavior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reports-descriptions">11.4. Reports descriptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#diplomat">11.4.1. Diplomat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sarif">11.4.2. Sarif</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#text">11.4.3. Text</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">12. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Development.html">13. Custom analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Glossary.html">14. Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Definitions.html">15. Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribute.html">16. Ideas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributors.html">17. List of contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Annex.html">18. Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>11. Reports</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Reports.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="reports">
+<h1>11. Reports<a class="headerlink" href="#reports" title="Permalink to this headline">¶</a></h1>
+<p>There are several reports that may be extracted from Exakat :</p>
+<ul class="simple">
+<li><a class="reference internal" href="#diplomat">Diplomat</a></li>
+<li><a class="reference internal" href="#sarif">Sarif</a></li>
+<li><a class="reference internal" href="#text">Text</a></li>
+</ul>
+<div class="section" id="configuring-a-report-before-the-audit">
+<h2>11.1. Configuring a report before the audit<a class="headerlink" href="#configuring-a-report-before-the-audit" title="Permalink to this headline">¶</a></h2>
+<p>By default, Exakat builds the ‘Ambassador’ report for any project. If you want another report, or want to ignore the build of Ambassador, configure it before running the audit.</p>
+<p>To do so, open the <cite>projects/&lt;project&gt;/config.ini</cite> file, and mention the list of report like that :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project_reports</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Owasp&#39;</span><span class="p">;</span>
+<span class="n">project_reports</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Weekly&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>By configuring the reports before the audit, Exakat processes only the needed analysis, and produces all the reports for each audit.</p>
+</div>
+<div class="section" id="generating-a-report-after-the-audit">
+<h2>11.2. Generating a report after the audit<a class="headerlink" href="#generating-a-report-after-the-audit" title="Permalink to this headline">¶</a></h2>
+<p>If you have run an audit, but wants to extract another report for a piece of code, you can use the following command :</p>
+<blockquote>
+<div><cite>php exakat.phar report -p &lt;project&gt; -format &lt;format&gt; -file &lt;filename&gt;</cite></div></blockquote>
+<p>Where &lt;format&gt; is one of the format listed in the following section, and &lt;filename&gt; is the target file.</p>
+<p>Note that some format requires some specific audits to be run : they will fail if those results are not available. Then, run the audit again, and mention the desired audit in the configuration.</p>
+</div>
+<div class="section" id="common-behavior">
+<h2>11.3. Common behavior<a class="headerlink" href="#common-behavior" title="Permalink to this headline">¶</a></h2>
+<p>Default format is Text. Each report has a default filename, that may be configured with the -file option. Each report adds a file extension to the provided filename.</p>
+<p>A special value for -file is ‘stdout’. Some formats may be output to stdout, such as Text or Json. Not all format are accepting that value : some format, like Ambassador or Sqlite, may only be written to directories.</p>
+<p>Each report is stored in its &lt;project&gt; folder, under the requested name.</p>
+<p>Reports may be generated at any time, during execution of the analysis (partial results) or later, even if another audit is running.</p>
+</div>
+<div class="section" id="reports-descriptions">
+<h2>11.4. Reports descriptions<a class="headerlink" href="#reports-descriptions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="diplomat">
+<h3>11.4.1. Diplomat<a class="headerlink" href="#diplomat" title="Permalink to this headline">¶</a></h3>
+<p>The Diplomat is the default human readable report.</p>
+<p>The Diplomat report is the default report since Exakat 1.7.0. It is a light version of the Ambassador report, and uses a shorter list of analysis.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span><span class="p">,</span><span class="n">File</span><span class="p">,</span><span class="n">Line</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">61</span>
+<span class="mi">10000</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">61</span>
+<span class="mi">777</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">63</span>
+<span class="mi">20</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">73</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">334</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">339</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">344</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">362</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">366</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">368</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">372</span>
+<span class="mi">777</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">423</span>
+<span class="mi">777</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">431</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Context</span><span class="o">/</span><span class="n">ContextClass</span><span class="o">/</span><span class="n">SimpleClassGenerator</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">68</span>
+<span class="mi">1</span><span class="p">,</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Context</span><span class="o">/</span><span class="n">ContextClass</span><span class="o">/</span><span class="n">SimpleClassGenerator</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">69</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Context</span><span class="o">/</span><span class="n">Environment</span><span class="o">/</span><span class="n">InitializedContextEnvironment</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">84</span>
+<span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Behat</span><span class="o">/</span><span class="n">Context</span><span class="o">/</span><span class="n">Environment</span><span class="o">/</span><span class="n">InitializedContextEnvironment</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">150</span>
+</pre></div>
+</div>
+<p>Diplomat is a HTML report format.</p>
+<p>Diplomat depends on the following 15 themes : CompatibilityPHP53, CompatibilityPHP54, CompatibilityPHP55, CompatibilityPHP56, CompatibilityPHP70, CompatibilityPHP71, CompatibilityPHP72, CompatibilityPHP73, CompatibilityPHP74, CompatibilityPHP80, Top10, Preferences, Appinfo, Appcontent, Suggestions.</p>
+</div>
+<div class="section" id="sarif">
+<h3>11.4.2. Sarif<a class="headerlink" href="#sarif" title="Permalink to this headline">¶</a></h3>
+<p>The SARIF report publishes the results in SARIF format.</p>
+<p><a class="reference external" href="https://docs.oasis-open.org/sarif/sarif/v2.0/sarif-v2.0.html">Static Analysis Results Interchange Format (SARIF)</a>  a standard format for the output of static analysis tools. The format is referred to as the “Static Analysis Results Interchange Format” and is abbreviated as SARIF.</p>
+<p>SARIF is a flexible JSON format, that describes in details the rules, the issues and their context.</p>
+<p>More details are available at <a class="reference external" href="https://sarifweb.azurewebsites.net/">sarifweb</a> and <a class="reference external" href="https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/sarif-support-for-code-scanning">SARIF support for code scanning</a> at Github.</p>
+<img alt="Example of a Sarif report (0)" src="_images/report.sarif.png" />
+<p>Sarif is a Json report format.</p>
+<p>Sarif accepts any arbitrary list of results.</p>
+</div>
+<div class="section" id="text">
+<h3>11.4.3. Text<a class="headerlink" href="#text" title="Permalink to this headline">¶</a></h3>
+<p>The Text report is a very simple text format.</p>
+<p>The Text report displays one result per line, with the following format  :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">from</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="p">:</span><span class="n">line</span><span class="p">[</span><span class="n">space</span><span class="p">]</span><span class="n">name</span> <span class="n">of</span> <span class="n">analysis</span>
+</pre></div>
+</div>
+<p>This format is fast, and fitted for machine communications.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/classes/test.php:1002      Php/ShouldUseFunction   Should Use Function     array_values(array_unique(array_merge($classTags, $annotations[&#39;tags&#39;])))
+/classes/test.php:1002      Php/ShouldUseFunction   Should Use Function     array_merge($classTags, $annotations[&#39;tags&#39;])
+/classes/test.php:1005      Structures/NoArrayUnique        Avoid array_unique()    array_unique(array_merge($classTags, $this-&gt;testMethods[$testMethodName][&#39;tags&#39;]))
+/classes/test.php:1005      Performances/SlowFunctions      Slow Functions  array_unique(array_merge($classTags, $this-&gt;testMethods[$testMethodName][&#39;tags&#39;]))
+</pre></div>
+</div>
+<p>Text is a Text report format.</p>
+<p>Text accepts any arbitrary list of results.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Configuration.html" class="btn btn-neutral float-right" title="12. Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Cases.html" class="btn btn-neutral float-left" title="10. Real Code Cases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2015-2020, Damien Seguy
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

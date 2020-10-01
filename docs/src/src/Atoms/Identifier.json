@@ -1,0 +1,7 @@
+{
+    "name": "Identifier",
+    "description": "A name for a constant or a class. For example : `$x instanceof Y`, 'echo PHP_INT_MAX`, `new Y`",
+    "url": [
+        ""
+    ]
+}

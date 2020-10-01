@@ -1,0 +1,5509 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>13. Custom analysis &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="14. Glossary" href="Glossary.html" />
+    <link rel="prev" title="12. Configuration" href="Configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Features.html">2. Exakat features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">3. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">4. Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">5. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">6. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">7. Exakat commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rulesets.html">8. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">9. Rules list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cases.html">10. Real Code Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reports.html">11. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">12. Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">13. Custom analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">13.1. Summary:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-exakat-runs-an-analysis">13.2. How Exakat runs an analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-startup">13.3. Quick startup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis-structure">13.4. Analysis structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-analyze-method">13.4.1. The analyze() method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-dependson-method">13.4.2. The dependsOn() method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#phpversion-property">13.4.3. $phpVersion property</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analyzer-extends">13.4.4. Analyzer extends</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#internal-database">13.5. Internal database</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#presentation">13.5.1. Presentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#atoms">13.5.2. Atoms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#addition">13.5.2.1. Addition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#analysis">13.5.2.2. Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#array">13.5.2.3. Array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arrayappend">13.5.2.4. Arrayappend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arrayliteral">13.5.2.5. Arrayliteral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#as">13.5.2.6. As</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#assignation">13.5.2.7. Assignation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bitshift">13.5.2.8. Bitshift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#block">13.5.2.9. Block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#boolean">13.5.2.10. Boolean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#break">13.5.2.11. Break</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cast">13.5.2.12. Cast</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">13.5.2.13. Cast</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#catch">13.5.2.14. Catch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#class">13.5.2.15. Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classalias">13.5.2.16. Classalias</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classanonymous">13.5.2.17. Classanonymous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clone">13.5.2.18. Clone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#closure">13.5.2.19. Closure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coalesce">13.5.2.20. Coalesce</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comparison">13.5.2.21. Comparison</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#concatenation">13.5.2.22. Concatenation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#const">13.5.2.23. Const</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#constant">13.5.2.24. Constant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#continue">13.5.2.25. Continue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#declare">13.5.2.26. Declare</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#declaredefinition">13.5.2.27. Declaredefinition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#default">13.5.2.28. Default</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#defineconstant">13.5.2.29. Defineconstant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dowhile">13.5.2.30. Dowhile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#echo">13.5.2.31. Echo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#empty">13.5.2.32. Empty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eval">13.5.2.33. Eval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exit">13.5.2.34. Exit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file">13.5.2.35. File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finally">13.5.2.36. Finally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#for">13.5.2.37. For</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#foreach">13.5.2.38. Foreach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#function">13.5.2.39. Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functioncall">13.5.2.40. Functioncall</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#global">13.5.2.41. Global</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#globaldefinition">13.5.2.42. Globaldefinition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#goto">13.5.2.43. Goto</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gotolabel">13.5.2.44. Gotolabel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#halt">13.5.2.45. Halt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#heredoc">13.5.2.46. Heredoc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#identifier">13.5.2.47. Identifier</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ifthen">13.5.2.48. Ifthen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#include">13.5.2.49. Include</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inlinehtml">13.5.2.50. Inlinehtml</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instanceof">13.5.2.51. Instanceof</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#insteadof">13.5.2.52. Insteadof</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#integer">13.5.2.53. Integer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interface">13.5.2.54. Interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#isset">13.5.2.55. Isset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#keyvalue">13.5.2.56. Keyvalue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#list">13.5.2.57. List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logical">13.5.2.58. Logical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magicconstant">13.5.2.59. Magicconstant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magicmethod">13.5.2.60. Magicmethod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#member">13.5.2.61. Member</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#method">13.5.2.62. Method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#methodcall">13.5.2.63. Methodcall</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#methodcallname">13.5.2.64. Methodcallname</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multiplication">13.5.2.65. Multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#name">13.5.2.66. Name</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#namespace">13.5.2.67. Namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#new">13.5.2.68. New</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#newcall">13.5.2.69. Newcall</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#not">13.5.2.70. Not</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nsname">13.5.2.71. Nsname</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#null">13.5.2.72. Null</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parameter">13.5.2.73. Parameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parametername">13.5.2.74. Parametername</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parent">13.5.2.75. Parent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parenthesis">13.5.2.76. Parenthesis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php">13.5.2.77. Php</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#phpvariable">13.5.2.78. Phpvariable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#postplusplus">13.5.2.79. Postplusplus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#power">13.5.2.80. Power</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ppp">13.5.2.81. Ppp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#preplusplus">13.5.2.82. Preplusplus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#print">13.5.2.83. Print</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#project">13.5.2.84. Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#propertydefinition">13.5.2.85. Propertydefinition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#real">13.5.2.86. Real</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#return">13.5.2.87. Return</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#self">13.5.2.88. Self</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sequence">13.5.2.89. Sequence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shell">13.5.2.90. Shell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sign">13.5.2.91. Sign</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#static">13.5.2.92. Static</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#staticclass">13.5.2.93. Staticclass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#staticconstant">13.5.2.94. Staticconstant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#staticdefinition">13.5.2.95. Staticdefinition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#staticmethod">13.5.2.96. Staticmethod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#staticmethodcall">13.5.2.97. Staticmethodcall</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#staticproperty">13.5.2.98. Staticproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#staticpropertyname">13.5.2.99. Staticpropertyname</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#string">13.5.2.100. String</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#switch">13.5.2.101. Switch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ternary">13.5.2.102. Ternary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#this">13.5.2.103. This</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#throw">13.5.2.104. Throw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trait">13.5.2.105. Trait</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#try">13.5.2.106. Try</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unset">13.5.2.107. Unset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usenamespace">13.5.2.108. Usenamespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usetrait">13.5.2.109. Usetrait</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#variable">13.5.2.110. Variable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#variablearray">13.5.2.111. Variablearray</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#variabledefinition">13.5.2.112. Variabledefinition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#variableobject">13.5.2.113. Variableobject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#void">13.5.2.114. Void</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#while">13.5.2.115. While</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yield">13.5.2.116. Yield</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yieldfrom">13.5.2.117. Yieldfrom</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#atom-properties">13.5.3. Atom properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#links">13.5.4. Links</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#navigating">13.5.5. Navigating</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#initial-steps">13.5.5.1. Initial steps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#all-steps">13.5.5.2. All steps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#special-values">13.5.5.3. Special values</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dictionaries">13.5.6. Dictionaries</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">13.6. Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-your-analysis">13.7. Testing your analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-test">13.8. Writing test</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pieces-of-advice">13.8.1. Pieces of advice</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tooling">13.9. Tooling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#publishing-your-analysis">13.10. Publishing your analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Glossary.html">14. Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Definitions.html">15. Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribute.html">16. Ideas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributors.html">17. List of contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Annex.html">18. Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>13. Custom analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Development.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="custom-analysis">
+<span id="development"></span><h1>13. Custom analysis<a class="headerlink" href="#custom-analysis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>13.1. Summary:<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#how-exakat-runs-an-analysis">How Exakat runs an analysis</a></li>
+<li><a class="reference internal" href="#quick-startup">Quick startup</a></li>
+<li><a class="reference internal" href="#analysis-structure">Analysis structure</a></li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="#internal-database">Internal database</a></dt>
+<dd><ul class="first last">
+<li><a class="reference internal" href="#atoms">Atoms</a></li>
+<li><a class="reference internal" href="#atom-properties">Atom properties</a></li>
+<li><a class="reference internal" href="#links">Links</a></li>
+<li><a class="reference internal" href="#navigating">Navigating</a></li>
+<li><a class="reference internal" href="#dictionaries">Dictionaries</a></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><a class="reference internal" href="#testing-your-analysis">Testing your analysis</a></li>
+<li><a class="reference internal" href="#tooling">Tooling</a></li>
+<li><a class="reference internal" href="#publishing-your-analysis">Publishing your analysis</a></li>
+</ul>
+</div>
+<div class="section" id="how-exakat-runs-an-analysis">
+<h2>13.2. How Exakat runs an analysis<a class="headerlink" href="#how-exakat-runs-an-analysis" title="Permalink to this headline">¶</a></h2>
+<p>An analysis is the smallest unit of work on the Exakat engine.</p>
+<p>An analysis is constituted of several elements :</p>
+<ul class="simple">
+<li>A name, including a prefix called ‘folder’.</li>
+<li>A class, that extends <cite>ExakatAnalyzerAnalyzer</cite>.</li>
+<li>A documentation</li>
+<li>Unit tests</li>
+</ul>
+<p>The exakat command <cite>analyze</cite> runs an analysis, either alone, or as a member of one category. An analysis may be part of multiple categories. Categories gathers several analysis together, to be used by a report.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># run one analysis alone</span>
+<span class="n">php</span> <span class="n">exakat</span> <span class="n">analyze</span> <span class="o">-</span><span class="n">p</span> <span class="n">test</span> <span class="o">-</span><span class="n">P</span> <span class="n">Structures</span><span class="o">/</span><span class="n">AddZero</span>
+
+<span class="c1"># run an analysis as apart of of a category : Structures/AddZero belongs to Analyze</span>
+<span class="n">php</span> <span class="n">exakat</span> <span class="n">analyze</span> <span class="o">-</span><span class="n">p</span> <span class="n">test</span> <span class="o">-</span><span class="n">T</span> <span class="n">Analyze</span>
+</pre></div>
+</div>
+<p>An analysis can only be run after loading the code in the central database, with the ‘load’ command. It is then ‘dump’-ed before being reported as an audit.</p>
+<p>The prefix is used for internal identification and storage. It is unique.</p>
+</div>
+<div class="section" id="quick-startup">
+<h2>13.3. Quick startup<a class="headerlink" href="#quick-startup" title="Permalink to this headline">¶</a></h2>
+<p>To create a new analysis, you must work with the Exakat source code. Start by cloning the repository :</p>
+<p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">exakat</span> <span class="pre">https://github.com/exakat/exakat.git</span></code></p>
+<p>Then move to the cloned directory. Here, call the following script to create an analysis :</p>
+<p><code class="docutils literal notranslate"><span class="pre">php</span> <span class="pre">scripts/createAnalyzer</span> <span class="pre">Custom/FirstTest</span></code></p>
+<p>This script creates the following files :</p>
+<ul class="simple">
+<li>library/Exakat/Analyze/Custom/FirstTest.php</li>
+<li>human/en/Custom/FirstTest.ini</li>
+<li>tests/analyzer/Test/Custom/FirstTest.php</li>
+<li>tests/analyzer/source/Custom/FirstTest.01.php</li>
+<li>tests/analyzer/exp/Custom/FirstTest.01.php</li>
+<li>It also updates a file called <cite>data/analyzers.sqlite</cite></li>
+</ul>
+<p>Open <cite>library/Exakat/Analyze/Custom/FirstTest.php</cite> in your favorite IDE. The code looks like the following :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?php
+/*
+ * Copyright 2012-2018 Damien Seguy – Exakat Ltd &lt;contact(at)exakat.io&gt;
+ * This file is part of Exakat.
+ *
+ * Exakat is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exakat is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Exakat.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ * The latest code can be found at &lt;http://exakat.io/&gt;.
+ *
+*/
+
+namespace Exakat\Analyzer\Custom;
+
+use Exakat\Analyzer\Analyzer;
+
+class FirstTest extends Analyzer {
+    /* Remove this if useless
+    public function dependsOn() {
+        return array(&#39;MethodDefinition&#39;);
+    }
+    */
+
+    public function analyze() {
+        $this-&gt;atomIs(&#39;Identifier&#39;)
+             -&gt;back(&#39;first&#39;);
+        $this-&gt;printQuery();
+        $this-&gt;prepareQuery();
+    }
+}
+
+?&gt;
+</pre></div>
+</div>
+<p>The main part of the analysis is the <cite>analyze</cite> method, so we’ll focus on it. It has a very simple example code, and runs a debugging tool. Let start by removing the line <cite>$this-&gt;printQuery();</cite>.</p>
+<p>For this example, we’re going to look for useless additions : something like <cite>$a + 0</cite>. For that, we need to detect additions, check that the operator is <cite>+</cite> and find if one of the operand is 0. For that, we’re going to replace the first call to <cite>$this</cite> by the following code :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$this-&gt;atomIs(&#39;Addition&#39;)
+     -&gt;codeIs(&#39;+&#39;)
+     -&gt;outIs(&#39;RIGHT&#39;)
+     -&gt;atomIs(&#39;Integer&#39;)
+     -&gt;codeIs(&#39;0&#39;);
+$this-&gt;prepareQuery();
+</pre></div>
+</div>
+<p>The query may be read as the following : find all atoms that are ‘Addition’, check if the code is ‘+’, then go to the ‘RIGHT’ expression, check if the atom is an ‘Integer’, then check if the value is ‘0’. If all of those steps are valid, the resulting element is now a result for our analysis.</p>
+<p>The next call to ‘prepareQuery’ means that this query is complete.</p>
+<p>At that point, our analysis is build with one query. It is executed by the exakat engine.</p>
+<p>Now, we need to start testing our analysis and check if all works as expected. The simplest is to rely on the unit tests to validate the analysis.</p>
+<p>Open the file <cite>tests/analyzer/source/Custom/MyFirst.01.php</cite>. Inside, you’ll find an empty PHP script.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?php
+
+?&gt;
+</pre></div>
+</div>
+<p>Let’s complete this script with code that we intend to analyse. For that, we simply PHP code that hold the pattern we are looking for. For example :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?php
+
+$a + 0;
+0 + $a;
+
+1 + $a;
+$a + 1;
+?&gt;
+</pre></div>
+</div>
+<p>As you can see, we added patterns of code that we would like to find, like <cite>$a + 0</cite> and <cite>0 + $a</cite>. We also added patterns of code we don’t want to find, like <cite>$a + 1</cite> and <cite>1 + $a</cite>. It is important to tell the tests what we expect, and what we want to avoid.</p>
+<p>Save that file, and open the next one : <cite>tests/analyzer/exp/Custom/MyFirst.01.php</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?php
+
+$expected     = array(&#39;&#39;,
+                      &#39;&#39;,
+                     );
+
+$expected_not = array(&#39;&#39;,
+                      &#39;&#39;,
+                     );
+
+?&gt;
+</pre></div>
+</div>
+<p>This file holds the expected values and the values we want to avoid. The expected values are <cite>$a + 0</cite> and <cite>0 + $a</cite>, so added them in the <cite>$expected</cite> array. The unwanted values are <cite>$a + 1</cite> and <cite>1 + $a</cite>, so added them in the <cite>$expected_not</cite> array.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?php
+
+$expected     = array(&#39;$a + 0&#39;,
+                      &#39;0 + $a&#39;,
+                     );
+
+$expected_not = array(&#39;$a + 1&#39;,
+                      &#39;1 + $a&#39;,
+                     );
+
+?&gt;
+</pre></div>
+</div>
+<p>Save the file too. We are now ready to run this test with PHPunit. Check that PHPunit is installed, then run the test.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">tests</span><span class="o">/</span><span class="n">analyzer</span><span class="o">/</span>
+<span class="n">phpunit</span> <span class="n">Test</span><span class="o">/</span><span class="n">Custom</span><span class="o">/</span><span class="n">MyFirst</span><span class="o">.</span><span class="n">php</span>
+</pre></div>
+</div>
+<p>You should have a result like this :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>PHPUnit 7.3.5 by Sebastian Bergmann and contributors.
+
+.                                                                   1 / 1 (100%)
+
+Time: 2.01 seconds, Memory: 10.00MB
+
+There was 1 failure:
+
+1) Test\Custom_MyFirst::testCustom_MyFirst01
+1 values were found and are unprocessed : 0 + $a
+
+source/Custom/MyFirst.02.php
+exp/Custom/MyFirst.02.php
+phpunit --filter=01 Test/Custom/MyFirst.php
+
+
+Failed asserting that 1 matches expected 0.
+
+FAILURES!
+Tests: 2, Assertions: 5, Failures: 1.
+</pre></div>
+</div>
+<p>In the first analysis, we have build a query to look for <cite>$a + 0</cite> but not for <cite>0 + $a</cite>. It is a good thing that we added tests for them, so we need to add more query to the analysis.</p>
+<p>Open again the ‘library/Exakat/Analyze/Custom/MyFirst.php’, and, inside the <cite>analyze()</cite> method, below the first <cite>prepareQuery()</cite>, add the following code to search for <cite>0 + $a</cite> :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$this-&gt;atomIs(&#39;Addition&#39;)
+     -&gt;codeIs(&#39;+&#39;)
+     -&gt;outIs(&#39;LEFT&#39;)
+     -&gt;atomIs(&#39;Integer&#39;)
+     -&gt;codeIs(&#39;0&#39;);
+$this-&gt;prepareQuery();
+</pre></div>
+</div>
+<p>An analysis may run several queries. In this case, we have searched for ‘$a + 0’, but we should also check for ‘0 + $a’. Addition is associative, so 0 may be useless on the right or on the left.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PHPUnit</span> <span class="mf">7.3</span><span class="o">.</span><span class="mi">5</span> <span class="n">by</span> <span class="n">Sebastian</span> <span class="n">Bergmann</span> <span class="ow">and</span> <span class="n">contributors</span><span class="o">.</span>
+
+<span class="o">.</span>                                                                   <span class="mi">1</span> <span class="o">/</span> <span class="mi">1</span> <span class="p">(</span><span class="mi">100</span><span class="o">%</span><span class="p">)</span>
+
+<span class="n">Time</span><span class="p">:</span> <span class="mf">2.82</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">Memory</span><span class="p">:</span> <span class="mf">10.00</span><span class="n">MB</span>
+</pre></div>
+</div>
+<p>This means that the Unit Test found the values we expected, and it also didn’t find the values we didn’t want.</p>
+<p>Congratulations! This is your first analysis, and it is time to celebrate! Welcome to the great family of static analyzers.</p>
+</div>
+<div class="section" id="analysis-structure">
+<h2>13.4. Analysis structure<a class="headerlink" href="#analysis-structure" title="Permalink to this headline">¶</a></h2>
+<p>An analysis class is build with 4 elements.</p>
+<ul class="simple">
+<li>analyze() method</li>
+<li>dependsOn() method</li>
+<li>$phpVersion property</li>
+<li>Analyzer extends</li>
+</ul>
+<div class="section" id="the-analyze-method">
+<h3>13.4.1. The analyze() method<a class="headerlink" href="#the-analyze-method" title="Permalink to this headline">¶</a></h3>
+<p>The analyze method is the most important. It is the method that does the actual analysis.</p>
+<p>The method doesn’t return anything.</p>
+</div>
+<div class="section" id="the-dependson-method">
+<h3>13.4.2. The dependsOn() method<a class="headerlink" href="#the-dependson-method" title="Permalink to this headline">¶</a></h3>
+<p>This method returns the list of other analysis on which the current analysis depends on. For example, an analysis may target PHP functions : it relies on another analysis that detects the PHP functions, then, add it own layer of review. The other analysis must be processed first, and the Exakat engine run the dependencies before it runs the current analysis.</p>
+<p>The list of dependency is a array of strings, with the usual analysis format : for example, <cite>array(‘Functions/IsExtFunction’)</cite>. Multiple analysis may be returned by that method. If the current analysis is autonomous, the method may be omitted, or it may return an empty array.</p>
+</div>
+<div class="section" id="phpversion-property">
+<h3>13.4.3. $phpVersion property<a class="headerlink" href="#phpversion-property" title="Permalink to this headline">¶</a></h3>
+<p>The protected <cite>$phpVersion</cite> property configure the analysis to run with specific versions of PHP. For example, <cite>Structures/Break0</cite> is an analysis that can only run until PHP 5.4 : after that version, PHP doesn’t compile code that uses <cite>break 0;</cite>. Thus, there is no need to run the current analysis on newer PHP versions.</p>
+<p>If the analysis works on every PHP version, this can be omitted.</p>
+<p>Patch level version are never taken into consideration : PHP 7.0.0 or PHP 7.0.30 are all covered by ‘7.0’.</p>
+<p><cite>$phpVersion</cite> accepts several values :</p>
+<ul class="simple">
+<li>‘7.0’ : the analysis only runs for PHP 7.0 version.</li>
+<li>‘7.1-‘ : the analysis only runs until PHP 7.1 version. PHP 7.1 is excluded.</li>
+<li>‘7.2+’ : the analysis only runs after PHP 7.2 version. PHP 7.2 is included.</li>
+</ul>
+<p>Generally speaking, PHP version are the official middle versions : 5.2, 5.3, 5.4, 5.5, 5.6, 7.0, 7.1, 7.2, 7.3, 7.4, 8.0. This changes with the publication of PHP versions.</p>
+</div>
+<div class="section" id="analyzer-extends">
+<h3>13.4.4. Analyzer extends<a class="headerlink" href="#analyzer-extends" title="Permalink to this headline">¶</a></h3>
+<p>By default, an analysis extends the ExakatAnalyzerAnalyzer class. Some frequent analysis that can be configurer, are available in the <cite>Common/*</cite> folder. More on that later.</p>
+</div>
+</div>
+<div class="section" id="internal-database">
+<h2>13.5. Internal database<a class="headerlink" href="#internal-database" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="presentation">
+<h3>13.5.1. Presentation<a class="headerlink" href="#presentation" title="Permalink to this headline">¶</a></h3>
+<p>Every important structure of PHP code is stored in the database as a node, called atom. Nodes are connected to each other with links. Each atom has a list of defining properties, that are not represented in the code. For example, where is a simple assignation :</p>
+<p>The ‘Assignation’ atom is holding the ‘+=’ code, which is its characteristics. Then, it has two members : ‘LEFT’ and ‘RIGHT’. Each of the target atoms are different : one is a variable, and the other is a integer. Altogether, they build the assignation, which is summed up in the ‘fullcode’ property of the assignation.</p>
+<img alt="_images/database.introduction.png" src="_images/database.introduction.png" />
+<p>To define a pattern in the code, we use a combinaison of filters on atom, links or their property. Any succession of steps that yield a result means that an issue has been found in the code.</p>
+</div>
+<div class="section" id="atoms">
+<h3>13.5.2. Atoms<a class="headerlink" href="#atoms" title="Permalink to this headline">¶</a></h3>
+<p>Here is the list of the 117 available atoms :</p>
+<ul class="simple">
+<li>Addition : An addition or a substraction</li>
+<li>Analysis : An analysis, as processed by Exakat.</li>
+<li>Array : Represents array access : <cite>$a[4]</cite>, <cite>$this[‘a’][‘f’]</cite> and <cite>foo()[1][‘g’]</cite></li>
+<li>Arrayappend : Represents <cite>$a[]</cite> or <cite>$this-&gt;b[]</cite></li>
+<li>Arrayliteral : Represents an array definition : <cite>[4,5 =&gt; 3,6]</cite> and <cite>array(1,2,3)</cite></li>
+<li>As : The as keyword, when aliasing an imported class</li>
+<li>Assignation : Any assignation and short assignation : <cite>$a = 1</cite>, <cite>$b .= 3</cite></li>
+<li>Bitshift : A bit shift operation on integers, with &lt;&lt; or &gt;&gt;</li>
+<li>Block : Represents a sequence between curly braces. For example, <cite>{ $c += $b; }</cite>.</li>
+<li>Boolean : Represents <cite>true</cite> or <cite>false</cite>.</li>
+<li>Break : A break, with or without the level indication. <cite>break 1</cite>;</li>
+<li>Cast : A case expression in a switch() statement. <a href="#id1"><span class="problematic" id="id2">`</span></a>case 1: `</li>
+<li>Cast : A cast operation, like <code class="docutils literal notranslate"><span class="pre">(array)</span></code> or <code class="docutils literal notranslate"><span class="pre">(unset)</span></code></li>
+<li>Catch : A catch clause in a try/catch command. For example : <cite>catch (Exception $e)</cite> or <cite>catch{A|B|C $d}</cite></li>
+<li>Class : A named class.</li>
+<li>Classalias : A call to the <cite>class_alias</cite> function.</li>
+<li>Classanonymous : A unnamed class, created with <cite>new class {};</cite></li>
+<li>Clone : A clone expression</li>
+<li>Closure : A closure definition. For example, <cite>function () { return 3; }</cite>.</li>
+<li>Coalesce : An expression with the coalesce operator, <cite>?:</cite>. For example, <cite>$x = $y ?: ‘ef’;</cite></li>
+<li>Comparison : A comparison, with any kind of comparison operator : <cite>==</cite>, <cite>===</cite>, <cite>&gt;</cite>, …</li>
+<li>Concatenation : A concatenation : a sequence of values, linked by the dot operator <cite>.</cite></li>
+<li>Const : A constant definition, for classes or global. <cite>const X = 1;</cite> or <cite>class x { const Y = 2; }</cite></li>
+<li>Constant : A constant definition, part of a <cite>Const</cite> atom.</li>
+<li>Continue : A continue operator, with or without its level indicator</li>
+<li>Declare : A declare expression.</li>
+<li>Declaredefinition : One configuration expression inside a <cite>declare</cite> definition. For example, in <cite>declare(strict_types=1);</cite>, <cite>strict_types=1</cite></li>
+<li>Default : A default case, in a switch statement.</li>
+<li>Defineconstant : A call to the <cite>define()</cite> function.</li>
+<li>Dowhile : A do…while() loop.</li>
+<li>Echo : A call to <cite>echo</cite></li>
+<li>Empty : A call to <cite>empty</cite></li>
+<li>Eval : A call to <cite>Eval</cite></li>
+<li>Exit : A call to <cite>Exit</cite></li>
+<li>File : A file, containing the PHP source code.</li>
+<li>Finally : A finally clause in a try/catch command.</li>
+<li>For : A for loop. For example : <cite>for($i = 0; $i &lt; 10; ++$i) { }</cite></li>
+<li>Foreach : A foreach loop.</li>
+<li>Function : A function definition</li>
+<li>Functioncall : A call to a function.</li>
+<li>Global : An expression with the global keyword. For example, <cite>global $x, $y</cite>.</li>
+<li>Globaldefinition : A definition of a global variable, inside a global expression. For example, in <cite>global $x = 1, $y</cite>, <cite>$x = 1</cite> and <cite>$y</cite> are Globaldefinition.</li>
+<li>Goto : The goto expression.</li>
+<li>Gotolabel : A target destination for a goto expression.</li>
+<li>Halt : The <cite>__halt_compiler</cite> command.</li>
+<li>Heredoc : A Heredoc or Nowdoc string</li>
+<li>Identifier : A name for a constant or a class. For example : <cite>$x instanceof Y</cite>, ‘echo PHP_INT_MAX`, <cite>new Y</cite></li>
+<li>Ifthen : A if/then/else structure.</li>
+<li>Include : A inclusion, with <cite>require</cite> or <cite>include</cite>, with <cite>_once</cite> or not.</li>
+<li>Inlinehtml : Raw text, in the middle of a PHP script. For example : <a href="#id3"><span class="problematic" id="id4">``</span></a>++$a; ?&gt;RAW TEXT&lt;?php ++$b; ``</li>
+<li>Instanceof : A <cite>instanceof</cite> expression</li>
+<li>Insteadof : A <cite>insteadof</cite> expression</li>
+<li>Integer : An Integer literal, positive or negative.</li>
+<li>Interface : An interface definition</li>
+<li>Isset : A call to <cite>isset</cite></li>
+<li>Keyvalue : An expression with the <cite>=&gt;</cite> operator : for arrays or foreach() instructions.</li>
+<li>List : The list() or [] call when on the right of an assignation.</li>
+<li>Logical : A logical expression. This covers also bitwise operations. For example : <cite>$a | $b</cite>, <cite>$a &amp;&amp; $b</cite>, <cite>$a xor $b</cite>.</li>
+<li>Magicconstant : A PHP magic constant. For example : __FILE__ or __class__.</li>
+<li>Magicmethod : A special PHP method in a class. For example, <cite>__clone()</cite>, <cite>__construct()</cite>, <cite>__get()</cite>, …</li>
+<li>Member : A reference to a member of an object. For example, <cite>$object-&gt;member</cite>.</li>
+<li>Method : A method definition in a class.</li>
+<li>Methodcall : A non-static call to a method. For example, <cite>$a-&gt;method();</cite></li>
+<li>Methodcallname : The name of the method in a methodcall</li>
+<li>Multiplication : A multiplication <cite>*</cite>, division <cite>/</cite> or modulo <cite>%</cite> operation.</li>
+<li>Name : The name of a structure : name of a class, method, interface, trait, interface.</li>
+<li>Namespace : A namespace declaration</li>
+<li>New : An instantiation expression, with <cite>new ClassName()</cite>.</li>
+<li>Newcall : The functioncall in a New expression. For example, in <a href="#id5"><span class="problematic" id="id6">``</span></a>new foo()`, <cite>foo()</cite> is the Newcall.</li>
+<li>Not : A call to <cite>!</cite> or <cite>~</cite>.</li>
+<li>Nsname : A fully qualified name, including <cite>`. For example, `strtolower</cite>, <cite>ABC</cite>, …w</li>
+<li>Null : The <cite>Null</cite> value</li>
+<li>Parameter : A parameter definition, in a function or method definition. When called, it becomes an argument.</li>
+<li>Parametername : A Parametername</li>
+<li>Parent : The parent keyword, when it is used to refer to the parent class.</li>
+<li>Parenthesis : A Parenthesis expression. This is not a syntactic parenthesis, like in a switch or functioncall.</li>
+<li>Php : A PHP script, inside its tags. This exclude the following and previous raw text in a PHP file.</li>
+<li>Phpvariable : A PHP reserved variable, such as <cite>$_GET</cite>, <cite>$_POST</cite>, <cite>$GLOBALS</cite>, etc.</li>
+<li>Postplusplus : $i++` expression</li>
+<li>Power : The power operator, <cite>**</cite>.</li>
+<li>Ppp : A properties declaration, in a class or a trait. For example : <cite>private $x, $y = 2;</cite></li>
+<li>Preplusplus : ++ or – when it is before the variable.</li>
+<li>Print : A call to the function print.</li>
+<li>Project : The project node : the root above all File.</li>
+<li>Propertydefinition : A property definition. For example : <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">private</span> <span class="pre">$property</span> <span class="pre">=</span> <span class="pre">1;</span> <span class="pre">var</span> <span class="pre">$x;</span> <span class="pre">}</span></code></li>
+<li>Real : A float number</li>
+<li>Return : The return expression.</li>
+<li>Self : The <cite>self</cite> keyword, as used inside a class.</li>
+<li>Sequence : A virtual atom, that represents the sequence of expression, in a block.</li>
+<li>Shell : A shell, made with ticks <cite>`</cite></li>
+<li>Sign : A Sign structure : when a <cite>-`or `+</cite> has been added before another expression. For example <cite>- ($a + $b)</cite>.</li>
+<li>Static : The static keyword, when it is used to refer to the current class.</li>
+<li>Staticclass : A call to <cite>::class</cite>, with the syntax of a static constant. For example, <cite>X::class</cite>.</li>
+<li>Staticconstant : A staticconstant : <cite>TheClass::TheConstant</cite></li>
+<li>Staticdefinition : A static variable definition, in a method or function. This is not a static property. For example ; <cite>function foo() { static $s; }</cite>.</li>
+<li>Staticmethod : A staticmethod name, when using trait and renaming a method. For example, <cite>trait t { use t2 { C::D as E; }}</cite>. <cite>C::D</cite> is a static method.</li>
+<li>Staticmethodcall : A static methodcall</li>
+<li>Staticproperty : A static property syntax. For example, <cite>A::$b</cite> or <cite>self::$d</cite>.</li>
+<li>Staticpropertyname : The name of a static property : not a variable.</li>
+<li>String : A string literal, with or without interpolation. For example, <cite>‘$x’</cite>, <cite>“a{$y}”</cite>, <cite>“a”</cite>.</li>
+<li>Switch : A switch structure.</li>
+<li>Ternary : The ternary operator : <cite>$a ? $b : ‘c’</cite>.</li>
+<li>This : The special variable <cite>$this</cite>.</li>
+<li>Throw : A throw expression</li>
+<li>Trait : A trait. For example : <cite>trait t { function foo() {} }</cite></li>
+<li>Try : The Try part in a try/catch/finally expression.</li>
+<li>Unset : A call to <cite>unset</cite></li>
+<li>Usenamespace : Use expression within a namespace, and not in a class or trait.</li>
+<li>Usetrait : A <cite>use</cite> expression, when used to import a trait. For exapmle, <cite>class x { use t; }</cite></li>
+<li>Variable : A Variable, as a standalone container. For example : <cite>$a = 1</cite> or <cite>$b += 3</cite>. Variables in arrays are <cite>Variablearray</cite>, while variables in objects are <cite>Variableobject</cite>.</li>
+<li>Variablearray : A variable, when used to build an array syntax. For example, the <cite>$x</cite> in <cite>$x[0]</cite> or <cite>$x[]</cite>.</li>
+<li>Variabledefinition : A placeholder to federate local variable definition in a method.</li>
+<li>Variableobject : A variable when used with the <cite>-&gt;</cite> operator.</li>
+<li>Void : A Void operation. It represents the absence of data. For example : <cite>foo();;</cite> : there is a Void as argument, and one between the semicolons.</li>
+<li>While : A While structure, different from a Dowhile structure. For example : <cite>while($a &lt; 10) { $a++;}</cite></li>
+<li>Yield : A <cite>yield</cite> expression</li>
+<li>Yieldfrom : A <cite>yield from</cite> expression</li>
+</ul>
+<div class="section" id="addition">
+<h4>13.5.2.1. Addition<a class="headerlink" href="#addition" title="Permalink to this headline">¶</a></h4>
+<p>An addition or a substraction</p>
+<img alt="Addition's outgoing diagramm" src="_images/Addition.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_MINUS</li>
+<li>T_PLUS</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="analysis">
+<h4>13.5.2.2. Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h4>
+<p>An analysis, as processed by Exakat.</p>
+<img alt="Analysis's outgoing diagramm" src="_images/Analysis.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>Atom</li>
+<li>analyzer</li>
+<li>atom</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+</div>
+<div class="section" id="array">
+<h4>13.5.2.3. Array<a class="headerlink" href="#array" title="Permalink to this headline">¶</a></h4>
+<p>Represents array access : <cite>$a[4]</cite>, <cite>$this[‘a’][‘f’]</cite> and <cite>foo()[1][‘g’]</cite></p>
+<img alt="Array's outgoing diagramm" src="_images/Array.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>enclosing</li>
+<li>fullcode</li>
+<li>globalvar</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+<li>reference</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_BRACKET</li>
+<li>T_CLOSE_CURLY</li>
+<li>T_CLOSE_PARENTHESIS</li>
+<li>T_CONSTANT_ENCAPSED_STRING</li>
+<li>T_CURLY_OPEN</li>
+<li>T_QUOTE</li>
+<li>T_START_HEREDOC</li>
+<li>T_STRING</li>
+<li>T_STRING_VARNAME</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>INDEX</li>
+<li>VARIABLE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CLASS</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>POSTPLUSPLUS</li>
+<li>PREPLUSPLUS</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="arrayappend">
+<h4>13.5.2.4. Arrayappend<a class="headerlink" href="#arrayappend" title="Permalink to this headline">¶</a></h4>
+<p>Represents <cite>$a[]</cite> or <cite>$this-&gt;b[]</cite></p>
+<img alt="Arrayappend's outgoing diagramm" src="_images/Arrayappend.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+<li>reference</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_BRACKET</li>
+<li>T_CLOSE_CURLY</li>
+<li>T_CLOSE_PARENTHESIS</li>
+<li>T_STRING</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>APPEND</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>LEFT</li>
+<li>OBJECT</li>
+<li>POSTPLUSPLUS</li>
+<li>PREPLUSPLUS</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="arrayliteral">
+<h4>13.5.2.5. Arrayliteral<a class="headerlink" href="#arrayliteral" title="Permalink to this headline">¶</a></h4>
+<p>Represents an array definition : <cite>[4,5 =&gt; 3,6]</cite> and <cite>array(1,2,3)</cite></p>
+<img alt="Arrayliteral's outgoing diagramm" src="_images/Arrayliteral.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>boolean</li>
+<li>cbClass</li>
+<li>cbMethod</li>
+<li>cbObject</li>
+<li>code</li>
+<li>constant</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ARRAY</li>
+<li>T_OPEN_BRACKET</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="as">
+<h4>13.5.2.6. As<a class="headerlink" href="#as" title="Permalink to this headline">¶</a></h4>
+<p>The as keyword, when aliasing an imported class</p>
+<img alt="As's outgoing diagramm" src="_images/As.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>alias</li>
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+<li>visibility</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_AS</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>AS</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>DEFINITION</li>
+<li>EXPRESSION</li>
+<li>USE</li>
+</ul>
+</div>
+<div class="section" id="assignation">
+<h4>13.5.2.7. Assignation<a class="headerlink" href="#assignation" title="Permalink to this headline">¶</a></h4>
+<p>Any assignation and short assignation : <cite>$a = 1</cite>, <cite>$b .= 3</cite></p>
+<img alt="Assignation's outgoing diagramm" src="_images/Assignation.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_AND_EQUAL</li>
+<li>T_CONCAT_EQUAL</li>
+<li>T_DIV_EQUAL</li>
+<li>T_EQUAL</li>
+<li>T_MINUS_EQUAL</li>
+<li>T_MOD_EQUAL</li>
+<li>T_MUL_EQUAL</li>
+<li>T_OR_EQUAL</li>
+<li>T_PLUS_EQUAL</li>
+<li>T_POW_EQUAL</li>
+<li>T_SL_EQUAL</li>
+<li>T_SR_EQUAL</li>
+<li>T_XOR_EQUAL</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="bitshift">
+<h4>13.5.2.8. Bitshift<a class="headerlink" href="#bitshift" title="Permalink to this headline">¶</a></h4>
+<p>A bit shift operation on integers, with &lt;&lt; or &gt;&gt;</p>
+<img alt="Bitshift's outgoing diagramm" src="_images/Bitshift.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_SL</li>
+<li>T_SR</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="block">
+<h4>13.5.2.9. Block<a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h4>
+<p>Represents a sequence between curly braces. For example, <cite>{ $c += $b; }</cite>.</p>
+<img alt="Block's outgoing diagramm" src="_images/Block.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_BRACKET</li>
+<li>T_CLOSE_CURLY</li>
+<li>T_CLOSE_PARENTHESIS</li>
+<li>T_CONSTANT_ENCAPSED_STRING</li>
+<li>T_LNUMBER</li>
+<li>T_QUOTE</li>
+<li>T_STRING</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CODE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>MEMBER</li>
+<li>NAME</li>
+</ul>
+</div>
+<div class="section" id="boolean">
+<h4>13.5.2.10. Boolean<a class="headerlink" href="#boolean" title="Permalink to this headline">¶</a></h4>
+<p>Represents <cite>true</cite> or <cite>false</cite>.</p>
+<img alt="Boolean's outgoing diagramm" src="_images/Boolean.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="break">
+<h4>13.5.2.11. Break<a class="headerlink" href="#break" title="Permalink to this headline">¶</a></h4>
+<p>A break, with or without the level indication. <cite>break 1</cite>;</p>
+<img alt="Break's outgoing diagramm" src="_images/Break.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_BREAK</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BREAK</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="cast">
+<h4>13.5.2.12. Cast<a class="headerlink" href="#cast" title="Permalink to this headline">¶</a></h4>
+<p>A case expression in a switch() statement. <a href="#id7"><span class="problematic" id="id8">`</span></a>case 1: `</p>
+<img alt="Cast's outgoing diagramm" src="_images/Cast.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CASE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CASE</li>
+<li>CODE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="id9">
+<h4>13.5.2.13. Cast<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<p>A cast operation, like <code class="docutils literal notranslate"><span class="pre">(array)</span></code> or <code class="docutils literal notranslate"><span class="pre">(unset)</span></code></p>
+<img alt="Cast's outgoing diagramm" src="_images/Cast.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>binaryString</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ARRAY_CAST</li>
+<li>T_BOOL_CAST</li>
+<li>T_DOUBLE_CAST</li>
+<li>T_INT_CAST</li>
+<li>T_OBJECT_CAST</li>
+<li>T_STRING_CAST</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CAST</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>POSTPLUSPLUS</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="catch">
+<h4>13.5.2.14. Catch<a class="headerlink" href="#catch" title="Permalink to this headline">¶</a></h4>
+<p>A catch clause in a try/catch command. For example : <cite>catch (Exception $e)</cite> or <cite>catch{A|B|C $d}</cite></p>
+<img alt="Catch's outgoing diagramm" src="_images/Catch.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_TRY</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>CLASS</li>
+<li>VARIABLE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>CATCH</li>
+</ul>
+</div>
+<div class="section" id="class">
+<h4>13.5.2.15. Class<a class="headerlink" href="#class" title="Permalink to this headline">¶</a></h4>
+<p>A named class.</p>
+<img alt="Class's outgoing diagramm" src="_images/Class.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>abstract</li>
+<li>aliased</li>
+<li>code</li>
+<li>ctype1_size</li>
+<li>final</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLASS</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONST</li>
+<li>DEFINITION</li>
+<li>EXTENDS</li>
+<li>IMPLEMENTS</li>
+<li>MAGICMETHOD</li>
+<li>METHOD</li>
+<li>NAME</li>
+<li>PPP</li>
+<li>USE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="classalias">
+<h4>13.5.2.16. Classalias<a class="headerlink" href="#classalias" title="Permalink to this headline">¶</a></h4>
+<p>A call to the <cite>class_alias</cite> function.</p>
+<img alt="Classalias's outgoing diagramm" src="_images/Classalias.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>constant</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+<li>RIGHT</li>
+</ul>
+</div>
+<div class="section" id="classanonymous">
+<h4>13.5.2.17. Classanonymous<a class="headerlink" href="#classanonymous" title="Permalink to this headline">¶</a></h4>
+<p>A unnamed class, created with <cite>new class {};</cite></p>
+<img alt="Classanonymous's outgoing diagramm" src="_images/Classanonymous.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLASS</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>DEFINITION</li>
+<li>EXTENDS</li>
+<li>IMPLEMENTS</li>
+<li>MAGICMETHOD</li>
+<li>METHOD</li>
+<li>PPP</li>
+<li>USE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>NEW</li>
+</ul>
+</div>
+<div class="section" id="clone">
+<h4>13.5.2.18. Clone<a class="headerlink" href="#clone" title="Permalink to this headline">¶</a></h4>
+<p>A clone expression</p>
+<img alt="Clone's outgoing diagramm" src="_images/Clone.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLONE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CLONE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+</ul>
+</div>
+<div class="section" id="closure">
+<h4>13.5.2.19. Closure<a class="headerlink" href="#closure" title="Permalink to this headline">¶</a></h4>
+<p>A closure definition. For example, <cite>function () { return 3; }</cite>.</p>
+<img alt="Closure's outgoing diagramm" src="_images/Closure.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>nullable</li>
+<li>rank</li>
+<li>reference</li>
+<li>static</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_FUNCTION</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>BLOCK</li>
+<li>DEFINITION</li>
+<li>RETURNED</li>
+<li>RETURNTYPE</li>
+<li>USE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>ELSE</li>
+<li>INDEX</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="coalesce">
+<h4>13.5.2.20. Coalesce<a class="headerlink" href="#coalesce" title="Permalink to this headline">¶</a></h4>
+<p>An expression with the coalesce operator, <cite>?:</cite>. For example, <cite>$x = $y ?: ‘ef’;</cite></p>
+<img alt="Coalesce's outgoing diagramm" src="_images/Coalesce.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_COALESCE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="comparison">
+<h4>13.5.2.21. Comparison<a class="headerlink" href="#comparison" title="Permalink to this headline">¶</a></h4>
+<p>A comparison, with any kind of comparison operator : <cite>==</cite>, <cite>===</cite>, <cite>&gt;</cite>, …</p>
+<img alt="Comparison's outgoing diagramm" src="_images/Comparison.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_GREATER</li>
+<li>T_IS_EQUAL</li>
+<li>T_IS_GREATER_OR_EQUAL</li>
+<li>T_IS_IDENTICAL</li>
+<li>T_IS_NOT_EQUAL</li>
+<li>T_IS_NOT_IDENTICAL</li>
+<li>T_IS_SMALLER_OR_EQUAL</li>
+<li>T_SMALLER</li>
+<li>T_SPACESHIP</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="concatenation">
+<h4>13.5.2.22. Concatenation<a class="headerlink" href="#concatenation" title="Permalink to this headline">¶</a></h4>
+<p>A concatenation : a sequence of values, linked by the dot operator <cite>.</cite></p>
+<img alt="Concatenation's outgoing diagramm" src="_images/Concatenation.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOT</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONCAT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="const">
+<h4>13.5.2.23. Const<a class="headerlink" href="#const" title="Permalink to this headline">¶</a></h4>
+<p>A constant definition, for classes or global. <cite>const X = 1;</cite> or <cite>class x { const Y = 2; }</cite></p>
+<img alt="Const's outgoing diagramm" src="_images/Const.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+<li>visibility</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CONST</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONST</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>CONST</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="constant">
+<h4>13.5.2.24. Constant<a class="headerlink" href="#constant" title="Permalink to this headline">¶</a></h4>
+<p>A constant definition, part of a <cite>Const</cite> atom.</p>
+<img alt="Constant's outgoing diagramm" src="_images/Constant.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_COMMA</li>
+<li>T_CONST</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>OVERWRITE</li>
+<li>VALUE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>CONST</li>
+<li>OVERWRITE</li>
+</ul>
+</div>
+<div class="section" id="continue">
+<h4>13.5.2.25. Continue<a class="headerlink" href="#continue" title="Permalink to this headline">¶</a></h4>
+<p>A continue operator, with or without its level indicator</p>
+<img alt="Continue's outgoing diagramm" src="_images/Continue.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CONTINUE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONTINUE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="declare">
+<h4>13.5.2.26. Declare<a class="headerlink" href="#declare" title="Permalink to this headline">¶</a></h4>
+<p>A declare expression.</p>
+<img alt="Declare's outgoing diagramm" src="_images/Declare.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DECLARE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>DECLARE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="declaredefinition">
+<h4>13.5.2.27. Declaredefinition<a class="headerlink" href="#declaredefinition" title="Permalink to this headline">¶</a></h4>
+<p>One configuration expression inside a <cite>declare</cite> definition. For example, in <cite>declare(strict_types=1);</cite>, <cite>strict_types=1</cite></p>
+<img alt="Declaredefinition's outgoing diagramm" src="_images/Declaredefinition.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>NAME</li>
+<li>VALUE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>DECLARE</li>
+</ul>
+</div>
+<div class="section" id="default">
+<h4>13.5.2.28. Default<a class="headerlink" href="#default" title="Permalink to this headline">¶</a></h4>
+<p>A default case, in a switch statement.</p>
+<img alt="Default's outgoing diagramm" src="_images/Default.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DEFAULT</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CODE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="defineconstant">
+<h4>13.5.2.29. Defineconstant<a class="headerlink" href="#defineconstant" title="Permalink to this headline">¶</a></h4>
+<p>A call to the <cite>define()</cite> function.</p>
+<img alt="Defineconstant's outgoing diagramm" src="_images/Defineconstant.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>EXPRESSION</li>
+<li>RIGHT</li>
+</ul>
+</div>
+<div class="section" id="dowhile">
+<h4>13.5.2.30. Dowhile<a class="headerlink" href="#dowhile" title="Permalink to this headline">¶</a></h4>
+<p>A do…while() loop.</p>
+<img alt="Dowhile's outgoing diagramm" src="_images/Dowhile.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DO</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>CONDITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="echo">
+<h4>13.5.2.31. Echo<a class="headerlink" href="#echo" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>echo</cite></p>
+<img alt="Echo's outgoing diagramm" src="_images/Echo.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ECHO</li>
+<li>T_OPEN_TAG_WITH_ECHO</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="empty">
+<h4>13.5.2.32. Empty<a class="headerlink" href="#empty" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>empty</cite></p>
+<img alt="Empty's outgoing diagramm" src="_images/Empty.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_EMPTY</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="eval">
+<h4>13.5.2.33. Eval<a class="headerlink" href="#eval" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>Eval</cite></p>
+<img alt="Eval's outgoing diagramm" src="_images/Eval.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_EVAL</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>EXPRESSION</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+</ul>
+</div>
+<div class="section" id="exit">
+<h4>13.5.2.34. Exit<a class="headerlink" href="#exit" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>Exit</cite></p>
+<img alt="Exit's outgoing diagramm" src="_images/Exit.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_COMMA</li>
+<li>T_EXIT</li>
+<li>T_OPEN_PARENTHESIS</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+<li>RIGHT</li>
+</ul>
+</div>
+<div class="section" id="file">
+<h4>13.5.2.35. File<a class="headerlink" href="#file" title="Permalink to this headline">¶</a></h4>
+<p>A file, containing the PHP source code.</p>
+<img alt="File's outgoing diagramm" src="_images/File.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_FILENAME</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+<li>FILE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>PROJECT</li>
+</ul>
+</div>
+<div class="section" id="finally">
+<h4>13.5.2.36. Finally<a class="headerlink" href="#finally" title="Permalink to this headline">¶</a></h4>
+<p>A finally clause in a try/catch command.</p>
+<img alt="Finally's outgoing diagramm" src="_images/Finally.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_TRY</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>FINALLY</li>
+</ul>
+</div>
+<div class="section" id="for">
+<h4>13.5.2.37. For<a class="headerlink" href="#for" title="Permalink to this headline">¶</a></h4>
+<p>A for loop. For example : <cite>for($i = 0; $i &lt; 10; ++$i) { }</cite></p>
+<img alt="For's outgoing diagramm" src="_images/For.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>alternative</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_CURLY</li>
+<li>T_OPEN_TAG</li>
+<li>T_SEMICOLON</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>FINAL</li>
+<li>INCREMENT</li>
+<li>INIT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="foreach">
+<h4>13.5.2.38. Foreach<a class="headerlink" href="#foreach" title="Permalink to this headline">¶</a></h4>
+<p>A foreach loop.</p>
+<img alt="Foreach's outgoing diagramm" src="_images/Foreach.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>alternative</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_FOREACH</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>SOURCE</li>
+<li>VALUE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="function">
+<h4>13.5.2.39. Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h4>
+<p>A function definition</p>
+<img alt="Function's outgoing diagramm" src="_images/Function.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>nullable</li>
+<li>rank</li>
+<li>reference</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_FUNCTION</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>BLOCK</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>RETURNED</li>
+<li>RETURNTYPE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="functioncall">
+<h4>13.5.2.40. Functioncall<a class="headerlink" href="#functioncall" title="Permalink to this headline">¶</a></h4>
+<p>A call to a function.</p>
+<img alt="Functioncall's outgoing diagramm" src="_images/Functioncall.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>aliased</li>
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>constant</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>enclosing</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+<li>reference</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_BRACKET</li>
+<li>T_CLOSE_PARENTHESIS</li>
+<li>T_CONSTANT_ENCAPSED_STRING</li>
+<li>T_CURLY_OPEN</li>
+<li>T_DOLLAR</li>
+<li>T_DOUBLE_COLON</li>
+<li>T_NS_SEPARATOR</li>
+<li>T_OBJECT_OPERATOR</li>
+<li>T_OPEN_BRACKET</li>
+<li>T_OPEN_PARENTHESIS</li>
+<li>T_STRING</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="global">
+<h4>13.5.2.41. Global<a class="headerlink" href="#global" title="Permalink to this headline">¶</a></h4>
+<p>An expression with the global keyword. For example, <cite>global $x, $y</cite>.</p>
+<img alt="Global's outgoing diagramm" src="_images/Global.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_GLOBAL</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>GLOBAL</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="globaldefinition">
+<h4>13.5.2.42. Globaldefinition<a class="headerlink" href="#globaldefinition" title="Permalink to this headline">¶</a></h4>
+<p>A definition of a global variable, inside a global expression. For example, in <cite>global $x = 1, $y</cite>, <cite>$x = 1</cite> and <cite>$y</cite> are Globaldefinition.</p>
+<img alt="Globaldefinition's outgoing diagramm" src="_images/Globaldefinition.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>DEFINITION</li>
+<li>GLOBAL</li>
+</ul>
+</div>
+<div class="section" id="goto">
+<h4>13.5.2.43. Goto<a class="headerlink" href="#goto" title="Permalink to this headline">¶</a></h4>
+<p>The goto expression.</p>
+<img alt="Goto's outgoing diagramm" src="_images/Goto.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_GOTO</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>GOTO</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="gotolabel">
+<h4>13.5.2.44. Gotolabel<a class="headerlink" href="#gotolabel" title="Permalink to this headline">¶</a></h4>
+<p>A target destination for a goto expression.</p>
+<img alt="Gotolabel's outgoing diagramm" src="_images/Gotolabel.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_COLON</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+<li>GOTOLABEL</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="halt">
+<h4>13.5.2.45. Halt<a class="headerlink" href="#halt" title="Permalink to this headline">¶</a></h4>
+<p>The <cite>__halt_compiler</cite> command.</p>
+<img alt="Halt's outgoing diagramm" src="_images/Halt.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_HALT_COMPILER</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="heredoc">
+<h4>13.5.2.46. Heredoc<a class="headerlink" href="#heredoc" title="Permalink to this headline">¶</a></h4>
+<p>A Heredoc or Nowdoc string</p>
+<img alt="Heredoc's outgoing diagramm" src="_images/Heredoc.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>binaryString</li>
+<li>boolean</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>delimiter</li>
+<li>fullcode</li>
+<li>heredoc</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_START_HEREDOC</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONCAT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CONCAT</li>
+<li>DEFAULT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="identifier">
+<h4>13.5.2.47. Identifier<a class="headerlink" href="#identifier" title="Permalink to this headline">¶</a></h4>
+<p>A name for a constant or a class. For example : <cite>$x instanceof Y</cite>, ‘echo PHP_INT_MAX`, <cite>new Y</cite></p>
+<img alt="Identifier's outgoing diagramm" src="_images/Identifier.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>aliased</li>
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+<li>reference</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ARRAY</li>
+<li>T_CALLABLE</li>
+<li>T_CONST</li>
+<li>T_FUNCTION</li>
+<li>T_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>AS</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CLASS</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>CONST</li>
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>FUNCTION</li>
+<li>INDEX</li>
+<li>INSTEADOF</li>
+<li>LEFT</li>
+<li>MEMBER</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>THEN</li>
+<li>TYPEHINT</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="ifthen">
+<h4>13.5.2.48. Ifthen<a class="headerlink" href="#ifthen" title="Permalink to this headline">¶</a></h4>
+<p>A if/then/else structure.</p>
+<img alt="Ifthen's outgoing diagramm" src="_images/Ifthen.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>alternative</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ELSEIF</li>
+<li>T_IF</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>THEN</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="include">
+<h4>13.5.2.49. Include<a class="headerlink" href="#include" title="Permalink to this headline">¶</a></h4>
+<p>A inclusion, with <cite>require</cite> or <cite>include</cite>, with <cite>_once</cite> or not.</p>
+<img alt="Include's outgoing diagramm" src="_images/Include.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_INCLUDE</li>
+<li>T_INCLUDE_ONCE</li>
+<li>T_REQUIRE</li>
+<li>T_REQUIRE_ONCE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>EXPRESSION</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+</ul>
+</div>
+<div class="section" id="inlinehtml">
+<h4>13.5.2.50. Inlinehtml<a class="headerlink" href="#inlinehtml" title="Permalink to this headline">¶</a></h4>
+<p>Raw text, in the middle of a PHP script. For example : <a href="#id10"><span class="problematic" id="id11">``</span></a>++$a; ?&gt;RAW TEXT&lt;?php ++$b; ``</p>
+<img alt="Inlinehtml's outgoing diagramm" src="_images/Inlinehtml.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_INLINE_HTML</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="instanceof">
+<h4>13.5.2.51. Instanceof<a class="headerlink" href="#instanceof" title="Permalink to this headline">¶</a></h4>
+<p>A <cite>instanceof</cite> expression</p>
+<img alt="Instanceof's outgoing diagramm" src="_images/Instanceof.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_INSTANCEOF</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CLASS</li>
+<li>VARIABLE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+</ul>
+</div>
+<div class="section" id="insteadof">
+<h4>13.5.2.52. Insteadof<a class="headerlink" href="#insteadof" title="Permalink to this headline">¶</a></h4>
+<p>A <cite>insteadof</cite> expression</p>
+<img alt="Insteadof's outgoing diagramm" src="_images/Insteadof.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_INSTEADOF</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>INSTEADOF</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="integer">
+<h4>13.5.2.53. Integer<a class="headerlink" href="#integer" title="Permalink to this headline">¶</a></h4>
+<p>An Integer literal, positive or negative.</p>
+<img alt="Integer's outgoing diagramm" src="_images/Integer.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_LNUMBER</li>
+<li>T_NUM_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>BREAK</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>CONTINUE</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="interface">
+<h4>13.5.2.54. Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h4>
+<p>An interface definition</p>
+<img alt="Interface's outgoing diagramm" src="_images/Interface.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_INTERFACE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONST</li>
+<li>DEFINITION</li>
+<li>EXTENDS</li>
+<li>MAGICMETHOD</li>
+<li>METHOD</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="isset">
+<h4>13.5.2.55. Isset<a class="headerlink" href="#isset" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>isset</cite></p>
+<img alt="Isset's outgoing diagramm" src="_images/Isset.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ISSET</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>EXPRESSION</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+</ul>
+</div>
+<div class="section" id="keyvalue">
+<h4>13.5.2.56. Keyvalue<a class="headerlink" href="#keyvalue" title="Permalink to this headline">¶</a></h4>
+<p>An expression with the <cite>=&gt;</cite> operator : for arrays or foreach() instructions.</p>
+<img alt="Keyvalue's outgoing diagramm" src="_images/Keyvalue.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOUBLE_ARROW</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>INDEX</li>
+<li>VALUE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>VALUE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="list">
+<h4>13.5.2.57. List<a class="headerlink" href="#list" title="Permalink to this headline">¶</a></h4>
+<p>The list() or [] call when on the right of an assignation.</p>
+<img alt="List's outgoing diagramm" src="_images/List.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_LIST</li>
+<li>T_OPEN_BRACKET</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>LEFT</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="logical">
+<h4>13.5.2.58. Logical<a class="headerlink" href="#logical" title="Permalink to this headline">¶</a></h4>
+<p>A logical expression. This covers also bitwise operations. For example : <cite>$a | $b</cite>, <cite>$a &amp;&amp; $b</cite>, <cite>$a xor $b</cite>.</p>
+<img alt="Logical's outgoing diagramm" src="_images/Logical.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_AND</li>
+<li>T_BOOLEAN_AND</li>
+<li>T_BOOLEAN_OR</li>
+<li>T_LOGICAL_AND</li>
+<li>T_LOGICAL_OR</li>
+<li>T_LOGICAL_XOR</li>
+<li>T_OR</li>
+<li>T_XOR</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="magicconstant">
+<h4>13.5.2.59. Magicconstant<a class="headerlink" href="#magicconstant" title="Permalink to this headline">¶</a></h4>
+<p>A PHP magic constant. For example : __FILE__ or __class__.</p>
+<img alt="Magicconstant's outgoing diagramm" src="_images/Magicconstant.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLASS_C</li>
+<li>T_DIR</li>
+<li>T_FILE</li>
+<li>T_FUNC_C</li>
+<li>T_LINE</li>
+<li>T_METHOD_C</li>
+<li>T_NS_C</li>
+<li>T_TRAIT_C</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="magicmethod">
+<h4>13.5.2.60. Magicmethod<a class="headerlink" href="#magicmethod" title="Permalink to this headline">¶</a></h4>
+<p>A special PHP method in a class. For example, <cite>__clone()</cite>, <cite>__construct()</cite>, <cite>__get()</cite>, …</p>
+<img alt="Magicmethod's outgoing diagramm" src="_images/Magicmethod.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>abstract</li>
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>final</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+<li>static</li>
+<li>visibility</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_FUNCTION</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>BLOCK</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>OVERWRITE</li>
+<li>RETURNED</li>
+<li>RETURNTYPE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>MAGICMETHOD</li>
+<li>OVERWRITE</li>
+</ul>
+</div>
+<div class="section" id="member">
+<h4>13.5.2.61. Member<a class="headerlink" href="#member" title="Permalink to this headline">¶</a></h4>
+<p>A reference to a member of an object. For example, <cite>$object-&gt;member</cite>.</p>
+<img alt="Member's outgoing diagramm" src="_images/Member.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>enclosing</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CURLY_OPEN</li>
+<li>T_OBJECT_OPERATOR</li>
+<li>T_QUOTE</li>
+<li>T_START_HEREDOC</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>MEMBER</li>
+<li>OBJECT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CLASS</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>POSTPLUSPLUS</li>
+<li>PREPLUSPLUS</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="method">
+<h4>13.5.2.62. Method<a class="headerlink" href="#method" title="Permalink to this headline">¶</a></h4>
+<p>A method definition in a class.</p>
+<img alt="Method's outgoing diagramm" src="_images/Method.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>abstract</li>
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>final</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>nullable</li>
+<li>rank</li>
+<li>reference</li>
+<li>static</li>
+<li>visibility</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_FUNCTION</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>BLOCK</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>OVERWRITE</li>
+<li>RETURNED</li>
+<li>RETURNTYPE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>METHOD</li>
+<li>OVERWRITE</li>
+</ul>
+</div>
+<div class="section" id="methodcall">
+<h4>13.5.2.63. Methodcall<a class="headerlink" href="#methodcall" title="Permalink to this headline">¶</a></h4>
+<p>A non-static call to a method. For example, <cite>$a-&gt;method();</cite></p>
+<img alt="Methodcall's outgoing diagramm" src="_images/Methodcall.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>enclosing</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CURLY_OPEN</li>
+<li>T_OBJECT_OPERATOR</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>METHOD</li>
+<li>OBJECT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="methodcallname">
+<h4>13.5.2.64. Methodcallname<a class="headerlink" href="#methodcallname" title="Permalink to this headline">¶</a></h4>
+<p>The name of the method in a methodcall</p>
+<img alt="Methodcallname's outgoing diagramm" src="_images/Methodcallname.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_BRACKET</li>
+<li>T_CONSTANT_ENCAPSED_STRING</li>
+<li>T_DOLLAR</li>
+<li>T_NEW</li>
+<li>T_STRING</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>METHOD</li>
+</ul>
+</div>
+<div class="section" id="multiplication">
+<h4>13.5.2.65. Multiplication<a class="headerlink" href="#multiplication" title="Permalink to this headline">¶</a></h4>
+<p>A multiplication <cite>*</cite>, division <cite>/</cite> or modulo <cite>%</cite> operation.</p>
+<img alt="Multiplication's outgoing diagramm" src="_images/Multiplication.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_PERCENTAGE</li>
+<li>T_SLASH</li>
+<li>T_STAR</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="name">
+<h4>13.5.2.66. Name<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h4>
+<p>The name of a structure : name of a class, method, interface, trait, interface.</p>
+<img alt="Name's outgoing diagramm" src="_images/Name.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>aliased</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ABSTRACT</li>
+<li>T_CLASS</li>
+<li>T_INSTANCEOF</li>
+<li>T_LIST</li>
+<li>T_NEW</li>
+<li>T_OPEN_TAG_WITH_ECHO</li>
+<li>T_PRINT</li>
+<li>T_PRIVATE</li>
+<li>T_PUBLIC</li>
+<li>T_STRING</li>
+<li>T_THROW</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>CONSTANT</li>
+<li>DEFINITION</li>
+<li>GOTO</li>
+<li>GOTOLABEL</li>
+<li>MEMBER</li>
+<li>METHOD</li>
+<li>NAME</li>
+</ul>
+</div>
+<div class="section" id="namespace">
+<h4>13.5.2.67. Namespace<a class="headerlink" href="#namespace" title="Permalink to this headline">¶</a></h4>
+<p>A namespace declaration</p>
+<img alt="Namespace's outgoing diagramm" src="_images/Namespace.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_NAMESPACE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="new">
+<h4>13.5.2.68. New<a class="headerlink" href="#new" title="Permalink to this headline">¶</a></h4>
+<p>An instantiation expression, with <cite>new ClassName()</cite>.</p>
+<img alt="New's outgoing diagramm" src="_images/New.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>rank</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_NEW</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>NEW</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="newcall">
+<h4>13.5.2.69. Newcall<a class="headerlink" href="#newcall" title="Permalink to this headline">¶</a></h4>
+<p>The functioncall in a New expression. For example, in <a href="#id12"><span class="problematic" id="id13">``</span></a>new foo()`, <cite>foo()</cite> is the Newcall.</p>
+<img alt="Newcall's outgoing diagramm" src="_images/Newcall.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>absolute</li>
+<li>aliased</li>
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOLLAR</li>
+<li>T_LIST</li>
+<li>T_NS_SEPARATOR</li>
+<li>T_STATIC</li>
+<li>T_STRING</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CLASS</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>THEN</li>
+<li>TYPEHINT</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="not">
+<h4>13.5.2.70. Not<a class="headerlink" href="#not" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>!</cite> or <cite>~</cite>.</p>
+<img alt="Not's outgoing diagramm" src="_images/Not.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_BANG</li>
+<li>T_TILDE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>NOT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="nsname">
+<h4>13.5.2.71. Nsname<a class="headerlink" href="#nsname" title="Permalink to this headline">¶</a></h4>
+<p>A fully qualified name, including <cite>`. For example, `strtolower</cite>, <cite>ABC</cite>, …w</p>
+<img alt="Nsname's outgoing diagramm" src="_images/Nsname.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>absolute</li>
+<li>alias</li>
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>origin</li>
+<li>rank</li>
+<li>reference</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_ARRAY</li>
+<li>T_CALLABLE</li>
+<li>T_NS_SEPARATOR</li>
+<li>T_STRING</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CLASS</li>
+<li>CONCAT</li>
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+<li>EXTENDS</li>
+<li>IMPLEMENTS</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>RETURNTYPE</li>
+<li>RIGHT</li>
+<li>TYPEHINT</li>
+<li>USE</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="null">
+<h4>13.5.2.72. Null<a class="headerlink" href="#null" title="Permalink to this headline">¶</a></h4>
+<p>The <cite>Null</cite> value</p>
+<img alt="Null's outgoing diagramm" src="_images/Null.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="parameter">
+<h4>13.5.2.73. Parameter<a class="headerlink" href="#parameter" title="Permalink to this headline">¶</a></h4>
+<p>A parameter definition, in a function or method definition. When called, it becomes an argument.</p>
+<img alt="Parameter's outgoing diagramm" src="_images/Parameter.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>nullable</li>
+<li>rank</li>
+<li>reference</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>TYPEHINT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>DEFINITION</li>
+<li>USE</li>
+</ul>
+</div>
+<div class="section" id="parametername">
+<h4>13.5.2.74. Parametername<a class="headerlink" href="#parametername" title="Permalink to this headline">¶</a></h4>
+<p>A Parametername</p>
+<img alt="Parametername's outgoing diagramm" src="_images/Parametername.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>GLOBAL</li>
+<li>NAME</li>
+</ul>
+</div>
+<div class="section" id="parent">
+<h4>13.5.2.75. Parent<a class="headerlink" href="#parent" title="Permalink to this headline">¶</a></h4>
+<p>The parent keyword, when it is used to refer to the parent class.</p>
+<img alt="Parent's outgoing diagramm" src="_images/Parent.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STRING</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>CLASS</li>
+<li>DEFINITION</li>
+<li>NEW</li>
+<li>RETURNTYPE</li>
+<li>TYPEHINT</li>
+</ul>
+</div>
+<div class="section" id="parenthesis">
+<h4>13.5.2.76. Parenthesis<a class="headerlink" href="#parenthesis" title="Permalink to this headline">¶</a></h4>
+<p>A Parenthesis expression. This is not a syntactic parenthesis, like in a switch or functioncall.</p>
+<img alt="Parenthesis's outgoing diagramm" src="_images/Parenthesis.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_OPEN_PARENTHESIS</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CODE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="php">
+<h4>13.5.2.77. Php<a class="headerlink" href="#php" title="Permalink to this headline">¶</a></h4>
+<p>A PHP script, inside its tags. This exclude the following and previous raw text in a PHP file.</p>
+<img alt="Php's outgoing diagramm" src="_images/Php.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>close_tag</li>
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_OPEN_TAG</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CODE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="phpvariable">
+<h4>13.5.2.78. Phpvariable<a class="headerlink" href="#phpvariable" title="Permalink to this headline">¶</a></h4>
+<p>A PHP reserved variable, such as <cite>$_GET</cite>, <cite>$_POST</cite>, <cite>$GLOBALS</cite>, etc.</p>
+<img alt="Phpvariable's outgoing diagramm" src="_images/Phpvariable.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+<li>reference</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>LEFT</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="postplusplus">
+<h4>13.5.2.79. Postplusplus<a class="headerlink" href="#postplusplus" title="Permalink to this headline">¶</a></h4>
+<p>$i++` expression</p>
+<img alt="Postplusplus's outgoing diagramm" src="_images/Postplusplus.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DEC</li>
+<li>T_INC</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>POSTPLUSPLUS</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+</ul>
+</div>
+<div class="section" id="power">
+<h4>13.5.2.80. Power<a class="headerlink" href="#power" title="Permalink to this headline">¶</a></h4>
+<p>The power operator, <cite>**</cite>.</p>
+<img alt="Power's outgoing diagramm" src="_images/Power.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_POW</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>LEFT</li>
+<li>RIGHT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="ppp">
+<h4>13.5.2.81. Ppp<a class="headerlink" href="#ppp" title="Permalink to this headline">¶</a></h4>
+<p>A properties declaration, in a class or a trait. For example : <cite>private $x, $y = 2;</cite></p>
+<img alt="Ppp's outgoing diagramm" src="_images/Ppp.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+<li>static</li>
+<li>visibility</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_PRIVATE</li>
+<li>T_PROTECTED</li>
+<li>T_PUBLIC</li>
+<li>T_STATIC</li>
+<li>T_VAR</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>PPP</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>PPP</li>
+</ul>
+</div>
+<div class="section" id="preplusplus">
+<h4>13.5.2.82. Preplusplus<a class="headerlink" href="#preplusplus" title="Permalink to this headline">¶</a></h4>
+<p>++ or – when it is before the variable.</p>
+<img alt="Preplusplus's outgoing diagramm" src="_images/Preplusplus.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DEC</li>
+<li>T_INC</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>PREPLUSPLUS</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>VALUE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="print">
+<h4>13.5.2.83. Print<a class="headerlink" href="#print" title="Permalink to this headline">¶</a></h4>
+<p>A call to the function print.</p>
+<img alt="Print's outgoing diagramm" src="_images/Print.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_PRINT</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>RIGHT</li>
+<li>THEN</li>
+</ul>
+</div>
+<div class="section" id="project">
+<h4>13.5.2.84. Project<a class="headerlink" href="#project" title="Permalink to this headline">¶</a></h4>
+<p>The project node : the root above all File.</p>
+<img alt="Project's outgoing diagramm" src="_images/Project.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_WHOLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>PROJECT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+</div>
+<div class="section" id="propertydefinition">
+<h4>13.5.2.85. Propertydefinition<a class="headerlink" href="#propertydefinition" title="Permalink to this headline">¶</a></h4>
+<p>A property definition. For example : <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">private</span> <span class="pre">$property</span> <span class="pre">=</span> <span class="pre">1;</span> <span class="pre">var</span> <span class="pre">$x;</span> <span class="pre">}</span></code></p>
+<img alt="Propertydefinition's outgoing diagramm" src="_images/Propertydefinition.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>propertyname</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+<li>OVERWRITE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>OVERWRITE</li>
+<li>PPP</li>
+</ul>
+</div>
+<div class="section" id="real">
+<h4>13.5.2.86. Real<a class="headerlink" href="#real" title="Permalink to this headline">¶</a></h4>
+<p>A float number</p>
+<img alt="Real's outgoing diagramm" src="_images/Real.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DNUMBER</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="return">
+<h4>13.5.2.87. Return<a class="headerlink" href="#return" title="Permalink to this headline">¶</a></h4>
+<p>The return expression.</p>
+<img alt="Return's outgoing diagramm" src="_images/Return.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_RETURN</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>RETURN</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="self">
+<h4>13.5.2.88. Self<a class="headerlink" href="#self" title="Permalink to this headline">¶</a></h4>
+<p>The <cite>self</cite> keyword, as used inside a class.</p>
+<img alt="Self's outgoing diagramm" src="_images/Self.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>reference</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STRING</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>CLASS</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>RETURNTYPE</li>
+<li>TYPEHINT</li>
+</ul>
+</div>
+<div class="section" id="sequence">
+<h4>13.5.2.89. Sequence<a class="headerlink" href="#sequence" title="Permalink to this headline">¶</a></h4>
+<p>A virtual atom, that represents the sequence of expression, in a block.</p>
+<img alt="Sequence's outgoing diagramm" src="_images/Sequence.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>bracket</li>
+<li>code</li>
+<li>constant</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+<li>root</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_CURLY</li>
+<li>T_CLOSE_PARENTHESIS</li>
+<li>T_COLON</li>
+<li>T_CONSTANT_ENCAPSED_STRING</li>
+<li>T_INLINE_HTML</li>
+<li>T_OPEN_CURLY</li>
+<li>T_OPEN_TAG</li>
+<li>T_SEMICOLON</li>
+<li>T_SWITCH</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>EXPRESSION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>BLOCK</li>
+<li>CASES</li>
+<li>CODE</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>FILE</li>
+<li>FINAL</li>
+<li>INCREMENT</li>
+<li>INIT</li>
+<li>THEN</li>
+</ul>
+</div>
+<div class="section" id="shell">
+<h4>13.5.2.90. Shell<a class="headerlink" href="#shell" title="Permalink to this headline">¶</a></h4>
+<p>A shell, made with ticks <cite>`</cite></p>
+<img alt="Shell's outgoing diagramm" src="_images/Shell.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_SHELL_QUOTE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONCAT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>EXPRESSION</li>
+<li>RIGHT</li>
+</ul>
+</div>
+<div class="section" id="sign">
+<h4>13.5.2.91. Sign<a class="headerlink" href="#sign" title="Permalink to this headline">¶</a></h4>
+<p>A Sign structure : when a <cite>-`or `+</cite> has been added before another expression. For example <cite>- ($a + $b)</cite>.</p>
+<img alt="Sign's outgoing diagramm" src="_images/Sign.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CLOSE_BRACKET</li>
+<li>T_CLOSE_PARENTHESIS</li>
+<li>T_CONSTANT_ENCAPSED_STRING</li>
+<li>T_LNUMBER</li>
+<li>T_STRING</li>
+<li>T_VARIABLE</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>SIGN</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>ELSE</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="static">
+<h4>13.5.2.92. Static<a class="headerlink" href="#static" title="Permalink to this headline">¶</a></h4>
+<p>The static keyword, when it is used to refer to the current class.</p>
+<img alt="Static's outgoing diagramm" src="_images/Static.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STATIC</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>STATIC</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>CLASS</li>
+<li>DEFINITION</li>
+<li>EXPRESSION</li>
+<li>NAME</li>
+</ul>
+</div>
+<div class="section" id="staticclass">
+<h4>13.5.2.93. Staticclass<a class="headerlink" href="#staticclass" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>::class</cite>, with the syntax of a static constant. For example, <cite>X::class</cite>.</p>
+<img alt="Staticclass's outgoing diagramm" src="_images/Staticclass.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOUBLE_COLON</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CLASS</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="staticconstant">
+<h4>13.5.2.94. Staticconstant<a class="headerlink" href="#staticconstant" title="Permalink to this headline">¶</a></h4>
+<p>A staticconstant : <cite>TheClass::TheConstant</cite></p>
+<img alt="Staticconstant's outgoing diagramm" src="_images/Staticconstant.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOUBLE_COLON</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CLASS</li>
+<li>CONSTANT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="staticdefinition">
+<h4>13.5.2.95. Staticdefinition<a class="headerlink" href="#staticdefinition" title="Permalink to this headline">¶</a></h4>
+<p>A static variable definition, in a method or function. This is not a static property. For example ; <cite>function foo() { static $s; }</cite>.</p>
+<img alt="Staticdefinition's outgoing diagramm" src="_images/Staticdefinition.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>DEFINITION</li>
+<li>GLOBAL</li>
+<li>STATIC</li>
+</ul>
+</div>
+<div class="section" id="staticmethod">
+<h4>13.5.2.96. Staticmethod<a class="headerlink" href="#staticmethod" title="Permalink to this headline">¶</a></h4>
+<p>A staticmethod name, when using trait and renaming a method. For example, <cite>trait t { use t2 { C::D as E; }}</cite>. <cite>C::D</cite> is a static method.</p>
+<img alt="Staticmethod's outgoing diagramm" src="_images/Staticmethod.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOUBLE_COLON</li>
+<li>T_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CLASS</li>
+<li>METHOD</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>SOURCE</li>
+</ul>
+</div>
+<div class="section" id="staticmethodcall">
+<h4>13.5.2.97. Staticmethodcall<a class="headerlink" href="#staticmethodcall" title="Permalink to this headline">¶</a></h4>
+<p>A static methodcall</p>
+<img alt="Staticmethodcall's outgoing diagramm" src="_images/Staticmethodcall.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOUBLE_COLON</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CLASS</li>
+<li>METHOD</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="staticproperty">
+<h4>13.5.2.98. Staticproperty<a class="headerlink" href="#staticproperty" title="Permalink to this headline">¶</a></h4>
+<p>A static property syntax. For example, <cite>A::$b</cite> or <cite>self::$d</cite>.</p>
+<img alt="Staticproperty's outgoing diagramm" src="_images/Staticproperty.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_DOUBLE_COLON</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CLASS</li>
+<li>MEMBER</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>POSTPLUSPLUS</li>
+<li>PREPLUSPLUS</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="staticpropertyname">
+<h4>13.5.2.99. Staticpropertyname<a class="headerlink" href="#staticpropertyname" title="Permalink to this headline">¶</a></h4>
+<p>The name of a static property : not a variable.</p>
+<img alt="Staticpropertyname's outgoing diagramm" src="_images/Staticpropertyname.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>DEFINITION</li>
+<li>MEMBER</li>
+<li>NAME</li>
+</ul>
+</div>
+<div class="section" id="string">
+<h4>13.5.2.100. String<a class="headerlink" href="#string" title="Permalink to this headline">¶</a></h4>
+<p>A string literal, with or without interpolation. For example, <cite>‘$x’</cite>, <cite>“a{$y}”</cite>, <cite>“a”</cite>.</p>
+<img alt="String's outgoing diagramm" src="_images/String.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>binaryString</li>
+<li>block</li>
+<li>boolean</li>
+<li>cbMethod</li>
+<li>code</li>
+<li>constant</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>delimiter</li>
+<li>encoding</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>intval</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CONSTANT_ENCAPSED_STRING</li>
+<li>T_ENCAPSED_AND_WHITESPACE</li>
+<li>T_QUOTE</li>
+<li>T_STRING</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONCAT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>NAME</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="switch">
+<h4>13.5.2.101. Switch<a class="headerlink" href="#switch" title="Permalink to this headline">¶</a></h4>
+<p>A switch structure.</p>
+<img alt="Switch's outgoing diagramm" src="_images/Switch.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_SWITCH</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CASES</li>
+<li>CONDITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="ternary">
+<h4>13.5.2.102. Ternary<a class="headerlink" href="#ternary" title="Permalink to this headline">¶</a></h4>
+<p>The ternary operator : <cite>$a ? $b : ‘c’</cite>.</p>
+<img alt="Ternary's outgoing diagramm" src="_images/Ternary.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_QUESTION</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONDITION</li>
+<li>ELSE</li>
+<li>THEN</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CODE</li>
+<li>CONDITION</li>
+<li>DEFAULT</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>INDEX</li>
+<li>NAME</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+</ul>
+</div>
+<div class="section" id="this">
+<h4>13.5.2.103. This<a class="headerlink" href="#this" title="Permalink to this headline">¶</a></h4>
+<p>The special variable <cite>$this</cite>.</p>
+<img alt="This's outgoing diagramm" src="_images/This.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>rank</li>
+<li>reference</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CAST</li>
+<li>CLASS</li>
+<li>CLONE</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>LEFT</li>
+<li>NEW</li>
+<li>OBJECT</li>
+<li>RETURN</li>
+<li>RIGHT</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="throw">
+<h4>13.5.2.104. Throw<a class="headerlink" href="#throw" title="Permalink to this headline">¶</a></h4>
+<p>A throw expression</p>
+<img alt="Throw's outgoing diagramm" src="_images/Throw.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_THROW</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>THROW</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="trait">
+<h4>13.5.2.105. Trait<a class="headerlink" href="#trait" title="Permalink to this headline">¶</a></h4>
+<p>A trait. For example : <cite>trait t { function foo() {} }</cite></p>
+<img alt="Trait's outgoing diagramm" src="_images/Trait.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_TRAIT</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+<li>MAGICMETHOD</li>
+<li>METHOD</li>
+<li>NAME</li>
+<li>PPP</li>
+<li>USE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="try">
+<h4>13.5.2.106. Try<a class="headerlink" href="#try" title="Permalink to this headline">¶</a></h4>
+<p>The Try part in a try/catch/finally expression.</p>
+<img alt="Try's outgoing diagramm" src="_images/Try.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_TRY</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>CATCH</li>
+<li>FINALLY</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="unset">
+<h4>13.5.2.107. Unset<a class="headerlink" href="#unset" title="Permalink to this headline">¶</a></h4>
+<p>A call to <cite>unset</cite></p>
+<img alt="Unset's outgoing diagramm" src="_images/Unset.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>args_max</li>
+<li>args_min</li>
+<li>code</li>
+<li>count</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_UNSET</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>ARGUMENT</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="usenamespace">
+<h4>13.5.2.108. Usenamespace<a class="headerlink" href="#usenamespace" title="Permalink to this headline">¶</a></h4>
+<p>Use expression within a namespace, and not in a class or trait.</p>
+<img alt="Usenamespace's outgoing diagramm" src="_images/Usenamespace.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_USE</li>
+<li>1</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>CONST</li>
+<li>FUNCTION</li>
+<li>USE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="usetrait">
+<h4>13.5.2.109. Usetrait<a class="headerlink" href="#usetrait" title="Permalink to this headline">¶</a></h4>
+<p>A <cite>use</cite> expression, when used to import a trait. For exapmle, <cite>class x { use t; }</cite></p>
+<img alt="Usetrait's outgoing diagramm" src="_images/Usetrait.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_USE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>USE</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>USE</li>
+</ul>
+</div>
+<div class="section" id="variable">
+<h4>13.5.2.110. Variable<a class="headerlink" href="#variable" title="Permalink to this headline">¶</a></h4>
+<p>A Variable, as a standalone container. For example : <cite>$a = 1</cite> or <cite>$b += 3</cite>. Variables in arrays are <cite>Variablearray</cite>, while variables in objects are <cite>Variableobject</cite>.</p>
+<img alt="Variable's outgoing diagramm" src="_images/Variable.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>enclosing</li>
+<li>fullcode</li>
+<li>fullnspath</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>noscream</li>
+<li>rank</li>
+<li>reference</li>
+<li>variadic</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_CURLY_OPEN</li>
+<li>T_DOLLAR</li>
+<li>T_DOLLAR_OPEN_CURLY_BRACES</li>
+<li>T_STRING_VARNAME</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>NAME</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>ARGUMENT</li>
+<li>CASE</li>
+<li>CAST</li>
+<li>CLASS</li>
+<li>CLONE</li>
+<li>CODE</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>DEFINITION</li>
+<li>ELSE</li>
+<li>EXPRESSION</li>
+<li>GLOBAL</li>
+<li>INDEX</li>
+<li>LEFT</li>
+<li>MEMBER</li>
+<li>NAME</li>
+<li>NEW</li>
+<li>NOT</li>
+<li>OBJECT</li>
+<li>POSTPLUSPLUS</li>
+<li>PREPLUSPLUS</li>
+<li>RETURN</li>
+<li>RETURNED</li>
+<li>RIGHT</li>
+<li>SIGN</li>
+<li>SOURCE</li>
+<li>THEN</li>
+<li>THROW</li>
+<li>VALUE</li>
+<li>VARIABLE</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="variablearray">
+<h4>13.5.2.111. Variablearray<a class="headerlink" href="#variablearray" title="Permalink to this headline">¶</a></h4>
+<p>A variable, when used to build an array syntax. For example, the <cite>$x</cite> in <cite>$x[0]</cite> or <cite>$x[]</cite>.</p>
+<img alt="Variablearray's outgoing diagramm" src="_images/Variablearray.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_STRING_VARNAME</li>
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>APPEND</li>
+<li>DEFINITION</li>
+<li>RETURNED</li>
+<li>VARIABLE</li>
+</ul>
+</div>
+<div class="section" id="variabledefinition">
+<h4>13.5.2.112. Variabledefinition<a class="headerlink" href="#variabledefinition" title="Permalink to this headline">¶</a></h4>
+<p>A placeholder to federate local variable definition in a method.</p>
+<img alt="Variabledefinition's outgoing diagramm" src="_images/Variabledefinition.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>DEFAULT</li>
+<li>DEFINITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>DEFINITION</li>
+<li>GLOBAL</li>
+<li>STATIC</li>
+</ul>
+</div>
+<div class="section" id="variableobject">
+<h4>13.5.2.113. Variableobject<a class="headerlink" href="#variableobject" title="Permalink to this headline">¶</a></h4>
+<p>A variable when used with the <cite>-&gt;</cite> operator.</p>
+<img alt="Variableobject's outgoing diagramm" src="_images/Variableobject.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>noscream</li>
+<li>reference</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_VARIABLE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>DEFINITION</li>
+<li>NAME</li>
+<li>OBJECT</li>
+<li>RETURNED</li>
+</ul>
+</div>
+<div class="section" id="void">
+<h4>13.5.2.114. Void<a class="headerlink" href="#void" title="Permalink to this headline">¶</a></h4>
+<p>A Void operation. It represents the absence of data. For example : <cite>foo();;</cite> : there is a Void as argument, and one between the semicolons.</p>
+<img alt="Void's outgoing diagramm" src="_images/Void.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>boolean</li>
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>intval</li>
+<li>isNull</li>
+<li>lccode</li>
+<li>line</li>
+<li>noDelimiter</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>v</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li></li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>BLOCK</li>
+<li>BREAK</li>
+<li>CAST</li>
+<li>CODE</li>
+<li>CONTINUE</li>
+<li>EXPRESSION</li>
+<li>NAME</li>
+<li>RETURN</li>
+<li>THEN</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="while">
+<h4>13.5.2.115. While<a class="headerlink" href="#while" title="Permalink to this headline">¶</a></h4>
+<p>A While structure, different from a Dowhile structure. For example : <cite>while($a &lt; 10) { $a++;}</cite></p>
+<img alt="While's outgoing diagramm" src="_images/While.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>alternative</li>
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_WHILE</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>BLOCK</li>
+<li>CONDITION</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>EXPRESSION</li>
+</ul>
+</div>
+<div class="section" id="yield">
+<h4>13.5.2.116. Yield<a class="headerlink" href="#yield" title="Permalink to this headline">¶</a></h4>
+<p>A <cite>yield</cite> expression</p>
+<img alt="Yield's outgoing diagramm" src="_images/Yield.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>constant</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_YIELD</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>YIELD</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>CONCAT</li>
+<li>CONDITION</li>
+<li>EXPRESSION</li>
+<li>LEFT</li>
+<li>RIGHT</li>
+<li>YIELD</li>
+</ul>
+</div>
+<div class="section" id="yieldfrom">
+<h4>13.5.2.117. Yieldfrom<a class="headerlink" href="#yieldfrom" title="Permalink to this headline">¶</a></h4>
+<p>A <cite>yield from</cite> expression</p>
+<img alt="Yieldfrom's outgoing diagramm" src="_images/Yieldfrom.png" />
+<p>List of available properties :</p>
+<ul class="simple">
+<li>code</li>
+<li>ctype1</li>
+<li>ctype1_size</li>
+<li>fullcode</li>
+<li>lccode</li>
+<li>line</li>
+<li>rank</li>
+</ul>
+<p>List of possible tokens :</p>
+<ul class="simple">
+<li>T_YIELD_FROM</li>
+</ul>
+<p>List of outgoing links :</p>
+<ul class="simple">
+<li>YIELD</li>
+</ul>
+<p>List of incoming links :</p>
+<ul class="simple">
+<li>ANALYZED</li>
+<li>ARGUMENT</li>
+<li>EXPRESSION</li>
+<li>LEFT</li>
+</ul>
+</div>
+</div>
+<div class="section" id="atom-properties">
+<h3>13.5.3. Atom properties<a class="headerlink" href="#atom-properties" title="Permalink to this headline">¶</a></h3>
+<p>Each atom in the database has a list of properties. They hold information about the current atom, that are not available through the network.</p>
+<p>To check those properties, there are some specific method calls.</p>
+<ul class="simple">
+<li>label : this is the type of atom.</li>
+<li>code : the value of the PHP token. For a variable, it is <cite>$name</cite>, while for a function, it is the function name <cite>foo</cite> instead of <cite>foo(1,2,3)</cite></li>
+<li>token : the name of the current PHP token. They use the same names as inside PHP, plus a couple of special values. They are strings, and not integers</li>
+<li>fullcode : this is a normalized representation of the code. It include the current atom, and its important dependencies</li>
+<li>rank : the position of the current atom in a list of similar element, like arguments in a functioncall. rank starts at 0.</li>
+<li>reference : is this atom is a reference, marked with ‘&amp;’</li>
+<li>variadic : is this atom is a variadic, marked with ‘…’</li>
+<li>noscream : is this atom is a variadic, marked with ‘&#64;’</li>
+<li>block : is this atom enclosed in curly braces (only available for Sequence)</li>
+<li>heredoc : is this a Heredoc (true), or a Nowdoc (false) (only available for Heredoc)</li>
+<li>delimiter : delimiter used for string : ‘, ” or nothing</li>
+<li>noDelimiter : the actual value of the string, without the delimiters</li>
+<li>count : count of elements. For example, count in a functioncall represents the number of arguments.</li>
+<li>fullnspath : the Full Qualified Name, as it was resolved at compile time.</li>
+<li>absolute : is this name absolute or not (only available for Nsname)</li>
+<li>alias : the alias name (only available for Usenamespace)</li>
+<li>origin : the origin for the use expression (only available for Usenamespace)</li>
+<li>encoding : Unicode block for the current string</li>
+<li>intval : the value of the atom, when cast as integer</li>
+<li>strval :  the value of the atom, when cast as string</li>
+<li>boolean :  the value of the atom, when cast as boolean</li>
+<li>args_max : maximum number of arguments (only available for Function, Method, Closure, Magicmethod)</li>
+<li>args_min : minimum number of arguments (only available for Function, Method, Closure, Magicmethod)</li>
+<li>enclosing : is the atom inside curly braces (only available for Variable inside a string)</li>
+<li>bracket : is the current array a short syntax or a traditional syntax (only available for Arrayliteral)</li>
+<li>flexible : is the Heredoc using the flexible syntax</li>
+<li>close_tag : has the Php atom the closing tag or not</li>
+<li>aliased : is the current tag aliased with a use expression, or not</li>
+<li>constant : is the current atom a constant value. atom are constant if they are build with constant values, like other constants or literals.</li>
+<li>root : is this the root node</li>
+<li>globalvar : the simple name of the variable, in the global syntax. For example, $GLOBALS[‘x’] is actually $x in the global space</li>
+<li>binaryString : the equivalent of strval, but after replacing the PHP escape sequence with their actual value. For example, “064” is turned into “4”. This is valid for PHP sequences, unicode codepoint, etc.</li>
+<li>visibility : the visibility for the property, constant or method. (only available for Const, Method, Magicmethod, Propertydefinition)</li>
+<li>final : is the current class or method final (only available for Class, Method and Magicmethod)</li>
+<li>abstract : is the current class or method abstract (only available for Class, Method and Magicmethod)</li>
+<li>static : is the current class, property or method static (only available for Class, Method, Property and Magicmethod)</li>
+</ul>
+</div>
+<div class="section" id="links">
+<h3>13.5.4. Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h3>
+<p>Links are the relation established between the atoms. You can move from one to the other by using links.</p>
+<p>Links are defined only with their label. A link between a ‘Not’ atom, and its operand is called ‘NOT’.</p>
+<p>There may be several links from an atom : for example, Addition has two outgoing links : ‘LEFT’ and ‘RIGHT’.</p>
+<p>Some links are always available, like ‘CONDITION’ and ‘THEN’ for Ifthen. ‘ELSE’ is not always available, depending on the code.</p>
+<p>Some links may be repeated as often as necessary. For example, ‘CONCAT’ is the building block for ‘Concatenation’ : there may be from 2 ‘CONCAT’ link to a lot more.</p>
+<p>Links are oriented : they always start from the mentioned atom, and go to the next. Leaving the current atom is the ‘OUT’ direction, while going back to the originating atom is ‘IN’.</p>
+<p>The destination atom type is rarely defined. PHP always provides a lot of freedom, and various expressions may be used at the same place. Consider calling a function : <cite>foo()</cite>, <cite>foo()</cite>, ‘$foo()`, <cite>foo()()</cite>, <cite>$foo[1]()</cite>. So, the target for ‘NAME’ from a ‘Functioncall’ atom, may be a ‘Name’, ‘Nsname’, ‘Variable’, ‘Functioncall’, ‘Array’. Usually, it is important to always check the landing atom, before accessing properties.</p>
+</div>
+<div class="section" id="navigating">
+<h3>13.5.5. Navigating<a class="headerlink" href="#navigating" title="Permalink to this headline">¶</a></h3>
+<p>The script is turned into a structure network of atoms, connected by links. To create an analysis, exakat will navigate those atoms and links. The navigation is based on a specific API.</p>
+<p>It starts with a call to atomIs() or analyzerIs() from $this, inside the analysis. Then, different steps are taken, and, in the end, if a final token is found, the query has found a result.</p>
+<div class="section" id="initial-steps">
+<h4>13.5.5.1. Initial steps<a class="headerlink" href="#initial-steps" title="Permalink to this headline">¶</a></h4>
+<p>There are three special steps that must be used as first call : atomIs(), atomFunctionIs() or analyzerIs(). Those two steps are optimized as first step, to take advantage of indexes in the databases. They also represents the classic starting point of any static analysis.</p>
+<p>Those two steps may also be used anywhere else in the query.</p>
+<ul class="simple">
+<li>atomIs($atomType) : checks that the current atom is of the type $atomType</li>
+<li>analyzerIs($analyzerName) : checks that the current atom is also the result of the analysis called $analyzerName.</li>
+<li>atomFunctionIs($functionName) : checks that the current atom is a ‘Functioncall’, with the name $functionName. This step can’t be used anywhere in the query but as the first step</li>
+</ul>
+<p>Here is an example of two queries with the initial step. The first one searches for an Exit command, described above as a call to <cite>exit</cite> or <cite>die</cite>. Then, it checks that the call has no argument, which only allows ‘exit’ to be selected.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$this-&gt;atomIs(&#39;Exit&#39;)
+     -&gt;hasNoOut(&#39;ARGUMENT&#39;);
+$this-&gt;prepareQuery();
+
+$this-&gt;analyzerIs(&#39;Functions/IsExtFunction&#39;)
+     -&gt;outIs(&#39;ARGUMENT&#39;)
+     -&gt;atomIs(&#39;Void&#39;);
+$this-&gt;prepareQuery();
+</pre></div>
+</div>
+<p>The second is based on the ‘Functions/IsExtFunction’, which mark functioncalls made to PHP extensions : as such, the function won’t have a definition in the PHP code, but in the binary. Then, the query follows the available ‘ARGUMENT’ links, and check if the argument is ‘Void’ or not. Here, the second call to atomIs() is not an initial step.</p>
+</div>
+<div class="section" id="all-steps">
+<h4>13.5.5.2. All steps<a class="headerlink" href="#all-steps" title="Permalink to this headline">¶</a></h4>
+<p>Here is the list of the 0 available steps :</p>
+</div>
+<div class="section" id="special-values">
+<h4>13.5.5.3. Special values<a class="headerlink" href="#special-values" title="Permalink to this headline">¶</a></h4>
+<p>There are a few special values to be used when calling a method’s query.</p>
+<ul class="simple">
+<li>Most of the arguments are expected as string. They often may also be replaced with an array of strings, and they will be used as a list of values for the same purpose. For example, <cite>atomIs(“String”)</cite> filters a “String”, while <cite>atomIs(array(“String”, “Integer”))</cite> filters a “String” or an “Integer”.</li>
+<li>With analyzerIs() and analyzerIsNot(), the special ‘self’ may be used to represents the current analysis.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="dictionaries">
+<h3>13.5.6. Dictionaries<a class="headerlink" href="#dictionaries" title="Permalink to this headline">¶</a></h3>
+<p>There are a collection of dictionaries available. Dictionaries hold list of definition, like PHP’s constant and functions, extension’s classes, or classes from unit test frameworks.</p>
+</div>
+</div>
+<div class="section" id="documentation">
+<h2>13.6. Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>Documentation is used to build automatic documentation for audit report : every time an analysis is run, its documentation is provided in the audits.</p>
+<p>Every Exakat analysis &lt;Folder/Name&gt; has a documentation, stored in the ‘human/en’ folder, as a .ini file.</p>
+<p>Keep the .ini files compiled, as PHP will refuse to load them otherwise. Then, Exakat will stop the processing : no documentation, no analysis.</p>
+<p>The documentation is in international English.Localisation will be handled in the future, as other folders inside ‘human’.</p>
+<p>Each analysis has a standard structure, with the following elements :</p>
+<ul class="simple">
+<li>name : the title used for the analysis. Keep it as short as possible, as it is used for short references in reports.</li>
+<li>description: A complete description of the analysis. The description should include a short introduction, a detailled explanation of the targe situations, a piece of code with good recommended code as a first illustration, and various bad situations as second example. The description should also include limitations from the analysis, if any. It should also include external links, including PHP.net documentation and tutorials, to help the reader learn more about the problem.</li>
+<li>exakatSince: This is the version where the analysis was created. For example : “1.4.0”</li>
+<li>modifications: This is an array of strings : each string is a short suggestions on what kind of refactoring may be done once the analysis has spotted the issue. Suggestions should be as precise as possible. Provide as many suggestions as possible, as the problem may often be solved from different angles.</li>
+</ul>
+</div>
+<div class="section" id="testing-your-analysis">
+<h2>13.7. Testing your analysis<a class="headerlink" href="#testing-your-analysis" title="Permalink to this headline">¶</a></h2>
+<p>Every analysis has its own set of unit test. They check that the analysis finds every pattern it intend to find, and it doesn’t find the other patterns. As such, it is important to test for expected and unwanted results.</p>
+<p>Expected results are patterns that you expect to find. But sometimes, analysis are too broad, and collect a number extra situations that are false positives. To avoid collecting them, and to document that they should not be found, unit tests have to be written.</p>
+<p>Analysis tests are located in the <cite>tests/analyzer/</cite> folder. In that folder, there is :</p>
+<ul class="simple">
+<li>Test folder : it contains the PHPUnit classes, and is automatically generated. Don’t open it.</li>
+<li>source : this  folder contains the PHP code source for the tests.</li>
+<li>exp : this folder contains the expected results of an analysis on the corresponding <cite>source</cite> code.</li>
+<li>random.php : this is a PHPUnit test suite that runs a random selection of unit tests</li>
+<li>alltests.php : this is a PHPUnit test suite that runs all the unit tests. It also checks some of the test Structures</li>
+<li>create_test.php : use this tool to create and add a new test to Exakat unit test list. It will create all the necessary files</li>
+</ul>
+<p>Unit are run with <a class="reference external" href="https://www.phpunit.de/">PHPUnit</a> version 7.0+. They were tested with PHPUnit 7.3.5 and are supposed to work with other minor versions.</p>
+</div>
+<div class="section" id="writing-test">
+<h2>13.8. Writing test<a class="headerlink" href="#writing-test" title="Permalink to this headline">¶</a></h2>
+<p>Tests must be written to match patterns and to not-match anti-patterns.</p>
+<p>For example, imagine that we are analyzing code to find useless additions. We want to match <cite>$a + 0</cite>, <cite>$a - 0</cite>, <cite>0 + $a</cite> but not <cite>0 - $a</cite>. The last one doesn’t have the same effect than the others : here the <cite>-</cite> sign has an important value. As such,  <cite>$a + 0</cite>, <cite>$a - 0</cite>, <cite>0 + $a</cite>  must go in the <cite>$expected</cite> array, and <cite>0 - $a</cite> must go in the <cite>$expected_not</cite> array.</p>
+<p>The unit test framework also supports code source as folders. There are situations where PHP refuses to compile a piece of code if all the code is in a single script, but accepts the same code when split over two or several files. For that, use the <cite>create_test.php</cite> with <cite>-d</cite> option, so as to create the folder with the test. <cite>source/Custom/MyFirst.0x.php</cite> will be created as a folder (including with the ‘.php’ extension). Otherwise, simply remove the <cite>source/Custom/MyFirst.0x.php</cite> file, and create a folder of the same name instead.</p>
+<p>PHP source for tests only have to compile without warning. There is no need for the PHP test script to run, nor to make any sense : this code will be audited, but not run.</p>
+<div class="section" id="pieces-of-advice">
+<h3>13.8.1. Pieces of advice<a class="headerlink" href="#pieces-of-advice" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>In the PHP source for the test, always try to give names that help understand where is the error being hunter, and what are clean situations. This may be done by giving explicit names to functions and variables.</li>
+<li>Try to keep the PHP source in a single file. When it is not possible, rely on a directory, with little files.</li>
+<li>When building a test, remove any name that link it to an existing code. Often, simply changing the name ‘$EXPLICIT_GLOBAL’ to ‘$X’ is enough.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="tooling">
+<h2>13.9. Tooling<a class="headerlink" href="#tooling" title="Permalink to this headline">¶</a></h2>
+<p>There are three scripts to simplify manipulations when managing an analyzer.</p>
+<p>They are located in the <cite>scripts</cite> folder. They must be called from Exakat’s code root, and not from within the script folder.</p>
+<ul class="simple">
+<li>createAnalyzer &lt;Folder/Name&gt;: this tool creates a new analyzer in the ‘Folder’ folder, with the name ‘Name’. At the time of creation, it creates also the documentation in ‘human/en/Folder/Name.ini’ file, and a first set of tests in the ‘tests/analyzer/’. Finally, it sets up the analyzer in the data/analyzers.sqlite folder.</li>
+<li>renameAnalyzer &lt;Folder1/Name1&gt; &lt;Folder2/Name2&gt;: this tool moves the analyzer called &lt;Folder1/Name1&gt; to &lt;Folder2/Name2&gt;. It moves the code in ‘library/Exakat/Analyzer/’, in the tests, and in the ‘human/en’ folder.</li>
+<li>removeAnalyzer &lt;Folder/Name&gt;: this tool removes the analyzer called &lt;Folder/Name&gt;. It removes the code in ‘library/Exakat/Analyzer/’, in the tests, and in the ‘human/en’ folder.</li>
+</ul>
+<p>The scripts are only available with the open source version. Exakat.phar doesn’t have support for those scripts.</p>
+</div>
+<div class="section" id="publishing-your-analysis">
+<h2>13.10. Publishing your analysis<a class="headerlink" href="#publishing-your-analysis" title="Permalink to this headline">¶</a></h2>
+<p>To be written.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Glossary.html" class="btn btn-neutral float-right" title="14. Glossary" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Configuration.html" class="btn btn-neutral float-left" title="12. Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2015-2020, Damien Seguy
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

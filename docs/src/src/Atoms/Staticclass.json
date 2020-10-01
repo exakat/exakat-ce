@@ -1,0 +1,7 @@
+{
+    "name": "Staticclass",
+    "description": "A call to `::class`, with the syntax of a static constant. For example, `X::class`.",
+    "url": [
+        ""
+    ]
+}

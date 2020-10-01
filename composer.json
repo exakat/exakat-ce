@@ -1,0 +1,47 @@
+{
+    "name": "exakat/exakat",
+    "type": "application",
+    "description": "The smart static analyzer for PHP",
+    "keywords": ["Exakat","PHP","audit", "static analysis", "code quality", "code review"],
+    "homepage": "https://www.exakat.io/",
+    "license": "AGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "The Exakat Team",
+            "email": "contact@exakat.io"
+        }
+    ],
+    "support": {
+        "docs": "https://exakat.readthedocs.org/",
+        "source": "https://github.com/exakat/exakat"
+    },
+	"bin": [
+		"exakat"
+	],
+    "scripts":
+    {
+        "post-install-cmd": [
+            "echo ' running post-install-cmd'",
+            "@php exakat doctor",
+            "@php exakat install"
+        ]
+    },
+    "require": {
+        "php": "~7.3",
+        "ext-curl": "*",
+        "ext-hash": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-sqlite3": "*",
+        "ext-tokenizer": "*",
+        "ext-xmlwriter": "*",
+        "guiguiboy/php-cli-progress-bar":"0.0.4",
+        "brightzone/gremlin-php": "3.1.1",
+        "symfony/yaml": "^5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "friendsofphp/php-cs-fixer": "*",
+        "php-parallel-lint/php-parallel-lint": "^1.2"
+    }
+}

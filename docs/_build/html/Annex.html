@@ -1,0 +1,578 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>18. Annex &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="17. List of contributors" href="Contributors.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Features.html">2. Exakat features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">3. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">4. Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">5. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">6. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">7. Exakat commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rulesets.html">8. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">9. Rules list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cases.html">10. Real Code Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reports.html">11. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">12. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Development.html">13. Custom analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Glossary.html">14. Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Definitions.html">15. Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribute.html">16. Ideas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributors.html">17. List of contributors</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">18. Annex</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#supported-rulesets">18.1. Supported Rulesets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-reports">18.2. Supported Reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-php-extensions">18.3. Supported PHP Extensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-frameworks">18.4. Supported Frameworks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#applications">18.5. Applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recognized-libraries">18.6. Recognized Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#new-analyzers">18.7. New analyzers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#php-error-messages">18.8. PHP Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#external-services">18.9. External services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#external-links">18.10. External links</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ruleset-configurations">18.11. Ruleset configurations</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>18. Annex</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Annex.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="annex">
+<h1>18. Annex<a class="headerlink" href="#annex" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Supported Rulesets</li>
+<li>Supported Reports</li>
+<li>Supported PHP Extensions</li>
+<li>Supported Frameworks</li>
+<li>Applications</li>
+<li>Recognized Libraries</li>
+<li>New analyzers</li>
+<li>External services</li>
+<li>PHP Error messages</li>
+</ul>
+<div class="section" id="supported-rulesets">
+<h2>18.1. Supported Rulesets<a class="headerlink" href="#supported-rulesets" title="Permalink to this headline">¶</a></h2>
+<p>Exakat groups analysis by rulesets. This way, analyzing ‘Security’ runs all possible analysis related to security. One analysis may belong to multiple rulesets.</p>
+<ul class="simple">
+<li>All</li>
+<li>Analyze</li>
+<li>Appinfo</li>
+<li>CompatibilityPHP74</li>
+<li>CompatibilityPHP80</li>
+<li>Dump</li>
+</ul>
+</div>
+<div class="section" id="supported-reports">
+<h2>18.2. Supported Reports<a class="headerlink" href="#supported-reports" title="Permalink to this headline">¶</a></h2>
+<p>Exakat produces various reports. Some are general, covering various aspects in a reference way; others focus on one aspect.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Ambassador</li>
+<li>Ambassadornomenu</li>
+<li>Drillinstructor</li>
+<li>Top10</li>
+<li>Text</li>
+<li>Xml</li>
+<li>Uml</li>
+<li>Yaml</li>
+<li>Plantuml</li>
+<li>None</li>
+<li>Simplehtml</li>
+<li>Owasp</li>
+<li>Perfile</li>
+<li>Beautycanon</li>
+<li>Phpconfiguration</li>
+<li>Phpcompilation</li>
+<li>Favorites</li>
+<li>Manual</li>
+<li>Inventories</li>
+<li>Clustergrammer</li>
+<li>Filedependencies</li>
+<li>Filedependencieshtml</li>
+<li>Classdependencies</li>
+<li>Stubs</li>
+<li>StubsJson</li>
+<li>Radwellcode</li>
+<li>Grade</li>
+<li>Weekly</li>
+<li>Scrutinizer</li>
+<li>Codesniffer</li>
+<li>Phpcsfixer</li>
+<li>Facetedjson</li>
+<li>Json</li>
+<li>Onepagejson</li>
+<li>Marmelab</li>
+<li>Simpletable</li>
+<li>Exakatyaml</li>
+<li>Codeflower</li>
+<li>Dependencywheel</li>
+<li>Phpcity</li>
+<li>Sarb</li>
+<li>Exakatvendors</li>
+<li>Topology</li>
+<li>Migration73</li>
+<li>Migration74</li>
+<li>Migration80</li>
+<li>Meters</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="supported-php-extensions">
+<h2>18.3. Supported PHP Extensions<a class="headerlink" href="#supported-php-extensions" title="Permalink to this headline">¶</a></h2>
+<p>PHP extensions are used to check for structures usage (classes, interfaces, etc.), to identify dependencies and directives.</p>
+<p>PHP extensions are described with the list of structures they define : functions, classes, constants, traits, variables, interfaces, namespaces, and directives.</p>
+</div>
+<div class="section" id="supported-frameworks">
+<h2>18.4. Supported Frameworks<a class="headerlink" href="#supported-frameworks" title="Permalink to this headline">¶</a></h2>
+<p>Frameworks, components and libraries are supported via Exakat extensions.</p>
+<p>List of extensions : there are 10 extensions</p>
+<ul class="simple">
+<li><span class="xref std std-ref">Cakephp</span></li>
+<li><span class="xref std std-ref">Drupal</span></li>
+<li><span class="xref std std-ref">Laravel</span></li>
+<li><span class="xref std std-ref">Pmb</span></li>
+<li><span class="xref std std-ref">Prestashop</span></li>
+<li><span class="xref std std-ref">Shopware</span></li>
+<li><span class="xref std std-ref">Slim</span></li>
+<li><span class="xref std std-ref">Symfony</span></li>
+<li><span class="xref std std-ref">Wordpress</span></li>
+<li><span class="xref std std-ref">ZendF</span></li>
+</ul>
+</div>
+<div class="section" id="applications">
+<h2>18.5. Applications<a class="headerlink" href="#applications" title="Permalink to this headline">¶</a></h2>
+<p>A number of applications were scanned in order to find real life examples of patterns. They are listed here :</p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.open-emr.org/">OpenEMR</a></li>
+<li><a class="reference external" href="https://thelia.net/">Thelia</a></li>
+</ul>
+</div>
+<div class="section" id="recognized-libraries">
+<h2>18.6. Recognized Libraries<a class="headerlink" href="#recognized-libraries" title="Permalink to this headline">¶</a></h2>
+<p>Libraries that are popular, large and often included in repositories are identified early in the analysis process, and ignored. This prevents Exakat to analysis some code foreign to the current repository : it prevents false positives from this code, and make the analysis much lighter. The whole process is entirely automatic.</p>
+<p>Those libraries, or even some of the, may be included again in the analysis by commenting the ignored_dir[] line, in the projects/&lt;project&gt;/config.ini file.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://adodb.org/dokuwiki/doku.php/">ADOdb</a></li>
+<li><a class="reference external" href="http://atoum.org/">atoum</a></li>
+<li><a class="reference external" href="https://github.com/eventio/bbq">BBQ</a></li>
+<li><a class="reference external" href="https://cakephp.org/">CakePHP</a></li>
+<li><a class="reference external" href="http://apigen.juzna.cz/doc/ci-bonfire/Bonfire/class-CI_Xmlrpc.html">CI xmlRPC</a></li>
+<li><a class="reference external" href="https://pear.php.net/reference/PhpDocumentor-latest/li_Cpdf.html">CPDF</a></li>
+<li><a class="reference external" href="https://codeception.com/">Codeception</a></li>
+<li><a class="reference external" href="https://github.com/dompdf/dompdf">DomPDF</a></li>
+<li><a class="reference external" href="http://www.fpdf.org/">FPDF</a></li>
+<li><a class="reference external" href="http://phpgacl.sourceforge.net/">phpGACL</a></li>
+<li><a class="reference external" href="http://pivotx.net/dev/docs/trunk/External/PHP-gettext/gettext_reader.html">gettext Reader</a></li>
+<li><a class="reference external" href="http://jpgraph.net/">jpGraph</a></li>
+<li><a class="reference external" href="http://sourceforge.net/projects/phphtml2pdf/">HTML2PDF</a></li>
+<li><a class="reference external" href="http://htmlpurifier.org/">HTML Purifier</a></li>
+<li>http_class</li>
+<li><a class="reference external" href="https://github.com/phpWhois/idna-convert">IDNA convert</a></li>
+<li><a class="reference external" href="http://leafo.net/lessphp/">lessc</a></li>
+<li><a class="reference external" href="http://magpierss.sourceforge.net/">magpieRSS</a></li>
+<li><a class="reference external" href="http://processwire.com/apigen/class-Markdown_Parser.html">MarkDown Parser</a></li>
+<li><a class="reference external" href="https://github.com/michelf/php-markdown">Markdown</a></li>
+<li><a class="reference external" href="http://www.mpdf1.com/mpdf/index.php">mpdf</a></li>
+<li>oauthToken</li>
+<li>passwordHash</li>
+<li><a class="reference external" href="http://www.pchart.net/">pChart</a></li>
+<li><a class="reference external" href="http://www.phpconcept.net/pclzip/">pclZip</a></li>
+<li><a class="reference external" href="http://propelorm.org/">Propel</a></li>
+<li><a class="reference external" href="https://phpexcel.codeplex.com/">phpExecl</a></li>
+<li><a class="reference external" href="https://github.com/PHPMailer/PHPMailer">phpMailer</a></li>
+<li><a class="reference external" href="http://www.phpspec.net/en/latest/">PHPSpec</a></li>
+<li><a class="reference external" href="https://www.phpunit.de/">PHPUnit</a></li>
+<li><a class="reference external" href="http://phpqrcode.sourceforge.net/">qrCode</a></li>
+<li><a class="reference external" href="https://pear.php.net/package/Services_JSON">Services_JSON</a></li>
+<li><a class="reference external" href="https://github.com/fabpot-graveyard/yaml/blob/master/lib/sfYaml.php">sfYaml</a></li>
+<li><a class="reference external" href="http://simplepie.org/">SimplePie</a></li>
+<li><a class="reference external" href="https://github.com/simpletest/simpletest">SimpleTest</a></li>
+<li><a class="reference external" href="http://swiftmailer.org/">swift</a></li>
+<li><a class="reference external" href="http://www.smarty.net/">Smarty</a></li>
+<li><a class="reference external" href="https://symfony.com/doc/current/testing.html">Symfony Unit Test</a></li>
+<li><a class="reference external" href="http://www.tcpdf.org/">tcpdf</a></li>
+<li><a class="reference external" href="https://pear.php.net/package/Text_Diff">text_diff</a></li>
+<li><a class="reference external" href="https://pear.php.net/package/Text_Highlighter/">text highlighter</a></li>
+<li><a class="reference external" href="http://www.fpdf.org/en/script/script92.php">tfpdf</a></li>
+<li><a class="reference external" href="https://github.com/TYPO3/testing-framework">Typo3TestingFramework</a></li>
+<li>UTF8</li>
+<li><a class="reference external" href="https://github.com/Xajax/Xajax">Xajax</a></li>
+<li><a class="reference external" href="http://www.yiiframework.com/">Yii</a></li>
+<li><a class="reference external" href="http://framework.zend.com/">Zend Framework</a></li>
+</ul>
+</div>
+<div class="section" id="new-analyzers">
+<h2>18.7. New analyzers<a class="headerlink" href="#new-analyzers" title="Permalink to this headline">¶</a></h2>
+<p>List of analyzers, by version of introduction, newest to oldest. In parenthesis, the first element is the analyzer name, used with ‘analyze -P’ command, and the seconds, if any, are the ruleset, used with the -T option. Rulesets are separated by commas, as the same analysis may be used in several rulesets.</p>
+<ul class="simple">
+<li>0.8.4<ul>
+<li>Adding Zero (Structures/AddZero)</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="php-error-messages">
+<h2>18.8. PHP Error messages<a class="headerlink" href="#php-error-messages" title="Permalink to this headline">¶</a></h2>
+<p>Exakat helps reduce the amount of error and warning that code is producing by reporting pattern that are likely to emit errors.</p>
+<p>0 PHP error message detailled :</p>
+<ul class="simple">
+<li></li>
+</ul>
+</div>
+<div class="section" id="external-services">
+<h2>18.9. External services<a class="headerlink" href="#external-services" title="Permalink to this headline">¶</a></h2>
+<p>List of external services whose configuration files has been commited in the code.</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.apache.org/">Apache</a> - .htaccess, htaccess.txt</li>
+<li><a class="reference external" href="http://www.apple.com/">Apple</a> - .DS_Store</li>
+<li><a class="reference external" href="http://www.appveyor.com/">appveyor</a> - appveyor.yml, .appveyor.yml</li>
+<li><a class="reference external" href="https://ant.apache.org/">ant</a> - build.xml</li>
+<li><a class="reference external" href="http://apigen.github.io/ApiGen/">apigen</a> - apigen.yml, apigen.neon</li>
+<li><a class="reference external" href="https://www.archunit.org/">arcunit</a> - .arcunit</li>
+<li><a class="reference external" href="http://laravel.com/docs/5.1/artisan">artisan</a> - artisan</li>
+<li><a class="reference external" href="http://atoum.org/">atoum</a> - .bootstrap.atoum.php, .atoum.php, .atoum.bootstrap.php</li>
+<li><a class="reference external" href="https://secure.phabricator.com/book/phabricator/article/arcanist_lint/">arcanist</a> - .arclint, .arcconfig</li>
+<li><a class="reference external" href="http://bazaar.canonical.com/en/">bazaar</a> - .bzr</li>
+<li><a class="reference external" href="https://babeljs.io/">babeljs</a> - .babel.rc, .babel.js, .babelrc</li>
+<li><a class="reference external" href="http://docs.behat.org/en/v2.5/">behat</a> - behat.yml.dist, behat.yml</li>
+<li><a class="reference external" href="https://github.com/box-project/box2">box2</a> - box.json, box.json.dist</li>
+<li><a class="reference external" href="http://bower.io/">bower</a> - bower.json, .bowerrc</li>
+<li><a class="reference external" href="https://circleci.com/">circleCI</a> - circle.yml, .circleci</li>
+<li><a class="reference external" href="http://www.codacy.com/">codacy</a> - .codacy.json</li>
+<li><a class="reference external" href="https://codeception.com/">codeception</a> - codeception.yml, codeception.dist.yml</li>
+<li><a class="reference external" href="https://codecov.io/">codecov</a> - .codecov.yml, codecov.yml</li>
+<li><a class="reference external" href="http://www.codeclimate.com/">codeclimate</a> - .codeclimate.yml</li>
+<li><a class="reference external" href="https://getcomposer.org/">composer</a> - composer.json, composer.lock, vendor</li>
+<li><a class="reference external" href="http://couscous.io/">couscous</a> - couscous.yml</li>
+<li><a class="reference external" href="https://github.com/squizlabs/PHP_CodeSniffer">Code Sniffer</a> - .php_cs, .php_cs.dist, .phpcs.xml, php_cs.dist, phpcs.xml, phpcs.xml.dist</li>
+<li><a class="reference external" href="https://coveralls.zendesk.com/">coveralls</a> - .coveralls.yml</li>
+<li><a class="reference external" href="https://crowdin.com/">crowdin</a> - crowdin.yml</li>
+<li><a class="reference external" href="http://savannah.nongnu.org/projects/cvs">cvs</a> - CVS</li>
+<li><a class="reference external" href="http://www.docker.com/">docker</a> - .dockerignore, .docker, docker-compose.yml, Dockerfile</li>
+<li><a class="reference external" href="https://symfony.com/doc/current/components/dotenv.htmls">dotenv</a> - .env.dist, .env, .env.example</li>
+<li><a class="reference external" href="http://docs.drone.io/">drone</a> - .dockerignore, .docker</li>
+<li><a class="reference external" href="https://www.drupal.org/project/drupalci">drupalci</a> - drupalci.yml</li>
+<li><a class="reference external" href="https://www.drupal.org/project/drupalci">drush</a> - drush.services.yml</li>
+<li><a class="reference external" href="https://editorconfig.org/">editorconfig</a> - .editorconfig</li>
+<li><a class="reference external" href="http://eslint.org/">eslint</a> - .eslintrc, .eslintignore, eslintrc.js, .eslintrc.js, .eslintrc.json</li>
+<li><a class="reference external" href="https://www.exakat.io/">Exakat</a> - .exakat.yaml, .exakat.yml, .exakat.ini</li>
+<li><a class="reference external" href="https://flintci.io/">flintci</a> - .flintci.yml</li>
+<li><a class="reference external" href="https://git-scm.com/">git</a> - .git, .gitignore, .gitattributes, .gitmodules, .mailmap, .githooks</li>
+<li><a class="reference external" href="https://www.github.com/">github</a> - .github</li>
+<li><a class="reference external" href="https://www.gitlab.com/">gitlab</a> - .gitlab-ci.yml</li>
+<li><a class="reference external" href="http://gulpjs.com/">gulpfile</a> - gulpfile.js</li>
+<li><a class="reference external" href="https://github.com/phpro/grumphp">grumphp</a> - grumphp.yml.dist, grumphp.yml</li>
+<li><a class="reference external" href="https://github.com/gushphp/gush">gush</a> - .gush.yml</li>
+<li><a class="reference external" href="https://gruntjs.com/">gruntjs</a> - Gruntfile.js</li>
+<li><a class="reference external" href="https://github.com/humbug/box.git">humbug</a> - humbug.json.dist, humbug.json</li>
+<li><a class="reference external" href="https://infection.github.io/">infection</a> - infection.yml, .infection.yml, infection.json.dist</li>
+<li><a class="reference external" href="https://insight.sensiolabs.com/">insight</a> - .sensiolabs.yml</li>
+<li><a class="reference external" href="https://www.jetbrains.com/phpstorm/">jetbrains</a> - .idea</li>
+<li><a class="reference external" href="http://jshint.com/">jshint</a> - .jshintrc, .jshintignore</li>
+<li><a class="reference external" href="https://www.mercurial-scm.org/">mercurial</a> - .hg, .hgtags, .hgignore, .hgeol</li>
+<li><a class="reference external" href="http://www.mkdocs.org">mkdocs</a> - mkdocs.yml</li>
+<li><a class="reference external" href="https://www.npmjs.com/">npm</a> - package.json, .npmignore, .npmrc, package-lock.json</li>
+<li><a class="reference external" href="https://www.openshift.com/">openshift</a> - .openshift</li>
+<li><a class="reference external" href="https://github.com/etsy/phan">phan</a> - .phan</li>
+<li><a class="reference external" href="https://github.com/cbednarski/pharcc">pharcc</a> - .pharcc.yml</li>
+<li><a class="reference external" href="https://phalconphp.com/">phalcon</a> - .phalcon</li>
+<li><a class="reference external" href="https://github.com/phpbench/phpbench">phpbench</a> - phpbench.json</li>
+<li><a class="reference external" href="https://www.phptesting.org/">phpci</a> - phpci.yml</li>
+<li><a class="reference external" href="https://www.phpdoc.org/">Phpdocumentor</a> - .phpdoc.xml, phpdoc.dist.xml</li>
+<li><a class="reference external" href="https://github.com/theseer/phpdox">phpdox</a> - phpdox.xml.dist, phpdox.xml</li>
+<li><a class="reference external" href="https://phinx.org/">phinx</a> - phinx.yml</li>
+<li><a class="reference external" href="https://github.com/mmoreram/php-formatter">phpformatter</a> - .formatter.yml</li>
+<li><a class="reference external" href="http://www.phpmetrics.org/">phpmetrics</a> - .phpmetrics.yml.dist</li>
+<li><a class="reference external" href="https://github.com/ovr/phpsa">phpsa</a> - .phpsa.yml</li>
+<li><a class="reference external" href="http://www.phpspec.net/en/latest/">phpspec</a> - phpspec.yml, .phpspec, phpspec.yml.dist</li>
+<li><a class="reference external" href="https://github.com/phpstan">phpstan</a> - phpstan.neon, .phpstan.neon, phpstan.neon.dist</li>
+<li><a class="reference external" href="https://github.com/jubianchi/phpswitch">phpswitch</a> - .phpswitch.yml</li>
+<li><a class="reference external" href="https://www.phpunit.de/">PHPUnit</a> - phpunit.xml.dist, phpunit.xml</li>
+<li><a class="reference external" href="https://prettier.io/">prettier</a> - .prettierrc, .prettierignore</li>
+<li><a class="reference external" href="https://getpsalm.org/">psalm</a> - psalm.xml</li>
+<li><a class="reference external" href="https://puppet.com/">puppet</a> - .puppet</li>
+<li><a class="reference external" href="https://github.com/liip/RMT">rmt</a> - .rmt.yml</li>
+<li><a class="reference external" href="https://robo.li/">robo</a> - RoboFile.php</li>
+<li><a class="reference external" href="https://scrutinizer-ci.com/">scrutinizer</a> - .scrutinizer.yml</li>
+<li><a class="reference external" href="http://semver.org/">semantic versioning</a> - .semver</li>
+<li><a class="reference external" href="https://www.spip.net/">SPIP</a> - paquet.xml</li>
+<li><a class="reference external" href="https://stickler-ci.com/docs">stickler</a> - .stickler.yml</li>
+<li><a class="reference external" href="https://datasift.github.io/storyplayer/">storyplayer</a> - storyplayer.json.dist</li>
+<li><a class="reference external" href="https://styleci.io/">styleci</a> - .styleci.yml</li>
+<li><a class="reference external" href="https://stylelint.io/">stylelint</a> - .stylelintrc</li>
+<li><a class="reference external" href="http://www.sublimelinter.com/en/latest/">sublimelinter</a> - .csslintrc</li>
+<li><a class="reference external" href="https://subversion.apache.org/">svn</a> - svn.revision, .svn, .svnignore</li>
+<li><a class="reference external" href="https://www.transifex.com/">transifex</a> - .tx</li>
+<li><a class="reference external" href="http://www.robotstxt.org/">Robots.txt</a> - robots.txt</li>
+<li><a class="reference external" href="https://travis-ci.org/">travis</a> - .travis.yml, .env.travis, .travis, .travis.php.ini, .travis.coverage.sh, .travis.ini</li>
+<li><a class="reference external" href="https://var.ci/">varci</a> - .varci, .varci.yml</li>
+<li><a class="reference external" href="https://www.vagrantup.com/">Vagrant</a> - Vagrantfile</li>
+<li><a class="reference external" href="https://code.visualstudio.com/">visualstudio</a> - .vscode</li>
+<li><a class="reference external" href="https://webpack.js.org/">webpack</a> - webpack.mix.js, webpack.config.js</li>
+<li><a class="reference external" href="https://yarnpkg.com/lang/en/">yarn</a> - yarn.lock</li>
+<li><a class="reference external" href="https://framework.zend.com/">Zend_Tool</a> - zfproject.xml</li>
+</ul>
+</div>
+<div class="section" id="external-links">
+<h2>18.10. External links<a class="headerlink" href="#external-links" title="Permalink to this headline">¶</a></h2>
+<p>List of external links mentionned in this documentation.</p>
+<ul class="simple">
+<li><cite>.exakat.ini</cite> or <cite>.exakat.yaml</cite> file. See <a class="reference external" href="https://www.exakat.io/add-exakat-to-your-ci-pipeline/">Add Exakat To Your CI Pipeline</a></li>
+<li><cite>.phar</cite> from the exakat.io website : <a class="reference external" href="http://www.exakat.io/versions/">www.exakat.io</a></li>
+<li><a class="reference external" href="https://www.7-zip.org/7z.html">7z</a></li>
+<li><a class="reference external" href="https://bazaar.canonical.com/en/">Bazaar</a></li>
+<li><a class="reference external" href="https://askubuntu.com/questions/421663/cat-write-error-broken-pipe">cat: write error: Broken pipe</a></li>
+<li><a class="reference external" href="https://getcomposer.org/">composer</a></li>
+<li><a class="reference external" href="http://www.php.net/curl">curl</a></li>
+<li><a class="reference external" href="https://www.nongnu.org/cvs/">CVS</a></li>
+<li><a class="reference external" href="http://dist.exakat.io/">dist.exakat.io</a></li>
+<li><a class="reference external" href="http://www.docker.com/">Docker</a></li>
+<li><a class="reference external" href="https://hub.docker.com/r/exakat/exakat/">Docker image</a></li>
+<li><a class="reference external" href="https://www.dotdeb.org/instructions/">dotdeb instruction</a></li>
+<li><a class="reference external" href="https://www.exakat.io/download-exakat/">download</a></li>
+<li><a class="reference external" href="http://www.exakat.io/">Exakat</a></li>
+<li><a class="reference external" href="https://www.exakat.io/exakat-cloud/">Exakat cloud</a></li>
+<li><a class="reference external" href="https://www.exakat.io/get-php-expertise/">Exakat SAS</a></li>
+<li><a class="reference external" href="https://hub.docker.com/r/exakat/exakat/">exakat/exakat</a></li>
+<li><a class="reference external" href="https://git-scm.com/">Git</a></li>
+<li><a class="reference external" href="https://docs.github.com/en/actions">Github Action</a></li>
+<li><a class="reference external" href="https://github.com/exakat/exakat">Github.com/exakat/exakat</a></li>
+<li><a class="reference external" href="http://tinkerpop.apache.org/">Gremlin server</a></li>
+<li><a class="reference external" href="http://www.php.net/hash">hash</a></li>
+<li><a class="reference external" href="https://hub.docker.com/r/exakat/exakat-ga">https://hub.docker.com/r/exakat/exakat-ga</a></li>
+<li><a class="reference external" href="https://www.exakat.io/">https://www.exakat.io/</a></li>
+<li><a class="reference external" href="https://www.exakat.io/versions/index.php?file=latest">https://www.exakat.io/versionss/index.php?file=latest</a></li>
+<li><a class="reference external" href="https://www.mercurial-scm.org/">mercurial</a></li>
+<li><a class="reference external" href="https://www.php.net/">PHP</a></li>
+<li><a class="reference external" href="https://www.phpunit.de/">PHPUnit</a></li>
+<li><a class="reference external" href="http://plantuml.com/">plantuml</a></li>
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/RAR_(file_format)">rar</a></li>
+<li><a class="reference external" href="http://www.php.net/sqlite3">sqlite3</a></li>
+<li><a class="reference external" href="https://docs.oasis-open.org/sarif/sarif/v2.0/sarif-v2.0.html">Static Analysis Results Interchange Format (SARIF)</a></li>
+<li><a class="reference external" href="https://subversion.apache.org/">Svn</a></li>
+<li><a class="reference external" href="https://hub.docker.com/r/tetraweb/php/">tetraweb/php</a></li>
+<li><a class="reference external" href="https://launchpad.net/~ondrej/+archive/ubuntu/php">The main PPA for PHP (7.4, 7.3, 7.2, 7.1, 7.0, 5.6)</a></li>
+<li><a class="reference external" href="http://www.php.net/tokenizer">tokenizer</a></li>
+<li><a class="reference external" href="https://github.com/exakat/exakat-vagrant">Vagrant file</a></li>
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/Zip_(file_format)">zip</a></li>
+</ul>
+</div>
+<div class="section" id="ruleset-configurations">
+<h2>18.11. Ruleset configurations<a class="headerlink" href="#ruleset-configurations" title="Permalink to this headline">¶</a></h2>
+<p>INI configuration for built-in rulesets. Copy them in config/themes.ini, and make your owns.</p>
+<p>1 rulesets detailled here :</p>
+<ul class="simple">
+<li><a class="reference external" href="ruleset_ini_analyze">Analyze</a></li>
+</ul>
+<p id="ruleset-ini-analyze">Analyze
+This ruleset centralizes a large number of classic trap and pitfalls when writing PHP.
+_______</p>
+<div class="line-block">
+<div class="line">[Analyze]</div>
+<div class="line-block">
+<div class="line">analyzer[] = “Structures/AddZero”;|</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="Contributors.html" class="btn btn-neutral float-left" title="17. List of contributors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2015-2020, Damien Seguy
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

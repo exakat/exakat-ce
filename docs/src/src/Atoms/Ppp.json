@@ -1,0 +1,7 @@
+{
+    "name": "Ppp",
+    "description": "A properties declaration, in a class or a trait. For example : `private $x, $y = 2;`",
+    "url": [
+        ""
+    ]
+}

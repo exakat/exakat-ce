@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>6. Frequently Asked Questions &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="7. Exakat commands" href="Commands.html" />
+    <link rel="prev" title="5. Tutorials" href="Tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Features.html">2. Exakat features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">3. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">4. Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">5. Tutorials</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Frequently Asked Questions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">6.1. Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#i-need-special-command-to-get-my-code">6.2. I need special command to get my code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-i-checkout-that-branch">6.3. Can I checkout that branch?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-i-clone-with-my-ssh-keys">6.4. Can I clone with my ssh keys?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#after-init-my-project-has-no-code">6.5. After init, my project has no code!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-project-is-too-big">6.6. The project is too big</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#java-out-of-memory-error">6.7. Java Out Of Memory Error</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-can-i-run-a-very-large-project">6.8. How can I run a very large project?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#does-exakat-runs-on-java-8">6.9. Does exakat runs on Java 8?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#where-can-i-find-the-report">6.10. Where can I find the report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-i-run-exakat-on-local-code">6.11. Can I run exakat on local code?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-i-ignore-a-dir-or-a-file">6.12. Can I ignore a dir or a file?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-i-audit-only-one-folder-in-vendor">6.13. <cite>Can I audit only one folder in vendor?</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-i-run-exakat-with-php-5">6.14. Can I run Exakat with PHP 5?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#i-get-the-error-the-executable-ansible-playbook-vagrant-is-trying-to-run-was-not-found">6.15. I get the error ‘The executable ‘ansible-playbook’ Vagrant is trying to run was not found’</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-i-run-exakat-on-windows">6.16. Can I run exakat on Windows?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#does-exakat-send-my-code-to-a-central-server">6.17. Does exakat send my code to a central server?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cat-write-error-broken-pipe-is-it-bad">6.18. “cat: write error: Broken pipe” : is it bad?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">7. Exakat commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rulesets.html">8. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">9. Rules list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cases.html">10. Real Code Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reports.html">11. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">12. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Development.html">13. Custom analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Glossary.html">14. Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Definitions.html">15. Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribute.html">16. Ideas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributors.html">17. List of contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Annex.html">18. Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>6. Frequently Asked Questions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/FAQ.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="frequently-asked-questions">
+<span id="faq"></span><h1>6. Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>6.1. Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#i-need-special-command-to-get-my-code">I need special command to get my code</a></li>
+<li><a class="reference internal" href="#can-i-checkout-that-branch">Can I checkout that branch?</a></li>
+<li><a class="reference internal" href="#can-i-clone-with-my-ssh-keys">Can I clone with my ssh keys?</a></li>
+<li><a class="reference internal" href="#after-init-my-project-has-no-code">After init, my project has no code!</a></li>
+<li><a class="reference internal" href="#the-project-is-too-big">The project is too big</a></li>
+<li><a class="reference internal" href="#java-out-of-memory-error">Java Out Of Memory Error</a></li>
+<li><a class="reference internal" href="#how-can-i-run-a-very-large-project">How can I run a very large project?</a></li>
+<li><a class="reference internal" href="#does-exakat-runs-on-java-8">Does exakat runs on Java 8?</a></li>
+<li><a class="reference internal" href="#where-can-i-find-the-report">Where can I find the report</a></li>
+<li><a class="reference internal" href="#can-i-run-exakat-on-local-code">Can I run exakat on local code?</a></li>
+<li><a class="reference internal" href="#can-i-ignore-a-dir-or-a-file">Can I ignore a dir or a file?</a></li>
+<li><a class="reference internal" href="#can-i-audit-only-one-folder-in-vendor">Can I audit only one folder in vendor?</a></li>
+<li><a class="reference internal" href="#can-i-run-exakat-with-php-5">Can I run Exakat with PHP 5?</a></li>
+<li><a class="reference internal" href="#i-get-the-error-the-executable-ansible-playbook-vagrant-is-trying-to-run-was-not-found">I get the error ‘The executable ‘ansible-playbook’ Vagrant is trying to run was not found’</a></li>
+<li><a class="reference internal" href="#can-i-run-exakat-on-windows">Can I run exakat on Windows?</a></li>
+<li><a class="reference internal" href="#does-exakat-send-my-code-to-a-central-server">Does exakat send my code to a central server?</a></li>
+<li><a class="reference internal" href="#cat-write-error-broken-pipe-is-it-bad">“cat: write error: Broken pipe” : is it bad?</a></li>
+</ul>
+</div>
+<div class="section" id="i-need-special-command-to-get-my-code">
+<h2>6.2. <a class="reference internal" href="#i-need-special-command-to-get-my-code">I need special command to get my code</a><a class="headerlink" href="#i-need-special-command-to-get-my-code" title="Permalink to this headline">¶</a></h2>
+<p>If Exakat has no documented method to reach your code, you may use this process :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span>
+<span class="n">cd</span> <span class="o">./</span><span class="n">projects</span><span class="o">/&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span>
+<span class="n">mkdir</span> <span class="n">code</span>
+<span class="o">//</span> <span class="n">here</span><span class="p">,</span> <span class="n">do</span> <span class="n">whatever</span> <span class="n">it</span> <span class="n">takes</span> <span class="n">to</span> <span class="n">put</span> <span class="nb">all</span> <span class="n">your</span> <span class="n">code</span> <span class="ow">in</span> <span class="s1">&#39;code&#39;</span> <span class="n">folder</span>
+<span class="n">cd</span> <span class="o">-</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Send a message on Github.com/exakat/exakat to mention your specific method.</p>
+</div>
+<div class="section" id="can-i-checkout-that-branch">
+<h2>6.3. <a class="reference internal" href="#can-i-checkout-that-branch">Can I checkout that branch?</a><a class="headerlink" href="#can-i-checkout-that-branch" title="Permalink to this headline">¶</a></h2>
+<p>Currently (Version 0.12.2), there is no way to request a tag or a branche or a revision when cloning the code.</p>
+<p>The best way is to reach the ‘code’ folder, and make the change there. Unless with ‘init’ or ‘update’, exakat doesn’t make any change to the code.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">myProject</span> <span class="o">-</span><span class="n">R</span> <span class="n">url</span><span class="p">:</span><span class="o">//</span><span class="n">my</span><span class="o">/</span><span class="n">git</span><span class="o">/</span><span class="n">repository</span>
+<span class="n">cd</span> <span class="o">./</span><span class="n">projects</span><span class="o">/</span><span class="n">myProject</span><span class="o">/</span><span class="n">code</span>
+<span class="n">git</span> <span class="n">branch</span> <span class="n">notMasterBranch</span>
+<span class="n">cd</span> <span class="o">-</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">myProject</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="can-i-clone-with-my-ssh-keys">
+<h2>6.4. <a class="reference internal" href="#can-i-clone-with-my-ssh-keys">Can I clone with my ssh keys?</a><a class="headerlink" href="#can-i-clone-with-my-ssh-keys" title="Permalink to this headline">¶</a></h2>
+<p>When using git, or any vcs, the current shell user’s SSH keys may be used to access the repository. When using a remote installation, or a docker image, the keys won’t be accessible.</p>
+<p>The fallback solution is to init an empty project, clone the code from the Shell (with the keys), and then run project.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">myProject</span>
+<span class="n">cd</span> <span class="o">./</span><span class="n">projects</span><span class="o">/</span><span class="n">myProject</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">url</span><span class="p">:</span><span class="o">//</span><span class="n">myprivate</span><span class="o">/</span><span class="n">git</span><span class="o">/</span><span class="n">repository</span> <span class="n">code</span>
+<span class="n">cd</span> <span class="o">-</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">myProject</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="after-init-my-project-has-no-code">
+<h2>6.5. <a class="reference internal" href="#after-init-my-project-has-no-code">After init, my project has no code!</a><a class="headerlink" href="#after-init-my-project-has-no-code" title="Permalink to this headline">¶</a></h2>
+<p>Check in the projects/&lt;name&gt;/config.ini file : if values were provided, you’ll find them there.</p>
+<p>In case the code was not found during init, then do the following :</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd>cd projects/&lt;name&gt;/
+git clone <a class="reference external" href="ssh://project/URL">ssh://project/URL</a> code
+cd -
+php exakat.phar files -p &lt;name&gt;</dd>
+</dl>
+<p>If you’re using some other method than git, then just collect the code in a ‘code’ folder in the &lt;name&gt; project and run the ‘files’ command.</p>
+</div>
+<div class="section" id="the-project-is-too-big">
+<h2>6.6. <a class="reference internal" href="#the-project-is-too-big">The project is too big</a><a class="headerlink" href="#the-project-is-too-big" title="Permalink to this headline">¶</a></h2>
+<p>There is a soft limit in config/exakat.ini, called ‘token_limit’ that initially prevents analysis of projects over 1 million tokens. That’s roughly 125k LOC, more than most code source.</p>
+<p>If you need to run exakat on larger sources, you may change this value to make it as large as possible. Then, the physical capacities of the machine, specially RAM, will be the actual limit.</p>
+<p>It may be interesting to ‘ignore_dir[]’, from projects/&lt;name&gt;/config.ini.</p>
+</div>
+<div class="section" id="java-out-of-memory-error">
+<h2>6.7. <a class="reference internal" href="#java-out-of-memory-error">Java Out Of Memory Error</a><a class="headerlink" href="#java-out-of-memory-error" title="Permalink to this headline">¶</a></h2>
+<p>By default, java is allowed to run with 512mb of RAM. That may be too little for the code being studied.</p>
+<p>Set the environment variable $JAVA_OPTIONS to give larger quantities of RAM. For example : ‘export JAVA_OPTIONS=’-Xms1024m -Xmx6096m’; or ‘setenv JAVA_OPTIONS=’-Xms1024m -Xmx6096m’</p>
+<p>Xms is the memory allocation at start, and Xmx is the maximum allocation. With some experimentation, 6G handles the largest</p>
+</div>
+<div class="section" id="how-can-i-run-a-very-large-project">
+<h2>6.8. <a class="reference internal" href="#how-can-i-run-a-very-large-project">How can I run a very large project?</a><a class="headerlink" href="#how-can-i-run-a-very-large-project" title="Permalink to this headline">¶</a></h2>
+<p>Here are a few steps you can try when running exakat on a very large project.</p>
+<ul class="simple">
+<li>Update project/&lt;name&gt;/config.ini, and use ignore_dirs[] and include_dirs[] to exclude as much code as possible. Notably, frameworks, data in PHP files, tests, cache, translations, etc.</li>
+<li>Set environment variable $JAVA_OPTIONS to large quantities of RAM : JAVA_OPTIONS=’-Xms1024m -Xmx6096m’;</li>
+<li>Check that your installation is running with ‘gsneo4j’ and not ‘tinkergraph’, in config/exakat.ini.</li>
+</ul>
+</div>
+<div class="section" id="does-exakat-runs-on-java-8">
+<h2>6.9. <a class="reference internal" href="#does-exakat-runs-on-java-8">Does exakat runs on Java 8?</a><a class="headerlink" href="#does-exakat-runs-on-java-8" title="Permalink to this headline">¶</a></h2>
+<p>Exakat itself runs with PHP 7.0+. Exakat runs with a gremlin database : gremlin-server 3.2.x is supported, which runs on Java 8.</p>
+<p>Java 9 is experimental, and is being tested. Java 7 used to be working, but is not supported anymore : it may still work, though.</p>
+</div>
+<div class="section" id="where-can-i-find-the-report">
+<h2>6.10. <a class="reference internal" href="#where-can-i-find-the-report">Where can I find the report</a><a class="headerlink" href="#where-can-i-find-the-report" title="Permalink to this headline">¶</a></h2>
+<p>Reports are available after running at least the following commands :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">R</span> <span class="o">&lt;</span><span class="n">code</span> <span class="n">source</span> <span class="n">repo</span><span class="o">&gt;</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The default report is the HTML report, called ‘Ambassador’. You’ll find it in ./projects/&lt;your project name&gt;/report.</p>
+<p>Other reports, build with ‘report’ command, will also be saved there, with different names.</p>
+</div>
+<div class="section" id="can-i-run-exakat-on-local-code">
+<h2>6.11. <a class="reference internal" href="#can-i-run-exakat-on-local-code">Can I run exakat on local code?</a><a class="headerlink" href="#can-i-run-exakat-on-local-code" title="Permalink to this headline">¶</a></h2>
+<p>There are several ways to do that : use symbolic links, make a copy of the source.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">R</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">the</span><span class="o">/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">symlink</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">R</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">the</span><span class="o">/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">copy</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">R</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">the</span><span class="o">/</span><span class="n">code</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>Symlink will branch exakat directly into the code; -copy makes a copy of the code (this means the code will never be updated without manual intervention); git (or other vcs) may also be used with local repositories.</p>
+<p>Exakat do not modify any existing source code : it only access it for reading purpose, then works on a separated database. As a defensive security measure, we suggest that exakat should work on a read-only copy of the code.</p>
+</div>
+<div class="section" id="can-i-ignore-a-dir-or-a-file">
+<h2>6.12. <a class="reference internal" href="#can-i-ignore-a-dir-or-a-file">Can I ignore a dir or a file?</a><a class="headerlink" href="#can-i-ignore-a-dir-or-a-file" title="Permalink to this headline">¶</a></h2>
+<p>Yes. After initing a project, open the projects/&lt;project name&gt;/config.ini file, and update the ignore_dir line. For example, to ignore a behat test folder, and to ignore any file called ‘license’ :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ignore_dirs</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;/behat/&#39;</span><span class="p">;</span>
+<span class="n">ignore_dirs</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;license&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>You may also include files, by using the include_dir[] line. Including files is processed after ignoring them, so you may include files in folders that were previously ignored.</p>
+</div>
+<div class="section" id="can-i-audit-only-one-folder-in-vendor">
+<h2>6.13. <cite>Can I audit only one folder in vendor?</cite><a class="headerlink" href="#can-i-audit-only-one-folder-in-vendor" title="Permalink to this headline">¶</a></h2>
+<p>You can use ignore_dirs to exclude everything in the source tree, then use include_dirs to include specific folders.</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><p class="first"># exclude everything
+ignore_dirs[] = ‘/’;</p>
+<p class="last"># include intended folder
+include_dirs[] = ‘/vendor/exakat’;</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="can-i-run-exakat-with-php-5">
+<h2>6.14. <a class="reference internal" href="#can-i-run-exakat-with-php-5">Can I run Exakat with PHP 5?</a><a class="headerlink" href="#can-i-run-exakat-with-php-5" title="Permalink to this headline">¶</a></h2>
+<p>It is recommended to run exakat with PHP 7.0 and more recent. Older version are not so well tested, since they have reached their end of life.</p>
+<p>Note that you may test your code on PHP 5.x, while running Exakat on PHP 7.0. There are 2 distinct configuration options in Exakat. ‘php’ is the path to the PHP binary that runs Exakat : this one should be PHP 7.0+. ‘phpxx’ are the path to the PHP helpers, that are used to tokenized and lint the target PHP code. This is where PHP 5.x may be configured.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">;</span> <span class="n">where</span> <span class="ow">and</span> <span class="n">which</span> <span class="n">PHP</span> <span class="n">executable</span> <span class="n">are</span> <span class="n">available</span>
+<span class="n">php</span>   <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">php71</span>
+
+<span class="n">php52</span> <span class="o">=</span>
+<span class="n">php53</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">php53</span>
+<span class="n">php54</span> <span class="o">=</span>
+<span class="n">php55</span> <span class="o">=</span>
+<span class="n">php56</span> <span class="o">=</span>
+<span class="n">php70</span> <span class="o">=</span>
+<span class="n">php71</span> <span class="o">=</span>
+<span class="n">php72</span> <span class="o">=</span>
+<span class="n">php73</span> <span class="o">=</span>
+</pre></div>
+</div>
+<p>Above is an example of a exakat configuration file, where Exakat is run with PHP 7.1 and process code with PHP 5.3.</p>
+</div>
+<div class="section" id="i-get-the-error-the-executable-ansible-playbook-vagrant-is-trying-to-run-was-not-found">
+<h2>6.15. <a class="reference internal" href="#i-get-the-error-the-executable-ansible-playbook-vagrant-is-trying-to-run-was-not-found">I get the error ‘The executable ‘ansible-playbook’ Vagrant is trying to run was not found’</a><a class="headerlink" href="#i-get-the-error-the-executable-ansible-playbook-vagrant-is-trying-to-run-was-not-found" title="Permalink to this headline">¶</a></h2>
+<p>This error is displayed when the host machine doesn’t have Ansible installed. Install ansible, and try again to provision.</p>
+</div>
+<div class="section" id="can-i-run-exakat-on-windows">
+<h2>6.16. <a class="reference internal" href="#can-i-run-exakat-on-windows">Can I run exakat on Windows?</a><a class="headerlink" href="#can-i-run-exakat-on-windows" title="Permalink to this headline">¶</a></h2>
+<p>Currently, Windows is not supported, though it might be some day.</p>
+<p>Until then, you may run Exakat with Vagrant, or with Docker.</p>
+</div>
+<div class="section" id="does-exakat-send-my-code-to-a-central-server">
+<h2>6.17. <a class="reference internal" href="#does-exakat-send-my-code-to-a-central-server">Does exakat send my code to a central server?</a><a class="headerlink" href="#does-exakat-send-my-code-to-a-central-server" title="Permalink to this headline">¶</a></h2>
+<p>When run from the sources, Exakat has everything it needs to fulfill its mission. There is no central server that does the job, and requires the transmission of the code.</p>
+<p>When running an audit on the Saas service of Exakat, the code is processed on our servers.</p>
+</div>
+<div class="section" id="cat-write-error-broken-pipe-is-it-bad">
+<h2>6.18. <a class="reference internal" href="#cat-write-error-broken-pipe-is-it-bad">“cat: write error: Broken pipe” : is it bad?</a><a class="headerlink" href="#cat-write-error-broken-pipe-is-it-bad" title="Permalink to this headline">¶</a></h2>
+<p>Exakat currently runs some piped commands, with xargs so as to make some operations parallel. When the following command ends up before the reading all the data from the first command, such a warning is emitted.</p>
+<p>It has no impact on exakat’s processing of the code.</p>
+<p>See also <a class="reference external" href="https://askubuntu.com/questions/421663/cat-write-error-broken-pipe">cat: write error: Broken pipe</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Commands.html" class="btn btn-neutral float-right" title="7. Exakat commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Tutorial.html" class="btn btn-neutral float-left" title="5. Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2015-2020, Damien Seguy
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<?php
+
+try {
+    if (version_compare(PHP_VERSION, '7.2.0') < 0) {
+        die("Exakat requires PHP 7.2 or more recent to run. \n");
+    }
+    
+    register_shutdown_function(function () {
+        $error = error_get_last();
+        if(null !== $error)
+        {
+            if (substr($error['message'], 0, 14) === 'Allowed memory') {
+                print $error['message'];
+                if (ini_get('memory_limit') !== -1) {
+                    print "\nConsider raising your memory_limit in php.ini, even set it to -1.\n";
+                }
+            } elseif (substr($error['message'], 0, 22) === 'Maximum execution time') {
+                print $error['message'];
+            }
+        }
+    });
+
+    $isPhar = class_exists('\\Phar') && phar::running();
+
+    if(empty($isPhar)){
+        require __DIR__ . '/library/helpers.php';
+        require __DIR__ . '/library/Exakat/Autoload/Autoload.php';
+    } else {
+        require phar::running() . '/library/helpers.php';
+        require phar::running() . '/library/Exakat/Autoload/Autoload.php';
+    }
+
+    $autoload = new \Exakat\Autoload\Autoload();
+    $autoload->registerAutoload();
+
+    if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+        require __DIR__ . '/vendor/autoload.php';
+    }
+
+    $config = exakat('config');
+    
+    global $VERBOSE;
+    $VERBOSE = $config->verbose;
+
+    $exakat = new \Exakat\Exakat();
+    $exakat->execute();
+} catch (\Exception $e) {
+    if($isPhar === false){
+        print $e->getMessage();
+    } else {
+        print "\nError : " . $e->getMessage() . ' 
+on file ' . $e->getFile() . '
+on line ' . $e->getLine() . "\n\n";
+    
+    }
+}
+
+?>

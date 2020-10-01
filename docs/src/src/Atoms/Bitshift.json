@@ -1,0 +1,7 @@
+{
+    "name": "Bitshift",
+    "description": "A bit shift operation on integers, with << or >>",
+    "url": [
+        ""
+    ]
+}

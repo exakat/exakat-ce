@@ -1,0 +1,7 @@
+{
+    "name": "Inlinehtml",
+    "description": "Raw text, in the middle of a PHP script. For example : ``++$a; ?>RAW TEXT<?php ++$b; ``",
+    "url": [
+        ""
+    ]
+}
