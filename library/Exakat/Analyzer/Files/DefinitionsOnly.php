@@ -35,7 +35,7 @@ class DefinitionsOnly extends Analyzer {
                                               'Include',
                                               'Interface',
                                               'Usenamespace',
-                                              'Void',
+//                                              'Void',
                                               'Trait',
                                               'Usenamespace',
                                               );

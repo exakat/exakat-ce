@@ -40,6 +40,10 @@ class CreateDefaultValues extends Complete {
                             'Propertydefinition',
                             'Parametername',
                             ), self::WITHOUT_CONSTANTS)
+             ->outIsIE('NAME')
+             ->savePropertyAs('fullcode', 'left')
+             ->back('first')
+
              ->outIs('DEFINITION')
              ->inIs('LEFT')
              ->atomIs('Assignation', self::WITHOUT_CONSTANTS)
@@ -52,7 +56,7 @@ class CreateDefaultValues extends Complete {
                      ->atomInsideNoDefinition(self::VARIABLES_ALL)
                      ->inIs('DEFINITION')
                      ->inIsIE('NAME')
-                     ->raw('is(eq("first"))')
+                     ->samePropertyAs('fullcode', 'left')
              )
              ->outIs('RIGHT')
              ->followParAs(FollowParAs::FOLLOW_NONE)

@@ -25,10 +25,6 @@ namespace Exakat\Analyzer\Structures;
 use Exakat\Analyzer\Analyzer;
 
 class UnsupportedTypesWithOperators extends Analyzer {
-    /* PHP version restrictions
-    protected $phpVersion = '7.4-';
-    */
-
     public function dependsOn(): array {
         return array('Complete/CreateDefaultValues',
                     );
@@ -45,31 +41,56 @@ class UnsupportedTypesWithOperators extends Analyzer {
                        'Power',
                        'Postplusplus',
                        'Preplusplus',
-                       'Keyvalue',
                        'Array',
+
+                       'Keyvalue',
                        );
 
-        $links = array('LEFT', 'RIGHT', 'NOT', 'PREPLUSPLUS', 'POSTPLUSPLUS', 'INDEX');
+        $links = array('LEFT', 
+                       'RIGHT', 
+                       'NOT', 
+                       'PREPLUSPLUS', 
+                       'POSTPLUSPLUS', 
 
-        // array() * 3
+                       'INDEX',
+                       );
+
+        // clone $a * 3
         $this->atomIs($atoms)
+             ->tokenIsNot('T_PLUS') // all but Addition +
              ->outIs($links)
              ->atomIs(array('Arrayliteral', 'New', 'Clone'), self::WITH_CONSTANTS)
-             ->back('first')
-             // array() + array()
-             ->not(
-                $this->side()
-                     ->atomIs('Addition')
-                     ->codeIs('+')
-                     ->outIs('RIGHT')
-                     ->atomIs(array('Arrayliteral'), self::WITH_CONSTANTS)
-                     ->inIs('RIGHT')
-                     ->outIs('LEFT')
-                     ->atomIs(array('Arrayliteral'), self::WITH_CONSTANTS)
-             );
+             ->back('first');
         $this->prepareQuery();
 
-        // foo() : array  * 3
+        $this->atomIs($atoms)
+             ->analyzerIsNot('self')
+             ->tokenIsNot('T_PLUS') // all but Addition +
+             ->outIs($links)
+             ->atomIs('Cast', self::WITH_CONSTANTS)
+             ->tokenIs('T_ARRAY_CAST') // no cast to resource
+             ->back('first');
+        $this->prepareQuery();
+
+        // todo : functioncall that return array or resource
+
+        // array() + 3
+        $this->atomIs('Addition')
+             ->tokenIs('T_PLUS')
+             ->outIs('LEFT')
+             ->atomIs(array('Arrayliteral', 'Cast'), self::WITH_CONSTANTS)
+             ->tokenIsNot(array('T_INT_CAST', 'T_DOUBLE_CAST', 'T_OBJECT_CAST', 'T_BOOL_CAST', 'T_STRING_CAST'))
+             ->back('first')
+             ->outIs('RIGHT')
+             ->atomIsNot(array('Arrayliteral'), self::WITH_CONSTANTS)
+             ->tokenIsNot('T_ARRAY_CAST')
+             ->atomIsNot(self::CONTAINERS)
+             ->atomIsNot(self::CALLS)
+             ->atomIsNot(array('Identifier', 'Nsname'))
+             ->back('first');
+        $this->prepareQuery();
+
+        // foo() : array() * 3
         $this->atomIs($atoms)
              ->outIs($links)
              ->atomIs('Functioncall', self::WITH_CONSTANTS)
@@ -90,10 +111,22 @@ class UnsupportedTypesWithOperators extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-        // PHP native functions
-        // Typed arguments and properties
-        // typed constants (via its value)
-    //    $c = array_filter($a);
+        // ~array()
+        $this->atomIs(array('Not', 'Bitoperation'))
+             ->analyzerIsNot('self')
+             ->tokenIsNot('T_BANG') // ~  and ! are the same Atom
+             ->outIs($links)
+             ->atomIs('Functioncall', self::WITH_CONSTANTS)
+             ->inIs('DEFINITION')
+             ->outIs('RETURNTYPE')
+             ->atomIsNot('Void')
+             ->fullnspathIsNot('\\bool')
+             ->back('first');
+        $this->prepareQuery();
+
+        // todo : PHP native functions
+        // todo : Typed arguments and properties
+        // todo : typed constants (via its value)
 
     }
 }

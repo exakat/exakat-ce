@@ -27,7 +27,6 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
 
         // function bar(A $a) { $a->foo()}; class A { function foo() {}}
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
-              ->as('method')
               ->hasNoIn('DEFINITION')
               ->outIs('METHOD')
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
@@ -47,18 +46,19 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
                        ->atomIs(self::STATIC_NAMES, self::WITHOUT_CONSTANTS)
                        ->inIs('IMPLEMENTS')
               )
+              ->atomIs(array('Class', 'Classanonymous'))
               // No check on Atom == Class, as it may not exists
               ->goToAllParents(self::INCLUDE_SELF)
+              ->atomIs(array('Class', 'Classanonymous'))
               ->outIs('METHOD')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
-              ->addETo('DEFINITION', 'method');
+              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // class B { public A $p; function bar() { $this->a->foo()}; class A { function foo() {}}
         $this->atomIs(array('Methodcall', 'Staticmethodcall'), self::WITHOUT_CONSTANTS)
-              ->as('method')
               ->hasNoIn('DEFINITION')
               ->outIs('METHOD')
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
@@ -73,11 +73,12 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->inIs('DEFINITION')
               // No check on Atom == Class, as it may not exists
               ->goToAllParents(self::INCLUDE_SELF)
+              ->atomIs(array('Class', 'Classanonymous'))
               ->outIs('METHOD')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
-              ->addETo('DEFINITION', 'method');
+              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // function bar(A $a) { $a->p}; class A { public $p;}
@@ -153,13 +154,14 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
                        ->atomIs(self::STATIC_NAMES, self::WITHOUT_CONSTANTS)
                        ->inIs('IMPLEMENTS')
               )
-              ->atomIs('Class', self::WITHOUT_CONSTANTS)
+              ->atomIs(array('Class', 'Trait'), self::WITHOUT_CONSTANTS)
               // No check on Atom == Class, as it may not exists
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs('CONST')
               ->outIs('CONST')
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->inIs('NAME')
               ->addETo('DEFINITION', 'constante');
         $this->prepareQuery();
 

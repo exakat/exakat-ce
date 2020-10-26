@@ -25,8 +25,8 @@ namespace Exakat;
 use Exakat\Configsource\Commandline;
 
 class Exakat {
-    const VERSION = '2.1.9';
-    const BUILD = 1156;
+    const VERSION = '2.2.0';
+    const BUILD = 1163;
 
     private $config  = null;
 
@@ -61,11 +61,6 @@ class Exakat {
                 $task->run();
                 break;
 
-            case 'diff' :
-                $task = new Tasks\Diff();
-                $task->run();
-                break;
-
             case 'stat' :
                 $task = new Tasks\Stat();
                 $task->run();
@@ -93,6 +88,11 @@ class Exakat {
 
             case 'report' :
                 $task = new Tasks\Report();
+                $task->run();
+                break;
+
+            case 'onefile' :
+                $task = new Tasks\OneFile();
                 $task->run();
                 break;
 
@@ -156,11 +156,6 @@ class Exakat {
                 $task->run();
                 break;
 
-            case 'server' :
-                $task = new Tasks\Server();
-                $task->run();
-                break;
-
             case 'api' :
                 $task = new Tasks\Api();
                 $task->run();
@@ -168,11 +163,6 @@ class Exakat {
 
             case 'upgrade' :
                 $task = new Tasks\Upgrade();
-                $task->run();
-                break;
-
-            case 'fetch' :
-                $task = new Tasks\Fetch();
                 $task->run();
                 break;
 

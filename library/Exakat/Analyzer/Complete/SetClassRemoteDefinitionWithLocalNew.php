@@ -30,7 +30,7 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
 
     public function analyze(): void {
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
-              //->hasNoIn('DEFINITION')
+              ->hasNoIn('DEFINITION')
               ->outIs('METHOD')
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'name')

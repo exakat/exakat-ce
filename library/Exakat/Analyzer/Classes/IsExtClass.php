@@ -33,39 +33,38 @@ class IsExtClass extends Analyzer {
     }
 
     public function analyze(): void {
-        // function foo() : \Generator {}
-        $this->analyzerIs('Classes/ClassUsage')
-             ->hasNoIn('DEFINITION')
-             ->is('isExt', true);
-        $this->prepareQuery();
-        return;
-
         $exts = $this->rulesets->listAllAnalyzer('Extensions');
 
-        $c = array($this->loadIni('php_classes.ini', 'classes'));
+        $classes = array($this->loadIni('php_classes.ini', 'classes'));
         foreach($exts as $ext) {
             $inifile = str_replace('Extensions\Ext', '', $ext);
             $ini = $this->load($inifile, 'classes');
 
             if (!empty($ini[0])) {
-                $c[] = $ini;
+                $classes[] = $ini;
             }
         }
 
-        $classes = array_merge(...$c);
+        $classes = array_merge(...$classes);
+        $classes = array_filter($classes);
         if (empty($classes)) {
             return;
         }
 
         $classes = makeFullNsPath($classes);
-        $classes = array_keys(array_count_values($classes));
 
+        // function foo() : \Generator {}
         $this->analyzerIs('Classes/ClassUsage')
+             ->hasNoIn('DEFINITION')
+             ->is('isExt', true)
              ->fullnspathIs($classes);
         $this->prepareQuery();
 
-        $this->atomIs('Usenamespace')
-             ->outIs('USE')
+        // function foo() : \Generator {}
+        $this->analyzerIs('Classes/ClassUsage')
+             ->hasNoIn('DEFINITION')
+             ->is('isPhp', true)
+             ->analyzerIsNot('self')
              ->fullnspathIs($classes);
         $this->prepareQuery();
     }

@@ -22,7 +22,6 @@
 
 namespace Exakat\Analyzer\Dump;
 
-
 class ConstantOrder extends AnalyzerTable {
     protected $analyzerName = 'constantOrder';
 

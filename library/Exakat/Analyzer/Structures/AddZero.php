@@ -39,6 +39,7 @@ class AddZero extends Analyzer {
              ->outIs('RIGHT')
              ->followParAs(FollowParAs::FOLLOW_PARAS_ONLY)
              ->atomIsNot(array('Ternary', 'Coalesce'))
+             ->atomIsNot('Variable')
              ->atomIs(array('Integer', 'Null', 'Boolean'), self::WITH_CONSTANTS)
              ->is('intval', 0)
              ->back('first');

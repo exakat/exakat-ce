@@ -24,6 +24,7 @@
 namespace Exakat\Analyzer;
 
 use Exakat\Autoload\Autoloader;
+use Exakat\Analyzer\Common\None;
 
 class Rulesets implements RulesetsInterface {
     private $main   = null;
@@ -154,14 +155,14 @@ class Rulesets implements RulesetsInterface {
         self::$instanciated = array();
     }
 
-    public function getInstance(string $name) {
+    public function getInstance(string $name) : Analyzer {
         if ($analyzer = $this->getClass($name)) {
             if (!isset(self::$instanciated[$analyzer])) {
                 self::$instanciated[$analyzer] = new $analyzer();
             }
             return self::$instanciated[$analyzer];
         } else {
-            return null;
+            return new None();
         }
     }
 

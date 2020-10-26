@@ -43,7 +43,7 @@ class Project {
             return false;
         }
 
-        if (in_array(mb_strtolower($this->project), array('onepage', '.', '..', '...'))) {
+        if (in_array(mb_strtolower($this->project), array('.', '..', '...'))) {
             $this->error = 'Project name can\'t use reserved keyword ' . $this->project;
             return false;
         }

@@ -30,9 +30,9 @@ class IndentationLevels extends AnalyzerHashAnalyzer {
         //function foo() { if (1) { /* level 2 */}}
         $this->atomIs(self::FUNCTIONS_ALL)
              ->processLevels();
-
         $results = $this->rawQuery();
-        $counts = array_count_values($results->toArray());
+
+        $counts = array_count_values($results->toArray()[0] ?? array());
         foreach($counts  as $key => $value) {
             $this->analyzerValues[] = array($this->shortAnalyzer, $key, $value);
         }

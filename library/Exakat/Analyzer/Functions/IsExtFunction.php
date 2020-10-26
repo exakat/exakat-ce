@@ -30,6 +30,7 @@ class IsExtFunction extends Analyzer {
     public function analyze(): void {
         // substr('abc', 0, 1)
         $this->atomIs('Functioncall')
+             ->tokenIs(self::STATICCALL_TOKEN)
              ->hasNoIn('DEFINITION')
              ->is('isExt', true);
         $this->prepareQuery();

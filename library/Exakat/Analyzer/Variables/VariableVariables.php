@@ -29,7 +29,10 @@ class VariableVariables extends Analyzer {
     public function analyze(): void {
         // $$a ${$x}
         $this->atomIs(self::VARIABLES_USER)
-             ->tokenIs(array('T_DOLLAR', 'T_DOLLAR_OPEN_CURLY_BRACES'));
+             ->tokenIs(array('T_DOLLAR', 'T_DOLLAR_OPEN_CURLY_BRACES'))
+             ->outIs('NAME')
+             ->atomInside(array('Variable', 'Variableobject', 'Variablearray', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+             ->back('first');
         $this->prepareQuery();
     }
 }

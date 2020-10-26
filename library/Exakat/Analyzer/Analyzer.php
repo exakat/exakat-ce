@@ -113,6 +113,7 @@ abstract class Analyzer {
     const P_MEDIUM    = 'medium';
     const P_LOW       = 'Low';
     const P_NONE      = 'Unknown';
+    const P_UNKNOWN   = 'Unknown';
 
     const PHP_VERSION_ANY = 'Any';
 
@@ -135,7 +136,7 @@ abstract class Analyzer {
 
     public const CONTAINERS       = array('Variable', 'Staticproperty', 'Member', 'Array');
     public const VARIABLES_USER   = array('Variable', 'Variableobject', 'Variablearray');
-    public const CONTAINERS_PHP   = array('Variable', 'Staticproperty', 'Member', 'Array', 'Phpvariable');
+    public const CONTAINERS_PHP   = array('Variable', 'Staticproperty', 'Member', 'Array', 'Phpvariable', 'This', 'Arrayappend');
     public const CONTAINERS_ROOTS = array('Variable', 'Staticproperty', 'Member', 'Array', 'Variableobject', 'Variablearray');
     public const VARIABLES_SCALAR = array('Variable', 'Variableobject', 'Variablearray', 'Globaldefinition', 'Staticdefinition', 'Phpvariable', 'Parametername');
     public const VARIABLES_ALL    = array('Variable', 'Variableobject', 'Variablearray', 'Globaldefinition', 'Staticdefinition', 'Propertydefinition', 'Phpvariable', 'Parametername');
@@ -161,12 +162,14 @@ abstract class Analyzer {
     public const CLASS_ELEMENTS   = array('METHOD', 'MAGICMETHOD', 'PPP', 'CONST', 'USE');
     public const CLASS_METHODS    = array('METHOD', 'MAGICMETHOD');
 
+    public const ATTRIBUTE_ATOMS  = array('Class', 'Classanonymous', 'Interface', 'Trait', 'Propertydefinition', 'Constant', 'Parameter', 'Function', 'Method', 'Magicmethod');
+
     public const FUNCTIONS_CALLS  = array('Functioncall' , 'Newcall', 'Methodcall', 'Staticmethodcall');
     public const CALLS            = array('Functioncall', 'Methodcall', 'Staticmethodcall' );
     public const FUNCTIONS_USAGE  = array('Functioncall', 'Methodcall', 'Staticmethodcall', 'Eval', 'Echo', 'Print', 'Unset' );
 
     public const STRINGS_ALL      = array('Concatenation', 'Heredoc', 'String', 'Identifier', 'Nsname', 'Staticclass', 'Magicconstant');
-    public const STRINGS_LITERALS  = array('Concatenation', 'Heredoc', 'String', 'Magicconstant');
+    public const STRINGS_LITERALS = array('Concatenation', 'Heredoc', 'String', 'Magicconstant', 'Staticclass');
 
     public const CONSTANTS_ALL    = array('Identifier', 'Nsname');
 

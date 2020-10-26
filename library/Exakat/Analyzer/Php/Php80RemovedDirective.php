@@ -28,6 +28,7 @@ use Exakat\Analyzer\Common\UsedDirective;
 class Php80RemovedDirective extends UsedDirective {
     public function analyze(): void {
         $this->directives = array('track_errors',
+                                  'mbstring.func_overload',
                                  );
 
         parent::analyze();

@@ -45,14 +45,14 @@ SQL;
     }
 
     public function analyze(): void {
-        $this->collectPhpStructures2('Functioncall',                           'Functions/IsExtFunction',   'function');
+        $this->collectPhpStructures2(array('Functioncall'),                    'Functions/IsExtFunction',   'function');
         $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Constants/IsExtConstant',   'constant');
         $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Interfaces/IsExtInterface', 'interface');
         $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Traits/IsExtTrait',         'trait');
         $this->collectPhpStructures2(array('Newcall', 'Identifier', 'Nsname'), 'Classes/IsExtClass',        'class');
     }
 
-    private function collectPhpStructures2($label, string $analyzer, string $type): void {
+    private function collectPhpStructures2(array $label, string $analyzer, string $type): void {
         $this->atomIs($label)
              ->analyzerIs($analyzer)
              ->raw('groupCount("m").by("fullnspath").cap("m").map{ x = []; for(key in it.get().keySet()) { x.add(["type":"' . $type . '", "name":key, "count":it.get().getAt(key)]);}; x }[0]');

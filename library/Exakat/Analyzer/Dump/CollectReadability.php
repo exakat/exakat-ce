@@ -42,7 +42,7 @@ SQL;
 
     public function analyze(): void {
         $loops = 20;
-        $this->atomIs(array('Function', 'Closure', 'Method', 'Magicmethod', 'File'), Analyzer::WITHOUT_CONSTANTS)
+        $this->atomIs(array('Function', 'Closure', 'Arrowfunction', 'Method', 'Magicmethod', 'File'), Analyzer::WITHOUT_CONSTANTS)
              ->initVariable('functions', '0')
              ->initVariable('name', '""')
              ->initVariable('expression', '0')

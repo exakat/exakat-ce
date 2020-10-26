@@ -247,7 +247,7 @@ SQL;
     public function getSuggestionRuleset(array $rulesets = array()): array {
         $list = $this->listAllRulesets();
 
-        return array_filter($list, function ($c) use ($rulesets) {
+        return array_filter($list, function (string $c) use ($rulesets) : bool {
             foreach($rulesets as $ruleset) {
                 $l = levenshtein($c, $ruleset);
                 if ($l < 8) {
@@ -259,7 +259,7 @@ SQL;
     }
 
     public function getSuggestionClass(string $name): array {
-        return array_filter($this->listAllAnalyzer(), function ($c) use ($name) {
+        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name) : bool {
             $l = levenshtein($c, $name);
 
             return $l < 8;

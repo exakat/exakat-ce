@@ -26,6 +26,7 @@ use Exakat\Analyzer\Analyzer;
 use Exakat\Reports\Helpers\Highchart;
 use Exakat\Config;
 use Exakat\Exakat;
+use Exakat\Phpexec;
 use Exakat\Vcs\Vcs;
 use Symfony\Component\Yaml\Yaml as Symfony_Yaml;
 use Exakat\Configsource\DatastoreConfig;
@@ -1616,7 +1617,7 @@ JAVASCRIPTCODE;
     protected function generateCompatibilityEstimate(Section $section): void {
         $html = $this->getBasedPage($section->source);
 
-        $versions = array('5.2', '5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0');
+        $versions = Phpexec::VERSIONS;
         $scores = array_fill_keys(array_values($versions), 0);
         $versions = array_reverse($versions);
 
@@ -1746,7 +1747,7 @@ JAVASCRIPTCODE;
 
 //        $colors = array('7900E5', 'BB00E1', 'DD00BF', 'D9007B', 'D50039', 'D20700', 'CE4400', 'CA8000', 'C6B900', '95C200', '59BF00', );
 //        $colors = array('7900E5', 'DD00BF', 'D50039', 'CE4400', 'C6B900', '59BF00');
-        $colors = array('59BF00', '59BF00', '59BF00', 'BEC500', 'CB6C00', 'D20700', 'D80064', 'DE00D7', '7900E5', '7900E5');
+        $colors = array('59BF00', '59BF00', '59BF00', 'BEC500', 'CB6C00', 'D20700', 'D80064', 'DE00D7', '7900E5', '7900E5','7900E5',);
         // This must be the same lenght than the list of versions
 
         $results = $this->dump->fetchAnalysersCounts(array_keys($analyzers));

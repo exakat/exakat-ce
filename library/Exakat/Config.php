@@ -26,10 +26,11 @@ use Exakat\Configsource\{CommandLine, DefaultConfig, DotExakatConfig, DotExakatY
 use Exakat\Exceptions\InaptPHPBinary;
 use Exakat\Autoload\AutoloadDev;
 use Exakat\Autoload\AutoloadExt;
+use Exakat\Phpexec;
 use Phar;
 
 class Config extends Configsource {
-    const PHP_VERSIONS = array('52', '53', '54', '55', '56', '70', '71', '72', '73', '74', '80', );
+    const PHP_VERSIONS = Phpexec::VERSIONS_COMPACT;
 
     const INSIDE_CODE   = true;
     const WITH_PROJECTS = false;
@@ -115,7 +116,15 @@ class Config extends Configsource {
         }
 
         // then read the config for the project in its folder
-        if ($this->commandLineConfig->get('project') === null) {
+        if ($this->commandLineConfig->get('command') === 'onefile') {
+            $project = new Project('onepage');
+            $this->projectConfig = new ProjectConfig($this->projects_root);
+            $this->projectConfig->setProject($project);
+
+            $this->dotExakatConfig     = new EmptyConfig();
+            $this->dotExakatYamlConfig = new EmptyConfig();
+
+        } elseif ($this->commandLineConfig->get('project')->isDefault()) {
 
             $this->projectConfig   = new EmptyConfig();
 
@@ -151,6 +160,19 @@ class Config extends Configsource {
                                      $this->dotExakatYamlConfig->toArray(),
                                      $this->commandLineConfig->toArray()
                                      );
+
+        // todo : consider 'onefile' as a separate config, as the others.
+        if ($this->commandLineConfig->get('command') === 'onefile') {
+            $this->options['project'] = $project;
+        }
+        
+        $this->options['project'] = !$this->options['project']->isDefault() ? $this->options['project'] : $this->dotExakatYamlConfig->get('project');
+        $this->options['project'] = !$this->options['project']->isDefault() ? $this->options['project'] : $this->dotExakatConfig->get('project');
+        
+        if ($this->commandLineConfig->get('project')->isDefault()) {
+            $this->options['project'] = $this->dotExakatYamlConfig->get('project');
+        }
+
         unset($this->options['project_themes']);
         $this->options['configFiles'] = $this->configFiles;
 
@@ -263,7 +285,7 @@ class Config extends Configsource {
 
     private function checkSelf(): void {
         if (version_compare(PHP_VERSION, '7.0.0') < 0) {
-            throw new InaptPHPBinary('PHP needs to be version 7.0.0 or more to run exakat.(' . PHP_VERSION . ' provided)');
+            throw new InaptPHPBinary('PHP needs to be version 7.3.0 or more to run exakat.(' . PHP_VERSION . ' provided)');
         }
         $extensions = array('curl', 'mbstring', 'sqlite3', 'hash', 'json');
 

@@ -33,14 +33,12 @@ class ScalarAreNotArrays extends Analyzer {
     }
 
     public function analyze(): void {
-        // TODO : support for null ?
-
-        // WIth typehint
-        // function foo(in $x) { echo $x[2]; }
+        // With typehint
+        // function foo(int $x) { echo $x[2]; }
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
              ->outIs('TYPEHINT')
-             ->fullnspathIs(array('\\int', '\\bool', '\\float'))
+             ->fullnspathIs(array('\\int', '\\bool', '\\float', '\\null'))
              ->inIs('TYPEHINT')
              ->outIs('NAME')
              ->outIs('DEFINITION')
@@ -48,7 +46,7 @@ class ScalarAreNotArrays extends Analyzer {
              ->inIs('VARIABLE');
         $this->prepareQuery();
 
-        // WIth typehint
+        // With typehint
         // function foo($x = 2) { echo $x[2]; }
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
@@ -63,22 +61,8 @@ class ScalarAreNotArrays extends Analyzer {
              ->analyzerIsNot('self');
         $this->prepareQuery();
 
-        // WIth typehint (here, null is the most important)
-        // function foo(?A $x) { echo $x[2]; }
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
-             ->analyzerIsNot('self')
-             ->hasOut('TYPEHINT')
-             ->isNullable()
-             ->outIs('NAME')
-             ->outIs('DEFINITION')
-             ->atomIs('Variablearray')
-             ->inIs('VARIABLE')
-             ->analyzerIsNot('self');
-        $this->prepareQuery();
-
-        // WIth return typehint
-        // echo $a[2]; $a = foo(); function foo() : int {}
+        // With return typehint
+        // $a = foo(); echo $a[2]; function foo() : int {}
         $this->atomIs('Variablearray')
              ->inIs('DEFINITION')
              ->outIs('DEFAULT')
@@ -86,23 +70,10 @@ class ScalarAreNotArrays extends Analyzer {
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
-             ->fullnspathIs(array('\\int', '\\bool', '\\float', '\\void', '\\callable'))
+             ->fullnspathIs(array('\\int', '\\bool', '\\float', '\\void', '\\callable', '\\null'))
              ->back('first')
              ->inIs('VARIABLE')
              ->analyzerIsNot('self');
-        $this->prepareQuery();
-
-        // echo $a[2]; $a = foo(); function foo() : ?int {}
-        $this->atomIs('Variablearray')
-             ->inIs('DEFINITION')
-             ->outIs('DEFAULT')
-             ->atomIs(self::FUNCTIONS_CALLS)
-             ->inIs('DEFINITION')
-             ->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('RETURNTYPE')
-             ->isNullable()
-             ->back('first')
-             ->inIs('VARIABLE');
         $this->prepareQuery();
 
         // With argument's default value

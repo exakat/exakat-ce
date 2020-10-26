@@ -444,12 +444,14 @@ function makeFullNsPath($functions, bool $constant = \FNP_NOT_CONSTANT) {
         };
     }
     
-    if (is_string($functions) || is_int($functions)) {
+    if (is_string($functions)) {
         return $cb($functions);
     } elseif (is_array($functions)) {
         return array_map($cb, $functions);
+    } else {
+        assert(is_int($functions));
     }
-
+    
     throw new WrongParameterType(gettype($functions), __METHOD__);
 }
 
@@ -508,7 +510,7 @@ function rsttable2html(string $raw) : string {
             continue;
         } elseif ($table === true) {
             if (preg_match('/^[\+-]+$/', $line, $r)) {
-                $html[] = '<tr>' . str_repeat('<td></td>', substr_count('+', $r[0])) . "</tr>\n";
+                $html[] = '<tr>' . str_repeat('<td></td>', substr_count($r[0], '+')) . "</tr>\n";
             } elseif (strpos($line, '|') === false) {
                 $table = false;
                 $html []= '</table>';

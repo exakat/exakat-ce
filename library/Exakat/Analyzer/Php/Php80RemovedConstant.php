@@ -26,7 +26,11 @@ use Exakat\Analyzer\Common\ConstantUsage;
 
 class Php80RemovedConstant extends ConstantUsage {
     public function analyze(): void {
-        $this->constants = array('\INTL_IDNA_VARIANT_2003');
+        $this->constants = array('\INTL_IDNA_VARIANT_2003',
+                                 '\MB_OVERLOAD_MAIL',
+                                 '\MB_OVERLOAD_STRING',
+                                 '\MB_OVERLOAD_REGEX',
+                                 );
 
         parent::analyze();
     }

@@ -27,11 +27,6 @@ use Exakat\Analyzer\Analyzer;
 class CollectNativeCallsPerExpressions extends AnalyzerHashHashResults {
     protected $analyzerName = 'NativeCallPerExpression';
 
-    public function dependsOn(): array {
-        return array('Functions/IsExtFunction',
-                    );
-    }
-
     public function analyze(): void {
         $MAX_LOOPING = Analyzer::MAX_LOOPING;
 
@@ -41,7 +36,7 @@ class CollectNativeCallsPerExpressions extends AnalyzerHashHashResults {
               ->_as('results')
               ->raw(<<<GREMLIN
 groupCount("m").by( __.emit( ).repeat( __.out({$this->linksDown}).not(hasLabel("Closure", "Arrowfunction", "Classanonymous")) ).times($MAX_LOOPING).hasLabel("Functioncall")
-      .where( __.in("ANALYZED").has("analyzer", "Functions/IsExtFunction"))
+      .or( __.has("isPhp", true), __.has("isExt", true) )
       .count()
 ).cap("m")
 GREMLIN
