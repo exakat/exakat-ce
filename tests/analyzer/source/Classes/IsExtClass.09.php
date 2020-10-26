@@ -11,4 +11,10 @@ function foo2(stdclass $x) {
 // not smart, but good for test
 const Exception = 1;
 
+function () : \GENERATOR {};
+
+fn ($a) : \GeneratOR => new gENErator();
+
+
+
 ?>

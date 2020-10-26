@@ -148,7 +148,9 @@ $expected     = array(
                       array('key'    => 'multipleTypehints',
                             'value' => '0',
                            ),
-                     );
+                      array('key'    => '\foo',
+                            'value' => '1',
+                           ),                     );
 
 $expected_not = array(
                       array('key'    => 'arrowfunctionWithReturnTypehint',

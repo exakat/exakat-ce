@@ -1,10 +1,8 @@
 <?php
 
-$expected     = array('xmlreader::$localName',
-                      'xmlreader::close( )',
+$expected     = array('$a->localName', 
+                      '$a->close( )',
                       'xmlreader::NONE',
-                      'xmlreader',
-                      'xmlreader',
                       'xmlreader',
                       'xmlreader',
                       'xmlreader',

@@ -219,7 +219,7 @@ abstract class Analyzer extends TestCase {
                 $display[] = $expected2[$key];
             }
         }
-        $this->assertEmpty($missed, count($missed)." expected values were not found :\n '".join("',\n '", $missed)."'\n\nin the ".count($display)." received values of \n".print_r($display, true));
+        $this->assertEmpty($missed, count($missed)." expected values were not found :\n '".join("',\n '", $missed)."'\n\nin the ".count($display)." received values of \n".var_export($list, true));
 
         $list2 = array_diff($list2, $expected2);
         $not   = array_intersect($expectedNot2, $list2);
