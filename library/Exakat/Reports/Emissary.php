@@ -2510,6 +2510,51 @@ HTML;
         return $return;
     }
 
+    private function generateAttributeInventory(Section $section) : void {
+        $res = $this->dump->fetchTable('cit');
+        $cit = array();
+        foreach($res->toArray() as $row) {
+            $cit[$row['type']][$row['id']] = $row['name'];
+        }
+
+        $res = $this->dump->fetchTable('functions');
+        $functions = array();
+        foreach($res->toArray() as $row) {
+            $functions[$row['type']][$row['id']] = $row['function'];
+        }
+
+        $res = $this->dump->fetchTable('classconstants');
+        $classconstants = array();
+        foreach($res->toArray() as $row) {
+            $classconstants[$row['id']] = $row['constant'];
+        }
+
+        $theTable = array();
+        $res = $this->dump->fetchTable('attributes');
+        foreach($res->toArray() as $row) {
+            // todo Add al lthe other types
+            // todo add color syntax
+            if (in_array($row['type'], array('class', 'interface', 'trait'))) {
+                $location = $row['type']. ' '.$cit[$row['type']][$row['type_id']] . '';
+            } elseif ($row['type'] === 'function') {
+                $location = 'function '.$functions[$row['type']][$row['type_id']] . ' ()';
+            } elseif ($row['type'] === 'classconstant') {
+                $location = 'const '.$classconstants[$row['type_id']];
+            } else {
+                $location = $row['type'];
+            }
+            $theTable[] = '<tr><td>'.$row['attribute'].'</td><td>'.$location.'</td></tr>';
+        }
+
+        $theTable = '<table><tr><th>Attribute</th><th>Location</th></tr>'.implode(PHP_EOL, $theTable).'</table>';
+
+        $html = $this->getBasedPage($section->source);
+        $html = $this->injectBloc($html, 'TITLE', $section->title);
+        $html = $this->injectBloc($html, 'DESCRIPTION', '');
+        $html = $this->injectBloc($html, 'CONTENT', $theTable);
+        $this->putBasedPage($section->file, $html);
+    }
+
     private function generateExceptionTree(Section $section): void {
         $exceptions = array (
   'Throwable' =>
