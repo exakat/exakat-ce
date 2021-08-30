@@ -36,18 +36,13 @@ use Exakat\Exceptions\DSLException;
 use ProgressBar\Manager as ProgressBar;
 use Exception;
 use Exakat\Log;
-use Exakat\Config;
 
 class Analyze extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     private $progressBar = null;
     private $php = null;
     private $analyzed = array();
-
-    public function setConfig(Config $config): void {
-        $this->config = $config;
-    }
 
     public function run(): void {
         if (!$this->config->project->validate()) {
@@ -162,6 +157,18 @@ class Analyze extends Tasks {
             $this->config->noRefresh === true) {
             display("$analyzerClass is already processed\n");
             return ;
+        }
+
+        if (!empty($this->config->rules_version_max) &&
+            version_compare($this->config->rules_version_max,$analyzers[$analyzerClass]->getExakatSince()) < 0) {
+            display("$analyzerClass is too new (rules_version_max: {$this->config->rules_version_max})\n");
+            return;
+        }
+
+        if (!empty($this->config->rules_version_min) &&
+            version_compare($this->config->rules_version_min,$analyzers[$analyzerClass]->getExakatSince()) > 0) {
+            display("$analyzerClass is too old (rules_version_min: {$this->config->rules_version_min})\n");
+            return;
         }
 
         if ($this->config->noDependencies === true) {

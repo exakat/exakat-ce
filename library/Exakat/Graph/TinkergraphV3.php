@@ -28,9 +28,9 @@ use Exakat\Exceptions\UnknownGremlinVersion;
 use Brightzone\GremlinDriver\Connection;
 
 class TinkergraphV3 extends Graph {
-    const CHECKED     = true;
-    const UNCHECKED   = false;
-    const UNAVAILABLE = 1;
+    public const CHECKED     = true;
+    public const UNCHECKED   = false;
+    public const UNAVAILABLE = 1;
 
     private $status   = self::UNCHECKED;
     private $db       = null;
@@ -45,7 +45,7 @@ class TinkergraphV3 extends Graph {
         }
 
         $gremlinJar = glob("{$this->config->tinkergraphv3_folder}/lib/gremlin-core-*.jar");
-        $gremlinVersion = basename(array_pop($gremlinJar));
+        $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
         // 3.4 only
         $this->gremlinVersion = substr($gremlinVersion, 13, -6);
         if(!in_array($this->gremlinVersion, array('3.4'), STRICT_COMPARISON)) {
@@ -74,7 +74,7 @@ class TinkergraphV3 extends Graph {
             $stats['port'] = $this->config->tinkergraph_port;
 
             $gremlinJar = glob("{$this->config->tinkergraphv3_folder}/lib/gremlin-core-*.jar");
-            $gremlinVersion = basename(array_pop($gremlinJar));
+            $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
             //example : gremlin-core-3.2.5.jar
             $gremlinVersion = substr($gremlinVersion, 13, -4);
 

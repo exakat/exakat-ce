@@ -30,7 +30,7 @@ use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Vcs\Vcs;
 
 class Files extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     private $tmpFileName = '';
 
@@ -41,6 +41,8 @@ class Files extends Tasks {
         }
 
         if ($this->config->inside_code === Config::INSIDE_CODE) {
+            // OK
+        } elseif (!empty($this->config->filename)) {
             // OK
         } elseif ($this->config->project === 'default') {
             throw new ProjectNeeded();
@@ -73,7 +75,7 @@ class Files extends Tasks {
             } else {
                 $hashes[$fnv132] = $file;
             }
-            $modifications = $fileModifications[trim($file, '/')] ?? 0;
+            $modifications = 0;
             $filesRows[] = compact('file', 'fnv132', 'modifications');
         }
         display("Removed $duplicates duplicates files\n");

@@ -23,7 +23,7 @@
 namespace Exakat\Reports\Data;
 
 use Exakat\Analyzer\Analyzer;
-use Exakat\Reports\Ambassador;
+use Exakat\Reports\Reports;
 
 class Appinfo extends Data {
         private $extensions = array(
@@ -436,33 +436,33 @@ class Appinfo extends Data {
 
                 foreach($hash as $name => $ext) {
                 if (!isset($sources[$ext])) {
-                    $this->values[$section][$name] = Ambassador::NOT_RUN;
+                    $this->values[$section][$name] = Reports::NOT_RUN;
                     continue;
                 }
                 if (!in_array($ext, $themed)) {
-                    $this->values[$section][$name] = Ambassador::NOT_RUN;
+                    $this->values[$section][$name] = Reports::NOT_RUN;
                     continue;
                 }
 
                 // incompatible
                 if ($sources[$ext] == Analyzer::CONFIGURATION_INCOMPATIBLE) {
-                    $this->values[$section][$name] = Ambassador::INCOMPATIBLE;
+                    $this->values[$section][$name] = Reports::INCOMPATIBLE;
                     continue ;
                 }
 
                 if ($sources[$ext] == Analyzer::VERSION_INCOMPATIBLE) {
-                    $this->values[$section][$name] = Ambassador::INCOMPATIBLE;
+                    $this->values[$section][$name] = Reports::INCOMPATIBLE;
                     continue ;
                 }
 
-                $this->values[$section][$name] = $sources[$ext] > 0 ? Ambassador::YES : Ambassador::NO;
+                $this->values[$section][$name] = $sources[$ext] > 0 ? Reports::YES : Reports::NO;
             }
 
             if ($section == 'Extensions') {
                 $list = $this->values[$section];
                 uksort($this->values[$section], function (string $ka, string $kb) use ($list): int {
                     if ($list[$ka] !== $list[$kb]) {
-                        return $list[$ka] === Ambassador::YES ? -1 : 1;
+                        return $list[$ka] === Reports::YES ? -1 : 1;
                     }
 
                     return $kb <=> $ka;
@@ -483,11 +483,11 @@ class Appinfo extends Data {
         // sort
         foreach($res->toArray() as $row) {
             if (empty($row['encoding'])) {
-                $this->values['Strings']['Unknown encoding'] = Ambassador::YES;
+                $this->values['Strings']['Unknown encoding'] = Reports::YES;
             } elseif (empty($row['block'])) {
-                $this->values['Strings'][$row['encoding']] = Ambassador::YES;
+                $this->values['Strings'][$row['encoding']] = Reports::YES;
             } else {
-                $this->values['Strings'][$row['encoding'] . ' (' . $row['block'] . ')' ] = Ambassador::YES;
+                $this->values['Strings'][$row['encoding'] . ' (' . $row['block'] . ')' ] = Reports::YES;
             }
         }
 

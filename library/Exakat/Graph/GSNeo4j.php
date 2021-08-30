@@ -29,9 +29,9 @@ use Brightzone\GremlinDriver\Connection;
 use stdClass;
 
 class GSNeo4j extends Graph {
-    const CHECKED     = true;
-    const UNCHECKED   = false;
-    const UNAVAILABLE = 2;
+    public const CHECKED     = true;
+    public const UNCHECKED   = false;
+    public const UNAVAILABLE = 2;
 
     private $status     = self::UNCHECKED;
 
@@ -59,14 +59,14 @@ class GSNeo4j extends Graph {
             }
 
             $gremlinJar = glob("{$this->config->gsneo4j_folder}/lib/gremlin-core-*.jar");
-            $gremlinVersion = basename(array_pop($gremlinJar));
+            $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
             //gremlin-core-3.2.5.jar
             $gremlinVersion = substr($gremlinVersion, 13, -4);
             $stats['gremlin version'] = $gremlinVersion;
 
             $neo4jJar = glob("{$this->config->gsneo4j_folder}/ext/neo4j-gremlin/lib/neo4j-*.jar");
             $neo4jJar = array_filter($neo4jJar, function (string $x): bool { return (bool) preg_match('#/neo4j-\d\.\d\.\d\.jar#', $x); });
-            $neo4jVersion = basename(array_pop($neo4jJar));
+            $neo4jVersion = basename(array_pop($neo4jJar) ?? '');
 
             //neo4j-2.3.3.jar
             $neo4jVersion = substr($neo4jVersion, 6, -4);
@@ -88,7 +88,7 @@ class GSNeo4j extends Graph {
         }
 
         $gremlinJar = glob("{$this->config->gsneo4j_folder}/lib/gremlin-core-*.jar");
-        $gremlinVersion = basename(array_pop($gremlinJar));
+        $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
         // 3.4 or 3.3 or 3.2
         $this->gremlinVersion = substr($gremlinVersion, 13, -6);
         if(!in_array($this->gremlinVersion, array('3.2', '3.3', '3.4'), STRICT_COMPARISON)) {
@@ -270,7 +270,13 @@ class GSNeo4j extends Graph {
     }
 
     public function fixId($id) {
-        return $id - 1;
+        if ($this->initialId === null) {
+            $id = $this->query('g.addV("X").id()')->toInt();
+            $this->query('g.V(' . $id . ').drop()');
+
+            $this->initialId = $id + 1;
+        }
+        return $id - 1 + $this->initialId;
     }
 }
 

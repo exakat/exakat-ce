@@ -78,7 +78,7 @@ union( __.identity(),
             .union( __.hasLabel(within(["Identifier", "Nsname", "Staticconstant"])).in("DEFINITION").out("VALUE"),
             
                       // local variable
-                      __.hasLabel(within(["Variable"])).in("DEFINITION").hasLabel('Variabledefinition', 'Staticdefinition').out("DEFAULT"),
+                      __.hasLabel(within(["Variable"])).in("DEFINITION").hasLabel('Variabledefinition').optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT"),
                       
                       // literal value, passed as an argument (Method, closure, function)
                       __.hasLabel(within(["Variable"])).in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").out("DEFAULT"),

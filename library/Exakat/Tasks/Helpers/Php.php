@@ -27,45 +27,45 @@ use Exakat\Exceptions\NoRecognizedTokens;
 abstract class Php {
 
 // Exakat home-made tokens
-    const T_BANG                         = '!';
-    const T_CLOSE_BRACKET                = ']';
-    const T_CLOSE_PARENTHESIS            = ')';
-    const T_CLOSE_CURLY                  = '}';
-    const T_COMMA                        = ',';
-    const T_DOT                          = '.';
-    const T_EQUAL                        = '=';
-    const T_MINUS                        = '-';
-    const T_AT                           = '@';
-    const T_OPEN_BRACKET                 = '[';
-    const T_OPEN_CURLY                   = '{';
-    const T_OPEN_PARENTHESIS             = '(';
-    const T_PERCENTAGE                   = '%';
-    const T_PLUS                         = '+';
-    const T_QUESTION                     = '?';
-    const T_COLON                        = ':';
-    const T_SEMICOLON                    = ';';
-    const T_SLASH                        = '/';
-    const T_STAR                         = '*';
-    const T_SMALLER                      = '<';
-    const T_GREATER                      = '>';
-    const T_TILDE                        = '~';
-    const T_QUOTE                        = '"';
-    const T_DOLLAR                       = '$';
-    const T_AND                          = '&';
-    const T_BACKTICK                     = '`';
-    const T_OR                           = '|';
-    const T_XOR                          = '^';
-    const T_ANDAND                       = '&&';
-    const T_OROR                         = '||';
-    const T_QUOTE_CLOSE                  = '"_CLOSE';
-    const T_SHELL_QUOTE                  = '`';
-    const T_SHELL_QUOTE_CLOSE            = '`_CLOSE';
+    public const T_BANG                         = '!';
+    public const T_CLOSE_BRACKET                = ']';
+    public const T_CLOSE_PARENTHESIS            = ')';
+    public const T_CLOSE_CURLY                  = '}';
+    public const T_COMMA                        = ',';
+    public const T_DOT                          = '.';
+    public const T_EQUAL                        = '=';
+    public const T_MINUS                        = '-';
+    public const T_AT                           = '@';
+    public const T_OPEN_BRACKET                 = '[';
+    public const T_OPEN_CURLY                   = '{';
+    public const T_OPEN_PARENTHESIS             = '(';
+    public const T_PERCENTAGE                   = '%';
+    public const T_PLUS                         = '+';
+    public const T_QUESTION                     = '?';
+    public const T_COLON                        = ':';
+    public const T_SEMICOLON                    = ';';
+    public const T_SLASH                        = '/';
+    public const T_STAR                         = '*';
+    public const T_SMALLER                      = '<';
+    public const T_GREATER                      = '>';
+    public const T_TILDE                        = '~';
+    public const T_QUOTE                        = '"';
+    public const T_DOLLAR                       = '$';
+    public const T_AND                          = '&';
+    public const T_BACKTICK                     = '`';
+    public const T_OR                           = '|';
+    public const T_XOR                          = '^';
+    public const T_ANDAND                       = '&&';
+    public const T_OROR                         = '||';
+    public const T_QUOTE_CLOSE                  = '"_CLOSE';
+    public const T_SHELL_QUOTE                  = '`';
+    public const T_SHELL_QUOTE_CLOSE            = '`_CLOSE';
 
-    const T_END                          = 'The End';
-    const T_REFERENCE                    = 'r';
-    const T_VOID                         = 'v';
+    public const T_END                          = 'The End';
+    public const T_REFERENCE                    = 'r';
+    public const T_VOID                         = 'v';
 
-    const TOKENS = array(
+    public const TOKENS = array(
                      ';'  => self::T_SEMICOLON,
                      '+'  => self::T_PLUS,
                      '-'  => self::T_MINUS,
@@ -104,8 +104,7 @@ abstract class Php {
             throw new NoRecognizedTokens($tokens);
         }
 
-        //'Php80',
-        $versions = array('Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
+        $versions = array('Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
 
         foreach($versions as $version) {
             $errors = array();

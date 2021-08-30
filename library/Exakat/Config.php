@@ -26,7 +26,6 @@ use Exakat\Configsource\{CommandLine, DefaultConfig, DotExakatConfig, DotExakatY
 use Exakat\Exceptions\InaptPHPBinary;
 use Exakat\Autoload\AutoloadDev;
 use Exakat\Autoload\AutoloadExt;
-use Exakat\Phpexec;
 use Phar;
 
 class Config extends Configsource {
@@ -95,7 +94,7 @@ class Config extends Configsource {
         $this->loadConfig(new Project());
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         unset($this->argv[0]);
 
         $this->defaultConfig = new DefaultConfig();
@@ -165,11 +164,11 @@ class Config extends Configsource {
         if ($this->commandLineConfig->get('command') === 'onefile') {
             $this->options['project'] = $project;
         }
-        
+
         $this->options['project'] = !$this->options['project']->isDefault() ? $this->options['project'] : $this->dotExakatYamlConfig->get('project');
         $this->options['project'] = !$this->options['project']->isDefault() ? $this->options['project'] : $this->dotExakatConfig->get('project');
-        
-        if ($this->commandLineConfig->get('project')->isDefault()) {
+
+        if ($this->options['project']->isDefault() && $this->commandLineConfig->get('project')->isDefault()) {
             $this->options['project'] = $this->dotExakatYamlConfig->get('project');
         }
 
@@ -218,20 +217,49 @@ class Config extends Configsource {
         $this->ext = new AutoloadExt($this->ext_root);
         $this->ext->registerAutoload();
 
-        $exts = glob($this->dir_root.'/library/Exakat/Analyzer/Extensions/Ext*');
-        $exts = array_map(function (string $path) : string { return strtolower(substr(basename($path, '.php'), 3));}, $exts);
+        $exts = glob($this->dir_root . '/library/Exakat/Analyzer/Extensions/Ext*');
+        $exts = array_map(function (string $path): string { return strtolower(substr(basename($path, '.php'), 3));}, $exts);
 
         if (in_array('all', $this->options['php_extensions'])) {
             $this->options['php_extensions'] = $exts;
         } elseif (in_array('none', $this->options['php_extensions'])) {
             $this->options['php_extensions'] = array();
         } else {
-            $this->options['php_extensions'] = array_filter($this->options['php_extensions'], function (string $name) use ($exts) : bool { return in_array($name, $exts);});
+            $this->options['php_extensions'] = array_filter($this->options['php_extensions'], function (string $name) use ($exts): bool { return in_array($name, $exts);});
         }
 
         $this->finishConfigs();
-        
+
+        $this->projectConfig         = null;
+        $this->commandLineConfig     = null;
+        $this->defaultConfig         = null;
+        $this->exakatConfig          = null;
+        $this->dotExakatConfig       = null;
+        $this->dotExakatYamlConfig   = null;
+        $this->envConfig             = null;
+
         return 'main_config';
+    }
+
+    public function __toString(): string {
+        $argv = implode(', ', $this->argv);
+
+        $display = <<<TEXT
+directive     : 
+--------------------------------------------------------------------
+project_dir   : {$this->options['project_dir']}  
+code_dir      : {$this->options['code_dir']}     
+log_dir       : {$this->options['log_dir']}      
+tmp_dir       : {$this->options['tmp_dir']}      
+datastore     : {$this->options['datastore']}    
+dump          : {$this->options['dump']}         
+dump_tmp      : {$this->options['dump_tmp']}     
+argv          : $argv
+--------------------------------------------------------------------
+
+TEXT;
+
+        return $display;
     }
 
     private function finishConfigs(): void {
@@ -284,7 +312,7 @@ class Config extends Configsource {
     }
 
     private function checkSelf(): void {
-        if (version_compare(PHP_VERSION, '7.0.0') < 0) {
+        if (version_compare(PHP_VERSION, '7.3.0') < 0) {
             throw new InaptPHPBinary('PHP needs to be version 7.3.0 or more to run exakat.(' . PHP_VERSION . ' provided)');
         }
         $extensions = array('curl', 'mbstring', 'sqlite3', 'hash', 'json');

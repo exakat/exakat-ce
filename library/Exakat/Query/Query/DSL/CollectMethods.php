@@ -32,12 +32,27 @@ class CollectMethods extends DSL {
 
         $command = new Command(<<<GREMLIN
  sideEffect{ {$variable} = []; }
-.where( 
-    __.out("METHOD", "MAGICMETHOD")
-      .out("NAME")
-      .sideEffect{ {$variable}.add(it.get().value("lccode")) ; }
-      .fold() 
+.where(
+    __
+    .where( 
+        __.out("METHOD", "MAGICMETHOD")
+          .out("NAME")
+          .sideEffect{ {$variable}.add(it.get().value("lccode")) ; }
+          .fold() 
+        )
+    .where(
+        __
+        .repeat(out("EXTENDS").in("DEFINITION")).emit()
+        .where( 
+            __
+              .out("METHOD", "MAGICMETHOD")
+              .out("NAME")
+              .sideEffect{ {$variable}.add(it.get().value("lccode")) ;  }
+              .fold() 
+            )
+            .fold()
     )
+)
 GREMLIN
 );
         return $command;

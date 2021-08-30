@@ -41,11 +41,11 @@ class Path extends AnalyzerResults {
                 $protocolList[] = $protocol;
             }
         }
-        $protocolList = implode('|', $protocolList);
+        $protocolRegex = implode('|', $protocolList);
 
         // /path/to/file.php (extension is necessary)
         $this->atomIs(self::STRINGS_LITERALS, self::WITHOUT_CONSTANTS)
-             ->regexIs('noDelimiter', '^((?!(' . $protocolList . ')://)[^ :\\\\+&]*/)([^ :\\\\+&/]*)(\\\\.\\\\w{1,6}|/)\\$')
+             ->regexIs('noDelimiter', '^((?!(' . $protocolRegex . ')://)[^ :\\\\+&]*/)([^ :\\\\+&/]*)(\\\\.\\\\w{1,6}|/)\\$')
              ->toResults();
         $this->prepareQuery();
 
@@ -56,7 +56,7 @@ class Path extends AnalyzerResults {
             $this->atomFunctionIs($functions)
                  ->outWithRank('ARGUMENT', $position)
                  ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
-                 ->regexIsNot('noDelimiter', '^((?!(' . $protocolList . ')://)[^ :\\\\+&]*/)([^ :\\\\+&/]*)\\\\.\\\\w{1,6}\\$')
+                 ->regexIsNot('noDelimiter', '^((?!(' . $protocolRegex . ')://)[^ :\\\\+&]*/)([^ :\\\\+&/]*)\\\\.\\\\w{1,6}\\$')
                  ->toResults();
             $this->prepareQuery();
         }

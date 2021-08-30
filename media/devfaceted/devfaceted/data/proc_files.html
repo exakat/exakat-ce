@@ -1,0 +1,60 @@
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+        <h1>
+          Processed Files
+        </h1>
+        </section>
+
+        <!-- Main content -->
+        <section id="used_settings" class="content">
+        	<div class="row">
+        		<div class="col-sm-6">
+        			<div class="box">
+        				<div class="box-header with-border">
+        	        <h3 class="box-title"><b>Processed Files</b></h3>
+        	      </div>
+        				<div class="box-body">
+        					<div class="row">
+        						<div class="col-xs-12">
+        							<p class="textLead">This is the list of processed files. Any file that is in the project, but not in the list below was omitted in the analyze. <br>
+        							<br>
+        							This may be due to configuration file, compilation error, wrong extension (including no extension).</p>
+        							<table class="table table-striped">
+        								<tr>
+        								</tr><tr><th>File</th>
+        								</tr>
+        								{{FILES}}
+        							</table>
+        		    		</div>
+        					</div>
+        				</div>
+        			</div>
+        		</div>
+
+        		<div class="col-sm-6">
+        			<div class="box">
+        				<div class="box-header with-border">
+        	        <h3 class="box-title"><b>Non-processed Files</b></h3>
+        	      </div>
+        				<div class="box-body">
+        					<div class="row">
+        						<div class="col-xs-12">
+        							<p class="textLead">This is the list of processed files. Any file that is in the project, but not in the list below was omitted in the analyze. <br>
+        							<br>
+        							This may be due to configuration file, compilation error, wrong extension (including no extension).</p>
+        							<table class="table table-striped">
+        								<tr></tr>
+        								<tr><th>File</th>
+        								<th>Reason</th>
+        								</tr>
+        								{{NON-FILES}}
+        							</table>
+        			    	</div>
+        					</div>
+        				</div>
+        			</div>
+        		</div>
+        	</div>
+        </section>
+      </div>
+    </div>

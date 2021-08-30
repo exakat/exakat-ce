@@ -58,6 +58,7 @@ class Docs {
             assert(file_exists("{$this->pathToIni}/human/en/$analyzer.ini"), "No documentation for '$analyzer'.");
         }
         assert($ini !== null, "No readable documentation for '$analyzer'.");
+        assert($ini['exakatSince'] !== null, "No exakatSince documentation for '$analyzer'.");
 
         $ini['parameter'] = array();
         $ranks = array_intersect(array_keys($ini), array('parameter1', 'parameter2', 'parameter3'));

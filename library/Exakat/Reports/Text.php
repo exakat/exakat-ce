@@ -24,8 +24,8 @@ namespace Exakat\Reports;
 
 
 class Text extends Reports {
-    const FILE_EXTENSION = 'txt';
-    const FILE_FILENAME  = self::STDOUT;
+    public const FILE_EXTENSION = 'txt';
+    public const FILE_FILENAME  = self::STDOUT;
 
     public function _generate(array $analyzerList): string {
         $analysisResults = $this->dump->fetchAnalysers($analyzerList);

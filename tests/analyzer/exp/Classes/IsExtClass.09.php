@@ -2,8 +2,8 @@
 
 $expected     = array('\\Generator',
                       'stdclass',
-                      '\GENERATOR', 
-                      '\GeneratOR', 
+                      '\\GENERATOR',
+                      '\\GeneratOR',
                       'gENErator( )',
                      );
 

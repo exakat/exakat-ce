@@ -26,7 +26,7 @@ use Exakat\Config;
 use Exakat\Exakat;
 
 class Upgrade extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         // Avoid downloading when it is not a phar

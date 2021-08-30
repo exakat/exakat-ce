@@ -43,7 +43,8 @@ class IsModified extends Plugin {
                 break;
 
             case 'Catch' :
-                if (in_array($extras['VARIABLE']->atom, $this->variables)) {
+                if (isset($extras['VARIABLE']) &&
+                    in_array($extras['VARIABLE']->atom, $this->variables)) {
                     $extras['VARIABLE']->isModified = true;
                 }
                 break;

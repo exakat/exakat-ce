@@ -40,7 +40,7 @@ class Constant extends Plugin {
         parent::__construct();
 
         $deterministFunctions = exakat('methods')->getDeterministFunctions();
-        $this->deterministFunctions = array_map(function ($x) { return "\\$x";}, $deterministFunctions);
+        $this->deterministFunctions = array_map(function (string $x): string { return "\\$x";}, $deterministFunctions);
     }
 
     public function run(Atom $atom, array $extras = array()): void {
@@ -49,6 +49,7 @@ class Constant extends Plugin {
         }
 
         foreach($extras as $extra) {
+            if (is_array($extra)) { continue; }
             if ($extra->constant === null)  {
                 $atom->constant = null;
                 return ;
@@ -83,7 +84,7 @@ class Constant extends Plugin {
                     break;
                 }
                 $constants = array_column($extras, 'constant');
-                $atom->constant = array_reduce($constants, function ($carry, $item) { return $carry && $item; }, true);
+                $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool { return $carry && $item; }, true);
                 break;
 
             case 'String' :
@@ -93,7 +94,7 @@ class Constant extends Plugin {
             case 'Classalias':
             case 'Sequence' :
                 $constants = array_column($extras, 'constant');
-                $atom->constant = array_reduce($constants, function ($carry, $item) { return $carry && $item; }, true);
+                $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool { return $carry && $item; }, true);
                 break;
 
             case 'Return' :
@@ -113,7 +114,7 @@ class Constant extends Plugin {
                 break;
 
             case 'Parenthesis' :
-                $atom->constant = $extras['CODE']->constant;
+                $atom->constant = $extras['CODE']->constant ?? false;
                 break;
 
             case 'Yield' :
@@ -147,7 +148,7 @@ class Constant extends Plugin {
                 } elseif (in_array($atom->fullnspath, $this->deterministFunctions)) {
                     if (isset($extras[0])) {
                         $constants = array_column($extras, 'constant');
-                        $atom->constant = array_reduce($constants, function ($carry, $item) { return $carry && $item; }, true);
+                        $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool { return $carry && $item; }, true);
                     } else {
                         $atom->constant  = Load::CONSTANT_EXPRESSION;
                     }

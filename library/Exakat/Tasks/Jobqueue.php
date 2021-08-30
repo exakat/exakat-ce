@@ -26,10 +26,10 @@ use Exakat\Config as ConfigExakat;
 use Exakat\Datastore;
 
 class Jobqueue extends Tasks {
-    const CONCURENCE = self::QUEUE;
-    const PATH = '/tmp/queue.exakat';
+    public const CONCURENCE = self::QUEUE;
+    public const PATH = '/tmp/queue.exakat';
 
-    const COMMANDS = array('quit', 'config', 'ping', 'project', 'onepage', 'report', 'init');
+    public const COMMANDS = array('quit', 'config', 'ping', 'project', 'onepage', 'report', 'init');
 
     private $pipefile = self::PATH;
     private $jobQueueLog = null;

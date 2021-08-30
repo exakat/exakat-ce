@@ -26,7 +26,7 @@ use Exakat\Tasks\Load;
 use stdClass;
 
 class Atom implements AtomInterface {
-    const STRING_MAX_SIZE = 500;
+    public const STRING_MAX_SIZE = 500;
 
     public $id           = 0;
     public $atom         = 'No Atom Set';
@@ -76,11 +76,14 @@ class Atom implements AtomInterface {
     public $isPhp        = 0;
     public $isExt        = 0;
     public $isStub       = 0;
+    public $position     = 0;
+    public Whitespace $ws ;
 
-    public function __construct(int $id, string $atom, int $line) {
+    public function __construct(int $id, string $atom, int $line, string $ws = '') {
         $this->id   = $id;
         $this->atom = $atom;
         $this->line = $line;
+        $this->ws   = new Whitespace($ws);
     }
 
     public function __set($name, $value) {
@@ -152,9 +155,11 @@ class Atom implements AtomInterface {
         // The array list the properties that will be kept (except for default)
         $atomsValues = array('Sequence' => array('code'        => 0,
                                                  'line'        => 0,
+                                                 'position'    => 0,
                                                  'count'       => 0,
                                                  'fullcode'    => 0,
                                                  'rank'        => 0,
+                                                 'ws'          => 0,
                                                  ),
 
                              // This one is used to skip the values configure
@@ -199,12 +204,16 @@ class Atom implements AtomInterface {
                 continue;
             }
 
+            if ($l === 'ws') {
+                $value = $this->ws->toJson();
+            }
+
             if ($l === 'lccode') {
                 $this->lccode = mb_strtolower((string) $this->code);
                 $value = $this->lccode;
             }
 
-            if (!in_array($l, array('noDelimiter', 'lccode', 'code', 'fullcode')) &&
+            if (!in_array($l, array('noDelimiter', 'lccode', 'code', 'fullcode', 'ws')) &&
                 $value === '') {
                 continue;
             }

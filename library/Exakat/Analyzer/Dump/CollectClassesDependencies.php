@@ -106,7 +106,7 @@ GREMLIN
 );
         $this->prepareQuery();
 
-        // returntypes 
+        // returntypes
         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
              ->outIs('RETURNTYPE')
              ->atomIs(self::STATIC_NAMES)
@@ -138,7 +138,7 @@ GREMLIN
 );
         $this->prepareQuery();
 
-        // typehinted properties 
+        // typehinted properties
         $this->atomIs(array('Class', 'Trait'), self::WITHOUT_CONSTANTS)
              ->outIs('PPP')
              ->outIs('TYPEHINT')

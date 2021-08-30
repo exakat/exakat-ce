@@ -76,7 +76,7 @@ class Svn extends Vcs {
         }
     }
 
-    public function getBranch() {
+    public function getBranch(): string {
         if (empty($this->info)) {
             $this->getInfo();
         }

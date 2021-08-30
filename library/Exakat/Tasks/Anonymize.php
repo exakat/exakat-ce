@@ -28,7 +28,7 @@ use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\NoCodeInProject;
 
 class Anonymize extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     private $lnumberValues = array();
     private $lnumber = 0;

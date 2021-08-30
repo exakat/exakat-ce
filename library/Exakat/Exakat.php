@@ -25,8 +25,8 @@ namespace Exakat;
 use Exakat\Configsource\Commandline;
 
 class Exakat {
-    const VERSION = '2.2.0';
-    const BUILD = 1163;
+    const VERSION = '2.2.2';
+    const BUILD = 1249;
 
     private $config  = null;
 
@@ -36,6 +36,16 @@ class Exakat {
 
     public function execute(): void {
         switch ($this->config->command) {
+            case 'cobble' :
+                $task = new Tasks\Cobble();
+                $task->run();
+                break;
+
+            case 'testcobble' :
+                $task = new Tasks\Testcobble();
+                $task->run();
+                break;
+
             case 'doctor' :
                 $doctor = new Tasks\Doctor();
                 $doctor->run();
@@ -188,7 +198,7 @@ class Exakat {
 
             default :
                 $command_value = $this->config->command_value;
-                $suggestions = array_filter(array_keys(CommandLine::$commands), function (string $x) use ($command_value) : bool { similar_text((string) $command_value, $x, $percentage); return $percentage > 60; });
+                $suggestions = array_filter(array_keys(CommandLine::$commands), function (string $x) use ($command_value): bool { similar_text((string) $command_value, $x, $percentage); return $percentage > 60; });
 
                 print (!empty($command_value) ? "Unknown command '{$this->config->command_value}'. See https://exakat.readthedocs.io/en/latest/Commands.html" . PHP_EOL : '') .
                       (!empty($suggestions) ? 'Did you mean : ' . implode(', ', $suggestions) . ' ? ' : '') . PHP_EOL;
@@ -208,7 +218,7 @@ class Exakat {
 |________|[__]`\_]\'-;__/[__|  \_]\'-;__/\__/  
                                                
 
-Exakat (Community Edition) : @ 2014-2020 Damien Seguy - Exakat SAS <contact(at)exakat.io>. 
+Exakat (Community Edition) : @ 2014-2021 Damien Seguy - Exakat SAS <contact(at)exakat.io>. 
 Version : ", $version, ' - Build ', $build, ' - ', $date, "\n";
 
                 break;

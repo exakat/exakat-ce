@@ -78,8 +78,7 @@ CREATE TABLE cit (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                     end INTEGER,
                     file INTEGER,
                     line INTEGER,
-                    extends STRING DEFAULT "",
-                    attributes STRING DEFAULT ""
+                    extends STRING DEFAULT ""
                   )
 SQL;
         $this->sqlite->query($query);
@@ -225,13 +224,6 @@ SQL;
 
         $this->storeInTable('hash', $toDump);
         display('Inited tables');
-    }
-
-    public function fetchAnalysers(array $analysers): Results {
-        $query = 'SELECT fullcode, file, line, analyzer, class, namespace FROM results WHERE analyzer IN (' . makeList($analysers) . ')';
-        $res = $this->sqlite->query($query);
-
-        return new Results($res, array('phpsyntax' => array('fullcode' => 'htmlcode')));
     }
 
     public function fetchAnalysersCounts(array $analysers): Results {
@@ -488,7 +480,7 @@ SQL
 SELECT cit.name AS class, 
        classconstants.constant AS constant, 
        value, 
-       namespaces.namespace || "\\" || lower(cit.name) AS fullnspath,
+       namespaces.namespace || lower(cit.name) AS fullnspath,
        visibility,
        constant,
        cit.type AS type
@@ -510,7 +502,7 @@ SQL
     public function fetchTableProperty(): Results {
         $res = $this->sqlite->query(<<<'SQL'
 SELECT cit.name AS class, 
-       namespaces.namespace || "\\" || lower(cit.name) AS fullnspath,
+       namespaces.namespace || lower(cit.name) AS fullnspath,
        visibility, 
        property, 
        value,

@@ -25,6 +25,7 @@ namespace Exakat\Tasks;
 use Exakat\Exakat;
 use Exakat\Config;
 use Exakat\Phpexec;
+use Exakat\Project;
 use Exakat\Graph\Graph;
 use Exakat\Exceptions\NoPhpBinary;
 use Exakat\Exceptions\HelperException;
@@ -32,7 +33,7 @@ use Exakat\Exceptions\NoSuchReport;
 use Exakat\Tasks\Helpers\ReportConfig;
 
 class Doctor extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     protected $logname = self::LOG_NONE;
 
@@ -114,10 +115,7 @@ class Doctor extends Tasks {
         }
 
         $stubs = exakat('stubs');
-        $files = array();
-        foreach($stubs as $stub) {
-            $files[] = $stub->getFile();
-        }
+        $files = $stubs->getFile();
         $stats['exakat']['stubs'] = makeList($files, '');
 
         // check for running PHP
@@ -242,12 +240,9 @@ class Doctor extends Tasks {
                 $id = random_int(0, PHP_INT_MAX);
             } while (file_exists("{$this->config->projects_root}/projects/test$id") && $i < 100);
 
-            $args = array ( 1 => 'init',
-                            2 => '-p',
-                            3 => "test$id",
-                          );
-            $initConfig = new Config($args);
+            $initConfig = $this->config->duplicate(array('project' => new Project('test' . $id)));
             $init = new Initproject(self::IS_SUBTASK);
+            $init->setConfig($initConfig);
             $init->run();
             rename("{$this->config->projects_root}/projects/test$id", "{$this->config->projects_root}/projects/test");
             unset($init);

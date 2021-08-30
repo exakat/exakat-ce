@@ -391,7 +391,7 @@ GREMLIN
     private function processLogical() {
             display('propagating Constant value in Logical');
             // fix path for constants with Const
-            $this->atomIs(array('Logical', 'Bitoperation'))
+            $this->atomIs(self::LOGICAL_ALL)
                  ->hasNo('propagated')
                  ->initVariable('x', '[ ]')
                  ->not(
@@ -462,7 +462,9 @@ GREMLIN
              ->raw(<<<'GREMLIN'
 sideEffect{ 
     it.get().property("intval", x.value("intval")); 
-    it.get().property("boolean", x.value("boolean"));
+    if (it.get().property("boolean") != null) {
+        it.get().property("boolean", x.value("boolean"));
+    }
     if ("noDelimiter" in x.keys()) {
         // Ternary, Comparison
         it.get().property("noDelimiter", x.value("noDelimiter").toString()); 
@@ -484,13 +486,13 @@ GREMLIN
         display('propagating Constant value in Not');
         $this->atomIs('Not')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
+             ->initVariable('x', 0)
              ->not(
                 $this->side()
                      ->outIs('NOT')
                      ->hasNo('intval')
              )
-             ->raw('where( __.out("NOT").sideEffect{ x = it.get() }.count() )')
+             ->raw('where( __.out("NOT").sideEffect{ x = it.get() }.fold() )')
              ->raw(<<<'GREMLIN'
 sideEffect{ 
     if (it.get().value("token") == 'T_BANG') {
@@ -499,8 +501,10 @@ sideEffect{
       i = ~x.value("intval");
     }
 
-    it.get().property("intval", x.value("intval")); 
-    it.get().property("boolean", x.value("boolean"));
+    it.get().property("intval", i); 
+    if (it.get().property("boolean") != null) {
+        it.get().property("boolean", !x.value("boolean"));
+    }
     it.get().property("noDelimiter", x.value("noDelimiter").toString()); 
     it.get().property("propagated", true); 
 

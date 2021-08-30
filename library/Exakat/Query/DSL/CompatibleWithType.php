@@ -65,15 +65,15 @@ __.sideEffect{ typehints = []; }
                 break;
                 
             case "\\\\int":
-                results = results || ($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Postplusplus", "Preplusplus", "Not"]);
+                results = results || ($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Postplusplus", "Preplusplus", "Not", "Spaceship"]);
                 break;
     
             case "\\\\numeric":
-                results = results || ($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Float", "Postplusplus", "Preplusplus"]);
+                results = results || ($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Float", "Postplusplus", "Preplusplus", "Spaceship"]);
                 break;
     
             case "\\\\float":
-                results = results || ($types in ["Float", "Addition", "Multiplication", "Bitshift", "Power"]);
+                results = results || ($types in ["Float", "Addition", "Multiplication", "Bitshift", "Power", "Spaceship"]);
                 break;
     
             case "\\\\bool":

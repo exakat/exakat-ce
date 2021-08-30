@@ -46,17 +46,17 @@ abstract class Tasks {
     private $pid = 0;
     private $path = '';
 
-    const  NONE    = 1;
-    const  ANYTIME = 2;
-    const  DUMP    = 3;
-    const  QUEUE   = 4;
-    const  SERVER  = 5;
+    public const  NONE    = 1;
+    public const  ANYTIME = 2;
+    public const  DUMP    = 3;
+    public const  QUEUE   = 4;
+    public const  SERVER  = 5;
 
-    const IS_SUBTASK     = true;
-    const IS_NOT_SUBTASK = false;
+    public const IS_SUBTASK     = true;
+    public const IS_NOT_SUBTASK = false;
 
-    const LOG_NONE = null;
-    const LOG_AUTONAMING = '';
+    public const LOG_NONE = null;
+    public const LOG_AUTONAMING = '';
 
     public function __construct(bool $subTask = self::IS_NOT_SUBTASK) {
         $this->gremlin    = exakat('graphdb');
@@ -157,6 +157,10 @@ abstract class Tasks {
         if ($this->path !== null) {
             unlink($this->path);
         }
+    }
+
+    public function setConfig(Config $config): void {
+        $this->config = $config;
     }
 }
 

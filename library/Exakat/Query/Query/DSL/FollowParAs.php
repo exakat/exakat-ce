@@ -26,9 +26,9 @@ namespace Exakat\Query\DSL;
 use Exakat\Query\Query;
 
 class FollowParAs extends DSL {
-    const FOLLOW_ALL        = 0;
-    const FOLLOW_NONE       = 1;
-    const FOLLOW_PARAS_ONLY = 2;
+    public const FOLLOW_ALL        = 0;
+    public const FOLLOW_NONE       = 1;
+    public const FOLLOW_PARAS_ONLY = 2;
 
     public function run(): Command {
 

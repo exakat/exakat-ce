@@ -25,8 +25,8 @@ namespace Exakat\Data;
 
 
 class Dictionary {
-    const CASE_SENSITIVE   = true;
-    const CASE_INSENSITIVE = false;
+    public const CASE_SENSITIVE   = true;
+    public const CASE_INSENSITIVE = false;
 
     private $datastore  = null;
     private $dictionary = array();
@@ -49,8 +49,6 @@ class Dictionary {
         }
         $return = array();
 
-        $code = makeArray($code);
-
         if ($case === self::CASE_SENSITIVE) {
             $caseClosure = function (string $x) { return $x; };
         } else {
@@ -61,6 +59,22 @@ class Dictionary {
             $d = $caseClosure($c);
             if (isset($this->dictionary[$d])) {
                 $return[] = $this->dictionary[$d];
+            }
+        }
+
+        return $return;
+    }
+
+    public function read(array $code): array {
+        if (empty($this->dictionary)) {
+            $this->init();
+        }
+
+        $return = array();
+        foreach($code as $c) {
+            $d = array_search($c, $this->dictionary);
+            if ($d !== false) {
+                $return[$c] = $d;
             }
         }
 

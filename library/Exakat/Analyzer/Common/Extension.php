@@ -161,9 +161,13 @@ class Extension extends Analyzer {
             }
         }
 
-        // json only
         if (!empty($ini->classconstants)) {
-            $classesconstants = (array) $ini->classconstants;
+            $classesconstants = array();
+            foreach((array) $ini->classconstants as $c) {
+                list($class, $constant) = explode('::', $c);
+                array_collect_by($classesconstants, makefullnspath($class), $constant);
+            }
+
             $this->atomIs('Staticconstant')
                  ->outIs('CLASS')
                  ->fullnspathIs(array_keys($classesconstants))
@@ -176,8 +180,39 @@ class Extension extends Analyzer {
             $this->prepareQuery();
         }
 
+        // Methods, with typehints (parameters and properties)
+        // TODO : Methods with returntypes, local new.
         if (!empty($ini->methods)) {
-            $methods = (array) $ini->methods;
+            $methods = array();
+            foreach(array_filter((array) $ini->methods) as $m) {
+                list($class, $method) = explode('::', $m);
+                array_collect_by($methods, makefullnspath($class), mb_strtolower($method));
+            }
+
+            $this->atomIs('Methodcall')
+                 ->outIs('OBJECT')
+                 // find Typehint for argument or property
+                 ->inIs('DEFINITION')
+                 ->inIsIE('NAME')
+                 ->outIs('TYPEHINT')
+                 ->fullnspathIs(array_keys($methods))
+                 ->savePropertyAs('fullnspath', 'fqn')
+                 ->back('first')
+
+                 ->outIs('METHOD')
+                 ->outIs('NAME')
+                 ->tokenIs('T_STRING')
+                 ->isHash('fullcode', $methods, 'fqn', self::CASE_INSENSITIVE)
+                 ->back('first');
+            $this->prepareQuery();
+        }
+
+        if (!empty($ini->staticMethods)) {
+            $methods = array();
+            foreach(array_filter((array) $ini->staticMethods) as $m) {
+                list($class, $method) = explode('::', $m);
+                array_collect_by($methods, makefullnspath($class), mb_strtolower($method));
+            }
 
             $this->atomIs('Staticmethodcall')
                  ->outIs('CLASS')
@@ -191,24 +226,40 @@ class Extension extends Analyzer {
                  ->isHash('fullcode', $methods, 'fqn', self::CASE_INSENSITIVE)
                  ->back('first');
             $this->prepareQuery();
+        }
 
-            $this->atomIs('Methodcall')
+        // Properties, with typehints (parameters and properties)
+        // TODO : Properties with returntypes, local new.
+        if (!empty($ini->properties)) {
+            $properties = array();
+            foreach(array_filter((array) $ini->properties) as $p) {
+                list($class, $property) = explode('::', $p);
+                array_collect_by($properties, makefullnspath($class), ltrim($property, '$'));
+            }
+
+            $this->atomIs('Member')
                  ->outIs('OBJECT')
-                 ->fullnspathIs(array_keys($methods))
+                 // find Typehint for argument or property
+                 ->inIs('DEFINITION')
+                 ->inIsIE('NAME')
+                 ->outIs('TYPEHINT')
+                 ->atomIs(self::STATIC_NAMES)
+                 ->fullnspathIs(array_keys($properties))
                  ->savePropertyAs('fullnspath', 'fqn')
                  ->back('first')
 
-                 ->outIs('METHOD')
-                 ->outIs('NAME')
-                 ->tokenIs('T_STRING')
-                 ->isHash('fullcode', $methods, 'fqn', self::CASE_INSENSITIVE)
+                 ->outIs('MEMBER')
+                 ->isHash('fullcode', $properties, 'fqn', self::CASE_SENSITIVE)
                  ->back('first');
             $this->prepareQuery();
         }
 
-        if (!empty($ini->properties)) {
-
-            $properties = array_map(function (string $x): string { return "\$$x";}, (array) $ini->properties);
+        if (!empty($ini->staticProperties)) {
+            $properties = array();
+            foreach(array_filter((array) $ini->properties) as $p) {
+                list($class, $property) = explode('::', $p);
+                array_collect_by($properties, makefullnspath($class), $property);
+            }
 
             $this->atomIs('Staticproperty')
                  ->outIs('CLASS')

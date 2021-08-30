@@ -26,7 +26,7 @@ use Exakat\Tasks\Load;
 use stdClass;
 
 class Atom implements AtomInterface {
-    const STRING_MAX_SIZE = 500;
+    public const STRING_MAX_SIZE = 500;
 
     public $id           = 0;
     public $atom         = 'No Atom Set';
@@ -67,20 +67,25 @@ class Atom implements AtomInterface {
     public $visibility   = '';
     public $final        = '';
     public $abstract     = false;
+    public $readonly     = false;
     public $static       = '';
     public $noscream     = 0;
     public $trailing     = 0;
     public $isRead       = 0;
     public $isModified   = 0;
     public $use          = '';
+    public $typehint     = '';
     public $isPhp        = 0;
     public $isExt        = 0;
     public $isStub       = 0;
+    public $position     = 0;
+    public Whitespace $ws ;
 
-    public function __construct(int $id, string $atom, int $line) {
+    public function __construct(int $id, string $atom, int $line, string $ws = '') {
         $this->id   = $id;
         $this->atom = $atom;
         $this->line = $line;
+        $this->ws   = new Whitespace($ws);
     }
 
     public function __set($name, $value) {
@@ -116,6 +121,7 @@ class Atom implements AtomInterface {
         $this->variadic      = $this->variadic ? 1 : null;
         $this->final         = $this->final ? 1 : null;
         $this->abstract      = $this->abstract ? 1 : null;
+        $this->readonly      = $this->readonly ? 1 : null;
         $this->static        = $this->static ? 1 : null;
         $this->absolute      = $this->absolute ? 1 : null;
         $this->constant      = $this->constant ? 1 : null;
@@ -152,9 +158,11 @@ class Atom implements AtomInterface {
         // The array list the properties that will be kept (except for default)
         $atomsValues = array('Sequence' => array('code'        => 0,
                                                  'line'        => 0,
+                                                 'position'    => 0,
                                                  'count'       => 0,
                                                  'fullcode'    => 0,
                                                  'rank'        => 0,
+                                                 'ws'          => 0,
                                                  ),
 
                              // This one is used to skip the values configure
@@ -175,6 +183,7 @@ class Atom implements AtomInterface {
                                                  'alternative' => 0,
                                                  'absolute'    => 0,
                                                  'abstract'    => 0,
+                                                 'readonly'    => 0,
                                                  'isRead'      => 0,
                                                  'isModified'  => 0,
                                                  'static'      => 0,
@@ -199,12 +208,16 @@ class Atom implements AtomInterface {
                 continue;
             }
 
+            if ($l === 'ws') {
+                $value = $this->ws->toJson();
+            }
+
             if ($l === 'lccode') {
                 $this->lccode = mb_strtolower((string) $this->code);
                 $value = $this->lccode;
             }
 
-            if (!in_array($l, array('noDelimiter', 'lccode', 'code', 'fullcode')) &&
+            if (!in_array($l, array('noDelimiter', 'lccode', 'code', 'fullcode', 'ws')) &&
                 $value === '') {
                 continue;
             }
@@ -248,6 +261,7 @@ class Atom implements AtomInterface {
                  'alternative',
                  'absolute',
                  'abstract',
+                 'readonly',
                  'isRead',
                  'isModified',
                  'static',

@@ -34,9 +34,10 @@ class DotExakatConfig extends Config {
         // also support json?
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         if (!file_exists($this->dotExakat)) {
             $this->config['inside_code'] = Configuration::WITH_PROJECTS;
+            $this->config['project']     = new Project();
             return self::NOT_LOADED;
         }
 

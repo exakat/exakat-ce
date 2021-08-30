@@ -324,6 +324,7 @@ class Datastore {
         }
 
         switch($table) {
+            case 'compilation81' :
             case 'compilation80' :
             case 'compilation74' :
             case 'compilation73' :
@@ -538,10 +539,8 @@ SQLITE;
     public function storeQueries(array $queries): int {
         $this->sqliteWrite->lastErrorCode();
         foreach($queries as $query) {
-            $res = $this->sqliteWrite->query($query);
-            if ($this->sqliteWrite->lastErrorCode()) {
-                print  $query . PHP_EOL . PHP_EOL;
-            }
+            $this->sqliteWrite->query($query);
+            assert(!$this->sqliteWrite->lastErrorCode(), "Error while storing query : $query\n" . $this->sqliteWrite->lastErrorMsg());
         }
 
         return count($queries);

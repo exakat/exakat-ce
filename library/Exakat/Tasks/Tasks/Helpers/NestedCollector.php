@@ -23,7 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 class NestedCollector {
-    const THE_END = 1234;
+    public const THE_END = 1234;
 
     private $previous = array();
     private $current = array(self::THE_END);

@@ -39,6 +39,11 @@ class Git extends Vcs {
         if (preg_match('/git version ([0-9\.]+)/', trim($res), $r)) {
             $this->installed = true;
             $this->version   = $r[1];
+
+            if (file_exists($this->destinationFull)) {
+                $res = shell_exec("cd {$this->destinationFull}/; {$this->executable} branch | grep \\* 2>&1") ?? '';
+                $this->branch = substr(trim($res), 2);
+            }
         } else {
             $this->installed = false;
         }
@@ -64,7 +69,7 @@ class Git extends Vcs {
         $repositoryNormalizedURL = unparse_url($repositoryDetails);
 
         $codePath = dirname($this->destinationFull);
-        $shell = "cd $codePath;GIT_TERMINAL_PROMPT=0 {$this->executable} clone -q ";
+        $shell = "cd $codePath;{$this->executable} clone -q ";
 
         if (!empty($this->branch)) {
             display("Check out with branch '$this->branch'");
@@ -124,23 +129,27 @@ class Git extends Vcs {
         $this->tag = $tag;
     }
 
-    public function getBranch() {
+    public function getBranch(): string {
         if (!file_exists("{$this->destinationFull}/")) {
             return '';
         }
         $res = shell_exec("cd {$this->destinationFull}; {$this->executable} branch | grep \* 2>&1") ?? '';
-        return trim($res, " *\n");
+        $this->branch = trim($res, " *\n");
+        
+        return $this->branch;
     }
 
     public function getRevision() {
         if (!file_exists($this->destinationFull)) {
             return '';
         }
+
         $res = shell_exec("cd {$this->destinationFull}; {$this->executable} rev-parse HEAD 2>&1") ?? '';
         return trim($res);
     }
 
     public function getInstallationInfo() {
+        $this->check();
         $stats = array('installed' => $this->installed === true ? 'Yes' : 'No',
                       );
 
@@ -157,10 +166,15 @@ class Git extends Vcs {
     }
 
     public function getStatus(): array {
+        $name = shell_exec("{$this->executable} config user.name") ?? '';
+        $email = shell_exec("{$this->executable} config user.email") ?? '';
+
         $status = array('vcs'       => 'git',
                         'branch'    => $this->getBranch(),
                         'revision'  => $this->getRevision(),
                         'updatable' => true,
+                        'name'      => $name,
+                        'email  '   => $email,
                        );
 
         return $status;
@@ -212,7 +226,7 @@ class Git extends Vcs {
         return $files;
     }
 
-    public function getDiffFile(string $next): string {
+    public function getDiffFile(string $next): array {
         // Added and removed ?
          $res = shell_exec("cd {$this->destinationFull}; {$this->executable} diff --diff-filter=a --name-only $next -- . ") ?? '';
 
@@ -248,6 +262,49 @@ class Git extends Vcs {
     public function getLastCommitDate(): int {
          return (int) strtotime(trim(shell_exec("cd {$this->destinationFull}; {$this->executable} log -1 --format=%cd") ?? ''));
     }
+
+    public function hasBranch(string $branch = ''): bool {
+        $branch = escapeshellarg($branch);
+        $res = shell_exec("cd {$this->destinationFull}; {$this->executable} branch --list $branch");
+
+        // fatal: A branch named 'freezy-sk-fix-typo' already exists.
+        return !empty($res);
+    }
+
+    public function createBranch(string $branch = ''): bool {
+        $branch = escapeshellarg($branch);
+        $res = shell_exec("cd {$this->destinationFull}; {$this->executable} checkout -q -b $branch");
+
+        // fatal: A branch named 'freezy-sk-fix-typo' already exists.
+        return strpos($res ?? '', 'fatal:') !== 0;
+    }
+
+    public function checkoutBranch(string $branch = ''): bool {
+        if (empty($branch)) {
+            // go back to the last branch
+            $res = shell_exec("cd {$this->destinationFull}; {$this->executable} checkout -q ".$this->branch);
+        } else {
+            $branch = escapeshellarg($branch);
+            $res = shell_exec("cd {$this->destinationFull}; {$this->executable} checkout -q $branch");
+        }
+
+        //error: pathspec 'inexistant branch' did not match any file(s) known to git
+        return strpos($res ?? '', 'error:') !== 0;
+    }
+
+    public function commitFiles(string $message = 'Exakat Cobbler created those files'): bool {
+        $message = escapeshellarg($message);
+
+        shell_exec(<<<SHELL
+cd {$this->destinationFull}; 
+{$this->executable} stage -A ; 
+git commit -m $message
+SHELL
+);
+
+        return true;
+    }
+
 }
 
 ?>

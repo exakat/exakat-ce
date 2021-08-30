@@ -78,8 +78,7 @@ CREATE TABLE cit (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                     end INTEGER,
                     file INTEGER,
                     line INTEGER,
-                    extends STRING DEFAULT "",
-                    attributes STRING DEFAULT ""
+                    extends STRING DEFAULT ""
                   )
 SQL;
         $this->sqlite->query($query);
@@ -488,7 +487,7 @@ SQL
 SELECT cit.name AS class, 
        classconstants.constant AS constant, 
        value, 
-       namespaces.namespace || "\\" || lower(cit.name) AS fullnspath,
+       namespaces.namespace || lower(cit.name) AS fullnspath,
        visibility,
        constant,
        cit.type AS type
@@ -510,7 +509,7 @@ SQL
     public function fetchTableProperty(): Results {
         $res = $this->sqlite->query(<<<'SQL'
 SELECT cit.name AS class, 
-       namespaces.namespace || "\\" || lower(cit.name) AS fullnspath,
+       namespaces.namespace || lower(cit.name) AS fullnspath,
        visibility, 
        property, 
        value,

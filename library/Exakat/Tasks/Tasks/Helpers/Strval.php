@@ -23,7 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 class Strval extends Plugin {
-    const NO_VALUE = null;
+    public const NO_VALUE = null;
 
     private $skipAtoms = array('Trait'         => 1,
                               'Class'          => 1,
@@ -49,6 +49,7 @@ class Strval extends Plugin {
         }
 
         foreach($extras as $extra) {
+            if (is_array($extra)) { continue; }
             if ($extra->noDelimiter === self::NO_VALUE)  {
                 $atom->noDelimiter = self::NO_VALUE;
                 return ;
@@ -79,7 +80,7 @@ class Strval extends Plugin {
             case 'Float' :
             case 'String' :
             case 'Identifier': // Nsname creates a fatal error
-                if (empty($extra)) {
+                if (empty($extras)) {
                     $atom->noDelimiter = trimOnce($atom->code);
                 } else {
                     $noDelimiters = array_column($extras, 'noDelimiter');
@@ -105,7 +106,7 @@ class Strval extends Plugin {
                 break;
 
             case 'Parenthesis' :
-                $atom->noDelimiter = $extras['CODE']->noDelimiter;
+                $atom->noDelimiter = $extras['CODE']->noDelimiter ?? '';
                 break;
 
             case 'Addition' :

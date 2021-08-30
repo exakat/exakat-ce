@@ -25,7 +25,7 @@ namespace Exakat\Tasks;
 use Exakat\Stats;
 
 class Stat extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         $stats = new Stats();

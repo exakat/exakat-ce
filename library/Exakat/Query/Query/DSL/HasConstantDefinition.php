@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class HasConstantDefinition extends DSL {
     public function run(): Command {
-        return new Command('where( __.in("DEFINITION"))');
+        return new Command('where( __.in("DEFINITION").hasLabel("Constant", "Defineconstant"))');
     }
 }
 ?>

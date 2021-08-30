@@ -63,7 +63,7 @@ class ProjectConfig extends Config {
         $this->project = $project;
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         $this->project = $project;
 
         $pathToIni = "{$this->projects_root}{$project}/config.ini";
@@ -164,6 +164,16 @@ class ProjectConfig extends Config {
         if (in_array($this->config['project_vcs'], Vcs::SUPPORTED_VCS)) {
             $this->config['git'] = false; // remove Git, which is by default
             $this->config[$this->config['project_vcs']] = true; // potentially, revert git
+        }
+
+        if (isset($this->config['rules_version_max']) &&
+            !preg_match('/^(\d+)\.(\d+)\.(\d+)$/', $this->config['rules_version_max'])) {
+            $this->config['rules_version_max'] = '';
+        }
+
+        if (isset($this->config['rules_version_min']) &&
+            !preg_match('/^(\d+)\.(\d+)\.(\d+)$/', $this->config['rules_version_min'])) {
+            $this->config['rules_version_min'] = '';
         }
 
         // Calculate the stubs recursivement if it is a folder
@@ -270,7 +280,7 @@ class ProjectConfig extends Config {
                 if (is_array($values)) {
                     $cc2 .= "{$name}[] = " . implode(";\n{$name}[] = ", $values) . ";\n; default value\n\n";
                 } elseif (is_string($values)) {
-                    if (intval($values) === 0) {
+                    if ((int) $values === 0) {
                         $cc2 .= "{$name} = \"$values\";\n; default value\n\n";
                     } else {
                         $cc2 .= "{$name} = $values;\n; default value\n\n";

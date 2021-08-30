@@ -28,18 +28,18 @@ use Exakat\Exceptions\NoSuchDir;
 use Exakat\Exceptions\NoSuchAnalyzer;
 
 class Test extends Tasks {
-    const CONCURENCE = self::NONE;
+    public const CONCURENCE = self::NONE;
 
     public function run(): void {
         // Check for requested file
-        if (!empty($this->config->filename) && !file_exists($this->config->filename)) {
-            throw new NoSuchFile($this->config->filename);
+        if (!empty($this->config->filename) && !file_exists($this->config->filename[0])) {
+            throw new NoSuchFile($this->config->filename[0]);
         } elseif (!empty($this->config->dirname) && !file_exists($this->config->dirname)) {
             throw new NoSuchDir($this->config->filename);
         }
 
         // Check for requested analyze
-        $analyzerName = $this->config->program;
+        $analyzerName = $this->config->program[0];
         if (!$this->rulesets->getClass($analyzerName)) {
             throw new NoSuchAnalyzer($analyzerName, $this->rulesets);
         }
@@ -48,11 +48,12 @@ class Test extends Tasks {
         $args = array ( 1 => 'cleandb',
                         2 => '-p',
                         3 => 'test',
-                        4 => '-stop',
+                        4 => '-Q',
                         );
         $configThema = new Config($args);
 
         $analyze = new CleanDb(self::IS_SUBTASK);
+        $analyze->setConfig($configThema);
         $analyze->run();
 
         display("Cleaning project\n");

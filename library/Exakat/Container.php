@@ -22,12 +22,13 @@
 
 namespace Exakat;
 
+use Exakat\Analyzer\Rulesets;
 use Exakat\Data\Dictionary;
+use Exakat\Data\Methods;
+use Exakat\Exceptions\NoPhpBinary;
 use Exakat\Graph\Graph;
 use Exakat\Reports\Helpers\Docs;
-use Exakat\Data\Methods;
-use Exakat\Analyzer\Rulesets;
-use Exakat\Tasks\Helpers\StubJson;
+use Exakat\Stubs\Stubs;
 
 class Container {
     private $verbose    = 0;
@@ -76,12 +77,7 @@ class Container {
     }
 
     private function stubs(): void {
-        $files = glob($this->config->dir_root.'/stubs/*.json');
-
-        $this->stubs = array();
-        foreach($files as $file) {
-            $this->stubs []= new StubJson($file);
-        }
+        $this->stubs = new Stubs($this->config->dir_root . '/stubs/');
     }
 
     private function docs(): void {
@@ -101,6 +97,9 @@ class Container {
 
     private function php(): void {
         $phpVersion = 'php' . str_replace('.', '', $this->config->phpversion);
+        if (empty($this->config->{$phpVersion})) {
+            throw new NoPhpBinary("No php binary configured for version {$this->config->phpversion}. Update config/exakat.ini or change the running version.");
+        }
         $this->php = new Phpexec($this->config->phpversion, $this->config->{$phpVersion});
     }
 }

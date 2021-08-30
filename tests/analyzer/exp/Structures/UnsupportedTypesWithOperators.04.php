@@ -1,13 +1,13 @@
 <?php
 
-$expected     = array('~fooInt( )', 
-                      '!fooArray( )', 
+$expected     = array('~fooInt( )',
+                      '!fooArray( )',
                       '~fooArray( )',
                      );
 
-$expected_not = array('~foo( )', 
-                      '!fooInt( )', 
-                      '!foo( )', 
+$expected_not = array('~foo( )',
+                      '!fooInt( )',
+                      '!foo( )',
                      );
 
 ?>

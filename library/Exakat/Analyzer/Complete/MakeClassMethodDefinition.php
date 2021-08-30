@@ -122,7 +122,7 @@ class MakeClassMethodDefinition extends Complete {
         $this->prepareQuery();
 
         // Third case for the parents
-        // class only 
+        // class only
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
                 $this->side()

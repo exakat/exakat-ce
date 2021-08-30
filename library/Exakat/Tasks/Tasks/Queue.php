@@ -25,7 +25,7 @@ namespace Exakat\Tasks;
 use Exakat\Exceptions\NoJobqueueStarted;
 
 class Queue extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     private $pipefile = Jobqueue::PATH;
 

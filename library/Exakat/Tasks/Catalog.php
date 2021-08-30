@@ -25,7 +25,7 @@ namespace Exakat\Tasks;
 use Exakat\Reports\Reports;
 
 class Catalog extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         $data = array();

@@ -26,7 +26,7 @@ use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Exceptions\NoSuchProject;
 
 class Clean extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     protected $logname = self::LOG_NONE;
 
@@ -39,7 +39,6 @@ class Clean extends Tasks {
                                   'Premier-markdown.md',
                                   'Premier-sqlite.sqlite',
                                   'Premier-text.txt',
-                                  'datastore.sqlite',
                                   'magicnumber.sqlite',
                                   'report.html',
                                   'report.md',
@@ -55,9 +54,11 @@ class Clean extends Tasks {
                                   'bigArrays.txt',
                                   'counts.sqlite',
                                   'stats.txt',
-                                  'dump.sqlite',
                                   'faceted.zip',
                                   'faceted2.zip',
+
+                                  'datastore.sqlite',
+                                  'dump.sqlite',
                                  );
 
     public function run(): void {

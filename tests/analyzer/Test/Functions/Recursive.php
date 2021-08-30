@@ -7,7 +7,7 @@ use Test\Analyzer;
 include_once dirname(__DIR__, 2).'/Test/Analyzer.php';
 
 class Recursive extends Analyzer {
-    /* 10 methods */
+    /* 11 methods */
 
     public function testFunctions_Recursive01()  { $this->generic_test('Functions_Recursive.01'); }
     public function testFunctions_Recursive02()  { $this->generic_test('Functions_Recursive.02'); }
@@ -19,5 +19,6 @@ class Recursive extends Analyzer {
     public function testFunctions_Recursive08()  { $this->generic_test('Functions/Recursive.08'); }
     public function testFunctions_Recursive09()  { $this->generic_test('Functions/Recursive.09'); }
     public function testFunctions_Recursive10()  { $this->generic_test('Functions/Recursive.10'); }
+    public function testFunctions_Recursive11()  { $this->generic_test('Functions/Recursive.11'); }
 }
 ?>

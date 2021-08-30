@@ -23,6 +23,7 @@
 namespace Exakat\Analyzer\Dump;
 
 use Exakat\Dump\Dump;
+use Exakat\Reports\Helpers\Results;
 
 abstract class AnalyzerResults extends AnalyzerDump {
     protected $storageType = self::QUERY_RESULTS;
@@ -73,13 +74,6 @@ abstract class AnalyzerResults extends AnalyzerDump {
         $this->dumpQueries = array();
 
         return 0;
-    }
-
-    public function getDump(): array {
-        $dump      = Dump::factory($this->config->dump);
-
-        $res = $dump->fetchAnalysers(array($this->shortAnalyzer));
-        return $res->toArray();
     }
 }
 

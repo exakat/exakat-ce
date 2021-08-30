@@ -56,7 +56,7 @@ class Bazaar extends Vcs {
         }
     }
 
-    public function getBranch() {
+    public function getBranch(): string {
         $this->check();
 
         $res = shell_exec("cd {$this->destinationFull}; {$this->executable} version-info 2>&1 | grep branch-nick") ?? '';

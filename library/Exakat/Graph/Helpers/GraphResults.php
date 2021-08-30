@@ -25,9 +25,9 @@ namespace Exakat\Graph\Helpers;
 use stdClass;
 
 class GraphResults implements \ArrayAccess, \Iterator, \Countable {
-    const EMPTY   = 0;
-    const SCALAR  = 1;
-    const ARRAY   = 2;
+    public const EMPTY   = 0;
+    public const SCALAR  = 1;
+    public const ARRAY   = 2;
 
     private $type = self::EMPTY;
     private $data  = null;
@@ -92,7 +92,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             }
         }
         if ($extra !== null) {
-            $results = array_map(function ($x) use ($extra) { return array_merge($x, $extra); }, $result);
+            $result = array_map(function ($x) use ($extra) { return array_merge($x, $extra); }, $result);
         }
 
         $this->data = $result;
@@ -108,7 +108,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             $result[] = array('', array_pop($value));
         }
         if ($extra !== null) {
-            $results = array_map($result, function ($x) use ($extra) { return array_merge($x, $extra); });
+            $result = array_map($result, function ($x) use ($extra) { return array_merge($x, $extra); });
         }
 
         $this->data = $result;

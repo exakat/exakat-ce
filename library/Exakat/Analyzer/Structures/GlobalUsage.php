@@ -37,9 +37,10 @@ class GlobalUsage extends Analyzer {
              ->codeIs('$GLOBALS', self::TRANSLATE, self::CASE_SENSITIVE);
         $this->prepareQuery();
 
-        // $GLOBALS as a whole
+        // $GLOBALS as an array
         $this->atomIs('Array')
-             ->outIs('VARIABLE')
+             ->hasNoIn('VARIABLE')
+             ->outIsIE('VARIABLE')
              ->codeIs('$GLOBALS', self::TRANSLATE, self::CASE_SENSITIVE)
              ->back('first');
         $this->prepareQuery();

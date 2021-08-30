@@ -45,7 +45,7 @@ class RulesetConfig extends Config {
         $this->remoteIniFile = false;
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         if (empty($this->remoteIniFile)) {
             return self::NOT_LOADED;
         }
@@ -79,7 +79,7 @@ class RulesetConfig extends Config {
         return 'config/rulesets.ini';
     }
 
-    public static function cleanRulesets(array $rulesets) {
+    public static function cleanRulesets(array $rulesets): array {
         // hash=>array
         $rulesets = array_map('array_values', $rulesets);
 

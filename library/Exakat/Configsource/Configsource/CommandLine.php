@@ -44,16 +44,26 @@ class CommandLine extends Config {
 
                                  '-debug'     => 'debug',
 
-                                 '-nodep'     => 'noDependencies',
-                                 '-norefresh' => 'noRefresh',
-                                 '-text'      => 'text',
-                                 '-o'         => 'output',
-                                 '-stop'      => 'stop',
-                                 '-ping'      => 'ping',
-                                 '-restart'   => 'restart',
-                                 '-start'     => 'start',
-                                 '-collect'   => 'collect',
-                                 '-load-dump' => 'load_dump', // for Dump
+                                 '--inplace'  => 'inplace',
+
+                                 '-nodep'      => 'noDependencies',
+                                 '--nodep'     => 'noDependencies',
+                                 '-norefresh'  => 'noRefresh',
+                                 '--norefresh' => 'noRefresh',
+                                 '-text'       => 'text',
+                                 '--text'      => 'text',
+                                 '-o'          => 'output',
+                                 '-collect'    => 'collect',
+                                 '-load-dump'  => 'load_dump', // for Dump
+                                 '--load-dump' => 'load_dump', // for Dump
+
+                                 '-load-dump'  => 'load_dump', // for clean : Reports
+                                 '--load-dump' => 'load_dump', // for clean : dump/datastore
+
+                                 '-stop'       => 'stop',
+                                 '-ping'       => 'ping',
+                                 '-restart'    => 'restart',
+                                 '-start'      => 'start',
 
     // Vcs
                                  '-svn'       => 'svn',
@@ -104,8 +114,15 @@ class CommandLine extends Config {
                                     '-baseline-use'  => 'baseline_use',
                                     '--baseline-use' => 'baseline_use',
 
+                                    '--rules-version-max' => 'rules_version_max',
+                                    '--rules-version-min' => 'rules_version_min',
+
+                                    '--inplace'     => 'inplace',
+
                                     // This one is finally an array
                                     '-c'            => 'configuration',
+
+                                    '-C'            => 'directives',
                                  );
 
     public static $commands = array('analyze'       => 1,
@@ -113,6 +130,8 @@ class CommandLine extends Config {
                                     'constantes'    => 1,
                                     'clean'         => 1,
                                     'cleandb'       => 1,
+                                    'cobble'        => 1,
+                                    'testcobble'    => 1,
                                     'dump'          => 1,
                                     'doctor'        => 1,
                                     'errors'        => 1,
@@ -123,24 +142,17 @@ class CommandLine extends Config {
                                     'init'          => 1,
                                     'catalog'       => 1,
                                     'remove'        => 1,
-                                    'server'        => 1,
-                                    'api'           => 1,
-                                    'jobqueue'      => 1,
-                                    'queue'         => 1,
                                     'load'          => 1,
-                                    'diff'          => 1,
                                     'project'       => 1,
                                     'report'        => 1,
                                     'results'       => 1,
                                     'stat'          => 1,
                                     'status'        => 1,
                                     'version'       => 1,
-                                    'onepage'       => 1,
-                                    'onepagereport' => 1,
+                                    'onefile'       => 1,
                                     'test'          => 1,
                                     'update'        => 1,
                                     'upgrade'       => 1,
-                                    'fetch'         => 1,
                                     'config'        => 1,
                                     'show'          => 1,
                                     'baseline'      => 1,
@@ -151,12 +163,12 @@ class CommandLine extends Config {
         $this->config['command'] = '<no-command>';
         $this->config['project'] = new Project();  // Default to no object
     }
-    
-    public function setArgs(array $args = array()) : void {
+
+    public function setArgs(array $args = array()): void {
         $this->args = $args;
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         if (empty($this->args)) {
             return self::NOT_LOADED;
         }
@@ -194,6 +206,22 @@ class CommandLine extends Config {
 
                 // Normal case is here
                 switch ($config) {
+                    case 'directives' :
+                        $pos = strpos($args[$id + 1], '=');
+                        if ($pos === false) {
+                            // -C a => Ignore
+                            continue 3;
+                        }
+                        $name = substr($args[$id + 1], 0, $pos);
+                        $value = substr($args[$id + 1], $pos + 1);
+
+                        if (isset($this->config['directives'][$name])) {
+                            $this->config['directives'][$name] = array($value);
+                        } else {
+                            $this->config['directives'][$name][] = $value;
+                        }
+                        break;
+
                     case 'project' :
                         if ($this->config['project']->isDefault()) {
                             $this->config['project'] = new Project($args[$id + 1]);
@@ -236,16 +264,21 @@ class CommandLine extends Config {
                         }
                         break;
 
+                    case 'filename' :
+                        if (isset($this->config['filename'])) {
+                            $this->config['filename'][] = $args[$id + 1];
+                        } else {
+                            $this->config['filename'] = array($args[$id + 1]);
+                        }
+                        $this->config['filename'] = array_unique($this->config['filename']);
+                        break;
+
                     case 'program' :
                         if (isset($this->config['project_rulesets'])) {
                             // program and project_rulesets are mutually exclusive
                             break;
                         } elseif (!isset($this->config['program'])) {
-                            $this->config['program'] = $args[$id + 1];
-                        } elseif (is_string($this->config['program'])) {
-                            $this->config['program'] = array($this->config['program'],
-                                                             $args[$id + 1],
-                                                            );
+                            $this->config['program'] = array($args[$id + 1]);
                         } else {
                             $this->config['program'][] = $args[$id + 1];
                         }

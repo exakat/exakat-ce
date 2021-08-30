@@ -29,8 +29,8 @@ class AtomGroup {
         $this->atomCount = $init;
     }
 
-    public function factory(string $atom, int $line): Atom {
-        return new Atom(++$this->atomCount, $atom, $line);
+    public function factory(string $atom, int $line, string $ws = ''): Atom {
+        return new Atom(++$this->atomCount, $atom, $line, $ws);
     }
 }
 

@@ -190,14 +190,16 @@ GREMLIN;
     // Can't move this to Query, because atoms and functioncall dictionaries are still unloaded
     private function fixFullnspathFunctions(): void {
         display('fixing Fullnspath for Functions');
+
         // Fix fullnspath with definition local to namespace when there is a definition
         // namesapce x { function substr() ; substr(); }
 
         $query = <<<'GREMLIN'
 g.V().hasLabel("Functioncall", "Identifier", "Nsname")
      .not(__.in("NAME").not(hasLabel("Functioncall")))
+     .not(__.in("CLASS").hasLabel("Instanceof"))
      .not(has("absolute", true))
-     .not(has("token", 'T_NAME_QUALIFIED'))
+     .not(has("token", within('T_NAME_QUALIFIED', 'T_NS_SEPARATOR')))
      .has("fullnspath")
      .as("identifier")
      .sideEffect{ cc = it.get().value("fullnspath");}
