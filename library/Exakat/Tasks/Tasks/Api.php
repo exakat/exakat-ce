@@ -23,9 +23,9 @@
 namespace Exakat\Tasks;
 
 class Api extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
-    const PORT = 8447;
+    public const PORT = 8447;
 
     public function run(): void {
         if ($this->config->stop    === true ||

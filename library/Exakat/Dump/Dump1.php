@@ -291,7 +291,7 @@ SQL;
     }
 
     public function fetchAnalysers(array $analysers): Results {
-        $query = 'SELECT fullcode, file, line, analyzer, class, namespace FROM results WHERE analyzer IN (' . makeList($analysers) . ')';
+        $query = 'SELECT fullcode, file, line, analyzer, class, namespace, function FROM results WHERE analyzer IN (' . makeList($analysers) . ')';
         $res = $this->sqlite->query($query);
 
         return new Results($res, array('phpsyntax' => array('fullcode' => 'htmlcode')));

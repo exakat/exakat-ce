@@ -1,6 +1,6 @@
 <?php
 
-$expected     = array('array(3 => 4) + $i', 
+$expected     = array('array(3 => 4) + $i',
                       '$a + $i',
                      );
 

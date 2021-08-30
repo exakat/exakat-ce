@@ -27,6 +27,8 @@ use Exakat\Graph\Helpers\GraphResults;
 abstract class Graph {
     protected $config = null;
 
+    protected $initialId = null;
+
     public const GRAPHDB = array('nogremlin',
                                  'gsneo4j',
                                  'gsneo4jV3',
@@ -61,6 +63,12 @@ abstract class Graph {
 
     abstract public function clean(): void;
 
+    public function empty(): void {
+        // don't catch max(id) here
+        $this->query('g.V().drop();');
+        $this->query('g.E().drop();');
+    }
+
     // Produces an id for storing a new value.
     // null means that the graph will handle it.
     // This is not the case of all graph : tinkergraph doesn't.
@@ -69,7 +77,7 @@ abstract class Graph {
     }
 
     public function fixId($id) {
-        return $id;
+        return $id + $this->initialId;
     }
 
     public static function getConnexion(string $gremlin = null): self {

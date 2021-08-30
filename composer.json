@@ -27,7 +27,6 @@
         ]
     },
     "require": {
-        "php": "~7.3",
         "ext-curl": "*",
         "ext-hash": "*",
         "ext-json": "*",
@@ -42,6 +41,7 @@
     "require-dev": {
         "phpunit/phpunit": "*",
         "friendsofphp/php-cs-fixer": "*",
-        "php-parallel-lint/php-parallel-lint": "^1.2"
+        "php-parallel-lint/php-parallel-lint": "^1.2",
+        "symplify/static-detector": "^0.3.51"
     }
 }

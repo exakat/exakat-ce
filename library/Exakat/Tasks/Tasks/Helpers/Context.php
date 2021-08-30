@@ -23,18 +23,20 @@
 namespace Exakat\Tasks\Helpers;
 
 class Context {
-    const CONTEXT_CLASS        = 'Class';
-    const CONTEXT_INTERFACE    = 'Interface';
-    const CONTEXT_TRAIT        = 'Trait';
-    const CONTEXT_FUNCTION     = 'Function';
-    const CONTEXT_NEW          = 'New';
-    const CONTEXT_NOSEQUENCE   = 'NoSequence';
+    public const CONTEXT_CLASS        = 'Class';
+    public const CONTEXT_INTERFACE    = 'Interface';
+    public const CONTEXT_TRAIT        = 'Trait';
+    public const CONTEXT_FUNCTION     = 'Function';
+    public const CONTEXT_NEW          = 'New';
+    public const CONTEXT_NOSEQUENCE   = 'NoSequence';
+    public const CONTEXT_LIST         = 'List';
     private $contexts = array(self::CONTEXT_CLASS        => array(0),
                               self::CONTEXT_INTERFACE    => array(0),
                               self::CONTEXT_TRAIT        => array(0),
                               self::CONTEXT_FUNCTION     => array(0),
                               self::CONTEXT_NEW          => array(0),
                               self::CONTEXT_NOSEQUENCE   => array(0),
+                              self::CONTEXT_LIST         => array(0),
                          );
 
     public function getCount(string $context = self::CONTEXT_NOSEQUENCE): bool {

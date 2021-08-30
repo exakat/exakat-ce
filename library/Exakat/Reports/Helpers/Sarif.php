@@ -96,6 +96,8 @@ class Sarif {
             return;
         }
 
+        // Sometimes, $line = 0 or -1 (convention for results which have no code anchor). We turn them to 1, by default
+        if ($line <= 1) { $line = 1; }
         $this->results[] = array('ruleId'    => $ruleId,
                                  'ruleIndex' => $this->rulesIndex[$ruleId],
                                  //"rule"      => $ruleId,  // same as ruleId?

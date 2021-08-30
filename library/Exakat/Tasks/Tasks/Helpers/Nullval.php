@@ -23,7 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 class Nullval extends Plugin {
-    const NO_VALUE = null;
+    public const NO_VALUE = null;
 
     public $name = 'isNull';
     public $type = 'boolean';
@@ -66,7 +66,7 @@ class Nullval extends Plugin {
                 break;
 
             case 'Parenthesis' :
-                $atom->isNull = $extras['CODE']->isNull;
+                $atom->isNull = $extras['CODE']->isNull ?? false;
                 break;
 
             case 'Ternary' :

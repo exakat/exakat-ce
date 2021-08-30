@@ -50,11 +50,13 @@ class ExakatConfig extends Config {
                               'nogremlin'     => 'None',
                               );
 
+    // todo : list the authorized values here.
+
     public function __construct(string $projects_root) {
         $this->projects_root = $projects_root;
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         // Default values
         $inis =  array(
                     array('graphdb'            => 'gsneo4jv3',
@@ -142,6 +144,16 @@ class ExakatConfig extends Config {
             }
         }
 
+        if (isset($this->config['rules_version_max']) &&
+            !preg_match('/^(\d+)\.(\d+)\.(\d+)$/', $this->config['rules_version_max'])) {
+            $this->config['rules_version_max'] = '';
+        }
+
+        if (isset($this->config['rules_version_min']) &&
+            !preg_match('/^(\d+)\.(\d+)\.(\d+)$/', $this->config['rules_version_min'])) {
+            $this->config['rules_version_min'] = '';
+        }
+
         // Calculate the stubs recursivement if it is a folder
         // all path are absolute, may be placed anywhere
         if (!isset($this->config['stubs'])) {
@@ -172,7 +184,7 @@ class ExakatConfig extends Config {
                 if (is_dir($path)) {
                     chdir($path);
                     $allFiles = rglob('.');
-                    $allFiles = array_map(function ($path) use ($stub) { return $stub . ltrim($path, '.'); }, $allFiles);
+                    $allFiles = array_map(function (string $path) use ($stub): string { return $stub . ltrim($path, '.'); }, $allFiles);
                     chdir($d);
 
                     $stubs[$stub] = $allFiles;

@@ -33,11 +33,11 @@ class Query {
     public const STOP_QUERY = 'filter{ false; }';
     public const NO_QUERY   = 'filter{ true;  }';
 
-    const TO_GREMLIN = true;
-    const NO_GREMLIN = false;
+    public const TO_GREMLIN = true;
+    public const NO_GREMLIN = false;
 
-    const QUERY_RUNNING = true;
-    const QUERY_STOPPED = false;
+    public const QUERY_RUNNING = true;
+    public const QUERY_STOPPED = false;
 
     private const SACK = '.withSack(["m":[], "processed":0, "total":0])';
 

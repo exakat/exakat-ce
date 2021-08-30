@@ -23,6 +23,8 @@
 namespace Exakat\Vcs;
 
 use Exakat\Exceptions\HelperException;
+use Exakat\Exceptions\VcsSupport;
+use Exakat\Exceptions\VcsError;
 
 class Zip extends Vcs {
     private $executable = 'unzip';
@@ -42,10 +44,18 @@ class Zip extends Vcs {
         $this->check();
 
         $binary = file_get_contents($source);
+        if (empty($binary)) {
+            throw new VcsError("Error while loading zip archive : archive is empty. Aborting\n");
+        }
         $archiveFile = tempnam(sys_get_temp_dir(), 'archiveZip') . '.zip';
         file_put_contents($archiveFile, $binary);
 
-        shell_exec("{$this->executable} $archiveFile -d {$this->destinationFull}");
+        $error = shell_exec("{$this->executable} $archiveFile -d {$this->destinationFull}") ?? '';
+        
+        // folder will not be created in case of error
+        if (!file_exists($this->destinationFull)) {
+            throw new VcsError("Error while extracting zip archive : \"$error\". Aborting\n");
+        }
 
         unlink($archiveFile);
     }
@@ -72,6 +82,24 @@ class Zip extends Vcs {
                        );
 
         return $status;
+    }
+
+    public function createBranch(string $branch): bool {
+        throw new VcsSupport('Zip', ' cannot create a new branch');
+
+        return false;
+    }
+
+    public function checkoutBranch(string $branch = ''): bool {
+        throw new VcsSupport('Zip', ' cannot checkout a branch');
+
+        return false;
+    }
+
+    public function commitFiles(string $string): bool {
+        throw new VcsSupport('Zip', ' cannot commit files');
+
+        return false;
     }
 }
 

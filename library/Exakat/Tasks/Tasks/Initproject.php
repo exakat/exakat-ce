@@ -31,7 +31,7 @@ use Exakat\Vcs\Vcs;
 use Exakat\Vcs\None;
 
 class Initproject extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         if ($this->config->project === 'default') {
@@ -215,7 +215,7 @@ class Initproject extends Tasks {
         }
 
         try {
-            $vcs->clone((string) $repositoryURL);
+            $vcs->clone($repositoryURL);
         } catch (VcsError $e) {
             rename($tmpPath, $finalPath);
 

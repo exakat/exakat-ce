@@ -28,7 +28,7 @@ use Exakat\Exceptions\NoSuchProject;
 use Exakat\Config as Configuration;
 
 class Config extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         $project = $this->config->project;

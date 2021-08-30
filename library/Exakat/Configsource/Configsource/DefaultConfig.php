@@ -46,6 +46,7 @@ class DefaultConfig extends Config {
                                'text'           => false,
                                'output'         => false,
                                'debug'          => false,
+                               'inplace'        => false,
 
                                'collect'        => false,
 
@@ -166,7 +167,7 @@ class DefaultConfig extends Config {
         $this->config['project'] = new Project();
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         return 'default';
     }
 }

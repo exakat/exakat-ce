@@ -23,7 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 class Intval extends Plugin {
-    const NO_VALUE = '';
+    public const NO_VALUE = '';
 
     public $name = 'intval';
     public $type = 'integer';
@@ -49,6 +49,7 @@ class Intval extends Plugin {
         }
 
         foreach($extras as $extra) {
+            if (is_array($extra)) { continue;}
             if ($extra->intval === self::NO_VALUE)  {
                 $atom->intval = self::NO_VALUE;
                 return ;
@@ -63,6 +64,8 @@ class Intval extends Plugin {
                     $actual = bindec(substr($value, 2));
                 } elseif (strtolower(substr($value, 0, 2)) === '0x') {
                     $actual = hexdec(substr($value, 2));
+                } elseif (strtolower(substr($value, 0, 2)) === '0o') { // PHP 8.1
+                    $actual = octdec(substr($value, 2));
                 } elseif (strtolower($value[0]) === '0') {
                     // PHP 7 will just stop.
                     // PHP 5 will work until it fails
@@ -105,7 +108,7 @@ class Intval extends Plugin {
                 break;
 
             case 'Parenthesis' :
-                $atom->intval = $extras['CODE']->intval;
+                $atom->intval = $extras['CODE']->intval ?? 0;
                 break;
 
             case 'Addition' :

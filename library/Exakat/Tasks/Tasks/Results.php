@@ -31,7 +31,7 @@ use Exakat\Exceptions\NoDump;
 use Exakat\Exceptions\NeedsAnalyzerThema;
 
 class Results extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         if ($this->config->project->isDefault()) {

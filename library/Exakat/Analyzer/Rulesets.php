@@ -155,7 +155,7 @@ class Rulesets implements RulesetsInterface {
         self::$instanciated = array();
     }
 
-    public function getInstance(string $name) : Analyzer {
+    public function getInstance(string $name): Analyzer {
         if ($analyzer = $this->getClass($name)) {
             if (!isset(self::$instanciated[$analyzer])) {
                 self::$instanciated[$analyzer] = new $analyzer();

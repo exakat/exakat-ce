@@ -38,7 +38,7 @@ use Exception;
 use Exakat\Vcs\Vcs;
 
 class Project extends Tasks {
-    const CONCURENCE = self::NONE;
+    public const CONCURENCE = self::NONE;
 
     protected $rulesetsToRun = array('Analyze',
                                      'Preferences',
@@ -218,7 +218,10 @@ class Project extends Tasks {
         display('Initial dump');
         $dumpConfig = $this->config->duplicate(array('collect'            => true,
                                                      'load_dump'          => true,
-                                                     'project_rulesets'   => array('First')));
+                                                     'project_rulesets'   => array('First'),
+                                                     'program'            => '',
+                                                     )
+                                                );
         $firstDump = new Dump(self::IS_SUBTASK);
         $firstDump->setConfig($dumpConfig);
         $firstDump->run();
@@ -277,7 +280,7 @@ class Project extends Tasks {
         $begin = $end;
     }
 
-    private function analyzeOne(string $analyzers, int $audit_start, bool $verbose): void {
+    private function analyzeOne(array $analyzers, int $audit_start, bool $verbose): void {
         $this->addSnitch(array('step'    => 'Analyzer',
                                'project' => $this->config->project));
 

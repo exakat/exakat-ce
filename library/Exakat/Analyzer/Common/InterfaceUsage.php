@@ -28,7 +28,7 @@ use Exakat\Analyzer\Analyzer;
 class InterfaceUsage extends Analyzer {
     protected $interfaces = array();
 
-    public function setInterfaces($interfaces) {
+    public function setInterfaces(array $interfaces): void {
         $this->interfaces = $interfaces;
     }
 

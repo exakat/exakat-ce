@@ -25,6 +25,7 @@ declare(strict_types=1);
 use Exakat\Exceptions\NoSuchDir;
 use Exakat\Container;
 use Exakat\Exceptions\WrongParameterType;
+use Exakat\Analyzer\Analyzer;
 
 const INI_PROCESS_SECTIONS      = true;
 const INI_DONT_PROCESS_SECTIONS = false;
@@ -383,7 +384,7 @@ function PHPSyntax(string $code) : string {
     $php = highlight_string("<?php \n{$code}\n ?>", true);
     $php = substr($php, 85, -40);
     if (substr($php, 0, 7) === '</span>') {
-        $php = substr($php, 7, 10000);
+        $php = substr($php, 7, 20000);
     } else {
         $php = '<span style="color: #0000BB">' . $php;
     }
@@ -606,6 +607,37 @@ function raiseDimensions($array, $split='/') : array {
     return $return;
 }
 
+function checkVersionRange(string $range, string $version) : bool {
+    // this handles Any version of PHP
+    if ($range === Analyzer::PHP_VERSION_ANY) {
+        return true;
+    }
+    
+    // version and above
+    if (($range[-1] === '+') && version_compare($version, $range) >= 0) {
+        return true;
+    }
+    
+    // up to version
+    if (($range[-1] === '-') && version_compare($version, $range) < 0) {
+        return true;
+    }
+    
+    // version range 1.2.3-4.5.6
+    if (strpos($range, '-') !== false) {
+        list($lower, $upper) = explode('-', $range);
+        return version_compare($version, $lower) >= 0 && version_compare($version, $upper) <= 0;
+    }
+    
+    // One version only
+    if (version_compare($version, $range) == 0) {
+        return true;
+    }
+    
+    // Default behavior if we don't understand :
+    return false;
+}
+
 function sort_dependencies(array $array, int $level = 0) : array {
     $return = array();
     $next = array();
@@ -682,6 +714,10 @@ function exakat(string $what) {
     }
 
     return $container->$what;
+}
+
+function flatten(array $array) : string {
+    return implode('', $array);
 }
 
 ?>

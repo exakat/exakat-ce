@@ -36,7 +36,7 @@ class AtomIsNot extends DSL {
         }
 
         assert(func_num_args() <= 2, 'Too many arguments for ' . __METHOD__);
-        $this->assertAtom($atoms);
+        assert($this->assertAtom($atoms));
         $diff = $this->normalizeAtoms($atoms);
         if (empty($diff)) {
             return new Command(Query::NO_QUERY);

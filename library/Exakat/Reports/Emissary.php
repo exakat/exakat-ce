@@ -24,6 +24,7 @@ namespace Exakat\Reports;
 
 use Exakat\Analyzer\Analyzer;
 use Exakat\Reports\Helpers\Highchart;
+use Exakat\Reports\Helpers\Section;
 use Exakat\Config;
 use Exakat\Exakat;
 use Exakat\Phpexec;
@@ -33,9 +34,9 @@ use Exakat\Configsource\DatastoreConfig;
 use Exakat\Tasks\Helpers\BaselineStash;
 
 class Emissary extends Reports {
-    const FILE_FILENAME  = 'emissary';
-    const FILE_EXTENSION = '';
-    const CONFIG_YAML    = 'Emissary';
+    public const FILE_FILENAME  = 'emissary';
+    public const FILE_EXTENSION = '';
+    public const CONFIG_YAML    = 'Emissary';
 
     protected $projectPath     = null;
     protected $finalName       = null;
@@ -53,13 +54,8 @@ class Emissary extends Reports {
 
     private $baseHTML = '';
 
-    const TOPLIMIT = 10;
-    const LIMITGRAPHE = 40;
-
-    const NOT_RUN      = 'Not Run';
-    const YES          = 'Yes';
-    const NO           = 'No';
-    const INCOMPATIBLE = 'Incompatible';
+    public const TOPLIMIT = 10;
+    public const LIMITGRAPHE = 40;
 
     private $inventories = array('constants'      => 'Constants',
                                  'classes'        => 'Classes',
@@ -567,7 +563,7 @@ HTML;
                 $parents[$row['id']] = array();
             } else {
                 array_collect_by($parents, $row['id'],(intval($row['extends']) > 0 ? $row['extends'] : 'class ' . $row['extends']));
-                array_collect_by($children, (intval($row['extends']) > 0 ? $row['extends'] : 'class ' . $row['extends']), $row['id']);
+                array_collect_by($children, ( (int) $row['extends'] > 0 ? $row['extends'] : 'class ' . $row['extends']), $row['id']);
             }
             $names[$row['id']] = $row['type'] . ' ' . $namespaces[$row['namespaceId']] . $row['name'];
         }
@@ -1088,7 +1084,7 @@ HTML;
         ));
 
         $result = $this->dump->fetchAnalysersCounts($list);
-        $result->filter(function (array $x): bool { return substr($x['analyzer'], 0, 7) !== 'Common';});
+        $result->filter(function (array $x): bool { return substr($x['analyzer'], 0, 6) !== 'Common';});
 
         $baseHTML = $this->getBasedPage($section->source);
 
@@ -1747,7 +1743,7 @@ JAVASCRIPTCODE;
 
 //        $colors = array('7900E5', 'BB00E1', 'DD00BF', 'D9007B', 'D50039', 'D20700', 'CE4400', 'CA8000', 'C6B900', '95C200', '59BF00', );
 //        $colors = array('7900E5', 'DD00BF', 'D50039', 'CE4400', 'C6B900', '59BF00');
-        $colors = array('59BF00', '59BF00', '59BF00', 'BEC500', 'CB6C00', 'D20700', 'D80064', 'DE00D7', '7900E5', '7900E5','7900E5',);
+        $colors = array('59BF00', '59BF00', '59BF00', 'BEC500', 'CB6C00', 'D20700', 'D80064', 'DE00D7', '7900E5', '7900E5', '7900E5', );
         // This must be the same lenght than the list of versions
 
         $results = $this->dump->fetchAnalysersCounts(array_keys($analyzers));
@@ -1796,6 +1792,10 @@ JAVASCRIPTCODE;
         $table []= '<tr><td>&nbsp;</td><td>Compilation</td><td>' . implode('</td><td>', $incompilable) . "</td></tr>\n";
         $data = array_merge($data, $data2);
         foreach($data as $name => $row) {
+            if (!class_exists("\Exakat\Analyzer\$name")) {
+                continue;
+            }
+
             $analyzer = $this->rulesets->getInstance($name, null, $this->config);
             if ($analyzer === null) {
                 continue;
@@ -2510,7 +2510,7 @@ HTML;
         return $return;
     }
 
-    private function generateAttributeInventory(Section $section) : void {
+    private function generateAttributeInventory(Section $section): void {
         $res = $this->dump->fetchTable('cit');
         $cit = array();
         foreach($res->toArray() as $row) {
@@ -2535,18 +2535,18 @@ HTML;
             // todo Add al lthe other types
             // todo add color syntax
             if (in_array($row['type'], array('class', 'interface', 'trait'))) {
-                $location = $row['type']. ' '.$cit[$row['type']][$row['type_id']] . '';
+                $location = $row['type'] . ' ' . $cit[$row['type']][$row['type_id']] . '';
             } elseif ($row['type'] === 'function') {
-                $location = 'function '.$functions[$row['type']][$row['type_id']] . ' ()';
+                $location = 'function ' . $functions[$row['type']][$row['type_id']] . ' ()';
             } elseif ($row['type'] === 'classconstant') {
-                $location = 'const '.$classconstants[$row['type_id']];
+                $location = 'const ' . $classconstants[$row['type_id']];
             } else {
                 $location = $row['type'];
             }
-            $theTable[] = '<tr><td>'.$row['attribute'].'</td><td>'.$location.'</td></tr>';
+            $theTable[] = '<tr><td>' . $row['attribute'] . '</td><td>' . $location . '</td></tr>';
         }
 
-        $theTable = '<table><tr><th>Attribute</th><th>Location</th></tr>'.implode(PHP_EOL, $theTable).'</table>';
+        $theTable = '<table><tr><th>Attribute</th><th>Location</th></tr>' . implode(PHP_EOL, $theTable) . '</table>';
 
         $html = $this->getBasedPage($section->source);
         $html = $this->injectBloc($html, 'TITLE', $section->title);
@@ -2924,9 +2924,16 @@ HTML
         $couldBePrivate = array();
         foreach($res->toArray() as $row) {
             if (!preg_match('/(class|interface|trait) (\S+) /i', $row['class'], $classname)) {
+                // todo : should log this
                 continue;
             }
-            $fullnspath = $row['namespace'] . '\\' . strtolower($classname[2]);
+
+            if (!preg_match('/(function) (\S+?)\(/i', $row['fullcode'], $methodname)) {
+                // todo : should log this
+                continue;
+            }
+
+            $fullnspath = $row['namespace'] . '\\' . strtolower($classname[2]) . '::' . mb_strtolower($methodname[2]);
 
             if (isset($couldBePrivate[$fullnspath])) {
                 $couldBePrivate[$fullnspath][] = $row['fullcode'];
@@ -2939,9 +2946,16 @@ HTML
         $couldBeProtected = array();
         foreach($res->toArray() as $row) {
             if (!preg_match('/(class|interface|trait) (\S+) /i', $row['class'], $classname)) {
+                // todo : should log this
                 continue;
             }
-            $fullnspath = $row['namespace'] . '\\' . strtolower($classname[2]);
+
+            if (!preg_match('/(function) (\S+?)\(/i', $row['fullcode'], $methodname)) {
+                // todo : should log this
+                continue;
+            }
+
+            $fullnspath = $row['namespace'] . '\\' . strtolower($classname[2]) . '::' . mb_strtolower($methodname[2]);
 
             if (isset($couldBeProtected[$fullnspath])) {
                 $couldBeProtected[$fullnspath][] = $row['fullcode'];
@@ -2973,16 +2987,14 @@ HTML
             $visibilities = array('&nbsp;', '&nbsp;', '&nbsp;', '&nbsp;', '&nbsp;', '&nbsp;');
             $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:green"></i>';
 
-            if (isset($couldBePrivate[$row['fullnspath']]) &&
-                in_array($row['method'], $couldBePrivate[$row['fullnspath']], \STRICT_COMPARISON)) {
-                    $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
-                    $visibilities[$ranking['private']] = '<i class="fa fa-star" style="color:green"></i>';
+            if (isset($couldBePrivate[$row['fullnspath']])) {
+                $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
+                $visibilities[$ranking['private']] = '<i class="fa fa-star" style="color:green"></i>';
             }
 
-            if (isset($couldBeProtected[$row['fullnspath']]) &&
-                in_array($row['method'], $couldBeProtected[$row['fullnspath']], \STRICT_COMPARISON)) {
-                    $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
-                    $visibilities[$ranking['protected']] = '<i class="fa fa-star" style="color:#FFA700"></i>';
+            if (isset($couldBeProtected[$row['fullnspath']])) {
+                $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
+                $visibilities[$ranking['protected']] = '<i class="fa fa-star" style="color:#FFA700"></i>';
             }
 
             $aClass[] = '<tr><td>&nbsp;</td><td>' . PHPSyntax($row['method']) . '</td><td class="exakat_short_text">' .
@@ -3025,8 +3037,8 @@ HTML
                 continue; // it is an interface or a trait
             }
             $fullnspath = $row['namespace'] . '\\' . strtolower($classname[1]);
-
             if (!preg_match('/^(.+) = /i', $row['fullcode'], $code)) {
+                // todo : should log this
                 continue;
             }
 
@@ -3457,9 +3469,8 @@ HTML
 
 HTML;
         }
-        $html = implode(PHP_EOL, $html);
 
-        $finalHTML = $this->injectBloc($finalHTML, 'TOPFILE', $html);
+        $finalHTML = $this->injectBloc($finalHTML, 'TOPFILE', implode(PHP_EOL, $html));
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
@@ -3540,13 +3551,13 @@ HTML;
         $expr = $results->getColumn('fullcode');
         $counts = array_count_values($expr);
 
-        $expressions = '';
+        $expressions = array();
         foreach($results->toArray() as $row) {
-            $expressions .= "<tr><td>{$row['file']}:{$row['line']}</td><td>{$counts[$row['fullcode']]}</td><td>{$row['htmlcode']}</td></tr>\n";
+            $expressions []= "<tr><td>{$row['file']}:{$row['line']}</td><td>{$counts[$row['fullcode']]}</td><td>{$row['htmlcode']}</td></tr>";
         }
 
         $html = $this->getBasedPage($section->source);
-        $html = $this->injectBloc($html, 'BLOC-EXPRESSIONS', $expressions);
+        $html = $this->injectBloc($html, 'BLOC-EXPRESSIONS', implode(PHP_EOL, $expressions));
         $html = $this->injectBloc($html, 'TITLE', $section->title);
         $this->putBasedPage($section->source, $html);
     }
@@ -3560,14 +3571,8 @@ HTML;
         $files = '';
         $dirs = array('/' => 1);
         foreach($filesList as $row) {
-            $subdirs = explode('/', trim(dirname($row['file']), '/'));
-            $dir = '';
-            foreach($subdirs as $subdir) {
-                $dir .= "/$subdir";
-                if (!isset($dirs[$dir])) {
-                    mkdir($path . $dir, 0755);
-                    $dirs[$dir] = 1;
-                }
+            if (!file_exists($path . '/' . dirname($row['file']))) {
+                mkdir($path . '/' . dirname($row['file']), 0755, true);
             }
 
             $sourcePath = "$pathToSource$row[file]";

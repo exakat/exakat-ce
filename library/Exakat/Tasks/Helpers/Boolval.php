@@ -23,7 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 class Boolval extends Plugin {
-    const NO_VALUE = false;
+    public const NO_VALUE = false;
 
     public $name = 'boolean';
     public $type = 'boolean';
@@ -48,6 +48,7 @@ class Boolval extends Plugin {
         }
 
         foreach($extras as $extra) {
+            if (is_array($extra)) { continue; }
             if ($extra->intval === self::NO_VALUE)  {
                 $atom->intval = self::NO_VALUE;
                 return ;
@@ -123,7 +124,7 @@ class Boolval extends Plugin {
                 break;
 
             case 'Parenthesis' :
-                $atom->boolean = $extras['CODE']->boolean;
+                $atom->boolean = $extras['CODE']->boolean ?? false;
                 break;
 
             case 'Addition' :
@@ -157,7 +158,7 @@ class Boolval extends Plugin {
                 break;
 
             case 'Keyvalue' :
-                $atom->boolean = (bool) ($extras['INDEX']->boolean && $extras['VALUE']->boolean);
+                $atom->boolean = $extras['INDEX']->boolean && $extras['VALUE']->boolean;
                 break;
 
             case 'Not' :

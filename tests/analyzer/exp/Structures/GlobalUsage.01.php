@@ -9,13 +9,14 @@ $expected     = array('$a',
                       '$c',
                       '$GLOBALS',
                       '$GLOBALS[\'G\']',
-                      '$GLOBALS[\'J\']',
-                      '$GLOBALS[\'H\']',
                       '$GLOBALS[\'H\'][\'I\']',
-                      '$GLOBALS[\'J\'][\'I\']',
+                      '$GLOBALS[\'J\'][\'I\'][\'K\']',
                      );
 
 $expected_not = array('$z',
+                      '$GLOBALS[\'J\']',
+                      '$GLOBALS[\'J\'][\'I\']',
+                      '$GLOBALS[\'H\']',
                      );
 
 ?>

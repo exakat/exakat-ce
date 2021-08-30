@@ -25,8 +25,8 @@ namespace Exakat\Reports;
 use Exakat\Reports\Helpers\Sarif as SarifJson;
 
 class Sarif extends Reports {
-    const FILE_EXTENSION = 'sarif';
-    const FILE_FILENAME  = 'exakat';
+    public const FILE_EXTENSION = 'sarif';
+    public const FILE_FILENAME  = 'exakat';
 
     public function _generate(array $analyzerList): string {
         $analysisResults = $this->dump->fetchAnalysers($analyzerList);

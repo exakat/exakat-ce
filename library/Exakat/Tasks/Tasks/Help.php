@@ -23,7 +23,7 @@
 namespace Exakat\Tasks;
 
 class Help extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         print <<<HELP

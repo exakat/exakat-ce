@@ -28,8 +28,8 @@ use Exakat\GraphElements;
 use Exakat\Analyzer\Analyzer;
 
 class DSLFactory {
-    const VARIABLE_WRITE = true;
-    const VARIABLE_READ  = false;
+    public const VARIABLE_WRITE = true;
+    public const VARIABLE_READ  = false;
 
     public $availableAtoms         = array();
     public $availableLinks         = array();

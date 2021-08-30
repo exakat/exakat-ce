@@ -54,7 +54,7 @@ class Cvs extends Vcs {
     }
 
     private function getInfo() {
-        $res = trim(shell_exec("cd {$this->destinationFull}; {$this->executable} info"));
+        $res = trim(shell_exec("cd {$this->destinationFull}; {$this->executable} info") ?? '');
 
         if (empty($res)) {
             $this->info['cvs'] = '';
@@ -67,7 +67,7 @@ class Cvs extends Vcs {
         }
     }
 
-    public function getBranch() {
+    public function getBranch(): string {
         return 'No branch';
     }
 
@@ -78,7 +78,7 @@ class Cvs extends Vcs {
     public function getInstallationInfo() {
         $stats = array();
 
-        $res = trim(shell_exec("{$this->executable} --version 2>&1"));
+        $res = trim(shell_exec("{$this->executable} --version 2>&1") ?? '');
         if (preg_match('/Concurrent Versions System \(CVS\) ([0-9\.]+) /', $res, $r)) {//
             $stats['installed'] = 'Yes';
             $stats['version'] = $r[1];

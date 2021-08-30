@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2019 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -22,11 +22,27 @@
 
 namespace Exakat\Tasks;
 
+use Exakat\Exceptions\VcsSupport;
+use Exakat\Vcs\Vcs;
+use Exakat\Export\Export as ExportFormat;
+
 class Export extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
+
+    public const OPEN_TAG  = '<?php ' . PHP_EOL;
+    public const CLOSE_TAG = PHP_EOL . '?' . '>';
+
+    public const NO_NEXT = -1;
+
+    private $sequenceFor     = false;
+    private $insideInterface = false;
+    private $dictionary      = null;
+    private $php             = null;
 
     public function run(): void {
         $gremlinVersion = $this->gremlin->serverInfo()[0];
+        $this->dictionary = exakat('dictionary');
+        $this->php = exakat('php');
 
         if (version_compare($gremlinVersion, '3.4.0') >= 0) {
             $queryTemplate = 'g.V().valueMap().with(WithOptions.tokens).by(unfold())';
@@ -64,163 +80,115 @@ class Export extends Tasks {
                 $E[$id] = array();
             }
 
-            $endNodeId = $e['inV'];
-            if(isset($E[$id][$endNodeId])) {
-                $E[$id][$endNodeId] .= ', ' . $e['label'];
-            } else {
-                $E[$id][$endNodeId] = $e['label'];
-            }
+            array_collect_by($E[$id], $e['inV'], $e['label']);
         }
 
         if (in_array('Dot', $this->config->project_reports)) {
-            $text = $this->display_dot($V, $E, $root);
+            $renderer = ExportFormat::getInstance('Dot', $V, $E);
+            $text = $renderer->render($root);
+            $extension = $renderer->getExtension();
+        } elseif (in_array('Php', $this->config->project_reports)) {
+            $renderer = ExportFormat::getInstance('Php', $V, $E);
+            $text = $renderer->render($root);
+            $files = json_decode($text, true);
+            $extension = $renderer->getExtension();
+
+            if ($this->config->json) {
+                echo $text;
+
+                return;
+            }
+
+            if (!empty($this->config->filename)) {
+                // only one file, the first one
+                file_put_contents($this->config->filename[0], array_pop($files));
+
+                $this->checkCompilation($this->config->filename[0]);
+
+                return;
+            }
+
+            if (!empty($this->config->dirname)) {
+                foreach($files as $file => $code) {
+                    if (!file_exists($this->config->dirname . '/' . dirname($file))) {
+                        mkdir($this->config->dirname . '/' . dirname($file), 0755);
+                    }
+                    file_put_contents($this->config->dirname . '/' . $file, $code);
+                    $this->checkCompilation($this->config->dirname . '/' . $file);
+                }
+
+                return;
+            }
+
+            if (!empty($this->config->inplace)) {
+                display("Writing in place\n");
+                foreach($files as $file => $code) {
+                    file_put_contents($this->config->code_dir . '/' . $file, $code);
+                    $this->checkCompilation($this->config->code_dir . '/' . $file);
+                }
+
+                return;
+            }
+
+            if (!empty($this->config->branch)) {
+                try {
+                    display("Writing in branch : {$this->config->branch}\n");
+
+                    $vcs = Vcs::getVcs($this->config);
+                    $vcs = new $vcs($this->config->project, $this->config->code_dir);
+                    $branch = $vcs->getBranch();
+                    $vcs->createBranch($this->config->branch);
+
+                    foreach($files as $file => $code) {
+                        file_put_contents($this->config->code_dir . '/' . $file, $code);
+                        $this->checkCompilation($this->config->code_dir . '/' . $file);
+                    }
+
+                    $vcs->commitFiles('Exakat cobbler for ' . implode(', ', $this->config->program));
+                    $vcs->checkoutBranch($branch);
+                } catch (VcsSupport $e) {
+                    print "Error while storing in branch {$this->config->branch} : ".$e->getMessage()."\n";
+                }
+
+                return;
+            }
+
+            $text = implode('', $files);
         } elseif (in_array('Table', $this->config->project_reports)) {
-            $text = $this->display_table($V, $E, $root);
+            $renderer = ExportFormat::getInstance('Table', $V, $E);
+            $text = $renderer->render($root);
+            $extension = $renderer->getExtension();
         } else {
-            $text = $this->display_text($V, $E, $root);
+            $renderer = ExportFormat::getInstance('Text', $V, $E);
+            $text = $renderer->render($root);
+            $extension = $renderer->getExtension();
         }
 
-        if ($this->config->filename) {
-            if (in_array('Dot', $this->config->project_reports)) {
-                $fp = fopen($this->config->filename . '.dot', 'w+');
-            } else {
-                $fp = fopen($this->config->filename, 'w+');
+        if ($filenames = $this->config->filename) {
+            foreach($filenames as $filename) {
+                $filename = array_pop($filenames);
+                if (in_array('Dot', $this->config->project_reports)) {
+                    $fp = fopen($filename . '.dot', 'w+');
+                } elseif (in_array('Php', $this->config->project_reports)) {
+                    $fp = fopen($filename . '.php', 'w+');
+                } else {
+                    // todo : case this is a folder
+                    $fp = fopen($filename, 'w+');
+                }
+                fwrite($fp, $text);
+                fclose($fp);
             }
-            fwrite($fp, $text);
-            fclose($fp);
         } else {
             echo $text;
         }
     }
 
-    private function display_text(array $V, array $E, int $root, $level = 0) {
-        $r = array();
-
-        if (isset($V[$root])) {
-            $r []= str_repeat('  ', $level) . $V[$root]['code'];
+    private function checkCompilation(string $file): bool {
+        if (!($compile = $this->php->compile($file))) {
+            display("Warning : '{$file}' doesn't compile. Proceed with caution.");
         }
 
-        if (isset($E[$root])) {
-            asort($E[$root]);
-            uksort($E[$root], function (int $a, int $b) use ($V) {
-                if (!isset($V[$a]['rank'])) { return 0; }
-                if (!isset($V[$b]['rank'])) { return 0; }
-                return $V[$a]['rank'] > $V[$b]['rank']; });
-
-            foreach($E[$root] as $id => $label) {
-                $r []= str_repeat('  ', $level) . 'Label : ' . $label . "\n" . $this->display_text($V, $E, $id, $level + 1);
-            }
-        }
-
-        return implode(PHP_EOL, $r);
-    }
-
-    private function display_dot(array $V, array $E, int $root): string {
-        $r = '';
-
-        foreach($V as $id => $v) {
-            if (!isset($v['fullcode'])) {
-                if (isset($v['code'])) {
-                    $v['fullcode'] =  $v['code'];
-                } elseif (isset($v['analyzer'])) {
-                    $v['fullcode'] =  $v['analyzer'];
-                } else {
-                    $v['fullcode'] =  'NO CODE PROVIDED';
-                }
-            }
-            $R = $id . ' [label="' . addslashes($v['fullcode']) . '"';
-
-        //https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
-        //        #e6194B, #3cb44b, #ffe119, #4363d8, #f58231, #911eb4, #42d4f4, #f032e6, #bfef45, #fabebe, #469990, #e6beff, #9A6324, #fffac8, #800000, #aaffc3, #808000, #ffd8b1, #000075, #a9a9a9, #ffffff, #000000
-
-            switch($v['label']) {
-                case 'Variable' :
-                case 'This' :
-                case 'Variableobject' :
-                case 'Variablearray' :
-                    $R .= ' style="filled" fillcolor="#e6194B"';
-                    break;
-
-                case 'Functioncall' :
-                case 'Methodcall' :
-                case 'Staticmethodcall' :
-                    $R .= ' style="filled" fillcolor="#3cb44b"';
-                    break;
-
-                case 'Class' :
-                    $R .= ' style="filled" fillcolor="#ffe119"';
-                    break;
-
-                case 'Interface' :
-                    $R .= ' style="filled" fillcolor="#4363d8"';
-                    break;
-
-                case 'Trait' :
-                    $R .= ' style="filled" fillcolor="#911eb4"';
-                    break;
-
-                case 'Method' :
-                case 'Magicmethod' :
-                    $R .= ' style="filled" fillcolor="#42d4f4"';
-                    break;
-
-                default:
-                    // nothing, really
-            }
-
-            if (isset($v['atom'])) {
-                $R .= ' shape=box ';
-            }
-            $R .= "];\n";
-
-            $r .= $R;
-        }
-
-        foreach($E as $start => $e) {
-            foreach($e as $end => $label) {
-                $r .= "$start -> $end [label=\"$label\"];\n";
-            }
-        }
-
-        $r = " digraph graphname {
-    $r
-     }";
-
-        return $r;
-    }
-
-    private function display_table(array $V, array $E, int $root): string {
-        $r = '<table>';
-
-        foreach($V as $v) {
-            $row = array(highlight_string($v['code'], \RETURN_VALUE));
-            if (isset($v['atom'])) {
-                $row[] = $v['atom'];
-            } else {
-                $row[] = 'No atom';
-            }
-            if (isset($v['token'])) {
-                $row[] = $v['token'];
-            } else {
-                $row[] = 'No token';
-            }
-            if (isset($v['file'])) {
-                $row[] = $v['file'];
-            } else {
-                $row[] = 'No file';
-            }
-            if (isset($v['order'])) {
-                $row[] = $v['order'];
-            } else {
-                $row[] = '';
-            }
-
-            $row = '<td>' . implode('</td><td>', $row) . '</td>';
-            $r .= "<tr>$row</tr>\n";
-        }
-        $r .= '</table>';
-
-        return $r;
+        return $compile;
     }
 }
 

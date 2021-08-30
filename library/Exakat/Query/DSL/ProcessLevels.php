@@ -30,7 +30,7 @@ class ProcessLevels extends DSL {
             list($maxLevel) = func_get_args();
             $filter = ".filter{ levels.max() > $maxLevel}";
         } else {
-            $filter = 'map{levels.max();}';
+            $filter = '.map{levels;}';
         }
 
         $MAX_LOOPING = self::$MAX_LOOPING;
@@ -44,7 +44,7 @@ where(
       .not(hasLabel('Sequence', 'Block'))
       .path()
       .sideEffect{ levels.add(Math.round((it.get().size() - 1 ) / 2 - 1));}
-      .count()
+      .fold()
 )$filter
 GREMLIN
 );

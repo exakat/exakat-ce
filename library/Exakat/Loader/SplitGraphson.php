@@ -307,6 +307,7 @@ GREMLIN;
                             'alternative'  => array(),
                             'absolute'     => array(),
                             'abstract'     => array(),
+                            'readonly'     => array(),
                             'aliased'      => array(),
                             'isRead'       => array(),
                             'isModified'   => array(),
@@ -318,17 +319,14 @@ GREMLIN;
                 $fileName = $atom->code;
             }
             $json[$atom->id] = $atom->toGraphsonLine($this->id);
+            $fixedId = $this->graphdb->fixId($atom->id);
             foreach($atom->boolProperties() as $property) {
-                $properties[$property][] = $this->graphdb->fixId($atom->id);
+                $properties[$property][] = $fixedId;
             }
         }
 
         foreach($links as &$link) {
-            if (isset($this->tokenCounts[$link[0]])) {
-                ++$this->tokenCounts[$link[0]];
-            } else {
-                $this->tokenCounts[$link[0]] = 1;
-            }
+            $this->tokenCounts[$link[0]] = ($this->tokenCounts[$link[0]] ?? 0) + 1;
 
             $link[1] = $this->graphdb->fixId($link[1]);
             $link[2] = $this->graphdb->fixId($link[2]);

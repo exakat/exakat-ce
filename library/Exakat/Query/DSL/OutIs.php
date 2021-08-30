@@ -28,6 +28,11 @@ use Exakat\Query\Query;
 class OutIs extends DSL {
     public function run(): Command {
         assert(func_num_args() <= 1, 'Too many arguments for ' . __METHOD__);
+
+        if (func_num_args() == 0) {
+            return new Command('out( )');
+        }
+
         list($link) = func_get_args();
 
         if (empty($link)) {

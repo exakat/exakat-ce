@@ -29,8 +29,10 @@ class Methods {
     private $sqlite = null;
     private $phar_tmp = null;
 
-    const STRICT = true;
-    const LOOSE  = false;
+    public const STRICT = true;
+    public const LOOSE  = false;
+
+    private const ARGS_COL = array('arg0', 'arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6', 'arg7', 'arg8', 'arg9', 'arg10', 'arg11');
 
     public function __construct(Config $config) {
         if ($config->is_phar) {
@@ -98,15 +100,16 @@ class Methods {
     }
 
     public function getFunctionsLastArgsNotBoolean(): array {
-        $query = <<<'SQL'
-SELECT '\' || lower(methods.name) AS fullnspath, args_max - 1 AS position FROM methods 
+        $clauses = array();
+        foreach(self::ARGS_COL as $position => $name) {
+            $max = $position + 1;
+            $clauses[] = "(args_max = $max AND not instr(arg$position, 'bool') AND arg$position != '')";
+        }
+
+        $query = 'SELECT \'\' || lower(methods.name) AS fullnspath, args_max - 1 AS position FROM methods 
 JOIN args_type ON args_type.name = methods.name
 WHERE methods.class = "PHP" AND
-      (args_max = 1 AND not instr(arg0, 'bool') AND arg0 != '') OR   
-      (args_max = 2 AND not instr(arg1, 'bool') AND arg1 != '') OR 
-      (args_max = 3 AND not instr(arg2, 'bool') AND arg2 != '') OR 
-      (args_max = 4 AND not instr(arg3, 'bool') AND arg3 != '')	
-SQL;
+     ' . implode(' OR ', $clauses);
         $res = $this->sqlite->query($query);
         $return = array();
 
@@ -118,14 +121,13 @@ SQL;
     }
 
     public function getFunctionsReferenceArgs(): array {
-        $query = <<<'SQL'
-SELECT name AS function, 0 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg0 = 'reference' UNION
-SELECT name AS function, 1 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg1 = 'reference' UNION
-SELECT name AS function, 2 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg2 = 'reference' UNION
-SELECT name AS function, 3 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg3 = 'reference' UNION
-SELECT name AS function, 4 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg4 = 'reference' UNION
-SELECT name AS function, 5 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg5 = 'reference'
-SQL;
+        $clauses = array();
+        foreach(self::ARGS_COL as $position => $name) {
+            $clauses[] = "SELECT name AS function, $position AS position FROM args_is_ref WHERE Class = 'PHP' AND arg$position = 'reference'";
+        }
+
+        $query = implode(' UNION ', $clauses);
+
         $res = $this->sqlite->query($query);
         $return = array();
 
@@ -137,14 +139,13 @@ SQL;
     }
 
     public function getFunctionsValueArgs(): array {
-        $query = <<<'SQL'
-SELECT name AS function, 0 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg0 = 'value' UNION
-SELECT name AS function, 1 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg1 = 'value' UNION
-SELECT name AS function, 2 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg2 = 'value' UNION
-SELECT name AS function, 3 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg3 = 'value' UNION
-SELECT name AS function, 4 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg4 = 'value' UNION
-SELECT name AS function, 5 AS position FROM args_is_ref WHERE Class = 'PHP' AND arg5 = 'value'
-SQL;
+        $clauses = array();
+        foreach(self::ARGS_COL as $position => $name) {
+            $clauses[] = "SELECT name AS function, $position AS position FROM args_is_ref WHERE Class = 'PHP' AND arg$position = 'value'";
+        }
+
+        $query = implode(' UNION ', $clauses);
+
         $res = $this->sqlite->query($query);
         $return = array();
 
@@ -182,7 +183,7 @@ SQL;
     public function getInternalParameterType(): array {
         $return = array();
 
-        $args = array('arg0', 'arg1');
+        $args = self::ARGS_COL;
         foreach($args as $id => $arg) {
             $query = <<<SQL
 SELECT $arg, lower(GROUP_CONCAT('\' || name)) AS functions FROM args_type WHERE class='PHP' AND $arg IN ('int', 'array', 'bool','string') GROUP BY $arg
@@ -212,18 +213,14 @@ SQL;
             $search = " = '$typehint'";
         }
 
-        $query = <<<SQL
-SELECT name AS function, 0 AS position FROM args_type WHERE Class = 'PHP' AND arg0 $search UNION
-SELECT name AS function, 1 AS position FROM args_type WHERE Class = 'PHP' AND arg1 $search UNION
-SELECT name AS function, 2 AS position FROM args_type WHERE Class = 'PHP' AND arg2 $search UNION
-SELECT name AS function, 3 AS position FROM args_type WHERE Class = 'PHP' AND arg3 $search UNION
-SELECT name AS function, 4 AS position FROM args_type WHERE Class = 'PHP' AND arg4 $search UNION
-SELECT name AS function, 5 AS position FROM args_type WHERE Class = 'PHP' AND arg5 $search UNION
-SELECT name AS function, 6 AS position FROM args_type WHERE Class = 'PHP' AND arg6 $search UNION
-SELECT name AS function, 7 AS position FROM args_type WHERE Class = 'PHP' AND arg7 $search UNION
-SELECT name AS function, 8 AS position FROM args_type WHERE Class = 'PHP' AND arg8 $search UNION
-SELECT name AS function, 9 AS position FROM args_type WHERE Class = 'PHP' AND arg9 $search 
-SQL;
+        $clauses = array();
+        foreach(self::ARGS_COL as $position => $name) {
+            $max = $position + 1;
+            $clauses[] = "SELECT name AS function, $position AS position FROM args_type WHERE Class = 'PHP' AND arg$position $search";
+        }
+
+        $query = implode(' UNION ', $clauses);
+
         $res = $this->sqlite->query($query);
 
         while($row = $res->fetchArray(\SQLITE3_ASSOC)) {

@@ -25,8 +25,13 @@ namespace Exakat\Reports;
 use Exakat\Dump\Dump;
 
 abstract class Reports {
-    const STDOUT = 'stdout';
-    const INLINE = 'inline';
+    public const STDOUT = 'stdout';
+    public const INLINE = 'inline';
+
+    public const NOT_RUN      = 'Not Run';
+    public const YES          = 'Yes';
+    public const NO           = 'No';
+    public const INCOMPATIBLE = 'Incompatible';
 
     public static $FORMATS        = array('Ambassador', 'Ambassadornomenu', 'Drillinstructor', 'Top10',
                                           'Text', 'Xml', 'Uml', 'Yaml', 'Plantuml', 'None', 'Simplehtml', 'Owasp', 'Perfile', 'Beautycanon',

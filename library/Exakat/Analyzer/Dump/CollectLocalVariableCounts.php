@@ -29,7 +29,17 @@ class CollectLocalVariableCounts extends AnalyzerHashHashResults {
     public function analyze(): void {
         // foo() {$t ; }
         $this->atomIs(self::FUNCTIONS_ALL)
-             ->raw('groupCount("m").by(__.out("DEFINITION").hasLabel("Variabledefinition", "Staticdefinition").count()).cap("m")');
+             ->raw(<<<'GREMLIN'
+groupCount("m").by(
+    __.out("DEFINITION")
+      .hasLabel("Variabledefinition")
+      .not(
+        __.out("DEFINITION")
+          .in("GLOBAL")
+      )
+      .count()).cap("m")
+GREMLIN
+);
 
         $this->prepareQuery();
     }

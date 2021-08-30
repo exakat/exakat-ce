@@ -26,7 +26,7 @@ use Exakat\Exceptions\InvalidProjectName;
 use Exakat\Exceptions\ProjectNeeded;
 
 class Show extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         $project = $this->config->project;

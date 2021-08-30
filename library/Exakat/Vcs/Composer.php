@@ -48,7 +48,7 @@ class Composer extends Vcs {
         $composer->require->$source = 'dev-master';
         $json = json_encode($composer, JSON_PRETTY_PRINT);
 
-        mkdir("{$this->destinationFull}", 0755);
+        mkdir($this->destinationFull, 0755);
         file_put_contents("{$this->destinationFull}/composer.json", $json);
         shell_exec("cd {$this->destinationFull}; {$this->executable} -q install");
     }

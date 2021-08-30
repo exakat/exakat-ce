@@ -1,6 +1,6 @@
 <?php
 
-$expected     = array('$a->localName', 
+$expected     = array('$a->localName',
                       '$a->close( )',
                       'xmlreader::NONE',
                       'xmlreader',

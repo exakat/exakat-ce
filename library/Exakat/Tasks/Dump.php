@@ -36,7 +36,7 @@ use Exakat\Query\Query;
 use Exakat\Dump\Dump as DumpDb;
 
 class Dump extends Tasks {
-    const CONCURENCE = self::DUMP;
+    public const CONCURENCE = self::DUMP;
 
     private $files = array();
 
@@ -45,7 +45,7 @@ class Dump extends Tasks {
     private $linksDown = '';
     private $dump      = null;
 
-    const WAITING_LOOP = 1000;
+    public const WAITING_LOOP = 1000;
 
     public function __construct(bool $subTask = self::IS_NOT_SUBTASK) {
         parent::__construct($subTask);
@@ -56,12 +56,7 @@ class Dump extends Tasks {
         $this->linksDown = GraphElements::linksAsList();
     }
 
-    public function setConfig(Config $config): void {
-        $this->config = $config;
-    }
-
     public function run(): void {
-
         if (!file_exists($this->config->project_dir)) {
             throw new NoSuchProject($this->config->project);
         }
@@ -74,11 +69,12 @@ class Dump extends Tasks {
         if (empty($projectInGraph)) {
             throw new NoSuchProject($this->config->project);
         }
+        if (!isset($projectInGraph[0])) {
+            throw new NoSuchProject($this->config->project);
+        }
+
         $projectInGraph = $projectInGraph[0];
 
-        if ($projectInGraph !== (string) $this->config->project) {
-            throw new NotProjectInGraph($this->config->project, $projectInGraph);
-        }
 // TODO
 //        $this->sqliteFilePrevious = $this->config->dump_previous;
 // also baseline
@@ -222,7 +218,9 @@ class Dump extends Tasks {
         $severities = array();
         $readCounts = array(array());
 
-        $skipAnalysis = array();
+        $skipAnalysis      = array();
+        $ignore_dirs       = array();
+        $ignore_namespaces = array();
         $analyzers = array_filter($analyzers, function (string $s): bool { return substr($s, 0, 9) !== 'Complete/' && substr($s, 0, 5) !== 'Dump/'; });
         // Remove analysis that are not exported via dump
         foreach($analyzers as $id => $analyzer) {
@@ -231,14 +229,36 @@ class Dump extends Tasks {
                 unset($analyzers[$id]);
                 $skipAnalysis[] = $analyzer;
             }
+
+            if (isset($this->config->{$analyzer}['ignore_dirs'])) {
+                $ignore_dirs[$analyzer] = $ignore_dirs[$analyzer] ?? array();
+                foreach($this->config->{$analyzer}['ignore_dirs'] as $ignore) {
+                    if ($ignore[0] === '/') {
+                        $ignore_dirs[$analyzer][] = "$ignore.*";
+                    } else {
+                        $ignore_dirs[$analyzer][] = ".*$ignore.*";
+                    }
+                }
+            }
+
+            if (isset($this->config->{$analyzer}['ignore_namespaces'])) {
+                $ignore_namespaces[$analyzer] = $ignore_namespaces[$analyzer] ?? array();
+                foreach($this->config->{$analyzer}['ignore_namespaces'] as $ignore) {
+                    if ($ignore[0] === '/') {
+                        $ignore_namespaces[$analyzer][] = '/' . addslashes($ignore) . '.*/i';
+                    } else {
+                        $ignore_namespaces[$analyzer][] = '/.*' . addslashes($ignore) . '.*/i';
+                    }
+                }
+            }
         }
         $this->dump->removeResults($analyzers);
 
-        $chunks = array_chunk($analyzers, 200);
+        $chunks = array_chunk($analyzers, 100);
         // Gremlin only accepts chunks of 255 maximum
 
-        foreach($chunks as $chunk) {
-            $query = $this->newQuery('processMultipleResults');
+        foreach($chunks as $id => $chunk) {
+            $query = $this->newQuery('processMultipleResults ' . $id);
             $query->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS)
                   ->is('analyzer', $chunk)
                   ->savePropertyAs('analyzer', 'analyzer')
@@ -252,6 +272,7 @@ where( __.until( hasLabel("Project") ).repeat(
     __.in($this->linksDown)
       .sideEffect{ if (it.get().label() in ["Function", "Closure", "Arrayfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
       .sideEffect{ if (it.get().label() in ["Class", "Trait", "Interface", "Classanonymous"]) { theClass = it.get().value("fullcode")} }
+      .sideEffect{ if (it.get().label() == "Namespace") { theNamespace = it.get().value("fullnspath"); } }
       .sideEffect{ if (it.get().label() == "File") { file = it.get().value("fullcode")} }
        ).fold()
 )
@@ -266,6 +287,24 @@ GREMLIN
             foreach($res as $result) {
                 if (empty($result)) {
                     continue;
+                }
+
+                if (isset($ignore_dirs[$result['analyzer']])) {
+                    foreach($ignore_dirs[$result['analyzer']] as $regex) {
+                        if (preg_match($regex, $result['file'])) {
+                            --$counts[$result['analyzer']];
+                            continue 2;
+                        }
+                    }
+                }
+
+                if (isset($ignore_namespaces[$result['analyzer']])) {
+                    foreach($ignore_namespaces[$result['analyzer']] as $regex) {
+                        if (preg_match($regex, $result['namespace'])) {
+                            --$counts[$result['analyzer']];
+                            continue 2;
+                        }
+                    }
                 }
 
                 if (isset($severities[$result['analyzer']])) {
@@ -440,14 +479,6 @@ GREMLIN
             $cit_use[$row['line'] . $row['fullnspath']] = array('uses'    => $row['uses'],
                                                                 'options' => $row['usesOptions'],
                                                                 );
-            unset($row['uses']);
-            unset($row['usesOptions']);
-            $citId[$row['line'] . $row['fullnspath']] = ++$citCount;
-            unset($row['fullnspath']);
-            $row['namespace'] = $namespaceId;
-            $cit[] = $row;
-
-            ++$total;
 
             if (!empty($row['attributes'])) {
                 $attributes = explode(';', trim($row['attributes']));
@@ -458,6 +489,16 @@ GREMLIN
                                             $attribute);
                 }
             }
+
+            unset($row['uses']);
+            unset($row['usesOptions']);
+            unset($row['attributes']);
+            $citId[$row['line'] . $row['fullnspath']] = ++$citCount;
+            unset($row['fullnspath']);
+            $row['namespace'] = $namespaceId;
+            $cit[] = $row;
+
+            ++$total;
         }
 
         // Interfaces
@@ -503,14 +544,6 @@ GREMLIN
                 $namespaceId = 1;
             }
 
-            $citId[$row['line'] . $row['fullnspath']] = ++$citCount;
-            unset($row['fullnspath']);
-            $row['namespace'] = $namespaceId;
-
-            $cit[] = $row;
-
-            ++$total;
-
             if (!empty($row['attributes'])) {
                 $attributes = explode(';', trim($row['attributes']));
                 foreach($attributes as $attribute) {
@@ -520,6 +553,15 @@ GREMLIN
                                             $attribute);
                 }
             }
+
+            $citId[$row['line'] . $row['fullnspath']] = ++$citCount;
+            unset($row['fullnspath']);
+            unset($row['attributes']);
+            $row['namespace'] = $namespaceId;
+
+            $cit[] = $row;
+
+            ++$total;
         }
 
         display("$total interfaces\n");
@@ -577,13 +619,6 @@ GREMLIN
             $cit_use[$row['line'] . $row['fullnspath']] = array('uses'    => $row['uses'],
                                                                 'options' => $row['usesOptions'],
                                                                 );
-            unset($row['uses']);
-            unset($row['usesOptions']);
-            $citId[$row['line'] . $row['fullnspath']] = ++$citCount;
-            unset($row['fullnspath']);
-            $row['namespace'] = $namespaceId;
-
-            $cit[] = $row;
 
             if (!empty($row['attributes'])) {
                 $attributes = explode(';', trim($row['attributes']));
@@ -594,6 +629,15 @@ GREMLIN
                                             $attribute);
                 }
             }
+
+            unset($row['uses']);
+            unset($row['usesOptions']);
+            unset($row['attributes']);
+            $citId[$row['line'] . $row['fullnspath']] = ++$citCount;
+            unset($row['fullnspath']);
+            $row['namespace'] = $namespaceId;
+
+            $cit[] = $row;
 
             ++$total;
         }
@@ -1410,7 +1454,8 @@ GREMLIN
         $functioncallMissed = $this->gremlin->query('g.V().hasLabel("Functioncall")
              .has("token", within("T_STRING", "T_NS_SEPARATOR"))
              .not(where(__.in("DEFINITION")))
-             .not(where(__.in("ANALYZED").has("analyzer", "Functions/IsExtFunction")))
+             .not( __.has("isPhp", true))
+             .not( __.has("isExt", true))
              .where( __.out("NAME").hasLabel("Identifier", "Nsname", "Name"))
         ');
         if ($functioncallMissed === 0) {

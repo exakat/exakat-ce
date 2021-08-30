@@ -30,7 +30,7 @@ use Exakat\Exceptions\NoFileToProcess;
 use Exakat\Vcs\Vcs;
 
 class Update extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     protected $logname = self::LOG_NONE;
 

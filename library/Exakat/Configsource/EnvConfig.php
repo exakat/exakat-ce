@@ -27,7 +27,7 @@ use Exakat\Project as Project;
 class EnvConfig extends Config {
     protected $config  = array();
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         if (!empty($e = getenv('EXAKAT_IGNORE_RULES'))) {
             $this->config['ignore_rules'] = str2array($e);
         }

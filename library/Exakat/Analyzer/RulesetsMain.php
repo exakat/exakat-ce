@@ -99,7 +99,7 @@ SQL;
     public function getRulesetsForAnalyzer(array $analyzer = array()): array {
         if (empty($analyzer)) {
             $where = '';
-        } elseif (is_array($analyzer)) {
+        } else {
             $where = ' WHERE c.name IN (' . makeList($analyzer) . ') ';
         }
 
@@ -247,7 +247,7 @@ SQL;
     public function getSuggestionRuleset(array $rulesets = array()): array {
         $list = $this->listAllRulesets();
 
-        return array_filter($list, function (string $c) use ($rulesets) : bool {
+        return array_filter($list, function (string $c) use ($rulesets): bool {
             foreach($rulesets as $ruleset) {
                 $l = levenshtein($c, $ruleset);
                 if ($l < 8) {
@@ -259,7 +259,7 @@ SQL;
     }
 
     public function getSuggestionClass(string $name): array {
-        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name) : bool {
+        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name): bool {
             $l = levenshtein($c, $name);
 
             return $l < 8;

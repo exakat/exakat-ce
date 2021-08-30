@@ -23,6 +23,8 @@
 namespace Exakat\Vcs;
 
 use Exakat\Exceptions\HelperException;
+use Exakat\Exceptions\VcsError;
+use Exakat\Exceptions\VcsSupport;
 
 class Targz extends Vcs {
     protected function selfCheck(): void {
@@ -45,14 +47,18 @@ class Targz extends Vcs {
         $this->check();
 
         $binary = file_get_contents($source);
+        if (empty($binary)) {
+            throw new VcsError("Error while loading tar.gz archive : archive is empty. Aborting\n");
+        }
+
         $archiveFile = tempnam(sys_get_temp_dir(), 'archiveTgz') . '.tar.gz';
         file_put_contents($archiveFile, $binary);
 
         $res = shell_exec("tar -tzf $archiveFile 2>&1 >/dev/null");
         if (!empty($res)) {
             list($l) = explode("\n", $res, 1);
-            print "Error while loading tar.gz archive : \"$l\". Aborting\n";
-            return;
+
+            throw new VcsError("Error while extracting tar.gz archive : \"$l\". Aborting\n");
         }
 
         shell_exec("mkdir {$this->destinationFull}; tar -zxf $archiveFile -C {$this->destinationFull}");
@@ -90,6 +96,24 @@ class Targz extends Vcs {
                        );
 
         return $status;
+    }
+
+    public function createBranch(string $branch): bool {
+        throw new VcsSupport('Zip', ' cannot create a new branch');
+
+        return false;
+    }
+
+    public function checkoutBranch(string $branch = ''): bool {
+        throw new VcsSupport('Zip', ' cannot checkout a branch');
+
+        return false;
+    }
+
+    public function commitFiles(string $string): bool {
+        throw new VcsSupport('Zip', ' cannot commit files');
+
+        return false;
     }
 }
 

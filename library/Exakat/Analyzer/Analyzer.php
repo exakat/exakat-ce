@@ -37,20 +37,20 @@ use Exakat\Phpexec;
 
 abstract class Analyzer {
     // Query types
-    const QUERY_DEFAULT       = 1;   // For compatibility purposes
-    const QUERY_ANALYZER      = 2;   // same as above, but explicit
-    const QUERY_VALUE         = 3;   // returns a single value
-    const QUERY_RAW           = 4;   // returns data, no storage
-    const QUERY_HASH          = 5;   // returns a list of values
-    const QUERY_MULTIPLE      = 6;   // returns several links at the same time (TBD)
-    const QUERY_ARRAYS        = 7;   // arrays of array
-    const QUERY_TABLE         = 8;   // to specific table
-    const QUERY_MISSING       = 9;   // store values that are not in the graph
-    const QUERY_PHP_ARRAYS    = 10;  // store a PHP array of values into hashResults
-    const QUERY_PHP_HASH      = 11;  // store a PHP array of values into hashResults
-    const QUERY_NO_ANALYZED   = 12;  // store links, but not the ANALYZED one
-    const QUERY_RESULTS       = 13;  // store results directly to dump, no ANALYZED
-    const QUERY_HASH_ANALYZER = 14;  // store results directly to hashAnalyzer
+    public const QUERY_DEFAULT       = 1;   // For compatibility purposes
+    public const QUERY_ANALYZER      = 2;   // same as above, but explicit
+    public const QUERY_VALUE         = 3;   // returns a single value
+    public const QUERY_RAW           = 4;   // returns data, no storage
+    public const QUERY_HASH          = 5;   // returns a list of values
+    public const QUERY_MULTIPLE      = 6;   // returns several links at the same time (TBD)
+    public const QUERY_ARRAYS        = 7;   // arrays of array
+    public const QUERY_TABLE         = 8;   // to specific table
+    public const QUERY_MISSING       = 9;   // store values that are not in the graph
+    public const QUERY_PHP_ARRAYS    = 10;  // store a PHP array of values into hashResults
+    public const QUERY_PHP_HASH      = 11;  // store a PHP array of values into hashResults
+    public const QUERY_NO_ANALYZED   = 12;  // store links, but not the ANALYZED one
+    public const QUERY_RESULTS       = 13;  // store results directly to dump, no ANALYZED
+    public const QUERY_HASH_ANALYZER = 14;  // store results directly to hashAnalyzer
 
     protected $datastore  = null;
 
@@ -82,7 +82,7 @@ abstract class Analyzer {
     protected $shortAnalyzer    = '';
     protected $analyzerQuoted   = '';
     protected $analyzerId       = 0;
-    protected $queryId          = 0;
+    protected int $queryId          = 0;
 
     protected $analyzerName      = 'no analyzer name';
     protected $analyzerTable     = 'no analyzer table name';
@@ -91,48 +91,50 @@ abstract class Analyzer {
     protected $analyzerValues    = array();
     protected $storageType       = self::QUERY_DEFAULT;
 
-    protected $phpVersion       = self::PHP_VERSION_ANY;
-    protected $phpConfiguration = 'Any';
+    protected $phpVersion        = self::PHP_VERSION_ANY;
+    protected $phpConfiguration  = 'Any';
 
-    private $path_tmp           = null;
+    private $path_tmp            = null;
 
-    const S_CRITICAL = 'Critical';
-    const S_MAJOR    = 'Major';
-    const S_MINOR    = 'Minor';
-    const S_NOTE     = 'Note';
-    const S_NONE     = 'None';
+    private $exakatSince         = '';
 
-    const T_NONE    = 'None';    //'0';
-    const T_INSTANT = 'Instant'; //'5';
-    const T_QUICK   = 'Quick';   //30';
-    const T_SLOW    = 'Slow';    //60';
-    const T_LONG    = 'Long';    //360';
+    public const S_CRITICAL = 'Critical';
+    public const S_MAJOR    = 'Major';
+    public const S_MINOR    = 'Minor';
+    public const S_NOTE     = 'Note';
+    public const S_NONE     = 'None';
 
-    const P_VERY_HIGH = 'very-high';
-    const P_HIGH      = 'high';
-    const P_MEDIUM    = 'medium';
-    const P_LOW       = 'Low';
-    const P_NONE      = 'Unknown';
-    const P_UNKNOWN   = 'Unknown';
+    public const T_NONE    = 'None';    //'0';
+    public const T_INSTANT = 'Instant'; //'5';
+    public const T_QUICK   = 'Quick';   //30';
+    public const T_SLOW    = 'Slow';    //60';
+    public const T_LONG    = 'Long';    //360';
 
-    const PHP_VERSION_ANY = 'Any';
+    public const P_VERY_HIGH = 'very-high';
+    public const P_HIGH      = 'high';
+    public const P_MEDIUM    = 'medium';
+    public const P_LOW       = 'Low';
+    public const P_NONE      = 'Unknown';
+    public const P_UNKNOWN   = 'Unknown';
 
-    const COMPATIBLE                 =  0;
-    const UNKNOWN_COMPATIBILITY      = -1;
-    const VERSION_INCOMPATIBLE       = -2;
-    const CONFIGURATION_INCOMPATIBLE = -3;
+    public const PHP_VERSION_ANY = 'Any';
 
-    const CASE_SENSITIVE   = true;
-    const CASE_INSENSITIVE = false;
+    public const COMPATIBLE                 =  0;
+    public const UNKNOWN_COMPATIBILITY      = -1;
+    public const VERSION_INCOMPATIBLE       = -2;
+    public const CONFIGURATION_INCOMPATIBLE = -3;
 
-    const WITH_CONSTANTS    = 1;
-    const WITHOUT_CONSTANTS = false;
+    public const CASE_SENSITIVE   = true;
+    public const CASE_INSENSITIVE = false;
 
-    const WITH_VARIABLES    = 2;
-    const WITHOUT_VARIABLES = false;
+    public const WITH_CONSTANTS    = 1;
+    public const WITHOUT_CONSTANTS = false;
 
-    const TRANSLATE    = true;
-    const NO_TRANSLATE = false;
+    public const WITH_VARIABLES    = 2;
+    public const WITHOUT_VARIABLES = false;
+
+    public const TRANSLATE    = true;
+    public const NO_TRANSLATE = false;
 
     public const CONTAINERS       = array('Variable', 'Staticproperty', 'Member', 'Array');
     public const VARIABLES_USER   = array('Variable', 'Variableobject', 'Variablearray');
@@ -145,6 +147,7 @@ abstract class Analyzer {
     public const LITERALS         = array('Integer', 'Float', 'Null', 'Boolean', 'String', 'Heredoc');
     public const LOOPS_ALL        = array('For' , 'Foreach', 'While', 'Dowhile');
     public const SWITCH_ALL       = array('Switch' , 'Match');
+    public const LOGICAL_ALL      = array('Logical', 'Bitoperation', 'Spaceship');
 
     public const FUNCTIONS_TOKENS = array('T_STRING', 'T_NS_SEPARATOR', 'T_ARRAY', 'T_EVAL', 'T_ISSET', 'T_EXIT', 'T_UNSET', 'T_ECHO', 'T_OPEN_TAG_WITH_ECHO', 'T_PRINT', 'T_LIST', 'T_EMPTY', 'T_OPEN_BRACKET', 'T_NAME_FULLY_QUALIFIED', 'T_NAME_RELATIVE', 'T_NAME_QUALIFIED');
     public const FUNCTIONS_ALL    = array('Function', 'Closure', 'Method', 'Magicmethod', 'Arrowfunction');
@@ -167,6 +170,7 @@ abstract class Analyzer {
     public const FUNCTIONS_CALLS  = array('Functioncall' , 'Newcall', 'Methodcall', 'Staticmethodcall');
     public const CALLS            = array('Functioncall', 'Methodcall', 'Staticmethodcall' );
     public const FUNCTIONS_USAGE  = array('Functioncall', 'Methodcall', 'Staticmethodcall', 'Eval', 'Echo', 'Print', 'Unset' );
+    public const NEW_CALLS        = array('Newcall', 'Newcallname' );
 
     public const STRINGS_ALL      = array('Concatenation', 'Heredoc', 'String', 'Identifier', 'Nsname', 'Staticclass', 'Magicconstant');
     public const STRINGS_LITERALS = array('Concatenation', 'Heredoc', 'String', 'Magicconstant', 'Staticclass');
@@ -177,15 +181,15 @@ abstract class Analyzer {
     public const TYPE_ATOMS       = array('Integer', 'String', 'Arrayliteral', 'Float', 'Boolean', 'Null', 'Closure', 'Concatenation', 'Magicconstant', 'Heredoc', 'Power' , 'Staticclass', 'Comparison', 'Not', 'Addition', 'Multiplication', 'Bitshift', 'Bitoperation', 'Logical');
     public const BREAKS           = array('Goto', 'Return', 'Break', 'Continue');
 
-    const INCLUDE_SELF = false;
-    const EXCLUDE_SELF = true;
+    public const INCLUDE_SELF = false;
+    public const EXCLUDE_SELF = true;
 
-    const CONTEXT_IN_CLOSURE = 1;
-    const CONTEXT_OUTSIDE_CLOSURE = 2;
+    public const CONTEXT_IN_CLOSURE = 1;
+    public const CONTEXT_OUTSIDE_CLOSURE = 2;
 
-    const MAX_LOOPING   = 15;    // hard limit for do...while when navigating the tree
-    const MAX_SEARCHING = 8;     // hard limit for searching the tree (failing the rest is not bad)
-    const TIME_LIMIT    = 1000;  // 1s, used with timelimit() from gremlin.
+    public const MAX_LOOPING   = 15;    // hard limit for do...while when navigating the tree
+    public const MAX_SEARCHING = 8;     // hard limit for searching the tree (failing the rest is not bad)
+    public const TIME_LIMIT    = 1000;  // 1s, used with timelimit() from gremlin.
 
     private static $rulesId         = array();
 
@@ -213,11 +217,18 @@ abstract class Analyzer {
         $docs            = exakat('docs');
 
         if (strpos($this->analyzer, '\\Common\\') === false) {
-            $parameters = $docs->getDocs($this->shortAnalyzer)['parameter'];
+            $parameters        = $docs->getDocs($this->shortAnalyzer)['parameter'];
+            $this->exakatSince = $docs->getDocs($this->shortAnalyzer)['exakatSince'];
             foreach($parameters as $parameter) {
                 assert(isset($this->{$parameter['name']}), "Missing definition for library/Exakat/Analyzer/$this->analyzerQuoted.php :\nprotected \$$parameter[name] = '" . ($parameter['default'] ?? '') . "';\n");
 
-                if (isset($this->config->{$this->analyzerQuoted}[$parameter['name']])) {
+                if (isset($this->config->directives[$parameter['name']])) {
+                    $this->{$parameter['name']} = $this->config->directives[$parameter['name']][0];
+
+                    if (!isset($parameter['default'])) {
+                        continue;
+                    }
+                } elseif (isset($this->config->{$this->analyzerQuoted}[$parameter['name']])) {
                     $this->{$parameter['name']} = $this->config->{$this->analyzerQuoted}[$parameter['name']];
 
                     if (!isset($parameter['default'])) {
@@ -281,6 +292,10 @@ abstract class Analyzer {
         $this->methods = exakat('methods');
 
         $this->initNewQuery();
+    }
+
+    public function getExakatSince(): string {
+        return $this->exakatSince;
     }
 
     public function init(int $analyzerId = null) {
@@ -501,34 +516,7 @@ GREMLIN;
     }
 
     public function checkPhpVersion(string $version): bool {
-        // this handles Any version of PHP
-        if ($this->phpVersion === self::PHP_VERSION_ANY) {
-            return true;
-        }
-
-        // version and above
-        if (($this->phpVersion[-1] === '+') && version_compare($version, $this->phpVersion) >= 0) {
-            return true;
-        }
-
-        // up to version
-        if (($this->phpVersion[-1] === '-') && version_compare($version, $this->phpVersion) < 0) {
-            return true;
-        }
-
-        // version range 1.2.3-4.5.6
-        if (strpos($this->phpVersion, '-') !== false) {
-            list($lower, $upper) = explode('-', $this->phpVersion);
-            return version_compare($version, $lower) >= 0 && version_compare($version, $upper) <= 0;
-        }
-
-        // One version only
-        if (version_compare($version, $this->phpVersion) == 0) {
-            return true;
-        }
-
-        // Default behavior if we don't understand :
-        return false;
+        return checkVersionRange($this->phpVersion, $version);
     }
 
     // @doc return the list of dependences that must be prepared before the execution of an analyzer
@@ -641,24 +629,8 @@ GREMLIN;
         }
         ++$this->queryId;
 
-        if ($analyzed === true) {
-            $analyzed = ".addE(\"ANALYZED\").from(g.V({$this->analyzerId}))";
-        } else {
-            $analyzed = '.property("complete", "' . $this->shortAnalyzer . '")';
-        }
+        $this->tailQuery($analyzed);
 
-        $this->raw(<<<GREMLIN
-dedup().sack{m,v -> ++m["total"]; m;}
-        $analyzed
-       .sideEffect( g.V({$this->analyzerId}).property("count", -1))
-       .count()
-       .sack()
-
-// Query (#{$this->queryId}) for {$this->analyzer}
-// php {$this->config->php} analyze -p {$this->config->project} -P {$this->analyzer} -v
-
-GREMLIN
-);
         $this->query->prepareQuery();
         $this->queries[] = $this->query;
     }
@@ -854,6 +826,27 @@ GREMLIN
         $id = crc32($export);
 
         file_put_contents($this->config->tmp_dir . '/dump-' . $id . '.php', $export);
+    }
+
+    public function tailQuery(bool $analyzed) {
+        if ($analyzed === true) {
+            $analyzed = ".addE(\"ANALYZED\").from(g.V({$this->analyzerId}))";
+        } else {
+            $analyzed = '.property("complete", "' . $this->shortAnalyzer . '")';
+        }
+
+        $this->raw(<<<GREMLIN
+dedup().sack{m,v -> ++m["total"]; m;}
+        $analyzed
+       .sideEffect( g.V({$this->analyzerId}).property("count", -1))
+       .count()
+       .sack()
+
+// Query (#{$this->queryId}) for {$this->analyzer}
+// php {$this->config->php} analyze -p {$this->config->project} -P {$this->analyzer} -v
+
+GREMLIN
+);
     }
 }
 ?>

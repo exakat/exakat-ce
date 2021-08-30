@@ -46,11 +46,11 @@ class UnsupportedTypesWithOperators extends Analyzer {
                        'Keyvalue',
                        );
 
-        $links = array('LEFT', 
-                       'RIGHT', 
-                       'NOT', 
-                       'PREPLUSPLUS', 
-                       'POSTPLUSPLUS', 
+        $links = array('LEFT',
+                       'RIGHT',
+                       'NOT',
+                       'PREPLUSPLUS',
+                       'POSTPLUSPLUS',
 
                        'INDEX',
                        );

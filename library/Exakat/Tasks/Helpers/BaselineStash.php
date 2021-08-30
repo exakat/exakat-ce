@@ -25,14 +25,14 @@ namespace Exakat\Tasks\Helpers;
 use Exakat\Config;
 
 class BaselineStash {
-    const STRATEGIES = array('none', 'always');
+    public const STRATEGIES = array('none', 'always');
 
     // 'none', 'always', '<Name>'
     private $baseline_strategy = 'none';
     private $baseline_dir       = '';
     private $use               = 'none';
 
-    const NO_BASELINE          = '';
+    public const NO_BASELINE          = '';
 
     public function __construct(Config $config) {
         $this->baseline_strategy = $config->baseline_set;
@@ -77,16 +77,14 @@ class BaselineStash {
                 $last_id = preg_match('/dump-(\d+)-/', $last, $r) ? (int) $r[1] : 1;
             }
 
-            if ($this->baseline_strategy === 'always') {
-                // Create a new
-                // md5 is here for uuid purpose.
-                $sqliteFilePrevious = $this->baseline_dir . '/dump-' . ($last_id + 1) . '-' . substr(md5($this->baseline_dir . ($last_id + 1)), 0, 7) . '.sqlite';
-                if (!copy($previous, $sqliteFilePrevious)) {
-                    display('Could not save the baseline with the name ' . $name);
-                }
-
-                return;
+            // Create a new
+            // md5 is here for uuid purpose.
+            $sqliteFilePrevious = $this->baseline_dir . '/dump-' . ($last_id + 1) . '-' . substr(md5($this->baseline_dir . ($last_id + 1)), 0, 7) . '.sqlite';
+            if (!copy($previous, $sqliteFilePrevious)) {
+                display('Could not save the baseline with the name ' . $name);
             }
+
+            return;
         }
     }
 

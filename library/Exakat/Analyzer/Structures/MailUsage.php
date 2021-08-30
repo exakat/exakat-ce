@@ -35,7 +35,7 @@ class MailUsage extends Analyzer {
         $mailerClasses = $this->loadIni('mailer.ini', 'classes');
         $this->atomIs('New')
              ->outIs('NEW')
-             ->atomIs('Newcall')
+             ->atomIs(self::NEW_CALLS)
              ->has('fullnspath')
              ->fullnspathIs($mailerClasses);
         $this->prepareQuery();

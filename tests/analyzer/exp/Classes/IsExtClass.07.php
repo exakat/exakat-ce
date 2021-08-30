@@ -4,7 +4,7 @@ $expected     = array('\\StdCLASS',
                       '\\Curlfile',
                      );
 
-$expected_not = array('\\Stdclass',  // Not recognizedd as an interface
+$expected_not = array('\\Stdclass',
                       '\\ArrayAccess',
                      );
 

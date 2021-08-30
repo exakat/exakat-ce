@@ -24,8 +24,8 @@
 namespace Exakat\Query\DSL;
 
 class IsNullable extends DSL {
-    const EXPLICIT = true;
-    const IMPLICIT = false;
+    public const EXPLICIT = true;
+    public const IMPLICIT = false;
 
     public function run(): Command {
         switch(func_num_args()) {

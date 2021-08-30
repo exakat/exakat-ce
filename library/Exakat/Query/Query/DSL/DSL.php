@@ -29,15 +29,15 @@ use Exakat\GraphElements;
 use Exakat\Analyzer\Analyzer;
 
 abstract class DSL {
-    const VARIABLE_WRITE = true;
-    const VARIABLE_READ  = false;
+    public const VARIABLE_WRITE = true;
+    public const VARIABLE_READ  = false;
 
-    const LABEL_SET  = true;
-    const LABEL_GO   = false;
+    public const LABEL_SET  = true;
+    public const LABEL_GO   = false;
 
-    const LEVELS_TO_ANALYSE = 4;
+    public const LEVELS_TO_ANALYSE = 4;
 
-    const PROPERTIES = array('id',
+    public const PROPERTIES = array('id',
                              'atom',
                              'code',
                              'lccode',

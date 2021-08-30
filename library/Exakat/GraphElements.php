@@ -121,6 +121,7 @@ abstract class GraphElements {
                                  'Sequence',
                                  'Shell',
                                  'Sign',
+                                 'Spaceship',
                                  'Static',
                                  'Staticclass',
                                  'Staticconstant',
@@ -375,6 +376,7 @@ abstract class GraphElements {
                                        'Sequence'                  => array('EXPRESSION'),
                                        'Shell'                     => array('CONCAT'),
                                        'Sign'                      => array('SIGN'),
+                                       'Spaceship'                 => array('LEFT', 'RIGHT'),
                                        'Static'                    => array('STATIC'),
                                        'Staticclass'               => array('CLASS', 'DEFINITION'),
                                        'Staticconstant'            => array('CLASS', 'CONSTANT'),
@@ -407,10 +409,6 @@ abstract class GraphElements {
 
     public static function linksAsList(): string {
         return makeList(self::$LINKS);
-    }
-
-    public static function linksDownAsList(): string {
-        return makeList(self::$LINKS_DOWN);
     }
 }
 

@@ -44,9 +44,10 @@ class DotExakatYamlConfig extends Config {
         }
     }
 
-    public function loadConfig(Project $project) : ?string {
+    public function loadConfig(Project $project): ?string {
         if (!file_exists($this->dotExakatYaml)) {
             $this->config['inside_code'] = Configuration::WITH_PROJECTS;
+            $this->config['project']     = new Project();
             return self::NOT_LOADED;
         }
 
@@ -223,7 +224,7 @@ class DotExakatYamlConfig extends Config {
             if (is_dir($path)) {
                 chdir($path);
                 $allFiles = rglob('.');
-                $allFiles = array_map(function ($path) use ($stub) { return $stub . ltrim($path, '.'); }, $allFiles);
+                $allFiles = array_map(function (string $path) use ($stub): string { return $stub . ltrim($path, '.'); }, $allFiles);
                 chdir($d);
 
                 $stubs[$stub] = $allFiles;
@@ -234,21 +235,18 @@ class DotExakatYamlConfig extends Config {
         return self::YAML_FILE;
     }
 
-    public function getRulesets() {
+    public function getRulesets(): array {
         return $this->rulesets;
     }
 
-    public function getConfig(string $dir_root = '') : string {
+    public function getConfig(string $dir_root = ''): string {
         // $vendor
         if ($this->config['include_dirs'] === array('/')) {
             $include_dirs = 'include_dirs[] = "";';
         } else {
             $include_dirs = 'include_dirs[] = "' . implode("\";\ninclude_dirs[] = \"", $this->config['include_dirs']) . "\";\n";
         }
-        $ignore_dirs  = 'ignore_dirs[] = "' . implode("\";\nignore_dirs[] = \"", $this->config['ignore_dirs']) . "\";\n";
         $file_extensions  = implode(',', $this->config['file_extensions']);
-
-        $custom_configs = array();
 
         $default = array();
         $iniFiles = glob("$dir_root/human/en/*/*.ini");
@@ -271,16 +269,14 @@ class DotExakatYamlConfig extends Config {
             }
         }
 
-        $custom_configs = implode('', $custom_configs);
-
         $configIni = array(
-'project'             => "{$this->config['project']}",
-'project_name'        => "{$this->config['project_name']}",
-'project_url'         => "{$this->config['project_url']}",
-'project_vcs'         => "{$this->config['project_vcs']}",
-'project_description' => "{$this->config['project_description']}",
-'project_branch'      => "{$this->config['project_branch']}",
-'project_tag'         => "{$this->config['project_tag']}",
+'project'             => (string) $this->config['project'],
+'project_name'        => (string) $this->config['project_name'],
+'project_url'         => (string) $this->config['project_url'],
+'project_vcs'         => (string) $this->config['project_vcs'],
+'project_description' => (string) $this->config['project_description'],
+'project_branch'      => (string) $this->config['project_branch'],
+'project_tag'         => (string) $this->config['project_tag'],
 'include_dirs'        => $this->config['include_dirs'],
 'ignore_dirs'         => $this->config['ignore_dirs'],
 'ignore_rules'        => $this->config['ignore_rules'],

@@ -22,23 +22,33 @@
 
 namespace Exakat\Tasks;
 
+
 class CleanDb extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     protected $logname = self::LOG_NONE;
 
     public function run(): void {
-         if (self::$semaphore === null) {
-            $this->manageServer();
-        } else {
-            fclose(self::$semaphore);
+        if ($this->config->quick === true) {
             try {
+                $this->gremlin->empty();
+            } catch (\Exception $e) {
                 $this->manageServer();
-            } finally {
-                self::$semaphore = @stream_socket_server('udp://0.0.0.0:' . self::$semaphorePort, $errno, $errstr, STREAM_SERVER_BIND);
             }
+            return;
         }
 
+         if (self::$semaphore === null) {
+            $this->manageServer();
+            return;
+        }
+
+        fclose(self::$semaphore);
+        try {
+            $this->manageServer();
+        } finally {
+            self::$semaphore = @stream_socket_server('udp://0.0.0.0:' . self::$semaphorePort, $errno, $errstr, STREAM_SERVER_BIND);
+        }
     }
 
     private function manageServer(): void {

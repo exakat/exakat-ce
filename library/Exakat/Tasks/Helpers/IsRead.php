@@ -64,6 +64,9 @@ class IsRead extends Plugin {
 
             case 'Block' :
             case 'Parenthesis' :
+                if (!isset($extras['CODE'])) {
+                    break;
+                }
                 if (in_array($extras['CODE']->atom, $this->variables, STRICT_COMPARISON)) {
                     $extras['CODE']->isRead = true;
                 }
@@ -162,6 +165,7 @@ class IsRead extends Plugin {
             case 'Addition':
             case 'Multiplication':
             case 'Logical' :
+            case 'Bitoperation' :
             case 'Comparison' :
             case 'Bitshift':
             case 'Power':

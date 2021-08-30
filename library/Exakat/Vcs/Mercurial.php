@@ -66,7 +66,7 @@ class Mercurial extends Vcs {
         return $stats;
     }
 
-    public function getBranch() {
+    public function getBranch(): string {
         $res = shell_exec("cd {$this->destinationFull}; {$this->executable} summary 2>&1 | grep branch") ?? '';
         return trim(substr($res, 8), " *\n");
     }

@@ -31,13 +31,13 @@ abstract class Config {
     protected $config  = array();
     protected $options = array();
 
-    abstract public function loadConfig(Project $project) : ?string ;
+    abstract public function loadConfig(Project $project): ?string ;
 
     public function toArray(): array {
         return $this->config;
     }
 
-    public function get($index) {
+    public function get(string $index) {
         return $this->config[$index] ?? null;
     }
 

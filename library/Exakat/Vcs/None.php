@@ -32,6 +32,19 @@ class None extends Vcs {
 
         return $status;
     }
+
+    public function createBranch(string $branch): bool {
+        return false;
+    }
+
+    public function checkoutBranch(string $branch = ''): bool {
+        return false;
+    }
+
+    public function commitFiles(string $string): bool {
+        return false;
+    }
+
 }
 
 ?>

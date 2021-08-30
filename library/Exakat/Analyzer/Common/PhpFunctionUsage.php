@@ -39,6 +39,11 @@ class PhpFunctionUsage extends Analyzer {
 
         $this->atomFunctionIs($functions)
              ->not(
+                 $this->side()
+                      ->outIs('NAME')
+                      ->hasIn('USED') // function with a use expression
+             )
+             ->not(
                 $this->side()
                      ->filter(
                         $this->side()

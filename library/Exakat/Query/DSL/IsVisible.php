@@ -25,9 +25,9 @@ namespace Exakat\Query\DSL;
 
 
 class IsVisible extends DSL {
-    const VISIBLE_ABOVE = 1;
-    const VISIBLE_BELOW = 2;
-    const ALL_VISIBLE   = array(self::VISIBLE_ABOVE, self::VISIBLE_BELOW);
+    public const VISIBLE_ABOVE = 1;
+    public const VISIBLE_BELOW = 2;
+    public const ALL_VISIBLE   = array(self::VISIBLE_ABOVE, self::VISIBLE_BELOW);
 
     public function run(): Command {
         switch (func_num_args()) {

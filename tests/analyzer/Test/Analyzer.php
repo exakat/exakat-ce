@@ -6,7 +6,9 @@ use Exakat\Phpexec;
 use Exakat\Dump\Dump;
 use Exakat\Analyzer\Rulesets;
 use Exakat\Analyzer\Dump\AnalyzerHashAnalyzer;
+use Exakat\Analyzer\Dump\AnalyzerResults;
 use Exakat\Analyzer\Dump\AnalyzerTable;
+use Exakat\Analyzer\Analyzer as AnalyzerClass;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestSuite;
 use Exakat\Autoload\AutoloadExt;
@@ -68,6 +70,10 @@ abstract class Analyzer extends TestCase {
 
         // collect the expected values
         require("$test_path/exp/$file.php");
+        
+        if (!checkVersionRange($phpVersionRange ?? AnalyzerClass::PHP_VERSION_ANY, $phpversion)) {
+            $this->markTestSkipped("This test is compatible with $phpVersionRange : $phpversion used.");
+        }
 
         $rulesets = new Rulesets("$EXAKAT_PATH/data/analyzers.sqlite", 
                                new AutoloadExt(''),
@@ -143,7 +149,9 @@ abstract class Analyzer extends TestCase {
         $this->number   = $number;
         $this->analyzer = $analyzer;
 
-        if ($analyzerobject instanceof AnalyzerHashAnalyzer) {
+        if ($analyzerobject instanceof AnalyzerResults) {
+            $this->checkTestOnResults($res, $expected, $expected_not, $analyzerobject);
+        } elseif ($analyzerobject instanceof AnalyzerHashAnalyzer) {
             $this->checkTestOnHashAnalyzer($res, $expected, $expected_not, $analyzerobject);
         } elseif ($analyzerobject instanceof AnalyzerTable) {
             $this->checkTestOnFullarray($res, $expected, $expected_not);
@@ -170,7 +178,42 @@ abstract class Analyzer extends TestCase {
         unlink(__DIR__.'/../../../stubs/unitTest.json');
     }
 
-    private function checkTestOnHashAnalyzer(array $list = array(), array $expected = array(), array $expectedNot = array(), AnalyzerHashAnalyzer $analyzerobject) : void {
+    private function checkTestOnResults(array $list = array(), array $expected = array(), array $expectedNot = array(), AnalyzerResults $analyzerobject = null) : void {
+        global $EXAKAT_PATH;
+        
+        $dump = Dump::factory("$EXAKAT_PATH/projects/test/dump.sqlite", Dump::READ);
+        $res = $dump->fetchAnalysers(array('Type/Printf'))->toArray();
+        $res = array_column($res, 'fullcode');
+
+        foreach($expected as $key => $value) {
+            if (($id = array_search($value, $res)) !== false) {
+                unset($expected[$key]);
+                unset($res[$id]);
+            }
+        }
+
+        $missed = array();
+        foreach($expected as $key => $value) {
+            $missed[] = "$key => $value";
+        }
+        $this->assertEmpty($missed, count($missed)." expected values were not found :\n '".join("',\n '", $missed)."'\n");
+
+        $missed = array();
+        foreach($expectedNot as $key => $value) {
+            if (isset($res[$key]) && $res[$key] == $value) {
+                unset($res[$key]);
+                $missed[] = "$key => $value";
+            }
+        }
+        $this->assertEmpty($missed, count($missed)." not expected values were still found :\n '".join("',\n '", $missed)."'\n");
+
+        $missed = array();
+        foreach($res as $key => $value) {
+            $missed[] = "$key => $value";
+        }
+        $this->assertEmpty($missed, count($res)." too many values were found :\n ".join(",\n ", $missed).",\n");
+    }
+    private function checkTestOnHashAnalyzer(array $list = array(), array $expected = array(), array $expectedNot = array(), AnalyzerHashAnalyzer $analyzerobject = null) : void {
         global $EXAKAT_PATH;
         
         $dump = Dump::factory("$EXAKAT_PATH/projects/test/dump.sqlite", Dump::READ);

@@ -28,7 +28,7 @@ use Exakat\Analyzer\Analyzer;
 class ClassUsage extends Analyzer {
     protected $classes = array();
 
-    public function setClasses($classes) {
+    public function setClasses($classes): void {
         $this->classes = $classes;
     }
 
@@ -36,7 +36,7 @@ class ClassUsage extends Analyzer {
         $classes =  makeFullNsPath($this->classes);
 
         // New X();
-        $this->atomIs('Newcall')
+        $this->atomIs(self::NEW_CALLS)
              ->hasNoIn('NAME')
              ->has('fullnspath')
              ->fullnspathIs($classes);
@@ -49,7 +49,7 @@ class ClassUsage extends Analyzer {
         $this->prepareQuery();
 
         // Typehint (return and argument), catch, instanceof, classes
-        $this->atomIs(array('Identifier',  'Nsname'))
+        $this->atomIs(array('Identifier', 'Nsname'))
              ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'IMPLEMENTS', 'CLASS'))
              ->fullnspathIs($classes)
              ->analyzerIsNot('self');

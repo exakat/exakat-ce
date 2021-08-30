@@ -28,7 +28,7 @@ use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Exceptions\InvalidProjectName;
 
 class Baseline extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     private const FORMAT = "+ %-4s %10s %12s\n";
 

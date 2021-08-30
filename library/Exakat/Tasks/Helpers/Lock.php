@@ -26,7 +26,9 @@ class Lock {
     private $path = null;
 
     public function __construct(string $path, string $name) {
+        assert(strpos($name, '\\') === false, "Wrong slash for analysis name '$name'.");
         $b = array_reverse(explode('/', $name));
+        assert(count($b) === 2, "Wrong lock build for '$name'.");
 
         $name = $b[1] . '-' . $b[0];
         $this->path = $path . '/' . $name;

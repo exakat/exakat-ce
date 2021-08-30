@@ -31,7 +31,7 @@ use Exakat\Vcs\Vcs;
 use Exakat\Vcs\None;
 
 class Initproject extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
         if ($this->config->project === 'default') {
@@ -215,7 +215,7 @@ class Initproject extends Tasks {
         }
 
         try {
-            $vcs->clone((string) $repositoryURL);
+            $vcs->clone($repositoryURL);
         } catch (VcsError $e) {
             rename($tmpPath, $finalPath);
 
@@ -225,7 +225,7 @@ class Initproject extends Tasks {
             $errorMessage = $e->getMessage();
             $this->datastore->addRow('hash', array('init error' => $errorMessage,
                                                    'inited'     => date('r')));
-            display("An error prevented code initialization : '$errorMessage'\n.No code was loaded.");
+            print "An error prevented code initialization: no code was loaded.\n.Error : $errorMessage'\n";
 
             file_put_contents("{$this->config->project_dir}/config.ini", $projectConfig->getConfig($this->config->dir_root));
 

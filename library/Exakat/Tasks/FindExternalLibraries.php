@@ -28,11 +28,11 @@ use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Exceptions\NoSuchProject;
 
 class FindExternalLibraries extends Tasks {
-    const CONCURENCE = self::ANYTIME;
+    public const CONCURENCE = self::ANYTIME;
 
-    const WHOLE_DIR   = 1;
-    const FILE_ONLY   = 2;
-    const PARENT_DIR  = 3; // Whole_dir and parent.
+    public const WHOLE_DIR   = 1;
+    public const FILE_ONLY   = 2;
+    public const PARENT_DIR  = 3; // Whole_dir and parent.
 
     private $php               = null;
     private $phpTokens         = array();
@@ -104,7 +104,6 @@ class FindExternalLibraries extends Tasks {
                                   $this->phpTokens['T_COMMENT']     => 1,
                                  );
 
-        $r = array();
         rsort($files);
         $ignore = 'None';
         $ignoreLength = 0;
@@ -119,13 +118,7 @@ class FindExternalLibraries extends Tasks {
             $this->process($file);
         }
 
-        if (empty($r)) {
-            $newConfigs = array();
-        } else {
-            $newConfigs = array_merge(...$r);
-        }
-
-        $newConfigs = array_diff($newConfigs, $this->config->include_dirs);
+        $newConfigs = $this->config->include_dirs;
 
         if (count($newConfigs) === 1) {
             display('One external library is going to be omitted : ' . implode(', ', array_keys($newConfigs)));

@@ -33,7 +33,7 @@ class Project {
         $this->project = $project;
     }
 
-    public function validate() : bool {
+    public function validate(): bool {
         if ($this->project === self::IS_DEFAULT) {
             return true;
         }
@@ -60,11 +60,11 @@ class Project {
         return $this->project;
     }
 
-    public function getError() : string {
+    public function getError(): string {
         return $this->error;
     }
 
-    public function isDefault() : bool {
+    public function isDefault(): bool {
         return $this->project === self::IS_DEFAULT;
     }
 }

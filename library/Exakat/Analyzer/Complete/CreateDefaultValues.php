@@ -33,9 +33,6 @@ class CreateDefaultValues extends Complete {
 
         // Link initial values for containers
         $this->atomIs(array('Variabledefinition',
-                            'Staticdefinition',
-                            'Globaldefinition',
-                            'Staticdefinition',
                             'Virtualproperty',
                             'Propertydefinition',
                             'Parametername',
@@ -57,6 +54,10 @@ class CreateDefaultValues extends Complete {
                      ->inIs('DEFINITION')
                      ->inIsIE('NAME')
                      ->samePropertyAs('fullcode', 'left')
+                     ->back('first')
+                     ->atomIs(array('Variabledefinition',
+                                    'Parametername',
+                                    ), self::WITHOUT_CONSTANTS)
              )
              ->outIs('RIGHT')
              ->followParAs(FollowParAs::FOLLOW_NONE)
@@ -69,14 +70,17 @@ class CreateDefaultValues extends Complete {
                      ->inIsIE('NAME')
                      ->raw('is(eq("first"))')
              )
+
+             // avoid multiple definitions of DEFAULT (although, but why ?)
+             ->not(
+                $this->side()
+                     ->inIs('DEFAULT')
+             )
              ->addEFrom('DEFAULT', 'first');
         $this->prepareQuery();
 
         // With comparisons
         $this->atomIs(array('Variabledefinition',
-                            'Staticdefinition',
-                            'Globaldefinition',
-                            'Staticdefinition',
                             'Virtualproperty',
                             'Propertydefinition',
                             'Parametername',
@@ -92,9 +96,6 @@ class CreateDefaultValues extends Complete {
 
         // With switch/match
         $this->atomIs(array('Variabledefinition',
-                            'Staticdefinition',
-                            'Globaldefinition',
-                            'Staticdefinition',
                             'Virtualproperty',
                             'Propertydefinition',
                             'Parametername',
@@ -116,54 +117,8 @@ class CreateDefaultValues extends Complete {
         $this->prepareQuery();
 
         // With foreach($a as $v)
-        $this->atomIs(array('Variabledefinition',
-                            'Staticdefinition',
-                            'Globaldefinition',
-                            'Staticdefinition',
-                            'Virtualproperty',
-                            'Propertydefinition',
-                            'Parametername',
-                            ), self::WITHOUT_CONSTANTS)
-             ->outIs('DEFINITION')
-             ->inIs('VALUE')
-             ->atomIs('Foreach')
-             ->outIs('SOURCE')
-             ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
-             ->outIs('ARGUMENT')
-             ->outIs('VALUE')
-             ->atomIs(array('Integer', 'String'), self::WITH_CONSTANTS)
-             ->not(
-                $this->side()
-                     ->inIs('DEFAULT')
-                     ->raw('is(neq("first"))')
-             )
-             ->addEFrom('DEFAULT', 'first');
-        $this->prepareQuery();
-
         // With foreach($a as $k => $v)
-        $this->atomIs(array('Variabledefinition',
-                            'Staticdefinition',
-                            'Globaldefinition',
-                            'Staticdefinition',
-                            'Virtualproperty',
-                            'Propertydefinition',
-                            'Parametername',
-                            ), self::WITHOUT_CONSTANTS)
-             ->outIs('DEFINITION')
-             ->inIs('INDEX')
-             ->atomIs('Foreach')
-             ->outIs('SOURCE')
-             ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
-             ->outIs('ARGUMENT')
-             ->outIsIE('INDEX')
-             ->atomIs(array('Integer', 'String'), self::WITH_CONSTANTS)
-             ->not(
-                $this->side()
-                     ->inIs('DEFAULT')
-                     ->raw('is(neq("first"))')
-             )
-             ->addEFrom('DEFAULT', 'first');
-        $this->prepareQuery();
+        // This is done with Complete/CreateForeachDefault
 
         // propagate virtualproperties to original definition
         // This one must be the final of this analysis

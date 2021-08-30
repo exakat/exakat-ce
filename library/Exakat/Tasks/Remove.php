@@ -27,7 +27,7 @@ use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\ProjectNeeded;
 
 class Remove extends Tasks {
-    const CONCURENCE = self::NONE;
+    public const CONCURENCE = self::NONE;
 
     public function run(): void {
         $project = $this->config->project;

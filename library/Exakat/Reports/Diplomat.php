@@ -22,27 +22,21 @@
 
 namespace Exakat\Reports;
 
-use Exakat\Config;
 
 class Diplomat extends Emissary {
-    const FILE_FILENAME  = 'diplomat';
-    const FILE_EXTENSION = '';
-    const CONFIG_YAML    = 'Diplomat';
+    public const FILE_FILENAME  = 'diplomat';
+    public const FILE_EXTENSION = '';
+    public const CONFIG_YAML    = 'Diplomat';
 
-    const TOPLIMIT = 10;
-    const LIMITGRAPHE = 40;
-
-    const NOT_RUN      = 'Not Run';
-    const YES          = 'Yes';
-    const NO           = 'No';
-    const INCOMPATIBLE = 'Incompatible';
+    public const TOPLIMIT = 10;
+    public const LIMITGRAPHE = 40;
 
     private $compatibilities = array();
 
     public function __construct() {
         parent::__construct();
 
-        foreach(['74', '80'] as $shortVersion) {
+        foreach(array('74', '80') as $shortVersion) {
             $this->compatibilities[$shortVersion] = "Compatibility PHP $shortVersion[0].$shortVersion[1]";
         }
 
@@ -50,7 +44,7 @@ class Diplomat extends Emissary {
     }
 
     public function dependsOnAnalysis(): array {
-        return array('CompatibilityPHP74', 'CompatibilityPHP80',
+        return array('CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81',
                      'Appinfo',
                      'Analyze',
                      );

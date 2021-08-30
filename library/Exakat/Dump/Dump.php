@@ -6,8 +6,8 @@ use Sqlite3;
 use Exakat\Reports\Helpers\Results;
 
 abstract class Dump {
-    const READ  = 1;
-    const INIT  = 0;
+    public const READ  = 1;
+    public const INIT  = 0;
 
     protected $project          = null;
     protected $phpexcutable     = null;

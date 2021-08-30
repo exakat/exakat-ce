@@ -120,6 +120,8 @@ SQL;
 
         if ($type === 'class') {
             $globalpath = $fullnspath;
+        } elseif ($call->absolute === true) {
+            $globalpath = $fullnspath;
         } else {
             $globalpath = $this->makeGlobalPath($fullnspath);
         }

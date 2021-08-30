@@ -35,10 +35,13 @@ class Property extends DSL {
             return new Command('sideEffect{ it.get().property("' . $property . '", ' . ($value === true ? 'true' : 'false') . '); }', array());
         } elseif (is_int($value)) {
             return new Command('sideEffect{ it.get().property("' . $property . '", ' . $value . '); }', array());
-        } else {
-            assert($this->assertVariable($value, self::VARIABLE_READ), "$value is not a variable");
-            // Default, a gremlin variable
+        } elseif ($this->isVariable($value)) {
             return new Command('sideEffect{ it.get().property("' . $property . '", ' . $value . '); }', array());
+        } elseif (is_string($value)) {
+            // Default, a string
+            return new Command('sideEffect{ it.get().property("' . $property . '", "' . str_replace('$', '\\$', $value) . '"); }', array());
+        } else {
+            die("No processing for type ".gettype($value)." in Property DSL.");
         }
     }
 }
