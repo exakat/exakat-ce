@@ -158,7 +158,6 @@ class Php56 extends Php {
     public const T_NS_SEPARATOR                  = 388;
     public const T_ELLIPSIS                      = 389;
     public const T_DOUBLE_COLON                  = 384;
-
     public const T_SPACESHIP                     = 1000;
     public const T_YIELD_FROM                    = 1000;
     public const T_COALESCE                      = 1000;
@@ -170,6 +169,7 @@ class Php56 extends Php {
     public const T_NULLSAFE_OBJECT_OPERATOR      = 1000;
     public const T_MATCH                         = 1000;
     public const T_ATTRIBUTE                     = 1000;
+    public const T_ENUM                                             = 1000;
     public const T_READONLY                                         = 1000;
     public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = 1000;
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 1000;

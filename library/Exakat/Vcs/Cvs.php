@@ -29,7 +29,7 @@ class Cvs extends Vcs {
     private $executable = 'cvs';
 
     protected function selfCheck() {
-        $res = shell_exec("{$this->executable} --version 2>&1");
+        $res = $this->shell("{$this->executable} --version 2>&1");
         if (strpos($res, 'CVS') === false) {
             throw new HelperException('Cvs');
         }
@@ -39,13 +39,13 @@ class Cvs extends Vcs {
         $this->check();
 
         $source = escapeshellarg($source);
-        shell_exec("cd {$this->destinationFull}; {$this->executable} checkout --quiet $source code");
+        $this->shell("cd {$this->destinationFull}; {$this->executable} checkout --quiet $source code");
     }
 
     public function update() {
         $this->check();
 
-        $res = shell_exec("cd {$this->destinationFull}; {$this->executable} update");
+        $res = $this->shell("cd {$this->destinationFull}; {$this->executable} update");
         if (preg_match('/Updated to revision (\d+)\./', $res, $r)) {
             return $r[1];
         }
@@ -54,7 +54,7 @@ class Cvs extends Vcs {
     }
 
     private function getInfo() {
-        $res = trim(shell_exec("cd {$this->destinationFull}; {$this->executable} info") ?? '');
+        $res = trim($this->shell("cd {$this->destinationFull}; {$this->executable} info"));
 
         if (empty($res)) {
             $this->info['cvs'] = '';
@@ -78,7 +78,7 @@ class Cvs extends Vcs {
     public function getInstallationInfo() {
         $stats = array();
 
-        $res = trim(shell_exec("{$this->executable} --version 2>&1") ?? '');
+        $res = trim($this->shell("{$this->executable} --version 2>&1"));
         if (preg_match('/Concurrent Versions System \(CVS\) ([0-9\.]+) /', $res, $r)) {//
             $stats['installed'] = 'Yes';
             $stats['version'] = $r[1];

@@ -28,12 +28,12 @@ use Exakat\Exceptions\VcsSupport;
 
 class Targz extends Vcs {
     protected function selfCheck(): void {
-        $res = shell_exec('tar --version 2>&1') ?? '';
+        $res = $this->shell('tar --version 2>&1');
         if (!preg_match('#\d+\.\d+(\.\d+)?#s', $res)) {
             throw new HelperException('Tar');
         }
 
-        $res = shell_exec('gzip -V 2>&1') ?? '';
+        $res = $this->shell('gzip -V 2>&1');
         if (strpos($res, 'gzip') === false) {
             throw new HelperException('gzip');
         }
@@ -54,14 +54,14 @@ class Targz extends Vcs {
         $archiveFile = tempnam(sys_get_temp_dir(), 'archiveTgz') . '.tar.gz';
         file_put_contents($archiveFile, $binary);
 
-        $res = shell_exec("tar -tzf $archiveFile 2>&1 >/dev/null");
+        $res = $this->shell("tar -tzf $archiveFile 2>&1 >/dev/null");
         if (!empty($res)) {
             list($l) = explode("\n", $res, 1);
 
             throw new VcsError("Error while extracting tar.gz archive : \"$l\". Aborting\n");
         }
 
-        shell_exec("mkdir {$this->destinationFull}; tar -zxf $archiveFile -C {$this->destinationFull}");
+        $this->shell("mkdir {$this->destinationFull}; tar -zxf $archiveFile -C {$this->destinationFull}");
 
         unlink($archiveFile);
     }
@@ -69,7 +69,7 @@ class Targz extends Vcs {
     public function getInstallationInfo(): array {
         $stats = array();
 
-        $res = trim(shell_exec('tar --version 2>&1') ?? '');
+        $res = trim($this->shell('tar --version 2>&1'));
         if (preg_match('/^(\w+) ([0-9\.]+) /', $res, $r)) {//
             $stats['tar'] = 'Yes';
             $stats['tar version'] = $r[0];
@@ -78,7 +78,7 @@ class Targz extends Vcs {
             $stats['tar optional'] = 'Yes';
         }
 
-        $res = trim(shell_exec('gzip -V 2>&1') ?? '');
+        $res = trim($this->shell('gzip -V 2>&1'));
         if (preg_match('/gzip (\d+),/', $res, $r)) {//
             $stats['gzip'] = 'Yes';
             $stats['gzip version'] = $r[1];

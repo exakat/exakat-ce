@@ -36,7 +36,7 @@ sideEffect{ line = it.get().value("line");
              }
 .where( __.until( hasLabel("Project") ).repeat( 
     __.in({$linksDown})
-      .sideEffect{ if (theFunction == "" && it.get().label() in ["Function", "Closure", "Arrayfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
+      .sideEffect{ if (theFunction == "" && it.get().label() in ["Function", "Closure", "Arrowfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
       .sideEffect{ if (theClass == ""    && it.get().label() in ["Class", "Trait", "Interface", "Classanonymous"]                ) { theClass = it.get().value("fullcode")   } }
       .sideEffect{ if (it.get().label() == "File") { file = it.get().value("fullcode")} }
        ).fold()

@@ -49,7 +49,7 @@ SQL;
         $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Constants/IsExtConstant',   'constant');
         $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Interfaces/IsExtInterface', 'interface');
         $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Traits/IsExtTrait',         'trait');
-        $this->collectPhpStructures2(array('Newcall', 'Identifier', 'Nsname'), 'Classes/IsExtClass',        'class');
+        $this->collectPhpStructures2(array('Newcall', 'Identifier', 'Nsname', 'Newcallname'), 'Classes/IsExtClass',        'class');
     }
 
     private function collectPhpStructures2(array $label, string $analyzer, string $type): void {

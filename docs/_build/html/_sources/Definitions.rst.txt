@@ -1,6 +1,6 @@
 .. Definitions:
 
-Definitions
+Glossary
 ============
 
 Here is a list of words, commonly used when using Exakat, with their definitions and their synonyms. 

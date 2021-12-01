@@ -1,7 +1,0 @@
-{
-    "name": "String",
-    "description": "A string literal, with or without interpolation. For example, `'$x'`, `\"a{$y}\"`, `\"a\"`. ",
-    "url": [
-        ""
-    ]
-}

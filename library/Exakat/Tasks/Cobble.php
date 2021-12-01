@@ -31,10 +31,10 @@ class Cobble extends Tasks {
 
     public function run(): void {
         $res = $this->gremlin->query('g.V().hasLabel("Project").valueMap(true)');
-        
+
         if (isset($res[0]['code']) && $res[0]['code'][0] !== (string) $this->config->project) {
             display("Not the right project for cobbling :  {$res[0]['code'][0]} / {$this->config->project}. Must restart.\n");
-            shell_exec($this->config->php. " exakat cleandb -Q -v -stop ");
+            shell_exec($this->config->php . ' exakat cleandb -Q -v -stop ');
         }
 
         $vcs = Vcs::getVcs($this->config);

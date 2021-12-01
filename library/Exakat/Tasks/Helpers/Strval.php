@@ -83,8 +83,8 @@ class Strval extends Plugin {
                 if (empty($extras)) {
                     $atom->noDelimiter = trimOnce($atom->code);
                 } else {
-                    $noDelimiters = array_column($extras, 'noDelimiter');
-                    $atom->noDelimiter = implode('', $noDelimiters);
+                    $fullcodes = array_column($extras, 'fullcode');
+                    $atom->noDelimiter = implode('', $fullcodes);
                 }
                 break;
 
@@ -177,6 +177,10 @@ class Strval extends Plugin {
                 break;
 
             case 'Heredoc' :
+                $noDelimiters = array_column($extras, 'noDelimiter');
+                $atom->noDelimiter = rtrim(implode('', $noDelimiters));
+                break;
+
             case 'Concatenation' :
                 $noDelimiters = array_column($extras, 'noDelimiter');
                 $atom->noDelimiter = implode('', $noDelimiters);

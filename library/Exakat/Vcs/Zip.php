@@ -30,7 +30,7 @@ class Zip extends Vcs {
     private $executable = 'unzip';
 
     protected function selfCheck() {
-        $res = shell_exec("{$this->executable} --version  2>&1") ?? '';
+        $res = $this->shell("{$this->executable} --version  2>&1");
         if (strpos($res, 'Zip') === false) {
             throw new HelperException('zip');
         }
@@ -50,8 +50,8 @@ class Zip extends Vcs {
         $archiveFile = tempnam(sys_get_temp_dir(), 'archiveZip') . '.zip';
         file_put_contents($archiveFile, $binary);
 
-        $error = shell_exec("{$this->executable} $archiveFile -d {$this->destinationFull}") ?? '';
-        
+        $error = $this->shell("{$this->executable} $archiveFile -d {$this->destinationFull}");
+
         // folder will not be created in case of error
         if (!file_exists($this->destinationFull)) {
             throw new VcsError("Error while extracting zip archive : \"$error\". Aborting\n");
@@ -63,7 +63,7 @@ class Zip extends Vcs {
     public function getInstallationInfo() {
         $stats = array();
 
-        $res = shell_exec("{$this->executable} -v  2>&1") ?? '';
+        $res = $this->shell("{$this->executable} -v  2>&1");
         if (stripos($res, 'not found') !== false) {
             $stats['installed'] = 'No';
         } elseif (preg_match('/Zip\s+([0-9\.]+)/is', $res, $r)) {

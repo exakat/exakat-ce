@@ -163,6 +163,7 @@ class Php53 extends Php {
     public const T_NULLSAFE_OBJECT_OPERATOR      = 1000;
     public const T_MATCH                         = 1000;
     public const T_ATTRIBUTE                     = 1000;
+    public const T_ENUM                                             = 1000;
     public const T_READONLY                                         = 1000;
     public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = 1000;
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 1000;

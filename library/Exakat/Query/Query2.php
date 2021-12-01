@@ -52,7 +52,7 @@ class Query2 extends Query {
         $this->php       = $php;
 
         $this->queryFactory = new DSLFactory($analyzer, $dependsOn);
-    }    
+    }
 
     public function side(): self {
         if ($this->stopped === self::QUERY_STOPPED) {
@@ -223,7 +223,7 @@ class Query2 extends Query {
 
         $sack = self::SACK;
 
-        $this->query = "g{$sack}.V().".$commands;
+        $this->query = "g{$sack}.V()." . $commands;
     }
 
     public function printRawQuery(): void {

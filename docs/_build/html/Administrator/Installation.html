@@ -1,0 +1,666 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Installation &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Upgrading" href="Upgrading.html" />
+    <link rel="prev" title="5. Real Code Cases" href="../Reference/Cases.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../User/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Support.html">Library &amp; Framework Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Cobbler.html">Cobbler</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rules.html">1. Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rulesets.html">2. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#download-exakat-phar">Download exakat.phar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-with-exakat-phar">Installation with exakat.phar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-on-osx">Installation on OSX</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#osx-installation-with-tinkergraph-3-4-11">OSX installation with tinkergraph 3.4.11</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osx-installation-troubleshooting">OSX installation troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-on-debian-ubuntu">Installation on Debian/Ubuntu</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#debian-ubuntu-installation-with-tinkergraph-3-4-11">Debian/Ubuntu installation with Tinkergraph 3.4.11</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites-full-installation-with-debian-ubuntu">Prerequisites : Full installation with Debian/Ubuntu</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-guide-with-composer">Installation guide with Composer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#composer-installation-first-run">Composer installation first run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-guide-with-docker">Installation guide with Docker</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#docker-image-for-exakat-with-projects-folder">Docker image for Exakat with projects folder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Docker image for Exakat with projects folder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-php-image-with-exakat">Docker PHP image with Exakat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-gremlin-image-with-exakat">Docker Gremlin image with Exakat</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-guide-as-github-action">Installation guide as Github Action</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#github-action">Github Action</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#github-action-for-exakat">Github Action for Exakat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#github-action-configuration-directives">Github Action Configuration directives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#upload-reports-as-artefact">Upload reports as artefact</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#exakat-docker-image-for-github-action">Exakat Docker image for Github Action</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-multiple-php-versions">Using multiple PHP versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-guide-for-optional-tools">Installation guide for optional tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Annex.html">Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Administrator/Installation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#requirements">Requirements</a></p></li>
+<li><p><a class="reference internal" href="#download-exakat-phar">Download exakat.phar</a></p></li>
+<li><p><a class="reference internal" href="#installation-with-exakat-phar">Installation with exakat.phar</a></p></li>
+<li><p><a class="reference internal" href="#installation-on-osx">Installation on OSX</a></p></li>
+<li><p><a class="reference internal" href="#installation-on-debian-ubuntu">Installation on Debian/Ubuntu</a></p></li>
+<li><p><a class="reference internal" href="#installation-guide-with-composer">Installation guide with Composer</a></p></li>
+<li><p><a class="reference internal" href="#installation-guide-with-docker">Installation guide with Docker</a></p></li>
+<li><p><a class="reference internal" href="#installation-guide-as-github-action">Installation guide as Github Action</a></p></li>
+<li><p><a class="reference internal" href="#installation-guide-for-optional-tools">Installation guide for optional tools</a></p></li>
+</ul>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>Exakat relies on external components : mandatroy or optional.</p>
+<p>Basic requirements :</p>
+<ul class="simple">
+<li><p>exakat.phar, the main code.</p></li>
+<li><p><a class="reference external" href="http://tinkerpop.apache.org/">Gremlin server</a> : exakat uses this graph database and the Gremlin 3 traversal language. Currently, only Gremlin Server is supported, with the tinkergraph and neo4j storage engine. Version 3.4.x is the recommended version, while version 3.3.x are still supported. Gremlin version 3.2.# and 3.5.# are unsupported.</p></li>
+<li><p>Java 8.x. Java 9.x/10.x will be supported later. Java 7.x was used, but is not actively supported.</p></li>
+<li><p><a class="reference external" href="https://www.php.net/">PHP</a> 8.0 to run. PHP 8.0 is recommended, PHP 7.2 or later are possible. This version requires the PHP extensions curl, hash, phar, sqlite3, tokenizer, mbstring and json.</p></li>
+</ul>
+<p>Optional requirements :</p>
+<ul class="simple">
+<li><p>PHP 5.2 to 8.1-dev for analysis purposes. Those versions only require the ext/tokenizer extension.</p></li>
+<li><p>VCS (Version Control Software), such as Git, SVN, bazaar, Mercurial. They all are optional, though git is recommended.</p></li>
+<li><p>Archives, such as zip, tgz, tbz2 may also be opened with optional helpers (See <a class="reference internal" href="#installation-guide-for-optional-tools">Installation guide for optional tools</a>).</p></li>
+</ul>
+<p>OS requirements :</p>
+<ul class="simple">
+<li><p>Exakat has beed tested on OSX, Debian and Ubuntu (up to 20.04).</p></li>
+<li><p>Exakat should work on Linux distributions, may be with little work.</p></li>
+<li><p>Exakat hasn’t been tested on Windows at all.</p></li>
+</ul>
+<p>For installation, curl or wget, and zip are needed.</p>
+</div>
+<div class="section" id="download-exakat-phar">
+<h2>Download exakat.phar<a class="headerlink" href="#download-exakat-phar" title="Permalink to this headline">¶</a></h2>
+<p>You can download exakat directly from <a class="reference external" href="https://www.exakat.io/">https://www.exakat.io/</a>.</p>
+<p>This server also provides older versions of Exakat. It is recommended to always download the last version, which is available with <a class="reference external" href="https://www.exakat.io/versions/index.php?file=latest">https://www.exakat.io/versions/index.php?file=latest</a>.</p>
+<p>For each version, MD5 and SHA256 signatures are available. The downloaded MD5 must match the one in the related .md5 file. The .md5 also has the version number, for extra check.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">o</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="s1">&#39;https://www.exakat.io/versions/index.php?file=latest&#39;</span>
+
+<span class="n">curl</span> <span class="o">-</span><span class="n">o</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span><span class="o">.</span><span class="n">md5</span> <span class="s1">&#39;https://www.exakat.io/versions/index.php?file=latest.md5&#39;</span>
+<span class="o">//</span><span class="mi">19485</span><span class="n">adb7d43b43f7c01b7153ae82881</span>  <span class="n">exakat</span><span class="o">-</span><span class="mf">2.0.0</span><span class="o">.</span><span class="n">phar</span>
+<span class="n">md5sum</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span><span class="o">.</span><span class="n">md5</span>
+<span class="o">//</span> <span class="n">Example</span> <span class="p">:</span>
+<span class="o">//</span><span class="mi">19485</span><span class="n">adb7d43b43f7c01b7153ae82881</span>  <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span>
+
+<span class="n">curl</span> <span class="o">-</span><span class="n">o</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span><span class="o">.</span><span class="n">sha256</span> <span class="s1">&#39;https://www.exakat.io/versions/index.php?file=latest.sha256&#39;</span>
+<span class="o">//</span><span class="n">d838c9ec9291e15873137693da2a0038a67c2f15c2282b89f09f27f23d24d27f</span>  <span class="n">exakat</span><span class="o">-</span><span class="mf">2.0.0</span><span class="o">.</span><span class="n">phar</span>
+<span class="n">sha256sum</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span><span class="o">.</span><span class="n">md5</span>
+<span class="o">//</span> <span class="n">Example</span> <span class="p">:</span>
+<span class="o">//</span><span class="n">d838c9ec9291e15873137693da2a0038a67c2f15c2282b89f09f27f23d24d27f</span>  <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span>
+
+<span class="o">//</span> <span class="n">Check</span> <span class="k">with</span> <span class="n">GPG</span> <span class="n">signature</span>
+<span class="n">curl</span> <span class="o">-</span><span class="n">o</span> <span class="n">exakat</span><span class="o">.</span><span class="n">sig</span> <span class="s1">&#39;https://www.exakat.io/versions/index.php?file=latest.sig&#39;</span>
+<span class="o">//</span> <span class="n">Optional</span> <span class="n">step</span> <span class="p">:</span> <span class="n">Download</span> <span class="n">the</span> <span class="n">Key</span>
+<span class="n">gpg</span> <span class="o">--</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">5</span><span class="n">EDF7EA4</span>
+<span class="o">//</span> <span class="n">Check</span> <span class="k">with</span> <span class="n">GPG</span> <span class="n">signature</span>
+<span class="n">gpg</span> <span class="o">--</span><span class="n">verify</span> <span class="n">exakat</span><span class="o">.</span><span class="n">sig</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span>
+<span class="o">//</span> <span class="n">Good</span> <span class="n">result</span> <span class="p">:</span>
+<span class="o">//</span><span class="n">gpg</span><span class="p">:</span> <span class="n">Signature</span> <span class="n">made</span> <span class="n">Tue</span> <span class="n">Nov</span>  <span class="mi">5</span> <span class="mi">07</span><span class="p">:</span><span class="mi">48</span><span class="p">:</span><span class="mi">34</span> <span class="mi">2019</span> <span class="n">CET</span> <span class="n">using</span> <span class="n">RSA</span> <span class="n">key</span> <span class="n">ID</span> <span class="mi">5</span><span class="n">EDF7EA4</span>
+<span class="o">//</span><span class="n">gpg</span><span class="p">:</span> <span class="n">Good</span> <span class="n">signature</span> <span class="kn">from</span> <span class="s2">&quot;Seguy Damien &lt;damien.seguy@gmail.com&gt;&quot;</span> <span class="p">[</span><span class="n">ultimate</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installation-with-exakat-phar">
+<h2>Installation with exakat.phar<a class="headerlink" href="#installation-with-exakat-phar" title="Permalink to this headline">¶</a></h2>
+<p>Exakat.phar includes its own installation script, as long as PHP is available. Exakat will then check different pre-requisites, and proceed to install some of the last elements.</p>
+<p>Exakat checks for Java and Zip installations. Then, it downloads tinkergraph and the Neo4j plugin from exakat.io and runs the <cite>doctor</cite> command.</p>
+<p>The script is based on the one displayed on the next section.</p>
+<p>You can use the <cite>install</cite> command this way :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">exakat</span>
+<span class="n">cd</span> <span class="n">exakat</span>
+<span class="n">curl</span> <span class="o">-</span><span class="n">o</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="s1">&#39;https://www.exakat.io/versions/index.php?file=latest&#39;</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">install</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installation-on-osx">
+<h2>Installation on OSX<a class="headerlink" href="#installation-on-osx" title="Permalink to this headline">¶</a></h2>
+<p>Paste the following commands in a terminal prompt. It downloads Exakat, and installs tinkerpop version 3.4.11.
+PHP 7.4 or more recent, curl, homebrew are required.</p>
+<div class="section" id="osx-installation-with-tinkergraph-3-4-11">
+<h3>OSX installation with tinkergraph 3.4.11<a class="headerlink" href="#osx-installation-with-tinkergraph-3-4-11" title="Permalink to this headline">¶</a></h3>
+<p>This is the installation script for Exakat and tinkergraph 3.4.11.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">exakat</span>
+<span class="n">cd</span> <span class="n">exakat</span>
+<span class="n">curl</span> <span class="o">-</span><span class="n">o</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="s1">&#39;https://www.exakat.io/versions/index.php?file=latest&#39;</span>
+<span class="n">curl</span> <span class="o">-</span><span class="n">o</span> <span class="n">apache</span><span class="o">-</span><span class="n">tinkerpop</span><span class="o">-</span><span class="n">gremlin</span><span class="o">-</span><span class="n">server</span><span class="o">-</span><span class="mf">3.4.11</span><span class="o">-</span><span class="nb">bin</span><span class="o">.</span><span class="n">zip</span> <span class="s1">&#39;https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-3.4.11-bin.zip&#39;</span>
+<span class="n">unzip</span> <span class="n">apache</span><span class="o">-</span><span class="n">tinkerpop</span><span class="o">-</span><span class="n">gremlin</span><span class="o">-</span><span class="n">server</span><span class="o">-</span><span class="mf">3.4.11</span><span class="o">-</span><span class="nb">bin</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">mv</span> <span class="n">apache</span><span class="o">-</span><span class="n">tinkerpop</span><span class="o">-</span><span class="n">gremlin</span><span class="o">-</span><span class="n">server</span><span class="o">-</span><span class="mf">3.4.11</span> <span class="n">tinkergraph</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="n">apache</span><span class="o">-</span><span class="n">tinkerpop</span><span class="o">-</span><span class="n">gremlin</span><span class="o">-</span><span class="n">server</span><span class="o">-</span><span class="mf">3.4.11</span><span class="o">-</span><span class="nb">bin</span><span class="o">.</span><span class="n">zip</span>
+
+<span class="c1"># Optional : install neo4j engine.</span>
+<span class="n">cd</span> <span class="n">tinkergraph</span>
+<span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">gremlin</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">sh</span> <span class="n">install</span> <span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">tinkerpop</span> <span class="n">neo4j</span><span class="o">-</span><span class="n">gremlin</span> <span class="mf">3.4.11</span>
+<span class="n">cd</span> <span class="o">..</span>
+
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">doctor</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="osx-installation-troubleshooting">
+<h3>OSX installation troubleshooting<a class="headerlink" href="#osx-installation-troubleshooting" title="Permalink to this headline">¶</a></h3>
+<p>It has be reported that installation fails on OSX 10.11 and 10.12, with error similar to ‘Error grabbing Grapes’. To fix this, use the following in command line :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">-</span><span class="n">r</span> <span class="o">~/.</span><span class="n">groovy</span><span class="o">/</span><span class="n">grapes</span><span class="o">/</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">r</span> <span class="o">~/.</span><span class="n">m2</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>They remove some files for grapes, that it will rebuild later. Then, try again the optional install instructions.</p>
+</div>
+</div>
+<div class="section" id="installation-on-debian-ubuntu">
+<h2>Installation on Debian/Ubuntu<a class="headerlink" href="#installation-on-debian-ubuntu" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="debian-ubuntu-installation-with-tinkergraph-3-4-11">
+<h3>Debian/Ubuntu installation with Tinkergraph 3.4.11<a class="headerlink" href="#debian-ubuntu-installation-with-tinkergraph-3-4-11" title="Permalink to this headline">¶</a></h3>
+<p>Paste the following commands in a terminal prompt. It installs Exakat most recent version with Tinkergraph 3.4.11.
+PHP 7.3 (7.0 or more recent), wget and unzip are expected.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mkdir exakat
+cd exakat
+wget -O exakat.phar https://www.exakat.io/versions/index.php?file=latest
+wget -O apache-tinkerpop-gremlin-server-3.4.11-bin.zip &#39;https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-3.4.11-bin.zip&#39;
+unzip apache-tinkerpop-gremlin-server-3.4.11-bin.zip
+mv apache-tinkerpop-gremlin-server-3.4.11 tinkergraph
+rm -rf apache-tinkerpop-gremlin-server-3.4.11-bin.zip
+
+# Optional : install neo4j engine.
+cd tinkergraph
+./bin/gremlin-server.sh install org.apache.tinkerpop neo4j-gremlin 3.4.11
+cd ..
+
+php exakat.phar doctor
+</pre></div>
+</div>
+</div>
+<div class="section" id="prerequisites-full-installation-with-debian-ubuntu">
+<h3>Prerequisites : Full installation with Debian/Ubuntu<a class="headerlink" href="#prerequisites-full-installation-with-debian-ubuntu" title="Permalink to this headline">¶</a></h3>
+<p>The following commands are an optional pre-requisite to the installation guide, that just follows. If something is missing in the next section, check with this section that all has beed installed correctly.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">////</span> <span class="n">Installing</span> <span class="n">PHP</span> <span class="kn">from</span> <span class="nn">sury.org</span>
+<span class="n">apt</span> <span class="n">update</span>
+<span class="n">apt</span> <span class="n">install</span> <span class="n">apt</span><span class="o">-</span><span class="n">transport</span><span class="o">-</span><span class="n">https</span> <span class="n">lsb</span><span class="o">-</span><span class="n">release</span> <span class="n">ca</span><span class="o">-</span><span class="n">certificates</span>
+
+<span class="n">wget</span> <span class="o">-</span><span class="n">O</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">trusted</span><span class="o">.</span><span class="n">gpg</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">php</span><span class="o">.</span><span class="n">gpg</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">sury</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">php</span><span class="o">/</span><span class="n">apt</span><span class="o">.</span><span class="n">gpg</span>
+<span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;echo &quot;deb https://packages.sury.org/php/ $(lsb_release -sc) main&quot; &gt; /etc/apt/sources.list.d/php.list&#39;</span>
+<span class="n">apt</span> <span class="n">update</span>
+
+<span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">php7</span><span class="mf">.2</span> <span class="n">php7</span><span class="mf">.2</span><span class="o">-</span><span class="n">common</span> <span class="n">php7</span><span class="mf">.2</span><span class="o">-</span><span class="n">cli</span> <span class="n">php7</span><span class="mf">.2</span><span class="o">-</span><span class="n">curl</span> <span class="n">php7</span><span class="mf">.2</span><span class="o">-</span><span class="n">json</span> <span class="n">php7</span><span class="mf">.2</span><span class="o">-</span><span class="n">mbstring</span> <span class="n">php7</span><span class="mf">.2</span><span class="o">-</span><span class="n">sqlite3</span>
+
+<span class="o">////</span> <span class="n">Installing</span> <span class="n">Java</span> <span class="n">JDK</span>
+<span class="n">echo</span> <span class="s2">&quot;deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main&quot;</span> <span class="o">|</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">webupd8team</span><span class="o">-</span><span class="n">java</span><span class="o">.</span><span class="n">list</span>
+<span class="n">echo</span> <span class="s2">&quot;deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main&quot;</span> <span class="o">|</span> <span class="n">tee</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">webupd8team</span><span class="o">-</span><span class="n">java</span><span class="o">.</span><span class="n">list</span>
+<span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+
+<span class="n">echo</span> <span class="n">debconf</span> <span class="n">shared</span><span class="o">/</span><span class="n">accepted</span><span class="o">-</span><span class="n">oracle</span><span class="o">-</span><span class="n">license</span><span class="o">-</span><span class="n">v1</span><span class="o">-</span><span class="mi">1</span> <span class="n">select</span> <span class="n">true</span> <span class="o">|</span> <span class="n">debconf</span><span class="o">-</span><span class="nb">set</span><span class="o">-</span><span class="n">selections</span>
+<span class="n">echo</span> <span class="n">debconf</span> <span class="n">shared</span><span class="o">/</span><span class="n">accepted</span><span class="o">-</span><span class="n">oracle</span><span class="o">-</span><span class="n">license</span><span class="o">-</span><span class="n">v1</span><span class="o">-</span><span class="mi">1</span> <span class="n">seen</span> <span class="n">true</span> <span class="o">|</span> <span class="n">debconf</span><span class="o">-</span><span class="nb">set</span><span class="o">-</span><span class="n">selections</span>
+<span class="n">DEBIAN_FRONTEND</span><span class="o">=</span><span class="n">noninteractive</span>  <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">yes</span> <span class="n">oracle</span><span class="o">-</span><span class="n">java8</span><span class="o">-</span><span class="n">installer</span> <span class="n">oracle</span><span class="o">-</span><span class="n">java8</span><span class="o">-</span><span class="nb">set</span><span class="o">-</span><span class="n">default</span>
+
+<span class="o">////</span> <span class="n">Installing</span> <span class="n">other</span> <span class="n">tools</span>
+<span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> <span class="n">git</span> <span class="n">subversion</span> <span class="n">mercurial</span> <span class="n">lsof</span> <span class="n">unzip</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="installation-guide-with-composer">
+<h2>Installation guide with Composer<a class="headerlink" href="#installation-guide-with-composer" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="composer-installation-first-run">
+<h3>Composer installation first run<a class="headerlink" href="#composer-installation-first-run" title="Permalink to this headline">¶</a></h3>
+<p>To install Exakat with composer, you can use the following commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">exakat</span>
+<span class="n">cd</span> <span class="n">exakat</span>
+<span class="n">composer</span> <span class="n">require</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span>
+<span class="n">php</span> <span class="n">vendor</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">exakat</span> <span class="n">install</span> <span class="o">-</span><span class="n">v</span>
+</pre></div>
+</div>
+<p>The final command checks for the presence of Java and unZip utility. Then, it installs a local copy of a <a class="reference external" href="http://tinkerpop.apache.org/">Gremlin server</a>. This is needed to run Exakat.</p>
+<p>To run your first audit, use the following commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">vendor</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">exakat</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span> <span class="o">-</span><span class="n">R</span> <span class="s1">&#39;https://github.com/sculpin/sculpin.git&#39;</span>
+<span class="n">php</span> <span class="n">vendor</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">exakat</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span>
+</pre></div>
+</div>
+<p>The final audit is now in the <cite>projects/sculpin/report</cite> directory.</p>
+</div>
+</div>
+<div class="section" id="installation-guide-with-docker">
+<h2>Installation guide with Docker<a class="headerlink" href="#installation-guide-with-docker" title="Permalink to this headline">¶</a></h2>
+<p>There are multiple ways to use exakat with docker. There is an image with a full exakat installation, which run with a traditional installation, or inside the audited code. Or, You may use Docker with a standard installation, to run useful part, such as a specific PHP version or the central database.</p>
+<p>image:: images/exakat-and-docker.png</p>
+<div class="section" id="docker-image-for-exakat-with-projects-folder">
+<h3>Docker image for Exakat with projects folder<a class="headerlink" href="#docker-image-for-exakat-with-projects-folder" title="Permalink to this headline">¶</a></h3>
+<p>Installation with Docker is easy, and convenient. It hides the dependency of the graph database, and keeps all files in the ‘projects’ folder, created in the working directory.</p>
+<p>Currently, Docker installation only ships with one PHP version (7.3), and with support for bazaar, composer, git, mercurial, svn, and zip.</p>
+<ul class="simple">
+<li><p>Install <a class="reference external" href="http://www.docker.com/">Docker</a></p></li>
+<li><p>Start Docker</p></li>
+<li><p>Pull exakat. The official docker page is <a class="reference external" href="https://hub.docker.com/r/exakat/exakat/">exakat/exakat</a>.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span>
+</pre></div>
+</div>
+<p># Check-run exakat :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat version
+docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat doctor
+</pre></div>
+</div>
+<p># Init a project :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat init -p &lt;project name&gt; -R &lt;vcs_url&gt;
+</pre></div>
+</div>
+<p>If you need SSH credentials to clone a project, you may import your SSH keys in the repository by assigning them to the <cite>exakat</cite> user. With the commmand below, the local set of keys of user ‘my-user’ are assigned to <cite>exakat</cite> in the container. Note that those keys will request the passphrase, which will prevent their usage.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -v /home/my-user/.ssh:/home/exakat/ssh -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat init -p &lt;project name&gt; -R &lt;vcs_url&gt;
+</pre></div>
+</div>
+<p># Run exakat :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat project -p &lt;project name&gt;
+</pre></div>
+</div>
+<p># Run exakat directly in the code base. For that, the code needs to have the .exakat.yml or .exakat.ini file available at the root. Then, you may call exakat with the ‘project’ command, without other options.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat project
+</pre></div>
+</div>
+<p>For large code bases, it may be necessary to increase the allocated memory for the graph database. Do this by using the JAVA_OPTIONS environment variable when you start the docker command : this example gives 2Gb of RAM to the graphdb. That should cover medium size applications.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -e JAVA_OPTIONS=&quot;-Xms32m -Xmx2g&quot; -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat
+</pre></div>
+</div>
+<p>You may run any exakat command by prefixing it with the following command :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat
+</pre></div>
+</div>
+<p>You may also create a handy shortcut, by creating an exakat.sh script and put it in your PATH :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="s1">&#39;docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat exakat/exakat exakat $1&#39;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">exakat</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span> <span class="n">u</span><span class="o">+</span><span class="n">x</span>  <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">exakat</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">./</span><span class="n">exakat</span><span class="o">.</span><span class="n">sh</span> <span class="n">version</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>Docker image for Exakat with projects folder<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>To run exakat inside the audited code, you must configure the <cite>.exakat.ini</cite> or <cite>.exakat.yaml</cite> file. See <a class="reference external" href="https://www.exakat.io/add-exakat-to-your-ci-pipeline/">Add Exakat To Your CI Pipeline</a>.</p>
+<p>Then, you can run the following command, with docker :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it --rm -v `$pwd`:/src exakat/exakat:latest exakat project -v
+</pre></div>
+</div>
+</div>
+<div class="section" id="docker-php-image-with-exakat">
+<h3>Docker PHP image with Exakat<a class="headerlink" href="#docker-php-image-with-exakat" title="Permalink to this headline">¶</a></h3>
+<p>Exakat recognizes docker images configured as PHP binaries. Instead of configuring exakat with local binaries, such as <cite>/usr/bin/php</cite>, you may configure a specific PHP version with a docker image.</p>
+<p>Open the <cite>config/exakat.ini</cite> file, at the root of the exakat installation, and use the following value :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">configuration</span> <span class="k">with</span> <span class="n">the</span> <span class="s1">&#39;tetraweb/php:5.5&#39;</span> <span class="n">image</span><span class="o">.</span>
+<span class="p">;</span><span class="n">php55</span> <span class="o">=</span> <span class="n">tetraweb</span><span class="o">/</span><span class="n">php</span><span class="p">:</span><span class="mf">5.5</span>
+<span class="n">php56</span> <span class="o">=</span> <span class="n">tetraweb</span><span class="o">/</span><span class="n">php</span><span class="p">:</span><span class="mf">5.6</span>
+<span class="c1"># classic configuration with local binary</span>
+<span class="n">php73</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">php</span>
+</pre></div>
+</div>
+<p>The image may be any docker image that provides a PHP binary. We suggest using <a class="reference external" href="https://hub.docker.com/r/tetraweb/php/">tetraweb/php</a>, which supports PHP 5.5 to 7.1. There are other images available, and you may also roll out your own.</p>
+</div>
+<div class="section" id="docker-gremlin-image-with-exakat">
+<h3>Docker Gremlin image with Exakat<a class="headerlink" href="#docker-gremlin-image-with-exakat" title="Permalink to this headline">¶</a></h3>
+<p>Exakat is able to use only the central database, Gremlin, as a docker image. This is convenient, as the database is only a temporary database, and those data are not necessary for producing the final reports.</p>
+<p>This image is under construction, and will be soon available.</p>
+</div>
+</div>
+<div class="section" id="installation-guide-as-github-action">
+<h2>Installation guide as Github Action<a class="headerlink" href="#installation-guide-as-github-action" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="github-action">
+<h3>Github Action<a class="headerlink" href="#github-action" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://docs.github.com/en/actions">Github Action</a> is a way to “Automate, customize, and execute your software development workflows right in your repository”. Exakat may be run on Github platform.</p>
+</div>
+<div class="section" id="github-action-for-exakat">
+<h3>Github Action for Exakat<a class="headerlink" href="#github-action-for-exakat" title="Permalink to this headline">¶</a></h3>
+<p>To add Exakat to your repository on Github, create a file <cite>.github/workflows/test.yml</cite>, at the root of your repository (<cite>.github/workflows</cite> might already exists).</p>
+<p>In the file, use the following YAML code. It will create an automatic action, on push and pull_request actions, that runs Exakat and display the issues found in the workflow panel. It is also possible to run manually this action.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">on</span><span class="p">:</span> <span class="p">[</span><span class="n">push</span><span class="p">,</span> <span class="n">pull_request</span><span class="p">]</span>
+<span class="n">name</span><span class="p">:</span> <span class="n">Test</span>
+<span class="n">jobs</span><span class="p">:</span>
+  <span class="n">exakat</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Exakat</span>
+    <span class="n">runs</span><span class="o">-</span><span class="n">on</span><span class="p">:</span> <span class="n">ubuntu</span><span class="o">-</span><span class="n">latest</span>
+    <span class="n">steps</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">checkout</span><span class="nd">@v2</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">Exakat</span>
+      <span class="n">uses</span><span class="p">:</span> <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="o">-</span><span class="n">ga</span>
+</pre></div>
+</div>
+<p>Note : it is recommended to edit this file directly on github.com, as it cannot be pushed from a remote repository.</p>
+<p>Then, you can use the <cite>Action</cite> button, next to ‘Pull requests’. This will run Exakat on the repository, with the ‘CI-checks’ ruleset, and in the ‘Perfile’ format.</p>
+</div>
+<div class="section" id="github-action-configuration-directives">
+<h3>Github Action Configuration directives<a class="headerlink" href="#github-action-configuration-directives" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to provide custom directives to the Exakat Github action, by using the ‘with’ keyword in the configuration. Here is an example :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">on</span><span class="p">:</span> <span class="p">[</span><span class="n">push</span><span class="p">,</span> <span class="n">pull_request</span><span class="p">]</span>
+<span class="n">name</span><span class="p">:</span> <span class="n">Test</span>
+<span class="n">jobs</span><span class="p">:</span>
+  <span class="n">exakat</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Exakat</span>
+    <span class="n">runs</span><span class="o">-</span><span class="n">on</span><span class="p">:</span> <span class="n">ubuntu</span><span class="o">-</span><span class="n">latest</span>
+    <span class="n">steps</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">checkout</span><span class="nd">@v2</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">Exakat</span>
+      <span class="n">uses</span><span class="p">:</span> <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="o">-</span><span class="n">ga</span>
+    <span class="o">-</span> <span class="k">with</span><span class="p">:</span>
+      <span class="n">ignore_rules</span><span class="p">:</span> <span class="s1">&#39;Classes/StaticMethodsCalledFromObject,Php/ShouldUseCoalesce,Functions/UsesDefaultArguments&#39;</span>
+      <span class="n">ignore_dirs</span><span class="p">:</span> <span class="s1">&#39;/path/to/repos#1,/path/to/repos#2,/path/to/repos#3&#39;</span>
+</pre></div>
+</div>
+<p>The supported directives are the following:</p>
+<ul class="simple">
+<li><p><strong>exit_on_issues</strong> : default to true. The github action returns with exit code 1 if any issue is found during the review. Set this to empty string, to have the action return 0. You may also configure the step with <a class="reference external" href="https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error">continue-on-error</a>.</p></li>
+<li><p><strong>ignore_rules</strong> : default to empty. A comma-separated list of Exakat rule short names, that will be excluded from the review. For example : ignore_rules: Structures/AddOne,Structures/PlusEgalOne.</p></li>
+<li><p><strong>ignore_dirs</strong> : default to empty. A comma-separated list folders that will be omitted. They are relative to the root of the repository.</p></li>
+<li><p><strong>include_dirs</strong> : default to empty. A comma-separated list folders that must be added. They are relative to the root of the repository, and will be added after the ignore_dirs directive.</p></li>
+<li><p><strong>file_extensions</strong> : default to exakat’s default value. A comma-separated list of file extensions to filter the processed files. Default list is php,php3,inc,tpl,phtml,tmpl,phps,ctp,module. This configuration replaces the default one.</p></li>
+<li><p><strong>project_reports</strong> : default to Perfile. A comma-separated list of Exakat reports to be processed. For example : Perfile,Sarif,Diplomat. Reports such as ‘Diplomat’ must be uploaded elsewhere (with <a class="reference external" href="https://github.com/actions/upload-artifact">upload artifact</a>), as the produced file will be written in the Github Action, which is later removed.</p></li>
+</ul>
+<div class="section" id="upload-reports-as-artefact">
+<h4>Upload reports as artefact<a class="headerlink" href="#upload-reports-as-artefact" title="Permalink to this headline">¶</a></h4>
+<p>When producing a report with Github action, the result is either send to STDOUT, aka the log in the Github interface. Or, it is written in the Github action. When this is done, the report must be uploaded out of the Github action to be preserved.</p>
+<p>Github upload, aka <a class="reference external" href="mailto:actions/upload-artifact&#37;&#52;&#48;v2">actions/upload-artifact<span>&#64;</span>v2</a>, may be used for that purpose. Add the following configuration in the action file :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">upload</span><span class="o">-</span><span class="n">artifact</span><span class="nd">@v2</span>
+  <span class="k">with</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">exakat</span><span class="o">-</span><span class="n">report</span>
+    <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">workspace</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">report</span>
+</pre></div>
+</div>
+<p>The path to report is stored in the <code class="docutils literal notranslate"><span class="pre">/github/workspace</span></code> folder, with different names depending on the requested exakat report. For example, the <cite>Yaml</cite> report is exported to ‘exakat.yaml’, while the <cite>Diplomat</cite> report is stored in a folder called ‘diplomat’. Thus, the configuration shall be :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">upload</span><span class="o">-</span><span class="n">artifact</span><span class="nd">@v2</span>
+  <span class="k">with</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">exakat</span><span class="o">-</span><span class="n">report</span>
+    <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">workspace</span><span class="o">/</span><span class="n">diplomat</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="exakat-docker-image-for-github-action">
+<h3>Exakat Docker image for Github Action<a class="headerlink" href="#exakat-docker-image-for-github-action" title="Permalink to this headline">¶</a></h3>
+<p>A Docker image is released with Exakat’s version automatically, to be used with Github Action. It is available at <a class="reference external" href="https://hub.docker.com/r/exakat/exakat-ga">https://hub.docker.com/r/exakat/exakat-ga</a>.</p>
+<p>You can run it in any given directory like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd /path/to/code
+docker pull exakat/exakat-ga
+docker run --rm -it -v ${PWD}:/app exakat/exakat-ga:latest
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="using-multiple-php-versions">
+<h2>Using multiple PHP versions<a class="headerlink" href="#using-multiple-php-versions" title="Permalink to this headline">¶</a></h2>
+<p>You need at least one version of PHP to run exakat. This version needs the <a class="reference external" href="http://www.php.net/curl">curl</a>, <a class="reference external" href="http://www.php.net/hash">hash</a>, <a class="reference external" href="http://www.php.net/tokenizer">tokenizer</a>, <a class="reference external" href="http://www.php.net/hash">hash</a> and <a class="reference external" href="http://www.php.net/sqlite3">sqlite3</a> extensions. They all are part of the core.</p>
+<p>Extra PHP-CLI versions allow more linting of the code. They only need to have the <a class="reference external" href="http://www.php.net/tokenizer">tokenizer</a> extension available.</p>
+<p>Exakat recommends PHP 8.0.x (or newer version) to run Exakat. We also recommend the installation of PHP versions 5.6, 7.1, 7.2, 7.3, 7.4, 8.0 and 8.1 (aka php-src master).</p>
+<p>To install easily various versions of PHP, use the ondrej repository. Check <a class="reference external" href="https://launchpad.net/~ondrej/+archive/ubuntu/php">The main PPA for PHP (8.0, 7.4, 7.3, 7.2, 7.1, 7.0, 5.6)</a>.
+You may also check the dotdeb repository, at <a class="reference external" href="https://www.dotdeb.org/instructions/">dotdeb instruction</a> or compile PHP yourself.</p>
+</div>
+<div class="section" id="installation-guide-for-optional-tools">
+<h2>Installation guide for optional tools<a class="headerlink" href="#installation-guide-for-optional-tools" title="Permalink to this headline">¶</a></h2>
+<p>Exakat is able to use a variety of tools to access PHP code to audit. Some external tools are necessary. You can check which tools are recognized locally with the <cite>exakat doctor -v</cite> command.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://bazaar.canonical.com/en/">bazaar</a> : the <cite>bzr</cite> command must be available.</p></li>
+<li><p><a class="reference external" href="https://getcomposer.org/">composer</a> : the <cite>composer</cite> command must be available.</p></li>
+<li><p><a class="reference external" href="https://www.nongnu.org/cvs/">CVS</a> : the <cite>cvs</cite> command must be available</p></li>
+<li><p><a class="reference external" href="https://git-scm.com/">Git</a> : the <cite>git</cite> command must be available.</p></li>
+<li><p><a class="reference external" href="https://www.mercurial-scm.org/">mercurial</a> : the <cite>hg</cite> must be available</p></li>
+<li><p><a class="reference external" href="https://subversion.apache.org/">Svn</a> : the <cite>svn</cite> command must be available.</p></li>
+<li><p>tgz : the <cite>tar</cite> and <cite>gunzip</cite> commands must be available</p></li>
+<li><p>tbz : the <cite>tar</cite> and <cite>bunzip2</cite> commands must be available.</p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/RAR_(file_format)">rar</a> : the <cite>rar</cite> commands must be available.</p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Zip_(file_format)">zip</a> : the <cite>unzip</cite> command must be available.</p></li>
+<li><p><a class="reference external" href="https://www.7-zip.org/7z.html">7z</a> : the <cite>7z</cite> command must be available</p></li>
+</ul>
+<p>The binaries above are used with the <cite>init</cite> and <cite>update</cite> commands, to get the source code. They are optional.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Upgrading.html" class="btn btn-neutral float-right" title="Upgrading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../Reference/Cases.html" class="btn btn-neutral float-left" title="5. Real Code Cases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015-2020, Damien Seguy.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

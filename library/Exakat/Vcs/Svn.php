@@ -33,7 +33,7 @@ class Svn extends Vcs {
     }
 
     protected function selfCheck() {
-        $res = shell_exec("{$this->executable} --version 2>&1") ?? '';
+        $res = $this->shell("{$this->executable} --version 2>&1");
         if (strpos($res, 'svn') === false) {
             throw new HelperException('SVN');
         }
@@ -44,13 +44,13 @@ class Svn extends Vcs {
 
         $source = escapeshellarg($source);
         $codePath = dirname($this->destinationFull);
-        shell_exec("cd {$codePath}; {$this->executable} checkout --quiet $source code");
+        $this->shell("cd {$codePath}; {$this->executable} checkout --quiet $source code");
     }
 
     public function update() {
         $this->check();
 
-        $res = shell_exec("cd {$this->destinationFull}; {$this->executable} update") ?? '';
+        $res = $this->shell("cd {$this->destinationFull}; {$this->executable} update");
         if (preg_match('/Updated to revision (\d+)\./', $res, $r)) {
             return $r[1];
         }
@@ -63,7 +63,7 @@ class Svn extends Vcs {
     }
 
     private function getInfo() {
-        $res = trim(shell_exec("cd {$this->destinationFull}; {$this->executable} info") ?? '');
+        $res = trim($this->shell("cd {$this->destinationFull}; {$this->executable} info"));
 
         if (empty($res)) {
             $this->info['svn'] = '';
@@ -95,7 +95,7 @@ class Svn extends Vcs {
     public function getInstallationInfo() {
         $stats = array();
 
-        $res = trim(shell_exec("{$this->executable} --version 2>&1") ?? '');
+        $res = trim($this->shell("{$this->executable} --version 2>&1"));
         if (preg_match('/svn, version ([0-9\.]+) /', $res, $r)) {//
             $stats['installed'] = 'Yes';
             $stats['version'] = $r[1];
@@ -122,7 +122,7 @@ class Svn extends Vcs {
     }
 
     public function getLastCommitDate(): int {
-        $res = trim(shell_exec("cd {$this->destinationFull}; {$this->executable} info 2>&1") ?? '');
+        $res = trim($this->shell("cd {$this->destinationFull}; {$this->executable} info 2>&1"));
 
         //Last Changed Date: 2020-07-22 09:17:27 +0200 (Wed, 22 Jul 2020)
         if (preg_match('/Last Changed Date: (\d{4}.+\d{4}) /m', $res, $r)) {

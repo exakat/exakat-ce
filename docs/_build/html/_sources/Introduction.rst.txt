@@ -3,7 +3,7 @@
 Introduction
 ============
 
-This is the documentation of the Exakat engine, version 2.1.9 (Build 1155), on Thu, 01 Oct 2020 08:48:45 +0000.
+This is the documentation of the Exakat engine, version 2.3.0 (Build 1260), on Mon, 08 Nov 2021 16:57:25 +0000.
 
 What is Exakat ? 
 ----------------
@@ -12,7 +12,7 @@ Exakat is a tool for analyzing, reporting and assessing PHP code source efficien
 
 Exakat reads the code, builds an AST and several dependency graphs, then indexes all of it in a graph database. From there, exakat runs analysis, collecting potential errors and descriptive information about the code. Finally, exakat produces reports, both for humans and machines.
 
-Exakat Use Cases
+Use Cases
 ----------------
 
 Code quality
@@ -81,7 +81,7 @@ Continuous integration and code quality management check the code by running cod
 
 Exakat provides machine readable format reports, such as json, xml, text that may be consumed by CI. Exakat provides also human readable format, such as HTML, for interactive review of the reports, and a longer usage life span.
 
-Exakat ecosystem
+Platforms
 ----------------
 
 `Exakat <http://www.exakat.io/>`_ is an Open Source tool. The code is available on `Github.com/exakat/exakat <https://github.com/exakat/exakat>`_, as `Docker image <https://hub.docker.com/r/exakat/exakat/>`_ and `Vagrant file <https://github.com/exakat/exakat-vagrant>`_. It is also available as a phar `download <https://www.exakat.io/download-exakat/>`_.

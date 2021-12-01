@@ -1,0 +1,1282 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>2. Rulesets &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. Reports" href="Reports.html" />
+    <link rel="prev" title="1. Rules" href="Rules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../User/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Support.html">Library &amp; Framework Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Cobbler.html">Cobbler</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">1. Rules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Rulesets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">2.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">2.2. Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-rulesets">2.3. List of rulesets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analyze">2.3.1. Analyze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#appinfo">2.3.2. Appinfo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compatibilityphp74">2.3.3. CompatibilityPHP74</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compatibilityphp80">2.3.4. CompatibilityPHP80</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compatibilityphp81">2.3.5. CompatibilityPHP81</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dump">2.3.6. Dump</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#first">2.3.7. First</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Annex.html">Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">2. </span>Rulesets</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Reference/Rulesets.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="rulesets">
+<span id="id1"></span><h1><span class="section-number">2. </span>Rulesets<a class="headerlink" href="#rulesets" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2><span class="section-number">2.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Exakat provides unique 653 rules to detect BUGS, CODE SMELLS, SECURITY OR QUALITY ISSUES in your PHP code.</p>
+<p>For more smoothly usage, the ruleset concept allow you to run a set of rules based on a decidated focus. Beawre that a Ruleset run all the associated rules and any needed dependencies.</p>
+<p>Rulesets are configured with the -T option, when running exakat in command line. For example :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">analyze</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">T</span> <span class="o">&lt;</span><span class="n">Security</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="summary">
+<h2><span class="section-number">2.2. </span>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Here is the list of the current rulesets supported by Exakat Engine.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 68%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="xref std std-ref">analyze</span></p></td>
+<td><p>Check for common best practices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="xref std std-ref">appinfo</span></p></td>
+<td><p>Appinfo is the equivalent of phpinfo() for your code.</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="xref std std-ref">compatibilityphp74</span></p></td>
+<td><p>List features that are incompatible with PHP 7.4.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="xref std std-ref">compatibilityphp80</span></p></td>
+<td><p>List features that are incompatible with PHP 8.0.</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="xref std std-ref">compatibilityphp81</span></p></td>
+<td><p>List features that are incompatible with PHP 8.1.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="xref std std-ref">dump</span></p></td>
+<td><p>Dump is a collector set of rules.</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="xref std std-ref">first</span></p></td>
+<td><p>A set of rules that are always run at the beginning of a project, because they are frenquently used.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Note : in command line, don’t forget to add quotes to rulesets’ names that include white space.</p>
+</div>
+<div class="section" id="list-of-rulesets">
+<h2><span class="section-number">2.3. </span>List of rulesets<a class="headerlink" href="#list-of-rulesets" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="analyze">
+<span id="ruleset-analyze"></span><h3><span class="section-number">2.3.1. </span>Analyze<a class="headerlink" href="#analyze" title="Permalink to this headline">¶</a></h3>
+<p>This ruleset centralizes a large number of classic trap and pitfalls when writing PHP.</p>
+<p>Total : 430 analysis</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#adding-zero"><span class="std std-ref">Adding Zero</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Arrays/AmbiguousKeys</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-index-definition"><span class="std std-ref">Multiple Index Definition</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/EmptyClass</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#forgotten-visibility"><span class="std std-ref">Forgotten Visibility</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#non-static-methods-called-in-a-static"><span class="std std-ref">Non Static Methods Called In A Static</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#old-style-constructor"><span class="std std-ref">Old Style Constructor</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#static-methods-called-from-object"><span class="std std-ref">Static Methods Called From Object</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#constants-with-strange-names"><span class="std std-ref">Constants With Strange Names</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/EmptyFunction</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#redeclared-php-functions"><span class="std std-ref">Redeclared PHP Functions</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/WithoutReturn</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Interfaces/EmptyInterface</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#incompilable-files"><span class="std std-ref">Incompilable Files</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#error-reporting-with-integers"><span class="std std-ref">error_reporting() With Integers</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#eval-usage"><span class="std std-ref">Eval() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#exit-usage"><span class="std std-ref">Exit() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#forgotten-whitespace"><span class="std std-ref">Forgotten Whitespace</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/Iffectation</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiply-by-one"><span class="std std-ref">Multiply By One</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#operator"><span class="std std-ref">&#64; Operator</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#not-not"><span class="std std-ref">Not Not</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#include-once-usage"><span class="std std-ref">include_once() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#strpos-like-comparison"><span class="std std-ref">Strpos()-like Comparison</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#throws-an-assignement"><span class="std std-ref">Throws An Assignement</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#var-dump-usage"><span class="std std-ref">var_dump()… Usage</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/toStringThrowsException</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/VariableNonascii</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/VariableUsedOnce</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Constants/BadConstantnames</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Traits/EmptyTrait</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Namespaces/UseWithFullyQualifiedNS</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-instructions"><span class="std std-ref">Useless Instructions</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AbstractStatic</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Constants/InvalidName</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-constant-definition"><span class="std std-ref">Multiple Constant Definition</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-optional-parameter"><span class="std std-ref">Wrong Optional Parameter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-null"><span class="std std-ref">Use === null</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ThisIsNotAnArray</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#one-variable-string"><span class="std std-ref">One Variable String</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#static-methods-can-t-contain-this"><span class="std std-ref">Static Methods Can’t Contain $this</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#while-list-each"><span class="std std-ref">While(List() = Each())</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/OneLineTwoInstructions</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiples-identical-case"><span class="std std-ref">Multiples Identical Case</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#switch-without-default"><span class="std std-ref">Switch Without Default</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ThisIsForClasses</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#nested-ternary"><span class="std std-ref">Nested Ternary</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Arrays/NonConstantArray</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-constants"><span class="std std-ref">Undefined Constants</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/InstantiatingAbstractClass</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CitSameName</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/EmptyTryCatch</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UndefinedClasses</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#htmlentities-calls"><span class="std std-ref">Htmlentities Calls</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-class-constants"><span class="std std-ref">Undefined Class Constants</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#used-once-variables-in-scope"><span class="std std-ref">Used Once Variables (In Scope)</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-functions"><span class="std std-ref">Undefined Functions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#deprecated-php-functions"><span class="std std-ref">Deprecated PHP Functions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dangling-array-references"><span class="std std-ref">Dangling Array References</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/QueriesInLoop</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/OldStyleVar</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#aliases-usage"><span class="std std-ref">Aliases Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#uses-default-values"><span class="std std-ref">Uses Default Values</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-number-of-arguments"><span class="std std-ref">Wrong Number Of Arguments</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/HardcodedPasswords</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UnresolvedClasses</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UselessConstructor</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ImplementIsForInterface</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-const"><span class="std std-ref">Use const</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Namespaces/UnresolvedUse</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UndefinedParentMP</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UndefinedStaticMP</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AccessPrivate</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AccessProtected</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/PssWithoutClass</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#list-may-omit-variables"><span class="std std-ref">list() May Omit Variables</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#or-die"><span class="std std-ref">Or Die</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/WrittenOnlyVariable</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#must-return-methods"><span class="std std-ref">Must Return Methods</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/EmptyLines</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#overwritten-exceptions"><span class="std std-ref">Overwritten Exceptions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#foreach-reference-is-not-modified"><span class="std std-ref">Foreach Reference Is Not Modified</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoChangeIncomingVariables</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ComparedComparison</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/UselessReturn</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UnusedClass</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/Unpreprocessed</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-properties"><span class="std std-ref">Undefined Properties</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/ShortOpenTagRequired</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#strict-comparison-with-booleans"><span class="std std-ref">Strict Comparison With Booleans</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#lone-blocks"><span class="std std-ref">Lone Blocks</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ThisIsNotForStatic</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#global-usage"><span class="std std-ref">Global Usage</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/ReservedNames</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#logical-should-use-symbolic-operators"><span class="std std-ref">Logical Should Use Symbolic Operators</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ShouldUseSelf</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/CatchShadowsVariable</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#deep-definitions"><span class="std std-ref">Deep Definitions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#repeated-print"><span class="std std-ref">Repeated print()</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#avoid-parenthesis"><span class="std std-ref">Avoid Parenthesis</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#objects-don-t-need-references"><span class="std std-ref">Objects Don’t Need References</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/LostReferences</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Constants/CreatedOutsideItsNamespace</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Namespaces/ConstantFullyQualified</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/PropertyNeverUsed</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-real-comparison"><span class="std std-ref">No Real Comparison</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ShouldUseThis</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-direct-call-to-magic-method"><span class="std std-ref">No Direct Call To Magic Method</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Type/StringHoldAVariable</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/EchoWithConcat</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/UnusedGlobal</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/UselessGlobal</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ShouldPreprocess</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-final"><span class="std std-ref">Useless Final</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-constant"><span class="std std-ref">Use Constant</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-unset"><span class="std std-ref">Useless Unset</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/BuriedAssignation</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-array-merge-in-loops"><span class="std std-ref">No array_merge() In Loops</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-parenthesis"><span class="std std-ref">Useless Parenthesis</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UnresolvedInstanceof</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-php-object-api"><span class="std std-ref">Use PHP Object API</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Exceptions/Unthrown</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/oldAutoloadUsage</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#altering-foreach-without-reference"><span class="std std-ref">Altering Foreach Without Reference</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-pathinfo"><span class="std std-ref">Use Pathinfo</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/ShouldUseConstants</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/HashAlgos</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-parenthesis-for-language-construct"><span class="std std-ref">No Parenthesis For Language Construct</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoHardcodedPath</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoHardcodedPort</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-constant-as-arguments"><span class="std std-ref">Use Constant As Arguments</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#implied-if"><span class="std std-ref">Implied If</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/OverwrittenLiterals</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/MakeDefault</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/NoPublicAccess</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-chain-exception"><span class="std std-ref">Should Chain Exception</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Interfaces/UselessInterfaces</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-interfaces"><span class="std std-ref">Undefined Interfaces</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Interfaces/ConcreteVisibility</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/DoubleInstruction</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-use-prepared-statement"><span class="std std-ref">Should Use Prepared Statement</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#print-and-die"><span class="std std-ref">Print And Die</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#unchecked-resources"><span class="std std-ref">Unchecked Resources</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoHardcodedIp</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#else-if-versus-elseif"><span class="std std-ref">Else If Versus Elseif</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/UnsetInForeach</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/CouldBeStatic</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-class-declarations"><span class="std std-ref">Multiple Class Declarations</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#empty-namespace"><span class="std std-ref">Empty Namespace</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#could-use-short-assignation"><span class="std std-ref">Could Use Short Assignation</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UselessAbstract</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/StaticLoop</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#pre-increment"><span class="std std-ref">Pre-increment</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/OnlyVariableReturnedByReference</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#indices-are-int-or-string"><span class="std std-ref">Indices Are Int Or String</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-typecast"><span class="std std-ref">Should Typecast</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/NoSelfReferencingConstant</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoDirectUsage</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/BreakOutsideLoop</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#avoid-substr-one"><span class="std std-ref">Avoid Substr() One</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/DoubleAssignation</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/EmptyList</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-brackets"><span class="std std-ref">Useless Brackets</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#preg-replace-with-option-e"><span class="std std-ref">preg_replace With Option e</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#eval-without-try"><span class="std std-ref">eval() Without Try</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/RelayFunction</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/funcGetArgModified</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#avoid-get-class"><span class="std std-ref">Avoid get_class()</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#silently-cast-integer"><span class="std std-ref">Silently Cast Integer</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#timestamp-difference"><span class="std std-ref">Timestamp Difference</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/UnusedArguments</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/SwitchToSwitch</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-parameter-type"><span class="std std-ref">Wrong Parameter Type</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#redefined-class-constants"><span class="std std-ref">Redefined Class Constants</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#redefined-default"><span class="std std-ref">Redefined Default</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-fopen-mode"><span class="std std-ref">Wrong fopen() Mode</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#negative-power"><span class="std std-ref">Negative Power</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Interfaces/AlreadyParentsInterface</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-random-int"><span class="std std-ref">Use random_int()</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CantExtendFinal</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#ternary-in-concat"><span class="std std-ref">Ternary In Concat</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UsingThisOutsideAClass</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-trait"><span class="std std-ref">Undefined Trait</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoHardcodedHash</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#identical-conditions"><span class="std std-ref">Identical Conditions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#unkown-regex-options"><span class="std std-ref">Unkown Regex Options</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-choice"><span class="std std-ref">No Choice</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/CommonAlternatives</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#logical-mistakes"><span class="std std-ref">Logical Mistakes</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Exceptions/UncaughtExceptions</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#same-conditions-in-condition"><span class="std std-ref">Same Conditions In Condition</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#return-true-false"><span class="std std-ref">Return True False</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/UselessSwitch</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#could-use-dir"><span class="std std-ref">Could Use __DIR__</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-use-coalesce"><span class="std std-ref">Should Use Coalesce</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/MakeGlobalAProperty</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#if-with-same-conditions"><span class="std std-ref">If With Same Conditions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#throw-functioncall"><span class="std std-ref">Throw Functioncall</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-instanceof"><span class="std std-ref">Use Instanceof</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#results-may-be-missing"><span class="std std-ref">Results May Be Missing</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#always-positive-comparison"><span class="std std-ref">Always Positive Comparison</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#empty-blocks"><span class="std std-ref">Empty Blocks</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#throw-in-destruct"><span class="std std-ref">Throw In Destruct</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-system-tmp"><span class="std std-ref">Use System Tmp</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Traits/DependantTrait</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#hidden-use-expression"><span class="std std-ref">Hidden Use Expression</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-make-alias"><span class="std std-ref">Should Make Alias</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-identical-trait-or-interface"><span class="std std-ref">Multiple Identical Trait Or Interface</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-alias-definitions"><span class="std std-ref">Multiple Alias Definitions</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NestedIfthen</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/CastToBoolean</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#failed-substr-comparison"><span class="std std-ref">Failed Substr Comparison</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-make-ternary"><span class="std std-ref">Should Make Ternary</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/UnusedReturnedValue</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ModernEmpty</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/UsePositiveCondition</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#drop-else-after-return"><span class="std std-ref">Drop Else After Return</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-class-operator"><span class="std std-ref">Use ::Class Operator</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#don-t-echo-error"><span class="std std-ref">Don’t Echo Error</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-type-casting"><span class="std std-ref">Useless Type Casting</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-isset-with-empty"><span class="std std-ref">No isset() With empty()</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-check"><span class="std std-ref">Useless Check</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/BailOutEarly</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/DontChangeBlindKey</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/UseStdclass</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/TooManyLocalVariables</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/WrongName</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/FinalByOcramius</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/LongArguments</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/AssignedTwiceOrMore</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/NoBooleanAsDefault</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Exceptions/ForgottenThrown</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-alias-definitions-per-file"><span class="std std-ref">Multiple Alias Definitions Per File</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dir-then-slash"><span class="std std-ref">__DIR__ Then Slash</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/NoPSSOutsideClass</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UsedOnceProperty</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/PropertyUsedInOneMethodOnly</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoNeedForElse</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/StrangeName</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Constants/StrangeName</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/TooManyFinds</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/UseSetCookie</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/CheckAllTypes</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/MissingCases</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#repeated-regex"><span class="std std-ref">Repeated Regex</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-class-in-global"><span class="std std-ref">No Class In Global</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/Crc32MightBeNegative</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#could-use-str-repeat"><span class="std std-ref">Could Use str_repeat()</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/SuspiciousComparison</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#strings-with-strange-space"><span class="std std-ref">Strings With Strange Space</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-empty-regex"><span class="std std-ref">No Empty Regex</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/AlternativeConsistenceByFile</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Arrays/RandomlySortedLiterals</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/OnlyVariablePassedByReference</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/NoReturnUsed</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-reference-on-left-side"><span class="std std-ref">No Reference On Left Side</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ImplementedMethodsArePublic</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/MixedConcatInterpolation</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/TooManyInjections</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/CouldCentralize</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Interfaces/CouldUseInterface</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AvoidOptionalProperties</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/MismatchedTernary</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/MismatchedDefaultArguments</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/MismatchedTypehint</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ScalarOrObjectProperty</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#assign-with-and-precedence"><span class="std std-ref">Assign With And Precedence</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-magic-method-with-array"><span class="std std-ref">No Magic Method With Array</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Performances/LogicalToInArray</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/PathinfoReturns</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/MultipleTypeVariable</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#is-actually-zero"><span class="std std-ref">Is Actually Zero</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#unconditional-break-in-loop"><span class="std std-ref">Unconditional Break In Loop</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/CouldBeElse</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#next-month-trap"><span class="std std-ref">Next Month Trap</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#printf-number-of-arguments"><span class="std std-ref">Printf Number Of Arguments</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AmbiguousStatic</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/DontSendThisInConstructor</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoGetClassNull</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/MissingNew</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/UnknownPcre2Option</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ParentFirst</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#invalid-regex"><span class="std std-ref">Invalid Regex</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/AvoidBooleanArgument</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#same-variable-foreach"><span class="std std-ref">Same Variable Foreach</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/NeverUsedParameter</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#identical-on-both-sides"><span class="std std-ref">Identical On Both Sides</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/IdenticalConsecutive</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-reference-for-ternary"><span class="std std-ref">No Reference For Ternary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#unused-inherited-variable-in-closure"><span class="std std-ref">Unused Inherited Variable In Closure</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Files/InclusionWrongCase</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Files/MissingInclude</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/UselessReferenceArgument</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-catch"><span class="std std-ref">Useless Catch</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/PossibleInfiniteLoop</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/TestThenCast</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/ForeachObject</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/PropertyCouldBeLocal</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/TooManyNativeCalls</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/RedefinedPrivateProperty</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#don-t-unset-properties"><span class="std std-ref">Don’t Unset Properties</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#strtr-arguments"><span class="std std-ref">Strtr Arguments</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#missing-parenthesis"><span class="std std-ref">Missing Parenthesis</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#callback-function-needs-return"><span class="std std-ref">Callback Function Needs Return</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/WrongRange</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CantInstantiateClass</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#strpos-too-much"><span class="std std-ref">strpos() Too Much</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#typehinted-references"><span class="std std-ref">Typehinted References</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/WeakType</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/MethodSignatureMustBeCompatible</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/MismatchTypeAndDefault</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#check-json"><span class="std std-ref">Check JSON</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/DontMixPlusPlus</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Exceptions/CantThrow</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AbstractOrImplements</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/IncompatibleSignature</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AmbiguousVisibilities</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-class"><span class="std std-ref">Undefined ::class</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/AssertFunctionIsReserved</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CouldBeAbstractClass</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ContinueIsForLoop</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/MustCallParentConstructor</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-variable"><span class="std std-ref">Undefined Variable</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-insteadof"><span class="std std-ref">Undefined Insteadof</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Traits/MethodCollisionTraits</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CouldBeFinal</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/InconsistentElseif</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/OnlyVariableForReference</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-access-style-to-property"><span class="std std-ref">Wrong Access Style to Property</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#invalid-pack-format"><span class="std std-ref">Invalid Pack Format</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Interfaces/RepeatedInterface</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#don-t-read-and-write-in-one-expression"><span class="std std-ref">Don’t Read And Write In One Expression</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-yield-with-key"><span class="std std-ref">Should Yield With Key</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#useless-alias"><span class="std std-ref">Useless Alias</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CouldBeStatic</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#possible-missing-subpattern"><span class="std std-ref">Possible Missing Subpattern</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#assign-and-compare"><span class="std std-ref">Assign And Compare</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoVariableIsACondition</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/InsufficientTypehint</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#typehint-must-be-returned"><span class="std std-ref">Typehint Must Be Returned</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CloneWithNonObject</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#check-on-call-usage"><span class="std std-ref">Check On __Call Usage</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/AvoidOptionArrays</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Traits/AlreadyParentsTrait</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Traits/TraitNotFound</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#casting-ternary"><span class="std std-ref">Casting Ternary</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ConcatEmpty</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#concat-and-addition"><span class="std std-ref">Concat And Addition</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoAppendOnSource</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Performances/MemoizeMagicCall</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/UnusedConstant</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/InfiniteRecursion</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Arrays/NullBoolean</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/DependantAbstractClass</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-type-returned"><span class="std std-ref">Wrong Type Returned</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ForeachSourceValue</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/AvoidMbDectectEncoding</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#array-key-exists-works-on-arrays"><span class="std std-ref">array_key_exists() Works On Arrays</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#class-without-parent"><span class="std std-ref">Class Without Parent</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#scalar-are-not-arrays"><span class="std std-ref">Scalar Are Not Arrays</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ArrayMergeAndVariadic</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#implode-arguments-order"><span class="std std-ref">Implode() Arguments Order</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#strip-tags-skips-closed-tag"><span class="std std-ref">strip_tags Skips Closed Tag</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Arrays/NoSpreadForHash</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/MaxLevelOfIdentation</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#should-use-explode-args"><span class="std std-ref">Should Use Explode Args</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-array-slice"><span class="std std-ref">Use array_slice()</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Arrays/TooManyDimensions</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#coalesce-and-concat"><span class="std std-ref">Coalesce And Concat</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/AlwaysFalse</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/IncompatibleSignature74</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#interfaces-is-not-implemented"><span class="std std-ref">Interfaces Is Not Implemented</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-literal-for-reference"><span class="std std-ref">No Literal For Reference</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Interfaces/NoGaranteeForPropertyConstant</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/NonNullableSetters</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/TooManyDereferencing</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#cant-implement-traversable"><span class="std std-ref">Cant Implement Traversable</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#is-a-with-string"><span class="std std-ref">Is_A() With String</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#mbstring-unknown-encoding"><span class="std std-ref">Mbstring Unknown Encoding</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#mbstring-third-arg"><span class="std std-ref">Mbstring Third Arg</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#merge-if-then"><span class="std std-ref">Merge If Then</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-type-with-call"><span class="std std-ref">Wrong Type With Call</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#not-equal-is-not"><span class="std std-ref">Not Equal Is Not !==</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/DontUseVoid</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-typed-property-default"><span class="std std-ref">Wrong Typed Property Default</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/HiddenNullable</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/FnArgumentVariableConfusion</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/MissingAbstractMethod</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/UndefinedConstantName</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/UsingDeprecated</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CyclicReferences</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/DoubleObjectAssignation</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/WrongArgumentType</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/MismatchProperties</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoNeedForTriple</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ArrayMergeArrayArray</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-type-for-native-php-function"><span class="std std-ref">Wrong Type For Native PHP Function</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Exceptions/CatchUndefinedVariable</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/SwappedArguments</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/DifferentArgumentCounts</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#unknown-parameter-name"><span class="std std-ref">Unknown Parameter Name</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#missing-some-returntype"><span class="std std-ref">Missing Some Returntype</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/DontPolluteGlobalSpace</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#mismatch-parameter-name"><span class="std std-ref">Mismatch Parameter Name</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/MultipleDeclareStrict</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/MismatchParameterAndType</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/ArrayFillWithObjects</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/ModifyTypedParameter</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/Assumptions</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#unsupported-types-with-operators"><span class="std std-ref">Unsupported Types With Operators</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/CouldBeStringable</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/WrongAttributeConfiguration</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/CancelledParameter</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/ConstantTypo</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#array-map-passes-by-value"><span class="std std-ref">Array_Map() Passes By Value</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/MissingMagicIsset</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Attributes/ModifyImmutable</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/OnlyVariableForReference</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/CannotUseStaticForClosure</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/OnlyFirstByte</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/InheritedPropertyMustMatch</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/NoObjectAsIndex</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Structures/HtmlentitiescallDefaultFlag</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/WrongArgumentNameWithPhpFunction</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/DuplicateNamedParameter</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/NativeClassTypeCompatibility</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Attributes/MissingAttributeAttribute</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/NoNullForNative</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/NoReferencedVoid</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/JsonSerializeReturnType</span></p></li>
+</ul>
+</div>
+<div class="section" id="appinfo">
+<span id="ruleset-appinfo"></span><h3><span class="section-number">2.3.2. </span>Appinfo<a class="headerlink" href="#appinfo" title="Permalink to this headline">¶</a></h3>
+<p>A set of rules that describes with PHP features is used in the code.</p>
+<p>Total : 375 analysis</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#array-index"><span class="std std-ref">Array Index</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#multidimensional-arrays"><span class="std std-ref">Multidimensional Arrays</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-arrays-index"><span class="std std-ref">PHP Arrays Index</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#classes-names"><span class="std std-ref">Classes Names</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#constant-definition"><span class="std std-ref">Constant Definition</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id79"><span class="std std-ref">Magic Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#old-style-constructor"><span class="std std-ref">Old Style Constructor</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#static-methods"><span class="std std-ref">Static Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#static-properties"><span class="std std-ref">Static Properties</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#constants-usage"><span class="std std-ref">Constants Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#magic-constant-usage"><span class="std std-ref">Magic Constant Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-constant-usage"><span class="std std-ref">PHP Constant Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#defined-exceptions"><span class="std std-ref">Defined Exceptions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#thrown-exceptions"><span class="std std-ref">Thrown Exceptions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-apc"><span class="std std-ref">ext/apc</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-bcmath"><span class="std std-ref">ext/bcmath</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-bzip2"><span class="std std-ref">ext/bzip2</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-calendar"><span class="std std-ref">ext/calendar</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-crypto"><span class="std std-ref">ext/crypto</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ctype"><span class="std std-ref">ext/ctype</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-curl"><span class="std std-ref">ext/curl</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-date"><span class="std std-ref">ext/date</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-dba"><span class="std std-ref">ext/dba</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-dom"><span class="std std-ref">ext/dom</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-enchant"><span class="std std-ref">ext/enchant</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ereg"><span class="std std-ref">ext/ereg</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-exif"><span class="std std-ref">ext/exif</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-fdf"><span class="std std-ref">ext/fdf</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-fileinfo"><span class="std std-ref">ext/fileinfo</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-filter"><span class="std std-ref">ext/filter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ftp"><span class="std std-ref">ext/ftp</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-gd"><span class="std std-ref">ext/gd</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-gmp"><span class="std std-ref">ext/gmp</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-gnupgp"><span class="std std-ref">ext/gnupgp</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-hash"><span class="std std-ref">ext/hash</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-iconv"><span class="std std-ref">ext/iconv</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-json"><span class="std std-ref">ext/json</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-kdm5"><span class="std std-ref">ext/kdm5</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ldap"><span class="std std-ref">ext/ldap</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-libxml"><span class="std std-ref">ext/libxml</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mbstring"><span class="std std-ref">ext/mbstring</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mcrypt"><span class="std std-ref">ext/mcrypt</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mongo"><span class="std std-ref">ext/mongo</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mssql"><span class="std std-ref">ext/mssql</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mysql"><span class="std std-ref">ext/mysql</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mysqli"><span class="std std-ref">ext/mysqli</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-odbc"><span class="std std-ref">ext/odbc</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-openssl"><span class="std std-ref">ext/openssl</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-pcre"><span class="std std-ref">ext/pcre</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-pdo"><span class="std std-ref">ext/pdo</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-pgsql"><span class="std std-ref">ext/pgsql</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-phar"><span class="std std-ref">ext/phar</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-posix"><span class="std std-ref">ext/posix</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-readline"><span class="std std-ref">ext/readline</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-reflection"><span class="std std-ref">ext/reflection</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-sem"><span class="std std-ref">ext/sem</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-session"><span class="std std-ref">ext/session</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-shmop"><span class="std std-ref">ext/shmop</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-simplexml"><span class="std std-ref">ext/simplexml</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-snmp"><span class="std std-ref">ext/snmp</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-soap"><span class="std std-ref">ext/soap</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-sockets"><span class="std std-ref">ext/sockets</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-spl"><span class="std std-ref">ext/spl</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-sqlite"><span class="std std-ref">ext/sqlite</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-sqlite3"><span class="std std-ref">ext/sqlite3</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ssh2"><span class="std std-ref">ext/ssh2</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-standard"><span class="std std-ref">ext/standard</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-tidy"><span class="std std-ref">ext/tidy</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-tokenizer"><span class="std std-ref">ext/tokenizer</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-wddx"><span class="std std-ref">ext/wddx</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xdebug"><span class="std std-ref">ext/xdebug</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xmlreader"><span class="std std-ref">ext/xmlreader</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xmlrpc"><span class="std std-ref">ext/xmlrpc</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xmlwriter"><span class="std std-ref">ext/xmlwriter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xsl"><span class="std std-ref">ext/xsl</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-yaml"><span class="std std-ref">ext/yaml</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-zip"><span class="std std-ref">ext/zip</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-zlib"><span class="std std-ref">ext/zlib</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#closures-glossary"><span class="std std-ref">Closures Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#functions-glossary"><span class="std std-ref">Functions Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#recursive-functions"><span class="std std-ref">Recursive Functions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#redeclared-php-functions"><span class="std std-ref">Redeclared PHP Functions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#typehints"><span class="std std-ref">Typehints</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#interfaces-glossary"><span class="std std-ref">Interfaces Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#aliases"><span class="std std-ref">Aliases</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#namespaces-glossary"><span class="std std-ref">Namespaces Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#autoloading"><span class="std std-ref">Autoloading</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#goto-names"><span class="std std-ref">Goto Names</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#halt-compiler"><span class="std std-ref">__halt_compiler</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#incompilable-files"><span class="std std-ref">Incompilable Files</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#labels"><span class="std std-ref">Labels</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#throw"><span class="std std-ref">Throw</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#trigger-errors"><span class="std std-ref">Trigger Errors</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#caught-expressions"><span class="std std-ref">Caught Expressions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#eval-usage"><span class="std std-ref">Eval() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#exit-usage"><span class="std std-ref">Exit() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#operator"><span class="std std-ref">&#64; Operator</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#include-once-usage"><span class="std std-ref">include_once() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#using-short-tags"><span class="std std-ref">Using Short Tags</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#binary-glossary"><span class="std std-ref">Binary Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#email-addresses"><span class="std std-ref">Email Addresses</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#heredoc-delimiter-glossary"><span class="std std-ref">Heredoc Delimiter Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#hexadecimal-glossary"><span class="std std-ref">Hexadecimal Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#md5-strings"><span class="std std-ref">Md5 Strings</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#nowdoc-delimiter-glossary"><span class="std std-ref">Nowdoc Delimiter Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#octal-glossary"><span class="std std-ref">Octal Glossary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#url-list"><span class="std std-ref">URL List</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#variable-references"><span class="std std-ref">Variable References</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#static-variables"><span class="std std-ref">Static Variables</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#variables-with-long-names"><span class="std std-ref">Variables With Long Names</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#variable-variables"><span class="std std-ref">Variable Variables</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#abstract-class-usage"><span class="std std-ref">Abstract Class Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#abstract-methods-usage"><span class="std std-ref">Abstract Methods Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#clone-usage"><span class="std std-ref">Clone Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#variable-constants"><span class="std std-ref">Variable Constants</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#redefined-php-traits"><span class="std std-ref">Redefined PHP Traits</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#traits-usage"><span class="std std-ref">Traits Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#trait-names"><span class="std std-ref">Trait Names</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-alternative-syntax"><span class="std std-ref">PHP Alternative Syntax</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#short-syntax-for-arrays"><span class="std std-ref">Short Syntax For Arrays</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#inclusions"><span class="std std-ref">Inclusions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-file"><span class="std std-ref">ext/file</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-array"><span class="std std-ref">ext/array</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ffmpeg"><span class="std std-ref">ext/ffmpeg</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-info"><span class="std std-ref">ext/info</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-math"><span class="std std-ref">ext/math</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#http-raw-post-data-usage"><span class="std std-ref">$HTTP_RAW_POST_DATA Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-yis"><span class="std std-ref">ext/yis</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#assertions"><span class="std std-ref">Assertions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#cast-usage"><span class="std std-ref">Cast Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#function-subscripting"><span class="std std-ref">Function Subscripting</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#nested-loops"><span class="std std-ref">Nested Loops</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#i-usage"><span class="std std-ref">&lt;?= Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-pcntl"><span class="std std-ref">ext/pcntl</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ming"><span class="std std-ref">ext/ming</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-redis"><span class="std std-ref">ext/redis</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-cyrus"><span class="std std-ref">ext/cyrus</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-sqlsrv"><span class="std std-ref">ext/sqlsrv</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ellipsis-usage"><span class="std std-ref">Ellipsis Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-0mq"><span class="std std-ref">ext/0mq</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-memcache"><span class="std std-ref">ext/memcache</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-memcached"><span class="std std-ref">ext/memcached</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-function-call"><span class="std std-ref">Dynamic Function Call</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#has-variable-arguments"><span class="std std-ref">Has Variable Arguments</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-catch"><span class="std std-ref">Multiple Catch</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamically-called-classes"><span class="std std-ref">Dynamically Called Classes</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#conditioned-function"><span class="std std-ref">Conditioned Function</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#conditioned-constants"><span class="std std-ref">Conditioned Constants</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#is-generator"><span class="std std-ref">Is Generator</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#try-with-finally"><span class="std std-ref">Try With Finally</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dereferencing-string-and-arrays"><span class="std std-ref">Dereferencing String And Arrays</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#constant-scalar-expressions"><span class="std std-ref">Constant Scalar Expressions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-imagick"><span class="std std-ref">ext/imagick</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-oci8"><span class="std std-ref">ext/oci8</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-imap"><span class="std std-ref">ext/imap</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#overwritten-class-const"><span class="std std-ref">Overwritten Class Const</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-class-constant"><span class="std std-ref">Dynamic Class Constant</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-methodcall"><span class="std std-ref">Dynamic Methodcall</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-new"><span class="std std-ref">Dynamic New</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-property"><span class="std std-ref">Dynamic Property</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-classes"><span class="std std-ref">Dynamic Classes</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-classes-in-one-file"><span class="std std-ref">Multiple Classes In One File</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#file-uploads"><span class="std std-ref">File Uploads</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-intl"><span class="std std-ref">ext/intl</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-cairo"><span class="std std-ref">ext/cairo</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-code"><span class="std std-ref">Dynamic Code</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-pspell"><span class="std std-ref">ext/pspell</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-direct-access"><span class="std std-ref">No Direct Access</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-opcache"><span class="std std-ref">ext/opcache</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-expect"><span class="std std-ref">ext/expect</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-recode"><span class="std std-ref">ext/recode</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-parsekit"><span class="std std-ref">ext/parsekit</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-runkit"><span class="std std-ref">ext/runkit</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-gettext"><span class="std std-ref">ext/gettext</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#super-global-usage"><span class="std std-ref">Super Global Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#global-usage"><span class="std std-ref">Global Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#namespaces"><span class="std std-ref">Namespaces</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#deep-definitions"><span class="std std-ref">Deep Definitions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#not-definitions-only"><span class="std std-ref">Not Definitions Only</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#usage-of-class-alias"><span class="std std-ref">Usage Of class_alias()</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-apache"><span class="std std-ref">ext/apache</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-eaccelerator"><span class="std std-ref">ext/eaccelerator</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-fpm"><span class="std std-ref">ext/fpm</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-iis"><span class="std std-ref">ext/iis</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xcache"><span class="std std-ref">ext/xcache</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-wincache"><span class="std std-ref">ext/wincache</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#resources-usage"><span class="std std-ref">Resources Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#shell-usage"><span class="std std-ref">Shell Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#file-usage"><span class="std std-ref">File Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#mail-usage"><span class="std std-ref">Mail Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dynamic-calls"><span class="std std-ref">Dynamic Calls</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#test-class"><span class="std std-ref">Test Class</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#mark-callable"><span class="std std-ref">Mark Callable</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-dio"><span class="std std-ref">ext/dio</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-phalcon"><span class="std std-ref">ext/phalcon</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#composer-usage"><span class="std std-ref">Composer Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#composer-s-autoload"><span class="std std-ref">Composer’s autoload</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#composer-namespace"><span class="std std-ref">Composer Namespace</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-apcu"><span class="std std-ref">ext/apcu</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-trader"><span class="std std-ref">ext/trader</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mailparse"><span class="std std-ref">ext/mailparse</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mail"><span class="std std-ref">ext/mail</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#scalar-typehint-usage"><span class="std std-ref">Scalar Typehint Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#return-typehint-usage"><span class="std std-ref">Return Typehint Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ob"><span class="std std-ref">ext/ob</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-geoip"><span class="std std-ref">ext/geoip</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-event"><span class="std std-ref">ext/event</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-amqp"><span class="std std-ref">ext/amqp</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-gearman"><span class="std std-ref">ext/gearman</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-com"><span class="std std-ref">ext/com</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-gmagick"><span class="std std-ref">ext/gmagick</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ibase"><span class="std std-ref">ext/ibase</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-inotify"><span class="std std-ref">ext/inotify</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-proctitle"><span class="std std-ref">ext/proctitle</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-wikidiff2"><span class="std std-ref">ext/wikidiff2</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xdiff"><span class="std std-ref">ext/xdiff</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-libevent"><span class="std std-ref">ext/libevent</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ev"><span class="std std-ref">ext/ev</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-php-ast"><span class="std std-ref">ext/php-ast</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xml"><span class="std std-ref">ext/xml</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xhprof"><span class="std std-ref">ext/xhprof</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#else-usage"><span class="std std-ref">Else Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#anonymous-classes"><span class="std std-ref">Anonymous Classes</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#coalesce"><span class="std std-ref">Coalesce</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#directives-usage"><span class="std std-ref">Directives Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#global-in-global"><span class="std std-ref">Global In Global</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-fann"><span class="std std-ref">ext/fann</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-web"><span class="std std-ref">Use Web</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-cli"><span class="std std-ref">Use Cli</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#error-messages"><span class="std std-ref">Error Messages</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php7-relaxed-keyword"><span class="std std-ref">Php7 Relaxed Keyword</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-pecl-http"><span class="std std-ref">ext/pecl_http</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#uses-environment"><span class="std std-ref">Uses Environment</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#redefined-methods"><span class="std std-ref">Redefined Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#is-cli-script"><span class="std std-ref">Is CLI Script</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-bugfixes"><span class="std std-ref">PHP Bugfixes</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-tokyotyrant"><span class="std std-ref">ext/tokyotyrant</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-v8js"><span class="std std-ref">ext/v8js</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#yield-usage"><span class="std std-ref">Yield Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#yield-from-usage"><span class="std std-ref">Yield From Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#pear-usage"><span class="std std-ref">Pear Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-lua"><span class="std std-ref">ext/lua</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#list-with-keys"><span class="std std-ref">List With Keys</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-suhosin"><span class="std std-ref">ext/suhosin</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#can-t-disable-function"><span class="std std-ref">Can’t Disable Function</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#functions-using-reference"><span class="std std-ref">Functions Using Reference</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#list-short-syntax"><span class="std std-ref">List Short Syntax</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-nullable-type"><span class="std std-ref">Use Nullable Type</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-exceptions-catch"><span class="std std-ref">Multiple Exceptions Catch()</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-rar"><span class="std std-ref">ext/rar</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-nsapi"><span class="std std-ref">ext/nsapi</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-newt"><span class="std std-ref">ext/newt</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ncurses"><span class="std std-ref">ext/ncurses</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-composer-lock"><span class="std std-ref">Use Composer Lock</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#string"><span class="std std-ref">String</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mhash"><span class="std std-ref">ext/mhash</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-zbarcode"><span class="std std-ref">ext/zbarcode</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-mongodb"><span class="std std-ref">ext/mongodb</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#error-log-usage"><span class="std std-ref">Error_Log() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#sql-queries"><span class="std std-ref">SQL queries</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-libsodium"><span class="std std-ref">ext/libsodium</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ds"><span class="std std-ref">ext/ds</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-cookies"><span class="std std-ref">Use Cookies</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#group-use-declaration"><span class="std std-ref">Group Use Declaration</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-sphinx"><span class="std std-ref">ext/sphinx</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#try-with-multiple-catch"><span class="std std-ref">Try With Multiple Catch</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-grpc"><span class="std std-ref">ext/grpc</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-browscap"><span class="std std-ref">Use Browscap</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-debug"><span class="std std-ref">Use Debug</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#psr-16-usage"><span class="std std-ref">PSR-16 Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#psr-7-usage"><span class="std std-ref">PSR-7 Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#psr-6-usage"><span class="std std-ref">PSR-6 Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#psr-3-usage"><span class="std std-ref">PSR-3 Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#psr-11-usage"><span class="std std-ref">PSR-11 Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#psr-13-usage"><span class="std std-ref">PSR-13 Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-stats"><span class="std std-ref">ext/stats</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dependency-injection"><span class="std std-ref">Dependency Injection</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#courier-anti-pattern"><span class="std std-ref">Courier Anti-Pattern</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-gender"><span class="std std-ref">ext/gender</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-judy"><span class="std std-ref">ext/judy</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#yii-usage"><span class="std std-ref">Yii usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#codeigniter-usage"><span class="std std-ref">Codeigniter usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#laravel-usage"><span class="std std-ref">Laravel usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#symfony-usage"><span class="std std-ref">Symfony usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#wordpress-usage"><span class="std std-ref">Wordpress usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ez-cms-usage"><span class="std std-ref">Ez cms usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#joomla-usage"><span class="std std-ref">Joomla usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#non-breakable-space-in-names"><span class="std std-ref">Non Breakable Space In Names</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#multiple-functions-declarations"><span class="std std-ref">Multiple Functions Declarations</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-swoole"><span class="std std-ref">ext/swoole</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#manipulates-nan"><span class="std std-ref">Manipulates NaN</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#manipulates-inf"><span class="std std-ref">Manipulates INF</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#const-or-define"><span class="std std-ref">Const Or Define</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#strict-types-preference"><span class="std std-ref">strict_types Preference</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#declare-strict-types-usage"><span class="std std-ref">Declare strict_types Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#encoding-usage"><span class="std std-ref">Encoding Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ticks-usage"><span class="std std-ref">Ticks Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-lapack"><span class="std std-ref">ext/lapack</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xattr"><span class="std std-ref">ext/xattr</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-rdkafka"><span class="std std-ref">ext/rdkafka</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-fam"><span class="std std-ref">ext/fam</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-parle"><span class="std std-ref">ext/parle</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#regex-inventory"><span class="std std-ref">Regex Inventory</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#too-complex-expression"><span class="std std-ref">Too Complex Expression</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#drupal-usage"><span class="std std-ref">Drupal Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#phalcon-usage"><span class="std std-ref">Phalcon Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#fuelphp-usage"><span class="std std-ref">FuelPHP Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#argon2-usage"><span class="std std-ref">Argon2 Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#crypto-usage"><span class="std std-ref">Crypto Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#type-array-index"><span class="std std-ref">Type Array Index</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#incoming-variable-index-inventory"><span class="std std-ref">Incoming Variable Index Inventory</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-vips"><span class="std std-ref">ext/vips</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#dl-usage"><span class="std std-ref">Dl() Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#environment-variables"><span class="std std-ref">Environment Variables</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-igbinary"><span class="std std-ref">ext/igbinary</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#fallback-function"><span class="std std-ref">Fallback Function</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-hrtime"><span class="std std-ref">ext/hrtime</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-xxtea"><span class="std std-ref">ext/xxtea</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-uopz"><span class="std std-ref">ext/uopz</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-varnish"><span class="std std-ref">ext/varnish</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-opencensus"><span class="std std-ref">ext/opencensus</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-leveldb"><span class="std std-ref">ext/leveldb</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-db2"><span class="std std-ref">ext/db2</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-zookeeper"><span class="std std-ref">ext/zookeeper</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-cmark"><span class="std std-ref">ext/cmark</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ConstVisibilityUsage</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-eio"><span class="std std-ref">ext/eio</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-csprng"><span class="std std-ref">ext/csprng</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-lzf"><span class="std std-ref">ext/lzf</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-msgpack"><span class="std std-ref">ext/msgpack</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#case-insensitive-constants"><span class="std std-ref">Case Insensitive Constants</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#handle-arrays-with-callback"><span class="std std-ref">Handle Arrays With Callback</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#trailing-comma-in-calls"><span class="std std-ref">Trailing Comma In Calls</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#can-t-disable-class"><span class="std std-ref">Can’t Disable Class</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-seaslog"><span class="std std-ref">ext/seaslog</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#pack-format-inventory"><span class="std std-ref">Pack Format Inventory</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#printf-format-inventory"><span class="std std-ref">Printf Format Inventory</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-decimal"><span class="std std-ref">ext/decimal</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-psr"><span class="std std-ref">ext/psr</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-sdl"><span class="std std-ref">ext/sdl</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-async"><span class="std std-ref">ext/async</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-wasm"><span class="std std-ref">ext/wasm</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#path-lists"><span class="std std-ref">Path lists</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#typed-property-usage"><span class="std std-ref">Typed Property Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-weakref"><span class="std std-ref">ext/weakref</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-pcov"><span class="std std-ref">ext/pcov</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#constant-dynamic-creation"><span class="std std-ref">Constant Dynamic Creation</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#an-oop-factory"><span class="std std-ref">An OOP Factory</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-overridden-function"><span class="std std-ref">PHP Overridden Function</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-svm"><span class="std std-ref">ext/svm</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-ffi"><span class="std std-ref">ext/ffi</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-password"><span class="std std-ref">ext/password</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-zend-monitor"><span class="std std-ref">ext/zend_monitor</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#ext-uuid"><span class="std std-ref">ext/uuid</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#numeric-literal-separator"><span class="std std-ref">Numeric Literal Separator</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-covariance"><span class="std std-ref">Use Covariance</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-contravariance"><span class="std std-ref">Use Contravariance</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-arrow-functions"><span class="std std-ref">Use Arrow Functions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#spread-operator-for-array"><span class="std std-ref">Spread Operator For Array</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#nested-ternary-without-parenthesis"><span class="std std-ref">Nested Ternary Without Parenthesis</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#typo-3-usage"><span class="std std-ref">Typo 3 usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#concrete-usage"><span class="std std-ref">Concrete usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#immutable-signature"><span class="std std-ref">Immutable Signature</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#shell-commands"><span class="std std-ref">Shell commands</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#links-between-parameter-and-argument"><span class="std std-ref">Links Between Parameter And Argument</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-variable-syntax-tweaks"><span class="std std-ref">Php 8.0 Variable Syntax Tweaks</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-only-typehints"><span class="std std-ref">Php 8.0 Only TypeHints</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#union-typehint"><span class="std std-ref">Union Typehint</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#protocol-lists"><span class="std std-ref">Protocol lists</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-php-attributes"><span class="std std-ref">Use PHP Attributes</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-nullsafe-operator"><span class="std std-ref">Use NullSafe Operator</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#use-closure-trailing-comma"><span class="std std-ref">Use Closure Trailing Comma</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Classes/ClassOverreach</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/FinalConstant</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/NeverTypehintUsage</span></p></li>
+</ul>
+</div>
+<div class="section" id="compatibilityphp74">
+<span id="ruleset-compatibilityphp74"></span><h3><span class="section-number">2.3.3. </span>CompatibilityPHP74<a class="headerlink" href="#compatibilityphp74" title="Permalink to this headline">¶</a></h3>
+<p>This ruleset centralizes all analysis for the migration from PHP 7.3 to 7.4.</p>
+<p>Total : 36 analysis</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#detect-current-class"><span class="std std-ref">Detect Current Class</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#don-t-read-and-write-in-one-expression"><span class="std std-ref">Don’t Read And Write In One Expression</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#idn-to-ascii-new-default"><span class="std std-ref">idn_to_ascii() New Default</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#concat-and-addition"><span class="std std-ref">Concat And Addition</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#new-functions-in-php-7-4"><span class="std std-ref">New Functions In PHP 7.4</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#curl-version-has-no-argument"><span class="std std-ref">curl_version() Has No Argument</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-7-4-new-class"><span class="std std-ref">Php 7.4 New Class</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#new-constants-in-php-7-4"><span class="std std-ref">New Constants In PHP 7.4</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-7-4-removed-functions"><span class="std std-ref">PHP 7.4 Removed Functions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#mb-strrpos-third-argument"><span class="std std-ref">mb_strrpos() Third Argument</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#array-key-exists-works-on-arrays"><span class="std std-ref">array_key_exists() Works On Arrays</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#reflection-export-is-deprecated"><span class="std std-ref">Reflection Export() Is Deprecated</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#unbinding-closures"><span class="std std-ref">Unbinding Closures</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#scalar-are-not-arrays"><span class="std std-ref">Scalar Are Not Arrays</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-7-4-reserved-keyword"><span class="std std-ref">PHP 7.4 Reserved Keyword</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#no-more-curly-arrays"><span class="std std-ref">No More Curly Arrays</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-7-4-constant-deprecation"><span class="std std-ref">PHP 7.4 Constant Deprecation</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-7-4-removed-directives"><span class="std std-ref">PHP 7.4 Removed Directives</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#hash-algorithms-incompatible-with-php-7-4"><span class="std std-ref">Hash Algorithms Incompatible With PHP 7.4-</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#openssl-random-pseudo-byte-second-argument"><span class="std std-ref">openssl_random_pseudo_byte() Second Argument</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#nested-ternary-without-parenthesis"><span class="std std-ref">Nested Ternary Without Parenthesis</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#filter-to-add-slashes"><span class="std std-ref">Filter To add_slashes()</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-variable-syntax-tweaks"><span class="std std-ref">Php 8.0 Variable Syntax Tweaks</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#new-functions-in-php-8-0"><span class="std std-ref">New Functions In PHP 8.0</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-only-typehints"><span class="std std-ref">Php 8.0 Only TypeHints</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#union-typehint"><span class="std std-ref">Union Typehint</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#signature-trailing-comma"><span class="std std-ref">Signature Trailing Comma</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#throw-was-an-expression"><span class="std std-ref">Throw Was An Expression</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#uses-php-8-match"><span class="std std-ref">Uses PHP 8 Match()</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/AvoidGetobjectVars</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/EnumUsage</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/FilesFullPath</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/FinalConstant</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/NeverTypehintUsage</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/PHP81scalartypehints</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/PHP80scalartypehints</span></p></li>
+</ul>
+</div>
+<div class="section" id="compatibilityphp80">
+<span id="ruleset-compatibilityphp80"></span><h3><span class="section-number">2.3.4. </span>CompatibilityPHP80<a class="headerlink" href="#compatibilityphp80" title="Permalink to this headline">¶</a></h3>
+<p>This ruleset centralizes all analysis for the migration from PHP 7.4 to 8.0.</p>
+<p>Total : 23 analysis</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#old-style-constructor"><span class="std std-ref">Old Style Constructor</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#wrong-optional-parameter"><span class="std std-ref">Wrong Optional Parameter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-removed-functions"><span class="std std-ref">PHP 8.0 Removed Functions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-removed-constants"><span class="std std-ref">PHP 8.0 Removed Constants</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#concat-and-addition"><span class="std std-ref">Concat And Addition</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-7-4-removed-directives"><span class="std std-ref">PHP 7.4 Removed Directives</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#cast-unset-usage"><span class="std std-ref">Cast Unset Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-errormsg-usage"><span class="std std-ref">$php_errormsg Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#mismatch-parameter-name"><span class="std std-ref">Mismatch Parameter Name</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-removed-directives"><span class="std std-ref">PHP 8.0 Removed Directives</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#unsupported-types-with-operators"><span class="std std-ref">Unsupported Types With Operators</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#negative-start-index-in-array"><span class="std std-ref">Negative Start Index In Array</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#nullable-with-constant"><span class="std std-ref">Nullable With Constant</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-resources-turned-into-objects"><span class="std std-ref">PHP Resources Turned Into Objects</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-80-named-parameter-variadic"><span class="std std-ref">PHP 80 Named Parameter Variadic</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#final-private-methods"><span class="std std-ref">Final Private Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#array-map-passes-by-value"><span class="std std-ref">Array_Map() Passes By Value</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/ReservedMatchKeyword</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/AvoidGetobjectVars</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/EnumUsage</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/FinalConstant</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/NeverTypehintUsage</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/PHP81scalartypehints</span></p></li>
+</ul>
+</div>
+<div class="section" id="compatibilityphp81">
+<span id="ruleset-compatibilityphp81"></span><h3><span class="section-number">2.3.5. </span>CompatibilityPHP81<a class="headerlink" href="#compatibilityphp81" title="Permalink to this headline">¶</a></h3>
+<p>This ruleset centralizes all analysis for the migration from PHP 8.0 to 8.1.</p>
+<p>Total : 12 analysis</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#php-7-4-removed-directives"><span class="std std-ref">PHP 7.4 Removed Directives</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-8-0-removed-directives"><span class="std std-ref">PHP 8.0 Removed Directives</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/RestrictGlobalUsage</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Variables/InheritedStaticVariable</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/Php81RemovedDirective</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/OpensslEncryptAlgoChange</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/Php81RemovedConstant</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/NativeClassTypeCompatibility</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/NoNullForNative</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/CallingStaticTraitMethod</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Functions/NoReferencedVoid</span></p></li>
+<li><p><span class="xref std std-ref">No anchor for Php/JsonSerializeReturnType</span></p></li>
+</ul>
+</div>
+<div class="section" id="dump">
+<span id="ruleset-dump"></span><h3><span class="section-number">2.3.6. </span>Dump<a class="headerlink" href="#dump" title="Permalink to this headline">¶</a></h3>
+<p>This ruleset collect various names given to different structures in the code ; variables, classes, methods, constants, etc. It is mostly used internally.</p>
+<p>Total : 36 analysis</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#environment-variable-usage"><span class="std std-ref">Environment Variable Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#indentation-levels"><span class="std std-ref">Indentation Levels</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#cyclomatic-complexity"><span class="std std-ref">Cyclomatic Complexity</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-literals"><span class="std std-ref">Collect Literals</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-parameter-counts"><span class="std std-ref">Collect Parameter Counts</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-local-variable-counts"><span class="std std-ref">Collect Local Variable Counts</span></a></p></li>
+<li><p><span class="xref std std-ref">dump-dereferencinglevels</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#foreach-favorite"><span class="std std-ref">Foreach() Favorite</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-mbstring-encodings"><span class="std std-ref">Collect Mbstring Encodings</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#typehinting-stats"><span class="std std-ref">Typehinting Stats</span></a></p></li>
+<li><p><span class="xref std std-ref">dump-inclusions</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#typehint-order"><span class="std std-ref">Typehint Order</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#new-order"><span class="std std-ref">New Order</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-class-interface-counts"><span class="std std-ref">Collect Class Interface Counts</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-class-depth"><span class="std std-ref">Collect Class Depth</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-class-children-count"><span class="std std-ref">Collect Class Children Count</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#constant-order"><span class="std std-ref">Constant Order</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-property-counts"><span class="std std-ref">Collect Property Counts</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-method-counts"><span class="std std-ref">Collect Method Counts</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-class-constant-counts"><span class="std std-ref">Collect Class Constant Counts</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#call-order"><span class="std std-ref">Call Order</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-parameter-names"><span class="std std-ref">Collect Parameter Names</span></a></p></li>
+<li><p><span class="xref std std-ref">dump-fossilizedmethods</span></p></li>
+<li><p><span class="xref std std-ref">dump-collectclasschanges</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-variables"><span class="std std-ref">Collect Variables</span></a></p></li>
+<li><p><span class="xref std std-ref">dump-collectglobalvariables</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-readability"><span class="std std-ref">Collect Readability</span></a></p></li>
+<li><p><span class="xref std std-ref">dump-collectdefinitionsstats</span></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-class-traits-counts"><span class="std std-ref">Collect Class Traits Counts</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-native-calls-per-expressions"><span class="std std-ref">Collect Native Calls Per Expressions</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-files-dependencies"><span class="std std-ref">Collect Files Dependencies</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-atom-counts"><span class="std std-ref">Collect Atom Counts</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-classes-dependencies"><span class="std std-ref">Collect Classes Dependencies</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-php-structures"><span class="std std-ref">Collect Php Structures</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#collect-use-counts"><span class="std std-ref">Collect Use Counts</span></a></p></li>
+<li><p><span class="xref std std-ref">No anchor for Dump/CollectBlockSize</span></p></li>
+</ul>
+</div>
+<div class="section" id="first">
+<span id="ruleset-first"></span><h3><span class="section-number">2.3.7. </span>First<a class="headerlink" href="#first" title="Permalink to this headline">¶</a></h3>
+<p>A set of rules that are always run at the beginning of a project, because they are frenquently used. It is mostly used internally.</p>
+<p>Total : 5 analysis</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#is-an-extension-function"><span class="std std-ref">Is An Extension Function</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#is-an-extension-interface"><span class="std std-ref">Is An Extension Interface</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#is-an-extension-constant"><span class="std std-ref">Is An Extension Constant</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#is-extension-trait"><span class="std std-ref">Is Extension Trait</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#mark-callable"><span class="std std-ref">Mark Callable</span></a></p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Reports.html" class="btn btn-neutral float-right" title="3. Reports" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Rules.html" class="btn btn-neutral float-left" title="1. Rules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015-2020, Damien Seguy.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

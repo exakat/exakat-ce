@@ -25,7 +25,7 @@ namespace Exakat\Tasks;
 class Install extends Tasks {
     public const CONCURENCE = self::NONE;
 
-    public const TINKERGRAPH_VERSION = '3.4.8';
+    public const TINKERGRAPH_VERSION = '3.4.12';
 
     public function run(): void {
         $error = array();

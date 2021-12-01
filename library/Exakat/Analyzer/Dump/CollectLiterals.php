@@ -91,7 +91,7 @@ SQL;
              ->raw(<<<'GREMLIN'
 map{ 
     x = ['encoding':it.get().values('encoding')[0]];
-    if (it.get().values('block').size() != 0) {
+    if (it.get().values('block')[0] != null) {
         x['block'] = it.get().values('block')[0];
     } else {
         x['block'] = '';

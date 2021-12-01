@@ -148,6 +148,7 @@ class Appinfo extends Data {
                             'PHP 8.0 Scalar Typehints'    => 'Php/Php80OnlyTypeHints',
                             'PHP 8.0 Union Typehints'     => 'Php/Php80OnlyTypeHints',
                             'Static variables'            => 'Variables/StaticVariables',
+                            'Never typehint'              => 'PHp/NeverTypehintUsage',
 
                             'Function dereferencing'      => 'Structures/FunctionSubscripting',
                             'Constant scalar expression'  => 'Structures/ConstantScalarExpression',
@@ -170,6 +171,7 @@ class Appinfo extends Data {
                             'Abstract classes'           => 'Classes/Abstractclass',
                             'Interfaces'                 => 'Interfaces/Interfacenames',
                             'Traits'                     => 'Traits/Traitnames',
+                            'Enums'                      => 'Php/EnumUsage',
 
                             'Static properties'          => 'Classes/StaticProperties',
 
@@ -179,6 +181,8 @@ class Appinfo extends Data {
 
                             'Class constants'            => 'Classes/ConstantDefinition',
                             'Overwritten constants'      => 'Classes/OverwrittenConst',
+                            'Constant visibility'        => 'Classes/ConstVisibilityUsage',
+                            'Final constants'            => 'Php/FinalConstant',
 
                             'Magic methods'              => 'Classes/MagicMethod',
                             'Cloning'                    => 'Classes/CloningUsage',
@@ -187,6 +191,7 @@ class Appinfo extends Data {
                             'Covariance'                 => 'Php/UseCovariance',
                             'Contravariance'             => 'Php/UseContravariance',
 
+                            'Class overreach'            => 'Classes/ClassOverreach',
                             'Null Safe Operator ?->'     => 'Php/NullSafeOperator',
                             'PHP 4 constructor'          => 'Classes/OldStyleConstructor',
                             'Multiple class in one file' => 'Classes/MultipleClassesInFile',

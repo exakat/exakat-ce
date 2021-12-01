@@ -42,6 +42,8 @@ class DotExakatYamlConfig extends Config {
                 $this->dotExakatYaml = $secondary;
             }
         }
+        
+        $this->config['project'] = new Project();
     }
 
     public function loadConfig(Project $project): ?string {
@@ -132,6 +134,10 @@ class DotExakatYamlConfig extends Config {
             $this->config[$name] = empty($tmp_config[$name]) ? $default_value : $tmp_config[$name];
             unset($tmp_config[$name]);
         }
+        
+        if (!empty($tmp_config)) {
+            display(count($tmp_config) . ' entries were found in .exakat.yaml, but could not be processed : ' . implode(', ', array_keys($tmp_config)));
+        }
 
         if (isset($tmp_config['project_themes'])) {
             display("please, rename project_themes into project_rulesets in your .exakat.yaml file\n");
@@ -151,11 +157,8 @@ class DotExakatYamlConfig extends Config {
 
         if (is_string($this->config['file_extensions'])) {
             $this->config['file_extensions'] = listToArray($this->config['file_extensions']);
-            foreach($this->config['file_extensions'] as &$ext) {
-                $ext = trim($ext, '. ');
-            }
-            unset($ext);
         }
+        $this->config['file_extensions'] = $this->cleanFileExtensions($this->config['file_extensions']);
 
         if (is_string($this->config['project_reports'])) {
             $this->config['project_reports'] = listToArray($this->config['project_reports']);

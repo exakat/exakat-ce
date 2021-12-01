@@ -30,6 +30,9 @@ class GoToAllChildren extends DSL {
         switch(func_num_args()) {
             case 1:
                 list($self) = func_get_args();
+                if (!in_array($self, array(Analyzer::INCLUDE_SELF, Analyzer::EXCLUDE_SELF), STRICT_COMPARISON)) {
+                    $self = Analyzer::INCLUDE_SELF;
+                }
                 break;
 
             default:

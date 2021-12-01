@@ -30,6 +30,7 @@ class ReportConfig {
     private $format      = 'None';
     private $config      = null;
     private $rulesets    = array();
+    private $options     = array();
     private $destination = null;
 
     public function __construct($config, Config $exakat_config) {
@@ -59,6 +60,7 @@ class ReportConfig {
 
             $this->name        = $config;
             $this->rulesets    = $exakat_config->project_rulesets ?? array();
+            $this->options     = $exakat_config->$config ?? array();
             $this->destination = $exakat_config->file ?: constant("\Exakat\Reports\\$config::FILE_FILENAME");
         } else {
             throw new NoSuchReport($config);
@@ -87,6 +89,7 @@ class ReportConfig {
         return $this->config->duplicate(array('file'             => $this->destination,
                                               'format'           => array($this->format),
                                               'project_rulesets' => $this->rulesets,
+                                              'options'          => $this->options,
                                               ));
     }
 

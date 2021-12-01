@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>with a Docker installation &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Overview" href="../User/Overview.html" />
+    <link rel="prev" title="with a Bare metal installation" href="Bare.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Bare.html">with a Bare metal installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">with a Docker installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#docker-container-with-projects-folder">Docker container, with projects folder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#initialization">Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#execution">Execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#more-reports">More reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-run">New run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#docker-container-within-the-code-folder">Docker container, within the code folder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">More reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">New run</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../User/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Support.html">Library &amp; Framework Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Cobbler.html">Cobbler</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rules.html">1. Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rulesets.html">2. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Annex.html">Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>with a Docker installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Gettingstarted/Docker.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="with-a-docker-installation">
+<span id="docker"></span><h1>with a Docker installation<a class="headerlink" href="#with-a-docker-installation" title="Permalink to this headline">¶</a></h1>
+<p>Here are 2 tutorials to run Exakat on your code. You may install exakat with the projects folder, and centralize your audits in one place, or run exakat in-code, right from the source code. You may also run exakat with a bare-metal installation, or as a docker container.</p>
+<ul class="simple">
+<li><p>Docker container</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>with projects folder</p></li>
+<li><p>within the code</p></li>
+</ul>
+</div></blockquote>
+<p>All four tutorials offer the same steps :
++ Project initialisation
++ Audit run
++ Reports access</p>
+<div class="section" id="docker-container-with-projects-folder">
+<h2>Docker container, with projects folder<a class="headerlink" href="#docker-container-with-projects-folder" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial runs exakat audits, when source code are organized in the <cite>projects</cite> folder. Any folder will do, since exakat is now hosted in the docker image.</p>
+<div class="section" id="initialization">
+<h3>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">¶</a></h3>
+<p>Go to the directory that contains the ‘projects’ folder.</p>
+<p>Init the project with the following command :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">famille</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">analyzeG3</span><span class="o">/</span><span class="n">projects</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">exakat</span><span class="o">/</span><span class="n">projects</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="p">:</span><span class="n">latest</span> <span class="n">exakat</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span> <span class="o">-</span><span class="n">R</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sculpin</span><span class="o">/</span><span class="n">sculpin</span> <span class="o">-</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>This will create a ‘projects/sculpin’ folder, with various documents and folder. The most important folder being ‘code’, where the code of the project is fetched, an cached. See _Commands for more details about the <cite>init</cite> command.</p>
+</div>
+<div class="section" id="execution">
+<h3>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h3>
+<p>After creating the project, an audit may be run from the same directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">famille</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">analyzeG3</span><span class="o">/</span><span class="n">projects</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">exakat</span><span class="o">/</span><span class="n">projects</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="p">:</span><span class="n">dev</span> <span class="n">exakat</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span>
+</pre></div>
+</div>
+<p>This command runs the whole cycle : code loading, code audits and report building.</p>
+<p>Once it is finished, the report is available in the <cite>projects/sculpin/report/</cite> folder. Open <cite>projects/sculpin/report/index.htmll</cite> with a browser.</p>
+</div>
+<div class="section" id="more-reports">
+<h3>More reports<a class="headerlink" href="#more-reports" title="Permalink to this headline">¶</a></h3>
+<p>When running exakat with the projects folder, reports may be configured before the run of the audit, in the config.ini file, or in command line, or extracted after the run.</p>
+<p>After a first audit, use the <cite>report</cite> command. Here is an example with the <cite>Uml</cite> report.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">famille</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">analyzeG3</span><span class="o">/</span><span class="n">projects</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">exakat</span><span class="o">/</span><span class="n">projects</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="p">:</span><span class="n">dev</span> <span class="n">exakat</span> <span class="n">report</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span> <span class="o">-</span><span class="nb">format</span> <span class="n">Uml</span>
+</pre></div>
+</div>
+<p>Reports may only be build if the analysis they depend on, were already processed.</p>
+<p>In command line, use the <cite>-format</cite> option, multiple times if necessary.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">famille</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">analyzeG3</span><span class="o">/</span><span class="n">projects</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">exakat</span><span class="o">/</span><span class="n">projects</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="p">:</span><span class="n">dev</span> <span class="n">exakat</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span> <span class="o">-</span><span class="nb">format</span> <span class="n">Uml</span>
+</pre></div>
+</div>
+<p>In config.ini, edit the <cite>projects/sculpin/report/config.ini</cite> file, and add the following lines :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project_reports</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Uml&#39;</span><span class="p">;</span>
+<span class="n">project_reports</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Plantuml&#39;</span><span class="p">;</span>
+<span class="n">project_reports</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Ambassador&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Then, run the audit as explained in the previous section.</p>
+<p>The full list of available reports are in the _Reports section.</p>
+</div>
+<div class="section" id="new-run">
+<h3>New run<a class="headerlink" href="#new-run" title="Permalink to this headline">¶</a></h3>
+<p>After adding some modifications to the code and committing them, you need to update the code before running it again : otherwise, it will run on the previous version of the code.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">famille</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">analyzeG3</span><span class="o">/</span><span class="n">projects</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">exakat</span><span class="o">/</span><span class="n">projects</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="p">:</span><span class="n">dev</span> <span class="n">exakat</span> <span class="n">update</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">famille</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">analyzeG3</span><span class="o">/</span><span class="n">projects</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">exakat</span><span class="o">/</span><span class="n">projects</span> <span class="n">exakat</span><span class="o">/</span><span class="n">exakat</span><span class="p">:</span><span class="n">dev</span> <span class="n">exakat</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="docker-container-within-the-code-folder">
+<h2>Docker container, within the code folder<a class="headerlink" href="#docker-container-within-the-code-folder" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial runs exakat audits from the source code repository, with a docker container.</p>
+<div class="section" id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
+<p>Refer to the _Installation section to install Exakat on docker.</p>
+</div>
+<div class="section" id="id1">
+<h3>Initialization<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Go to the directory that contains the source code.</p>
+<p>Create a configuration file called <cite>.exakat.yml</cite>, with the following content :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span>
+</pre></div>
+</div>
+<p>This is the minimum configuration for that file. You may read more about _Configuration in the dedicated section.</p>
+</div>
+<div class="section" id="id2">
+<h3>Execution<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>After creating the configuration file, an audit may be run from the same directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it --rm -v $(`pwd`):/src exakat/exakat:latest exakat project
+</pre></div>
+</div>
+<p>This command runs the whole cycle : code loading, code audits and report building. It works without initial configuration.</p>
+<p>Once it is finished, the report is displayed on the standard output (aka, the screen).</p>
+</div>
+<div class="section" id="id3">
+<h3>More reports<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>When running exakat inside code, reports must be configured before the run of the audit : they will be build immediately.</p>
+<p>Edit the .exakat.yml file, and add the following lines :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span>
+<span class="n">project_reports</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">Uml</span>
+  <span class="o">-</span> <span class="n">Plantuml</span>
+  <span class="o">-</span> <span class="n">Ambassador</span>
+</pre></div>
+</div>
+<p>Then, run the audit as explained in the previous section.</p>
+<p>This configuration produces 3 reports : “Ambassador”, which is the default report, “Uml”, available in the ‘uml.dot’ file, and “Plantuml”, that may be opened with <a class="reference external" href="http://plantuml.com/">plantuml</a>.</p>
+<p>The full list of available reports are in the _Reports section.</p>
+</div>
+<div class="section" id="id4">
+<h3>New run<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>After adding some modifications to the code, run again exakat with the same command than the first time. Since the audit is run within the code source, no explicit update operation is needed.</p>
+<p>Check the <cite>.exakat.yml</cite> file before running the audit, to check if all the reports you want are configured.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it --rm -w /src -v $(pwd):/src --entrypoint &quot;/usr/src/exakat/exakat.phar&quot; exakat/exakat:latest project
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../User/Overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Bare.html" class="btn btn-neutral float-left" title="with a Bare metal installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015-2020, Damien Seguy.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

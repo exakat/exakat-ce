@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 /*
  * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
@@ -169,8 +169,8 @@ class Php80 extends Php {
     public const T_ELLIPSIS                                         = 400;
     public const T_BAD_CHARACTER                                    = 401;
     public const T_DOUBLE_COLON                                     = 398;
-    
     public const T_READONLY                                         = 1000;
+    public const T_ENUM                                             = 1000;
     public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = 1000;
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 1000;
 }

@@ -151,7 +151,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         return isset($this->data[$offset]);
     }
 
-    public function offsetGet($offset) {
+    public function offsetGet($offset) : mixed {
         return $this->data[$offset];
     }
 
@@ -171,11 +171,11 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         }
     }
 
-    public function current() {
+    public function current() : mixed {
         return current($this->data);
     }
 
-    public function key() {
+    public function key() : mixed {
         if ($this->type === self::ARRAY) {
             return key($this->data);
         }

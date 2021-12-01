@@ -147,7 +147,7 @@ class Export extends Tasks {
                     $vcs->commitFiles('Exakat cobbler for ' . implode(', ', $this->config->program));
                     $vcs->checkoutBranch($branch);
                 } catch (VcsSupport $e) {
-                    print "Error while storing in branch {$this->config->branch} : ".$e->getMessage()."\n";
+                    print "Error while storing in branch {$this->config->branch} : " . $e->getMessage() . "\n";
                 }
 
                 return;

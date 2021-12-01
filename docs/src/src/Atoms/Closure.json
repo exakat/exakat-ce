@@ -1,7 +1,0 @@
-{
-    "name": "Closure",
-    "description": "A closure definition. For example, `function () { return 3; }`.",
-    "url": [
-        ""
-    ]
-}

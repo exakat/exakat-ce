@@ -86,6 +86,8 @@ class Precedence {
                         'T_SPACESHIP'                   => 37,
 
                         'T_AND'                         => 42,    // &
+                        'T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG' => 42,    // & in PHP 8.1
+                        'T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG' => 42,    // & in PHP 8.1
 
                         'T_XOR'                         => 43,    // ^
 

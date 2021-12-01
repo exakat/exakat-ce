@@ -1,7 +1,0 @@
-{
-    "name": "Variable",
-    "description": "A Variable, as a standalone container. For example : `$a = 1` or `$b += 3`. Variables in arrays are `Variablearray`, while variables in objects are `Variableobject`. ",
-    "url": [
-        ""
-    ]
-}

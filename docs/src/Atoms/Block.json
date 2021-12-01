@@ -1,7 +1,0 @@
-{
-    "name": "Block",
-    "description": "Represents a sequence between curly braces. For example, `{ $c += $b; }`.",
-    "url": [
-        ""
-    ]
-}

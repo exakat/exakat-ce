@@ -162,7 +162,6 @@ class Php74 extends Php {
     public const T_ELLIPSIS                      = 394;
     public const T_BAD_CHARACTER                 = 395;
     public const T_DOUBLE_COLON                  = 390;
-
     public const T_NAME_FULLY_QUALIFIED          = 1000;
     public const T_NAME_RELATIVE                 = 1000;
     public const T_NAME_QUALIFIED                = 1000;
@@ -170,6 +169,7 @@ class Php74 extends Php {
     public const T_MATCH                         = 1000;
     public const T_ATTRIBUTE                     = 1000;
     public const T_CHARACTER                     = 1000;
+    public const T_ENUM                                             = 1000;
     public const T_READONLY                                         = 1000;
     public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = 1000;
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 1000;

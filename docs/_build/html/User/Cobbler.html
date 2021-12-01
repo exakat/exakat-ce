@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Cobbler &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="1. Rules" href="../Reference/Rules.html" />
+    <link rel="prev" title="Report" href="Report.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Support.html">Library &amp; Framework Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cobbler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-are-cobblers">What are cobblers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cobbler-command">Cobbler command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis-and-cobblers">Analysis and Cobblers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#one-analysis-one-cobbler">One analysis, one cobbler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#one-analysis-multiple-cobblers">One analysis, multiple cobblers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-analysis-one-cobbler">Multiple analysis, one cobbler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cobbler-configuration">Cobbler configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ini-configuration-example">INI configuration example:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cobbler-tutorial">Cobbler tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-requisite">Pre-requisite</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rules.html">1. Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rulesets.html">2. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Annex.html">Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Cobbler</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/User/Cobbler.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cobbler">
+<span id="id1"></span><h1>Cobbler<a class="headerlink" href="#cobbler" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-are-cobblers">
+<h2>What are cobblers<a class="headerlink" href="#what-are-cobblers" title="Permalink to this headline">¶</a></h2>
+<p>Cobblers mend PHP code. They apply a transformation to it.</p>
+<p>Cobblers are a complement to code analysis : the analysis spot code to be fixed, the cobbler mends the code. Later, the analysis doesn’t find those issues anymore.</p>
+</div>
+<div class="section" id="cobbler-command">
+<h2>Cobbler command<a class="headerlink" href="#cobbler-command" title="Permalink to this headline">¶</a></h2>
+<p>To run a cobbler, use the <cite>cobble</cite> command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span> <span class="n">cobble</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">write</span><span class="o">-</span><span class="n">options</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">P</span> <span class="o">&lt;</span><span class="n">Cobbler</span><span class="o">/</span><span class="n">Name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The &lt;project&gt; parameter is the project on which the cobbler is run. It must have been <cite>init</cite>-ed with Exakat.</p>
+<p>&lt;Cobbler/Name&gt; is the name of the cobbler to run. The list of available cobblers are in the documentation.</p>
+<p>&lt;write-options&gt; configure the destination of the updated code. The available options are :</p>
+<ul class="simple">
+<li><p>–branch &lt;branch&gt; : the modified code is written in a new branch, called &lt;branch&gt;. The branch may be configured for each cobbler.</p></li>
+<li><p>–inplace : the analyzed code is replaced by the modified code. This cannot be reverted</p></li>
+<li><p>-f &lt;filename&gt; : the modified code is written in the &lt;filename&gt; file. Only one file is written.</p></li>
+<li><p>-d &lt;dirname&gt; : the modified codes are written in the &lt;directory&gt; folder. Files are written with the original name and path from the root of the repository.</p></li>
+<li><p>default behavior : –branch Exakat/Cobbler/Name.</p></li>
+</ul>
+</div>
+<div class="section" id="analysis-and-cobblers">
+<h2>Analysis and Cobblers<a class="headerlink" href="#analysis-and-cobblers" title="Permalink to this headline">¶</a></h2>
+<p>The analysis come first, and then the cobbler. The analysis reads the code, assess the situation and report patterns in the code that should be fixed.
+Then, the results from the analysis are given to the Cobbler, as a starting point. The cobbler applies various modifications in the code, and then, produce a new code.
+That code is now free of issues that the analysis found.</p>
+</div>
+<div class="section" id="one-analysis-one-cobbler">
+<h2>One analysis, one cobbler<a class="headerlink" href="#one-analysis-one-cobbler" title="Permalink to this headline">¶</a></h2>
+<p>For example, Performances/PrePostIncrement is the analysis that reports post-increment that should be converted into pre-increments.
+This is the base analysis for the Structure/PostToPre cobbler. This cobbler updates the code and turns <code class="docutils literal notranslate"><span class="pre">$a++</span></code> into <code class="docutils literal notranslate"><span class="pre">++$a</span></code>, and <code class="docutils literal notranslate"><span class="pre">$b--</span></code> into <code class="docutils literal notranslate"><span class="pre">--$b</span></code>.
+The resulting code is then stored into a new VCS branch, so that it may be reviewed before PR.</p>
+<p>Cobblers are often created to apply one of the possible fixes related to one analysis. For example, Performances/PrePostIncrement might be fixed by turning the Post increment into a pre-increment, but it may also be replaced by a constant, instead of a literal.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="nv">$a</span><span class="o">++</span><span class="p">;</span>
+
+<span class="c1">// Speed up the code with pre-increment</span>
+<span class="c1">// ++$a;</span>
+
+<span class="c1">// Make the ++ operation configurable</span>
+<span class="c1">// const C = 1;</span>
+<span class="c1">// $a = $a + C;</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+<p>It is not possible to apply the two cobblers at the same time, since they do not pursue the same goals. One is a performance improvement, the other one make the code configurable.</p>
+</div>
+<div class="section" id="one-analysis-multiple-cobblers">
+<h2>One analysis, multiple cobblers<a class="headerlink" href="#one-analysis-multiple-cobblers" title="Permalink to this headline">¶</a></h2>
+<p>When one analysis produces results that may be fixed with multiple cobbler, apply the following strategy :
++ Run the different cobblers, and write the results in different branches
++ Do a PR with each branch, and cherry pick the transformations</p>
+</div>
+<div class="section" id="multiple-analysis-one-cobbler">
+<h2>Multiple analysis, one cobbler<a class="headerlink" href="#multiple-analysis-one-cobbler" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to apply the same cobbler to the results of multiple analysis : for example, the Structures/RemoveCode may be applied simultaneously to the analysis <cite>Structures/UselessExpressions</cite> and <cite>Classes/UnusedClasses</cite>. Both analysis spot unused code, that may well be removed.</p>
+</div>
+<div class="section" id="cobbler-configuration">
+<h2>Cobbler configuration<a class="headerlink" href="#cobbler-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Cobblers take the following configuration directives :</p>
+<ul class="simple">
+<li><p>Source analysis : the analysis which should be resolved by the cobbler. One or more analysis may be provided. Default values are provided, and available in the documentation.</p></li>
+<li><p>Branch name : the branch used in the current VCS, to store the mended code.</p></li>
+<li><p>Specific configuration : some cobblers accept customs configuration. They are detailled in the documentation of the cobbler.</p></li>
+</ul>
+</div>
+<div class="section" id="ini-configuration-example">
+<h2>INI configuration example:<a class="headerlink" href="#ini-configuration-example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Structures</span><span class="o">/</span><span class="n">RemoveCode</span><span class="p">]</span>
+<span class="n">analysis</span><span class="p">[]</span> <span class="o">=</span> <span class="s2">&quot;Structures/UselessExpression&quot;</span>
+<span class="n">analysis</span><span class="p">[]</span> <span class="o">=</span> <span class="s2">&quot;Classes/UnusedClass&quot;</span>
+<span class="n">branch</span> <span class="o">=</span> <span class="s2">&quot;code-cleaning&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cobbler-tutorial">
+<h2>Cobbler tutorial<a class="headerlink" href="#cobbler-tutorial" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="pre-requisite">
+<h2>Pre-requisite<a class="headerlink" href="#pre-requisite" title="Permalink to this headline">¶</a></h2>
+<p>We assume that Exakat has been <cite>install</cite>-ed, and that an exakat project is already inited.</p>
+<p>The way to run a cobbler is to call the <cite>cobble</cite> command. In this example, exakat removes the noscream <cite>&#64;</cite> operator, based on the <cite>Structures/NoScream</cite> analysis, and store the results in the <cite>target-branch</cite> for the <cite>project name</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">php</span> <span class="n">exakat</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">phulp</span> <span class="o">-</span><span class="n">R</span> <span class="o">&lt;</span><span class="n">URL</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">git</span>
+<span class="o">&gt;</span> <span class="n">php</span> <span class="n">exakat</span> <span class="n">cobble</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">b</span> <span class="o">&lt;</span><span class="n">target_branch</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">P</span> <span class="n">Structures</span><span class="o">/</span><span class="n">RemoveNoScream</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../Reference/Rules.html" class="btn btn-neutral float-right" title="1. Rules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Report.html" class="btn btn-neutral float-left" title="Report" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015-2020, Damien Seguy.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

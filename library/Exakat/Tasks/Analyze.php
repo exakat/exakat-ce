@@ -79,12 +79,6 @@ class Analyze extends Tasks {
                 }
             }
 
-            $diff = array_uintersect($this->config->ignore_rules, $analyzersClass, 'strcasecmp');
-            if (!empty($diff)) {
-                display('Ignoring ' . count($diff) . ' rule' . (count($diff) > 1 ? 's' : '') . ' by configuration : ' . implode(', ', $diff));
-                $analyzersClass = array_udiff($analyzersClass, $this->config->ignore_rules, 'strcasecmp');
-            }
-
             if (empty($analyzersClass)) {
                 throw new NeedsAnalyzerThema();
             }
@@ -95,6 +89,9 @@ class Analyze extends Tasks {
             if ((!$analyzersClass = $this->rulesets->getRulesetsAnalyzers($ruleset)) && ($ruleset[0] !== 'None')) {
                 throw new NoSuchRuleset(implode(', ', $ruleset), $this->rulesets->getSuggestionRuleset($ruleset));
             }
+
+            // todo : unidentified rules are omitted at execution time
+            // may be we could spot them here, and fix.
 
             $this->datastore->addRow('hash', array(implode('-', $this->config->project_rulesets) => count($analyzersClass) ) );
 

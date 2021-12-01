@@ -1,7 +1,0 @@
-{
-    "name": "Halt",
-    "description": "The `__halt_compiler` command.",
-    "url": [
-        ""
-    ]
-}
