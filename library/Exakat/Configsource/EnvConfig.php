@@ -40,6 +40,21 @@ class EnvConfig extends Config {
             $this->config['include_dirs'] = str2array($e);
         }
 
+        if (!empty($e = getenv('EXAKAT_FILE_EXTENSIONS'))) {
+            $this->config['file_extensions'] = str2array($e);
+            $this->config['file_extensions'] = $this->cleanFileExtensions($this->config['file_extensions']);
+        }
+
+        if (!empty($e = getenv('EXAKAT_PROJECT_REPORTS'))) {
+            $this->config['project_reports'] = str2array($e);
+            $this->config['project_reports'] = $this->cleanProjectReports($this->config['project_reports']);
+        }
+
+        if (!empty($e = getenv('EXAKAT_PROJECT_RULESETS'))) {
+            $this->config['project_rulesets'] = str2array($e);
+            $this->config['project_rulesets'] = $this->cleanProjectReports($this->config['project_rulesets']);
+        }
+
         return 'environnment';
     }
 }

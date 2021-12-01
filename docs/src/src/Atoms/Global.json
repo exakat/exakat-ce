@@ -1,7 +1,0 @@
-{
-    "name": "Global",
-    "description": "An expression with the global keyword. For example, `global $x, $y`.",
-    "url": [
-        ""
-    ]
-}

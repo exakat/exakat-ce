@@ -298,6 +298,7 @@ class IsExt extends Plugin {
                 break;
 
             case 'Newcall' :
+            case 'Newcallname' :
                 if (empty($path)) {
                     break;
                 }

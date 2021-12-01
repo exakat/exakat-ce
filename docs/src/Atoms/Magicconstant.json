@@ -1,7 +1,0 @@
-{
-    "name": "Magicconstant",
-    "description": "A PHP magic constant. For example : __FILE__ or __class__.",
-    "url": [
-        ""
-    ]
-}

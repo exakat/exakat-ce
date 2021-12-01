@@ -135,6 +135,10 @@ abstract class Vcs {
          return 0;
     }
 
+    public function shell(string $command): string {
+         return shell_exec($command) ?: '' ?? '';
+    }
+
 }
 
 ?>

@@ -293,13 +293,13 @@ class Files extends Tasks {
         foreach($files as $id => $file) {
             if (is_link($path . $file)) {
                 unset($files[$id]);
-                $ignoredFiles[$file] = "Symbolic link ($f)";
+                $ignoredFiles[$file] = "Symbolic link ($file)";
                 continue;
             }
             $f = basename($file);
             if (isset($ignoreFileNames[mb_strtolower($f)])) {
                 unset($files[$id]);
-                $ignoredFiles[$file] = "Ignored file ($f)";
+                $ignoredFiles[$file] = "Ignored file ($file)";
                 continue;
             }
             $ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -345,7 +345,12 @@ class Files extends Tasks {
 
             display("Check compilation for $version");
 
-            $php = new Phpexec($phpVersion, $this->config->{$phpVersion});
+            try {
+                $php = new Phpexec($phpVersion, $this->config->{$phpVersion});
+            } catch (\Exception $e) {
+                // Skip compilation check if PHP is not available
+                continue;
+            }
             $php->compileFiles($this->config->code_dir, $this->tmpFileName, $this->config->dir_root);
             ++$SQLresults;
         }

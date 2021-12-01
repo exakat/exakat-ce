@@ -23,17 +23,9 @@
 
 namespace Exakat\Query\DSL;
 
-use Exakat\Query\Query;
-
 class AnalyzerInside extends DSL {
     public function run(): Command {
         list($analyzers) = func_get_args();
-
-//        $this->assertAtom($atoms);
-//        $diff = $this->normalizeAtoms($atoms);
-//        if (empty($diff)) {
-//            return new Command(Query::STOP_QUERY);
-//        }
 
         $gremlin = 'emit().repeat( out(' . self::$linksDown . ') ).times(' . self::$MAX_LOOPING . ').where( __.in("ANALYZED").has("analyzer", within(***)))';
         return new Command($gremlin, array($analyzers));

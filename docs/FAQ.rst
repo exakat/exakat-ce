@@ -15,6 +15,7 @@ Summary
 * `How can I run a very large project?`_
 * `Does exakat runs on Java 8?`_
 * `Where can I find the report`_
+* `Exakat only produces the default report`_
 * `Can I run exakat on local code?`_
 * `Can I ignore a dir or a file?`_
 * `Can I audit only one folder in vendor?`_
@@ -23,6 +24,7 @@ Summary
 * `Can I run exakat on Windows?`_
 * `Does exakat send my code to a central server?`_
 * `"cat: write error: Broken pipe" : is it bad?`_
+* `Require a [gremlin]Argument`_
 
 
 
@@ -81,6 +83,7 @@ Check in the projects/<name>/config.ini file : if values were provided, you'll f
 In case the code was not found during init, then do the following : 
 
 ::
+
     cd projects/<name>/
     git clone ssh://project/URL code
     cd -
@@ -88,6 +91,7 @@ In case the code was not found during init, then do the following :
     
 If you're using some other method than git, then just collect the code in a 'code' folder in the <name> project and run the 'files' command.
 
+The 'init' command doesn't overwrite an existing project : if the `code` folder is missing, you should add it manually, or remove the project with `remove` command, and use `init` again.
 
 `The project is too big`_
 -------------------------
@@ -135,9 +139,23 @@ Reports are available after running at least the following commands :
     php exakat.phar project -p <your project name>
 
 
-The default report is the HTML report, called 'Ambassador'. You'll find it in ./projects/<your project name>/report.
+The default report is the HTML report, called `Ambassador <https://exakat.readthedocs.io/en/latest/Reports.html#ambassador>`_. You'll find it in ./projects/<your project name>/report.
 
 Other reports, build with 'report' command, will also be saved there, with different names. 
+
+`Exakat only produces the default report`_
+-------------------------------------------
+
+After a default installation, Exakat builds the `Ambassador <https://exakat.readthedocs.io/en/latest/Reports.html#ambassador>`_ report. If you want another report, for example `Migration80 <https://exakat.readthedocs.io/en/latest/Reports.html#migration80>`_, you have to request it. 
+
+::
+
+    php exakat.phar report -p <your project name> --format Migration80  -v
+
+
+You may also access other reports, such as `Text <https://exakat.readthedocs.io/en/latest/Reports.html#text>`_, which are always available after an audit. 
+
+The 'report' command aborts the report build when insufficient rules have been run. At that point, you must configure the report or the rules, in the projects or the server, and run the audit again.
 
 `Can I run exakat on local code?`_
 ----------------------------------
@@ -173,6 +191,7 @@ You may also include files, by using the include_dir[] line. Including files is 
 You can use ignore_dirs to exclude everything in the source tree, then use include_dirs to include specific folders.
 
 ::
+
     # exclude everything
     ignore_dirs[] = '/';
 
@@ -183,14 +202,14 @@ You can use ignore_dirs to exclude everything in the source tree, then use inclu
 `Can I run Exakat with PHP 5?`_
 -------------------------------
 
-It is recommended to run exakat with PHP 7.0 and more recent. Older version are not so well tested, since they have reached their end of life.
+It is recommended to run exakat with PHP 7.4 or even 8.0. PHP 7.3 is still possible, though not supported. PHP 7.2 and below won't work (we checked).
 
-Note that you may test your code on PHP 5.x, while running Exakat on PHP 7.0. There are 2 distinct configuration options in Exakat. 'php' is the path to the PHP binary that runs Exakat : this one should be PHP 7.0+. 'phpxx' are the path to the PHP helpers, that are used to tokenized and lint the target PHP code. This is where PHP 5.x may be configured.
+Note that you may test your code on PHP 5.x, while running Exakat on PHP 7.4. There are 2 distinct configuration options in Exakat. 'php' is the path to the PHP binary that runs Exakat : this one should be PHP 7.0+. 'phpxx' are the path to the PHP helpers, that are used to tokenized and lint the target PHP code. This is where PHP 5.x may be configured.
 
 ::
 
     ; where and which PHP executable are available
-    php   = /usr/local/sbin/php71
+    php   = /usr/local/sbin/php74
     
     php52 = 
     php53 = /usr/local/sbin/php53
@@ -201,6 +220,9 @@ Note that you may test your code on PHP 5.x, while running Exakat on PHP 7.0. Th
     php71 = 
     php72 = 
     php73 = 
+    php74 = 
+    php80 = 
+    php81 = 
 
 Above is an example of a exakat configuration file, where Exakat is run with PHP 7.1 and process code with PHP 5.3.
 
@@ -232,4 +254,33 @@ Exakat currently runs some piped commands, with xargs so as to make some operati
 It has no impact on exakat's processing of the code. 
 
 See also `cat: write error: Broken pipe <https://askubuntu.com/questions/421663/cat-write-error-broken-pipe>`_.
+
+
+`Require a [gremlin]Argument`
+-------------------------------------------------
+
+Running an audit (project command) leads to an error message such as this one : 
+
+::
+
+    2/2 [========================================================================>] 100.00% 00:00:00   
+    
+    Error : The request message was parseable, but the arguments supplied in the message were in conflict or incomplete. Check the message format and retry the request. : A message with an [eval] op code requires a [gremlin] argument.
+    
+    ===================  SERVER TRACE  ========================= 
+    array (
+    )
+    ============================================================ 
+    
+    on file phar:///exakat-2.1.9/exakat.phar/vendor/brightzone/gremlin-php/src/Connection.php on line 847
+
+
+This happens when exakat couldn't stop the gremlin database. You should take it down manually, then restart the audit. No version update necessary.
+
+Get the process ID with the following command, and then, kill it.
+
+:: 
+
+    ps aux | grep gsneo4jv3.3.4   
+    ps aux | grep gremlin
 

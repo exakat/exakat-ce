@@ -142,6 +142,28 @@ abstract class Config {
 
         return Symfony_Yaml::dump($yaml);
     }
+    
+    protected function cleanFileExtensions(array $extensions) : array {
+        $filter = function($s) { 
+            if (!is_string($s)) { return ''; } 
+            return trim($s, '. '); 
+        };
+        $extensions = array_map($filter, $extensions);
+        $extensions = array_filter($extensions);
+        
+        return $extensions;
+    }
+
+    protected function cleanProjectReports(array $reports) : array {
+        $filter = function($s) { 
+            if (!is_string($s)) { return ''; } 
+            return trim($s, '. -/'); 
+        };
+        $reports = array_map($filter, $reports);
+        $reports = array_filter($reports);
+        
+        return $reports;
+    }
 }
 
 ?>

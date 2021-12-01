@@ -1,22 +1,27 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>1. Introduction &mdash; Exakat 1 documentation</title>
+  <title>Introduction &mdash; Exakat 1 documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -26,17 +31,17 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="2. Exakat features" href="Features.html" />
+    <link rel="next" title="Release Note" href="Changelog.html" />
     <link rel="prev" title="Welcome to Exakat’s documentation!" href="index.html" /> 
 </head>
 
@@ -51,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Exakat
+            <a href="index.html" class="icon icon-home"> Exakat
           
 
           
@@ -61,7 +66,7 @@
             
             
               <div class="version">
-                2.1.9
+                2.2.2
               </div>
             
           
@@ -87,45 +92,66 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#what-is-exakat">1.1. What is Exakat ?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#exakat-use-cases">1.2. Exakat Use Cases</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#code-quality">1.2.1. Code quality</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#php-version-migration">1.2.2. PHP version migration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#framework-code-quality">1.2.3. Framework code quality</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#php-configurations">1.2.4. PHP configurations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#security-performances-testability">1.2.5. Security, performances, testability</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#feature-inventories">1.2.6. Feature inventories</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-exakat">What is Exakat ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-cases">Use Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-quality">Code quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#php-version-migration">PHP version migration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#framework-code-quality">Framework code quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#php-configurations">PHP configurations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security-performances-testability">Security, performances, testability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#feature-inventories">Feature inventories</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#exakat-compared-to-others">1.3. Exakat compared to others</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#code-sniffer">1.3.1. Code sniffer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#phan-phpstan-php">1.3.2. Phan, PHPstan, PHP</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#php7mar-php7cc">1.3.3. PHP7mar, PHP7cc</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#php-ci-jenkins-grumphp">1.3.4. PHP-ci, Jenkins, Grumphp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exakat-compared-to-others">Exakat compared to others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-sniffer">Code sniffer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#phan-phpstan-php">Phan, PHPstan, PHP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#php7mar-php7cc">PHP7mar, PHP7cc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#php-ci-jenkins-grumphp">PHP-ci, Jenkins, Grumphp</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#exakat-ecosystem">1.4. Exakat ecosystem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#architecture">1.5. Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#platforms">Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Features.html">2. Exakat features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Installation.html">3. Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">4. Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">5. Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">6. Frequently Asked Questions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Commands.html">7. Exakat commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Rulesets.html">8. Rulesets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Rules.html">9. Rules list</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Cases.html">10. Real Code Cases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Reports.html">11. Reports</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Configuration.html">12. Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Development.html">13. Custom analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Glossary.html">14. Glossary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Definitions.html">15. Definitions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Contribute.html">16. Ideas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Contributors.html">17. List of contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Annex.html">18. Annex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Gettingstarted/Bare.html">with a Bare metal installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gettingstarted/Docker.html">with a Docker installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="User/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User/PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User/Support.html">Library &amp; Framework Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User/Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User/Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User/Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User/Cobbler.html">Cobbler</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Reference/Rules.html">1. Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reference/Rulesets.html">2. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reference/Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reference/Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reference/Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Administrator/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Administrator/Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Administrator/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Administrator/Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Annex.html">Annex</a></li>
 </ul>
 
             
@@ -166,18 +192,20 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>1. Introduction</li>
+      <li>Introduction</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/Introduction.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -192,72 +220,72 @@
            <div itemprop="articleBody">
             
   <div class="section" id="introduction">
-<span id="id1"></span><h1>1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>This is the documentation of the Exakat engine, version 2.1.9 (Build 1155), on Thu, 01 Oct 2020 08:48:45 +0000.</p>
+<span id="id1"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>This is the documentation of the Exakat engine, version 2.3.0 (Build 1260), on Mon, 08 Nov 2021 16:57:25 +0000.</p>
 <div class="section" id="what-is-exakat">
-<h2>1.1. What is Exakat ?<a class="headerlink" href="#what-is-exakat" title="Permalink to this headline">¶</a></h2>
+<h2>What is Exakat ?<a class="headerlink" href="#what-is-exakat" title="Permalink to this headline">¶</a></h2>
 <p>Exakat is a tool for analyzing, reporting and assessing PHP code source efficiently and systematically. Exakat processes PHP 5.2 to 7.4 and 8.0 code, as well as reporting on security, performance, code quality, migration.</p>
 <p>Exakat reads the code, builds an AST and several dependency graphs, then indexes all of it in a graph database. From there, exakat runs analysis, collecting potential errors and descriptive information about the code. Finally, exakat produces reports, both for humans and machines.</p>
 </div>
-<div class="section" id="exakat-use-cases">
-<h2>1.2. Exakat Use Cases<a class="headerlink" href="#exakat-use-cases" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="use-cases">
+<h2>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="code-quality">
-<h3>1.2.1. Code quality<a class="headerlink" href="#code-quality" title="Permalink to this headline">¶</a></h3>
+<h3>Code quality<a class="headerlink" href="#code-quality" title="Permalink to this headline">¶</a></h3>
 <p>Exakat detects hundreds of issues in PHP code : dead code, incompatible calls, undefined calls, illogical expressions, etc. Exakat is built for PHP, and cover common mistakes.</p>
 </div>
 <div class="section" id="php-version-migration">
-<h3>1.2.2. PHP version migration<a class="headerlink" href="#php-version-migration" title="Permalink to this headline">¶</a></h3>
+<h3>PHP version migration<a class="headerlink" href="#php-version-migration" title="Permalink to this headline">¶</a></h3>
 <p>Every PHP middle version is a migration by itself : based on the manual and common practices, exakat find both backward incompatibilities, that prevent migration, and new features, that makes code modern.</p>
 <p>Exakat review code for minor version, and spot bug fixes that may impact the code.</p>
 </div>
 <div class="section" id="framework-code-quality">
-<h3>1.2.3. Framework code quality<a class="headerlink" href="#framework-code-quality" title="Permalink to this headline">¶</a></h3>
+<h3>Framework code quality<a class="headerlink" href="#framework-code-quality" title="Permalink to this headline">¶</a></h3>
 <p>Common best practices and recommendations for specific plat-forms like Wordpress, CakePHP or Zend Framework are covered.</p>
 </div>
 <div class="section" id="php-configurations">
-<h3>1.2.4. PHP configurations<a class="headerlink" href="#php-configurations" title="Permalink to this headline">¶</a></h3>
+<h3>PHP configurations<a class="headerlink" href="#php-configurations" title="Permalink to this headline">¶</a></h3>
 <p>Exakat detects several specialized analyzes, for Web security : making the code more secure online; PHP performances : allowing faster execution.</p>
 </div>
 <div class="section" id="security-performances-testability">
-<h3>1.2.5. Security, performances, testability<a class="headerlink" href="#security-performances-testability" title="Permalink to this headline">¶</a></h3>
+<h3>Security, performances, testability<a class="headerlink" href="#security-performances-testability" title="Permalink to this headline">¶</a></h3>
 <p>Exakat has several specialized analyzes, for Web security : making the code more secure online; PHP performances : allowing faster execution; Testability : targeting the common pitfalls that makes code less testable.</p>
 </div>
 <div class="section" id="feature-inventories">
-<h3>1.2.6. Feature inventories<a class="headerlink" href="#feature-inventories" title="Permalink to this headline">¶</a></h3>
+<h3>Feature inventories<a class="headerlink" href="#feature-inventories" title="Permalink to this headline">¶</a></h3>
 <p>When auditing code, it is important to have a global view. Exakat collects all PHP features (magic functions, any operator, special functions or patterns) and represents them in one report, giving auditors a full view.</p>
 <p>Exakat inventories all literals for later review, helping with the magic number syndrome and any data refactoring.</p>
 </div>
 </div>
 <div class="section" id="exakat-compared-to-others">
-<h2>1.3. Exakat compared to others<a class="headerlink" href="#exakat-compared-to-others" title="Permalink to this headline">¶</a></h2>
+<h2>Exakat compared to others<a class="headerlink" href="#exakat-compared-to-others" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="code-sniffer">
-<h3>1.3.1. Code sniffer<a class="headerlink" href="#code-sniffer" title="Permalink to this headline">¶</a></h3>
+<h3>Code sniffer<a class="headerlink" href="#code-sniffer" title="Permalink to this headline">¶</a></h3>
 <p>Automated coding standard violation detection for PHP review the code for syntax layout. Exakat is not a coding standard detection tool, as it focuses on bug finding, rather than coding layout.</p>
 <p>While checking for coding standard, some bugs may be detected, and when checking for bugs, some coding standards may be found too.</p>
 <p>Using AST, dependency graphs and knowledge databases, Exakat reviews the code, checks its potential usage and mis-usage. Exakat doesn’t take any presentation nor comments into accounts : only functions, variables and their effects.</p>
 </div>
 <div class="section" id="phan-phpstan-php">
-<h3>1.3.2. Phan, PHPstan, PHP<a class="headerlink" href="#phan-phpstan-php" title="Permalink to this headline">¶</a></h3>
+<h3>Phan, PHPstan, PHP<a class="headerlink" href="#phan-phpstan-php" title="Permalink to this headline">¶</a></h3>
 <p>PHP code quality checks, based on type compatibility, and structure definitions. Exakat shares AST style analysis but it goes a bit further by including common mistakes and actual PHP features detections.</p>
 </div>
 <div class="section" id="php7mar-php7cc">
-<h3>1.3.3. PHP7mar, PHP7cc<a class="headerlink" href="#php7mar-php7cc" title="Permalink to this headline">¶</a></h3>
+<h3>PHP7mar, PHP7cc<a class="headerlink" href="#php7mar-php7cc" title="Permalink to this headline">¶</a></h3>
 <p>Code review for PHP 5 to migrate to PHP 7. Exakat covers every middle version from PHP 5.3 to PHP 7.3.</p>
 </div>
 <div class="section" id="php-ci-jenkins-grumphp">
-<h3>1.3.4. PHP-ci, Jenkins, Grumphp<a class="headerlink" href="#php-ci-jenkins-grumphp" title="Permalink to this headline">¶</a></h3>
+<h3>PHP-ci, Jenkins, Grumphp<a class="headerlink" href="#php-ci-jenkins-grumphp" title="Permalink to this headline">¶</a></h3>
 <p>Continuous integration and code quality management check the code by running code quality tools and collecting all the reported informations. Exakat is a good companion for those tools.</p>
 <p>Exakat provides machine readable format reports, such as json, xml, text that may be consumed by CI. Exakat provides also human readable format, such as HTML, for interactive review of the reports, and a longer usage life span.</p>
 </div>
 </div>
-<div class="section" id="exakat-ecosystem">
-<h2>1.4. Exakat ecosystem<a class="headerlink" href="#exakat-ecosystem" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="platforms">
+<h2>Platforms<a class="headerlink" href="#platforms" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://www.exakat.io/">Exakat</a> is an Open Source tool. The code is available on <a class="reference external" href="https://github.com/exakat/exakat">Github.com/exakat/exakat</a>, as <a class="reference external" href="https://hub.docker.com/r/exakat/exakat/">Docker image</a> and <a class="reference external" href="https://github.com/exakat/exakat-vagrant">Vagrant file</a>. It is also available as a phar <a class="reference external" href="https://www.exakat.io/download-exakat/">download</a>.</p>
 <p><a class="reference external" href="https://www.exakat.io/exakat-cloud/">Exakat cloud</a> is a SaaS platform, offering exakat audits on code, anytime, at reduced cost.</p>
 <p><a class="reference external" href="https://www.exakat.io/get-php-expertise/">Exakat SAS</a> is a Service company, providing consulting and training services around automated analysis and code quality for PHP.</p>
 </div>
 <div class="section" id="architecture">
-<h2>1.5. Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
+<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
 <p>Exakat relies on PHP to lint and tokenize the target code; a graph database to process the AST and the tokens; a SQLITE 3 database to store the results and produce the various reports.</p>
 <p>Exakat itself runs on PHP 7.2, with a short selection of extensions. It is tested with PHP 7.0 and 7.3.</p>
 <img alt="exakat architecture" src="_images/exakat.architecture.png" />
@@ -272,37 +300,29 @@
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="Features.html" class="btn btn-neutral float-right" title="2. Exakat features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Exakat’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="Changelog.html" class="btn btn-neutral float-right" title="Release Note" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Exakat’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2015-2020, Damien Seguy
+        &#169; Copyright 2015-2020, Damien Seguy.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

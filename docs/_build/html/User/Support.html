@@ -1,0 +1,602 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Library &amp; Framework Support &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Configuration" href="Configuration.html" />
+    <link rel="prev" title="PHP Version" href="PHPversion.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Library &amp; Framework Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#external-library-support">External Library Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#external-services-support">External Services Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-php-extensions">Supported PHP Extensions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cobbler.html">Cobbler</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rules.html">1. Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rulesets.html">2. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Annex.html">Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Library &amp; Framework Support</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/User/Support.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="library-framework-support">
+<h1>Library &amp; Framework Support<a class="headerlink" href="#library-framework-support" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Supported Rulesets</p></li>
+<li><p>Supported Reports</p></li>
+<li><p>Supported PHP Extensions</p></li>
+<li><p>Applications</p></li>
+<li><p>Recognized Libraries</p></li>
+<li><p>New analyzers</p></li>
+<li><p>External services</p></li>
+<li><p>PHP Error messages</p></li>
+<li><p>Exakat Changelog</p></li>
+</ul>
+</div>
+<div class="section" id="external-library-support">
+<h2>External Library Support<a class="headerlink" href="#external-library-support" title="Permalink to this headline">¶</a></h2>
+<p>Libraries that are popular, large and often included in repositories are identified early in the analysis process, and ignored. This prevents Exakat to analysis some code foreign to the current repository : it prevents false positives from this code, and make the analysis much lighter. The whole process is entirely automatic.</p>
+<p>Those libraries, or even some of the, may be included again in the analysis by commenting the ignored_dir[] line, in the projects/&lt;project&gt;/config.ini file.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://adodb.org/dokuwiki/doku.php/">ADOdb</a></p></li>
+<li><p><a class="reference external" href="http://atoum.org/">atoum</a></p></li>
+<li><p><a class="reference external" href="https://github.com/eventio/bbq">BBQ</a></p></li>
+<li><p><a class="reference external" href="https://cakephp.org/">CakePHP</a></p></li>
+<li><p><a class="reference external" href="http://apigen.juzna.cz/doc/ci-bonfire/Bonfire/class-CI_Xmlrpc.html">CI xmlRPC</a></p></li>
+<li><p><a class="reference external" href="https://pear.php.net/reference/PhpDocumentor-latest/li_Cpdf.html">CPDF</a></p></li>
+<li><p><a class="reference external" href="https://codeception.com/">Codeception</a></p></li>
+<li><p><a class="reference external" href="https://github.com/dompdf/dompdf">DomPDF</a></p></li>
+<li><p><a class="reference external" href="http://www.fpdf.org/">FPDF</a></p></li>
+<li><p><a class="reference external" href="http://phpgacl.sourceforge.net/">phpGACL</a></p></li>
+<li><p><a class="reference external" href="http://pivotx.net/dev/docs/trunk/External/PHP-gettext/gettext_reader.html">gettext Reader</a></p></li>
+<li><p><a class="reference external" href="http://jpgraph.net/">jpGraph</a></p></li>
+<li><p><a class="reference external" href="http://sourceforge.net/projects/phphtml2pdf/">HTML2PDF</a></p></li>
+<li><p><a class="reference external" href="http://htmlpurifier.org/">HTML Purifier</a></p></li>
+<li><p>http_class</p></li>
+<li><p><a class="reference external" href="https://github.com/phpWhois/idna-convert">IDNA convert</a></p></li>
+<li><p><a class="reference external" href="http://leafo.net/lessphp/">lessc</a></p></li>
+<li><p><a class="reference external" href="http://magpierss.sourceforge.net/">magpieRSS</a></p></li>
+<li><p><a class="reference external" href="http://processwire.com/apigen/class-Markdown_Parser.html">MarkDown Parser</a></p></li>
+<li><p><a class="reference external" href="https://github.com/michelf/php-markdown">Markdown</a></p></li>
+<li><p><a class="reference external" href="http://www.mpdf1.com/mpdf/index.php">mpdf</a></p></li>
+<li><p>oauthToken</p></li>
+<li><p>passwordHash</p></li>
+<li><p><a class="reference external" href="http://www.pchart.net/">pChart</a></p></li>
+<li><p><a class="reference external" href="http://www.phpconcept.net/pclzip/">pclZip</a></p></li>
+<li><p><a class="reference external" href="http://propelorm.org/">Propel</a></p></li>
+<li><p><a class="reference external" href="https://phpexcel.codeplex.com/">phpExecl</a></p></li>
+<li><p><a class="reference external" href="https://github.com/PHPMailer/PHPMailer">phpMailer</a></p></li>
+<li><p><a class="reference external" href="http://www.phpspec.net/en/latest/">PHPSpec</a></p></li>
+<li><p><a class="reference external" href="https://www.phpunit.de/">PHPUnit</a></p></li>
+<li><p><a class="reference external" href="http://phpqrcode.sourceforge.net/">qrCode</a></p></li>
+<li><p><a class="reference external" href="https://pear.php.net/package/Services_JSON">Services_JSON</a></p></li>
+<li><p><a class="reference external" href="https://github.com/fabpot-graveyard/yaml/blob/master/lib/sfYaml.php">sfYaml</a></p></li>
+<li><p><a class="reference external" href="http://simplepie.org/">SimplePie</a></p></li>
+<li><p><a class="reference external" href="https://github.com/simpletest/simpletest">SimpleTest</a></p></li>
+<li><p><a class="reference external" href="http://swiftmailer.org/">swift</a></p></li>
+<li><p><a class="reference external" href="http://www.smarty.net/">Smarty</a></p></li>
+<li><p><a class="reference external" href="https://symfony.com/doc/current/testing.html">Symfony Unit Test</a></p></li>
+<li><p><a class="reference external" href="http://www.tcpdf.org/">tcpdf</a></p></li>
+<li><p><a class="reference external" href="https://pear.php.net/package/Text_Diff">text_diff</a></p></li>
+<li><p><a class="reference external" href="https://pear.php.net/package/Text_Highlighter/">text highlighter</a></p></li>
+<li><p><a class="reference external" href="http://www.fpdf.org/en/script/script92.php">tfpdf</a></p></li>
+<li><p><a class="reference external" href="https://github.com/TYPO3/testing-framework">Typo3TestingFramework</a></p></li>
+<li><p>UTF8</p></li>
+<li><p><a class="reference external" href="https://github.com/Xajax/Xajax">Xajax</a></p></li>
+<li><p><a class="reference external" href="http://www.yiiframework.com/">Yii</a></p></li>
+<li><p><a class="reference external" href="http://framework.zend.com/">Zend Framework</a></p></li>
+</ul>
+</div>
+<div class="section" id="external-services-support">
+<h2>External Services Support<a class="headerlink" href="#external-services-support" title="Permalink to this headline">¶</a></h2>
+<p>List of external services whose configuration files has been commited in the code.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.apache.org/">Apache</a> - .htaccess, htaccess.txt</p></li>
+<li><p><a class="reference external" href="http://www.apple.com/">Apple</a> - .DS_Store</p></li>
+<li><p><a class="reference external" href="http://www.appveyor.com/">appveyor</a> - appveyor.yml, .appveyor.yml</p></li>
+<li><p><a class="reference external" href="https://ant.apache.org/">ant</a> - build.xml</p></li>
+<li><p><a class="reference external" href="http://apigen.github.io/ApiGen/">apigen</a> - apigen.yml, apigen.neon</p></li>
+<li><p><a class="reference external" href="https://www.archunit.org/">arcunit</a> - .arcunit</p></li>
+<li><p><a class="reference external" href="http://laravel.com/docs/5.1/artisan">artisan</a> - artisan</p></li>
+<li><p><a class="reference external" href="http://atoum.org/">atoum</a> - .bootstrap.atoum.php, .atoum.php, .atoum.bootstrap.php</p></li>
+<li><p><a class="reference external" href="https://secure.phabricator.com/book/phabricator/article/arcanist_lint/">arcanist</a> - .arclint, .arcconfig</p></li>
+<li><p><a class="reference external" href="https://bazaar.canonical.com/en/">bazaar</a> - .bzr</p></li>
+<li><p><a class="reference external" href="https://babeljs.io/">babeljs</a> - .babel.rc, .babel.js, .babelrc</p></li>
+<li><p><a class="reference external" href="http://docs.behat.org/en/v2.5/">behat</a> - behat.yml.dist, behat.yml</p></li>
+<li><p><a class="reference external" href="https://github.com/box-project/box2">box2</a> - box.json, box.json.dist</p></li>
+<li><p><a class="reference external" href="http://bower.io/">bower</a> - bower.json, .bowerrc</p></li>
+<li><p><a class="reference external" href="https://circleci.com/">circleCI</a> - circle.yml, .circleci</p></li>
+<li><p><a class="reference external" href="http://www.codacy.com/">codacy</a> - .codacy.json</p></li>
+<li><p><a class="reference external" href="https://codeception.com/">codeception</a> - codeception.yml, codeception.dist.yml</p></li>
+<li><p><a class="reference external" href="https://codecov.io/">codecov</a> - .codecov.yml, codecov.yml</p></li>
+<li><p><a class="reference external" href="http://www.codeclimate.com/">codeclimate</a> - .codeclimate.yml</p></li>
+<li><p><a class="reference external" href="https://getcomposer.org/">composer</a> - composer.json, composer.lock, vendor</p></li>
+<li><p><a class="reference external" href="http://couscous.io/">couscous</a> - couscous.yml</p></li>
+<li><p><a class="reference external" href="https://github.com/squizlabs/PHP_CodeSniffer">Code Sniffer</a> - .php_cs, .php_cs.dist, .phpcs.xml, php_cs.dist, phpcs.xml, phpcs.xml.dist</p></li>
+<li><p><a class="reference external" href="https://coveralls.zendesk.com/">coveralls</a> - .coveralls.yml</p></li>
+<li><p><a class="reference external" href="https://crowdin.com/">crowdin</a> - crowdin.yml</p></li>
+<li><p><a class="reference external" href="https://www.nongnu.org/cvs/">cvs</a> - CVS</p></li>
+<li><p><a class="reference external" href="http://www.docker.com/">docker</a> - .dockerignore, .docker, docker-compose.yml, Dockerfile</p></li>
+<li><p><a class="reference external" href="https://symfony.com/doc/current/components/dotenv.htmls">dotenv</a> - .env.dist, .env, .env.example</p></li>
+<li><p><a class="reference external" href="http://docs.drone.io/">drone</a> - .dockerignore, .docker</p></li>
+<li><p><a class="reference external" href="https://www.drupal.org/project/drupalci">drupalci</a> - drupalci.yml</p></li>
+<li><p><a class="reference external" href="https://www.drupal.org/project/drupalci">drush</a> - drush.services.yml</p></li>
+<li><p><a class="reference external" href="https://editorconfig.org/">editorconfig</a> - .editorconfig</p></li>
+<li><p><a class="reference external" href="http://eslint.org/">eslint</a> - .eslintrc, .eslintignore, eslintrc.js, .eslintrc.js, .eslintrc.json</p></li>
+<li><p><a class="reference external" href="https://www.exakat.io/">Exakat</a> - .exakat.yaml, .exakat.yml, .exakat.ini</p></li>
+<li><p><a class="reference external" href="https://flintci.io/">flintci</a> - .flintci.yml</p></li>
+<li><p><a class="reference external" href="https://git-scm.com/">git</a> - .git, .gitignore, .gitattributes, .gitmodules, .mailmap, .githooks</p></li>
+<li><p><a class="reference external" href="https://www.github.com/">github</a> - .github</p></li>
+<li><p><a class="reference external" href="https://www.gitlab.com/">gitlab</a> - .gitlab-ci.yml</p></li>
+<li><p><a class="reference external" href="http://gulpjs.com/">gulpfile</a> - gulpfile.js</p></li>
+<li><p><a class="reference external" href="https://github.com/phpro/grumphp">grumphp</a> - grumphp.yml.dist, grumphp.yml</p></li>
+<li><p><a class="reference external" href="https://github.com/gushphp/gush">gush</a> - .gush.yml</p></li>
+<li><p><a class="reference external" href="https://gruntjs.com/">gruntjs</a> - Gruntfile.js</p></li>
+<li><p><a class="reference external" href="https://github.com/humbug/box.git">humbug</a> - humbug.json.dist, humbug.json</p></li>
+<li><p><a class="reference external" href="https://infection.github.io/">infection</a> - infection.yml, .infection.yml, infection.json.dist</p></li>
+<li><p><a class="reference external" href="https://insight.sensiolabs.com/">insight</a> - .sensiolabs.yml</p></li>
+<li><p><a class="reference external" href="https://www.jetbrains.com/phpstorm/">jetbrains</a> - .idea</p></li>
+<li><p><a class="reference external" href="http://jshint.com/">jshint</a> - .jshintrc, .jshintignore</p></li>
+<li><p><a class="reference external" href="https://www.mercurial-scm.org/">mercurial</a> - .hg, .hgtags, .hgignore, .hgeol</p></li>
+<li><p><a class="reference external" href="http://www.mkdocs.org">mkdocs</a> - mkdocs.yml</p></li>
+<li><p><a class="reference external" href="https://www.npmjs.com/">npm</a> - package.json, .npmignore, .npmrc, package-lock.json</p></li>
+<li><p><a class="reference external" href="https://www.openshift.com/">openshift</a> - .openshift</p></li>
+<li><p><a class="reference external" href="https://github.com/etsy/phan">phan</a> - .phan</p></li>
+<li><p><a class="reference external" href="https://github.com/cbednarski/pharcc">pharcc</a> - .pharcc.yml</p></li>
+<li><p><a class="reference external" href="https://phalconphp.com/">phalcon</a> - .phalcon</p></li>
+<li><p><a class="reference external" href="https://github.com/phpbench/phpbench">phpbench</a> - phpbench.json</p></li>
+<li><p><a class="reference external" href="https://www.phptesting.org/">phpci</a> - phpci.yml</p></li>
+<li><p><a class="reference external" href="https://www.phpdoc.org/">Phpdocumentor</a> - .phpdoc.xml, phpdoc.dist.xml</p></li>
+<li><p><a class="reference external" href="https://github.com/theseer/phpdox">phpdox</a> - phpdox.xml.dist, phpdox.xml</p></li>
+<li><p><a class="reference external" href="https://phinx.org/">phinx</a> - phinx.yml</p></li>
+<li><p><a class="reference external" href="https://github.com/mmoreram/php-formatter">phpformatter</a> - .formatter.yml</p></li>
+<li><p><a class="reference external" href="http://www.phpmetrics.org/">phpmetrics</a> - .phpmetrics.yml.dist</p></li>
+<li><p><a class="reference external" href="https://github.com/ovr/phpsa">phpsa</a> - .phpsa.yml</p></li>
+<li><p><a class="reference external" href="http://www.phpspec.net/en/latest/">phpspec</a> - phpspec.yml, .phpspec, phpspec.yml.dist</p></li>
+<li><p><a class="reference external" href="https://github.com/phpstan">phpstan</a> - phpstan.neon, .phpstan.neon, phpstan.neon.dist</p></li>
+<li><p><a class="reference external" href="https://github.com/jubianchi/phpswitch">phpswitch</a> - .phpswitch.yml</p></li>
+<li><p><a class="reference external" href="https://www.phpunit.de/">PHPUnit</a> - phpunit.xml.dist, phpunit.xml</p></li>
+<li><p><a class="reference external" href="https://prettier.io/">prettier</a> - .prettierrc, .prettierignore</p></li>
+<li><p><a class="reference external" href="https://getpsalm.org/">psalm</a> - psalm.xml</p></li>
+<li><p><a class="reference external" href="https://puppet.com/">puppet</a> - .puppet</p></li>
+<li><p><a class="reference external" href="https://github.com/liip/RMT">rmt</a> - .rmt.yml</p></li>
+<li><p><a class="reference external" href="https://robo.li/">robo</a> - RoboFile.php</p></li>
+<li><p><a class="reference external" href="https://scrutinizer-ci.com/">scrutinizer</a> - .scrutinizer.yml</p></li>
+<li><p><a class="reference external" href="http://semver.org/">semantic versioning</a> - .semver</p></li>
+<li><p><a class="reference external" href="https://www.spip.net/">SPIP</a> - paquet.xml</p></li>
+<li><p><a class="reference external" href="https://stickler-ci.com/docs">stickler</a> - .stickler.yml</p></li>
+<li><p><a class="reference external" href="https://datasift.github.io/storyplayer/">storyplayer</a> - storyplayer.json.dist</p></li>
+<li><p><a class="reference external" href="https://styleci.io/">styleci</a> - .styleci.yml</p></li>
+<li><p><a class="reference external" href="https://stylelint.io/">stylelint</a> - .stylelintrc</p></li>
+<li><p><a class="reference external" href="http://www.sublimelinter.com/en/latest/">sublimelinter</a> - .csslintrc</p></li>
+<li><p><a class="reference external" href="https://subversion.apache.org/">svn</a> - svn.revision, .svn, .svnignore</p></li>
+<li><p><a class="reference external" href="https://www.transifex.com/">transifex</a> - .tx</p></li>
+<li><p><a class="reference external" href="http://www.robotstxt.org/">Robots.txt</a> - robots.txt</p></li>
+<li><p><a class="reference external" href="https://travis-ci.org/">travis</a> - .travis.yml, .env.travis, .travis, .travis.php.ini, .travis.coverage.sh, .travis.ini</p></li>
+<li><p><a class="reference external" href="https://var.ci/">varci</a> - .varci, .varci.yml</p></li>
+<li><p><a class="reference external" href="https://www.vagrantup.com/">Vagrant</a> - Vagrantfile</p></li>
+<li><p><a class="reference external" href="https://code.visualstudio.com/">visualstudio</a> - .vscode</p></li>
+<li><p><a class="reference external" href="https://webpack.js.org/">webpack</a> - webpack.mix.js, webpack.config.js</p></li>
+<li><p><a class="reference external" href="https://yarnpkg.com/lang/en/">yarn</a> - yarn.lock</p></li>
+<li><p><a class="reference external" href="https://framework.zend.com/">Zend_Tool</a> - zfproject.xml</p></li>
+</ul>
+</div>
+<div class="section" id="supported-php-extensions">
+<h2>Supported PHP Extensions<a class="headerlink" href="#supported-php-extensions" title="Permalink to this headline">¶</a></h2>
+<p>PHP extensions are used to check for structures usage (classes, interfaces, etc.), to identify dependencies and directives.</p>
+<p>PHP extensions are described with the list of structures they define : functions, classes, constants, traits, variables, interfaces, namespaces, and directives.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/alanxz/rabbitmq-c">ext/amqp</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.apache.php">ext/apache</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/apc">ext/apc</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.apcu.php">ext/apcu</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.array.php">ext/array</a></p></li>
+<li><p><a class="reference external" href="https://pecl.php.net/package/ast">ext/php-ast</a></p></li>
+<li><p><a class="reference external" href="https://github.com/concurrent-php/ext-async">ext/async</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/bcmath">ext/bcmath</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/bzip2">ext/bzip2</a></p></li>
+<li><p><a class="reference external" href="https://cairographics.org/">ext/cairo</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/ref.calendar.php">ext/calendar</a></p></li>
+<li><p><a class="reference external" href="https://github.com/commonmark/cmark">ext/cmark</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.com.php">ext/com</a></p></li>
+<li><p><a class="reference external" href="https://pecl.php.net/package/crypto">ext/crypto</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.csprng.php">ext/csprng</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/ref.ctype.php">ext/ctype</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.curl.php">ext/curl</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.cyrus.php">ext/cyrus</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.datetime.php">ext/date</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.ibm-db2.php">ext/db2</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.dba.php">ext/dba</a></p></li>
+<li><p><a class="reference external" href="http://php-decimal.io">ext/decimal</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/refs.fileprocess.file.php">ext/dio</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.dom.php">ext/dom</a></p></li>
+<li><p><a class="reference external" href="http://docs.php.net/manual/en/book.ds.php">ext/ds</a></p></li>
+<li><p><a class="reference external" href="http://eaccelerator.net/">ext/eaccelerator</a></p></li>
+<li><p><a class="reference external" href="http://software.schmorp.de/pkg/libeio.html">ext/eio</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.enchant.php">ext/enchant</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/function.ereg.php">ext/ereg</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.ev.php">ext/ev</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/event">ext/event</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.exif.php">ext/exif</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.expect.php">ext/expect</a></p></li>
+<li><p><a class="reference external" href="http://oss.sgi.com/projects/fam/">ext/fam</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.fann.php">ext/fann</a></p></li>
+<li><p><a class="reference external" href="http://www.adobe.com/devnet/acrobat/fdftoolkit.html">ext/fdf</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.ffi.php">ext/ffi</a></p></li>
+<li><p><a class="reference external" href="http://ffmpeg-php.sourceforge.net/">ext/ffmpeg</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.filesystem.php">ext/file</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.fileinfo.php">ext/fileinfo</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.filter.php">ext/filter</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/fpm">ext/fpm</a></p></li>
+<li><p><a class="reference external" href="http://www.faqs.org/rfcs/rfc959">ext/ftp</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.image.php">ext/gd</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.gearman.php">ext/gearman</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.gender.php">ext/gender</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.geoip.php">ext/geoip</a></p></li>
+<li><p><a class="reference external" href="https://www.gnu.org/software/gettext/manual/gettext.html">ext/gettext</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.gmagick.php">ext/gmagick</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.gmp.php">ext/gmp</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.gnupg.php">ext/gnupgp</a></p></li>
+<li><p><a class="reference external" href="http://www.grpc.io/">ext/grpc</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.hash.php">ext/hash</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/intro.hrtime.php">ext/hrtime</a></p></li>
+<li><p><a class="reference external" href="https://github.com/m6w6/ext-http">ext/pecl_http</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.ibase.php">ext/ibase</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/iconv">ext/iconv</a></p></li>
+<li><p><a class="reference external" href="https://github.com/igbinary/igbinary/">ext/igbinary</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.iisfunc.php">ext/iis</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.imagick.php">ext/imagick</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/imap">ext/imap</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.info.php">ext/info</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.inotify.php">ext/inotify</a></p></li>
+<li><p><a class="reference external" href="http://site.icu-project.org/">ext/intl</a></p></li>
+<li><p><a class="reference external" href="http://www.faqs.org/rfcs/rfc7159">ext/json</a></p></li>
+<li><p><a class="reference external" href="http://judy.sourceforge.net/">ext/judy</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.kadm5.php">ext/kdm5</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.lapack.php">ext/lapack</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.ldap.php">ext/ldap</a></p></li>
+<li><p><a class="reference external" href="https://github.com/reeze/php-leveldb">ext/leveldb</a></p></li>
+<li><p><a class="reference external" href="http://libevent.org/">ext/libevent</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jedisct1/libsodium-php">ext/libsodium</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.libxml.php">ext/libxml</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.lua.php">ext/lua</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/lzf">ext/lzf</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.mail.php">ext/mail</a></p></li>
+<li><p><a class="reference external" href="http://www.faqs.org/rfcs/rfc822.html">ext/mailparse</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.math.php">ext/math</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.mbstring.php">ext/mbstring</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.mcrypt.php">ext/mcrypt</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.memcache.php">ext/memcache</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.memcached.php">ext/memcached</a></p></li>
+<li><p><a class="reference external" href="http://mhash.sourceforge.net/">ext/mhash</a></p></li>
+<li><p><a class="reference external" href="http://www.libming.org/">ext/ming</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/mongo">ext/mongo</a></p></li>
+<li><p><a class="reference external" href="https://github.com/mongodb/mongo-c-driver">ext/mongodb</a></p></li>
+<li><p><a class="reference external" href="https://github.com/msgpack/msgpack-php">ext/msgpack</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.mssql.php">ext/mssql</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.mysql.php">ext/mysql</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.mysqli.php">ext/mysqli</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.ncurses.php">ext/ncurses</a></p></li>
+<li><p><a class="reference external" href="http://people.redhat.com/rjones/ocaml-newt/html/Newt.html">ext/newt</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/install.unix.sun.php">ext/nsapi</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.outcontrol.php">ext/ob</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.oci8.php">ext/oci8</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.uodbc.php">ext/odbc</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.opcache.php">ext/opcache</a></p></li>
+<li><p><a class="reference external" href="https://github.com/census-instrumentation/opencensus-php">ext/opencensus</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.openssl.php">ext/openssl</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.parle.php">ext/parle</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.parsekit.php">ext/parsekit</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.password.php">ext/password</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.pcntl.php">ext/pcntl</a></p></li>
+<li><p><a class="reference external" href="https://github.com/krakjoe/pcov">ext/pcov</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.pcre.php">ext/pcre</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.pdo.php">ext/pdo</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.pgsql.php">ext/pgsql</a></p></li>
+<li><p><a class="reference external" href="https://docs.phalconphp.com/en/latest/reference/tutorial.html">ext/phalcon</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.phar.php">ext/phar</a></p></li>
+<li><p><a class="reference external" href="https://standards.ieee.org/findstds/standard/1003.1-2008.html">ext/posix</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.proctitle.php">ext/proctitle</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.pspell.php">ext/pspell</a></p></li>
+<li><p><a class="reference external" href="https://www.php-fig.org/psr/psr-3">ext/psr</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.rar.php">ext/rar</a></p></li>
+<li><p><a class="reference external" href="https://github.com/arnaud-lb/php-rdkafka">ext/rdkafka</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.readline.php">ext/readline</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.recode.php">ext/recode</a></p></li>
+<li><p><a class="reference external" href="https://github.com/phpredis/phpredis/">ext/redis</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.reflection.php">ext/reflection</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.runkit.php">ext/runkit</a></p></li>
+<li><p><a class="reference external" href="https://github.com/Ponup/phpsdl">ext/sdl</a></p></li>
+<li><p><a class="reference external" href="https://github.com/SeasX/SeasLog">ext/seaslog</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.sem.php">ext/sem</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.session.php">ext/session</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.sem.php">ext/shmop</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.simplexml.php">ext/simplexml</a></p></li>
+<li><p><a class="reference external" href="http://www.net-snmp.org/">ext/snmp</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.soap.php">ext/soap</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.sockets.php">ext/sockets</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.sphinx.php">ext/sphinx</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.spl.php">ext/spl</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.sqlite.php">ext/sqlite</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.sqlite3.php">ext/sqlite3</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/sqlsrv">ext/sqlsrv</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.ssh2.php">ext/ssh2</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/ref.info.php">ext/standard</a></p></li>
+<li><p><a class="reference external" href="https://people.sc.fsu.edu/~jburkardt/c_src/cdflib/cdflib.html">ext/stats</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/ref.strings.php">String</a></p></li>
+<li><p><a class="reference external" href="https://suhosin.org/">ext/suhosin</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/svm">ext/svm</a></p></li>
+<li><p><a class="reference external" href="https://www.swoole.com/">ext/swoole</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.tidy.php">ext/tidy</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/tokenizer">ext/tokenizer</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.tokyo-tyrant.php">ext/tokyotyrant</a></p></li>
+<li><p><a class="reference external" href="https://pecl.php.net/package/trader">ext/trader</a></p></li>
+<li><p><a class="reference external" href="https://pecl.php.net/package/uopz">ext/uopz</a></p></li>
+<li><p><a class="reference external" href="https://linux.die.net/man/3/libuuid">ext/uuid</a></p></li>
+<li><p><a class="reference external" href="https://bugs.chromium.org/p/v8/issues/list">ext/v8js</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.varnish.php">ext/varnish</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jcupitt/php-vips-ext">ext/vips</a></p></li>
+<li><p><a class="reference external" href="https://github.com/Hywan/php-ext-wasm">ext/wasm</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/intro.wddx.php">ext/wddx</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.weakref.php">ext/weakref</a></p></li>
+<li><p><a class="reference external" href="https://www.mediawiki.org/wiki/Extension:Wikidiff2">ext/wikidiff2</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/wincache">ext/wincache</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.xattr.php">ext/xattr</a></p></li>
+<li><p><a class="reference external" href="https://xcache.lighttpd.net/">ext/xcache</a></p></li>
+<li><p><a class="reference external" href="https://xdebug.org/">ext/xdebug</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.xdiff.php">ext/xdiff</a></p></li>
+<li><p><a class="reference external" href="http://web.archive.org/web/20110514095512/http://mirror.facebook.net/facebook/xhprof/doc.html">ext/xhprof</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.xml.php">ext/xml</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.xmlreader.php">ext/xmlreader</a></p></li>
+<li><p><a class="reference external" href="http://www.php.net/manual/en/book.xmlrpc.php">ext/xmlrpc</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.xmlwriter.php">ext/xmlwriter</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/intro.xsl.php">ext/xsl</a></p></li>
+<li><p><a class="reference external" href="https://pecl.php.net/package/xxtea">ext/xxtea</a></p></li>
+<li><p><a class="reference external" href="http://www.yaml.org/">ext/yaml</a></p></li>
+<li><p><a class="reference external" href="http://www.tldp.org/HOWTO/NIS-HOWTO/index.html">ext/yis</a></p></li>
+<li><p><a class="reference external" href="https://github.com/mkoppanen/php-zbarcode">ext/zbarcode</a></p></li>
+<li><p><a class="reference external" href="http://files.zend.com/help/Zend-Server/content/zendserverapi/zend_monitor-php_api.htm">ext/zend_monitor</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.zip.php">ext/zip</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/manual/en/book.zlib.php">ext/zlib</a></p></li>
+<li><p><a class="reference external" href="http://zeromq.org/">ext/0mq</a></p></li>
+<li><p><a class="reference external" href="https://www.php.net/zookeeper">ext/zookeeper</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Configuration.html" class="btn btn-neutral float-right" title="Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="PHPversion.html" class="btn btn-neutral float-left" title="PHP Version" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015-2020, Damien Seguy.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

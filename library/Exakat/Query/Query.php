@@ -230,7 +230,7 @@ class Query {
 
         $sack = self::SACK;
 
-        $this->query = "g{$sack}.V()".$commands;
+        $this->query = "g{$sack}.V()" . $commands;
     }
 
     public function printRawQuery(): void {

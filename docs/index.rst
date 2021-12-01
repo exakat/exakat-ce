@@ -9,24 +9,58 @@ Welcome to Exakat's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
-   :numbered:
+   :maxdepth: 1
 
    Introduction
-   Features
-   Installation
-   Upgrading
-   Tutorial
+   Changelog
+   
+.. toctree::
+   :maxdepth: 1
+   :caption: GETTING STARTED
+
+   Gettingstarted/Bare
+   Gettingstarted/Docker   
+   
+.. toctree::
+   :maxdepth: 1
+   :caption: USER GUIDE   
+   
+   User/Overview
+   User/PHPversion
+   User/Support
+   User/Configuration  
+   User/Scoping
+   User/Rule
+   User/Report
+   User/Cobbler
+
+
+   
+.. toctree::
+   :maxdepth: 1
+   :numbered:
+   :caption: REFERENCE GUIDE
+   
+   Reference/Rules
+   Reference/Rulesets
+   Reference/Reports
+   Reference/Cobblers
+   Reference/Cases
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: ADMINISTRATOR GUIDE
+   
+   Administrator/Installation
+   Administrator/Upgrading
+   Administrator/Configuration
+   Administrator/Commands
+   
+.. toctree::
+   :maxdepth: 1
+   :caption: OTHERS   
+
    FAQ
-   Commands
-   Rulesets
-   Rules
-   Cases
-   Reports
-   Configuration
-   Development
-   Glossary
    Definitions
-   Contribute
-   Contributors
    Annex

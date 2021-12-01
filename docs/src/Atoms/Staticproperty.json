@@ -1,7 +1,0 @@
-{
-    "name": "Staticproperty",
-    "description": "A static property syntax. For example, `A::$b` or `self::$d`.",
-    "url": [
-        ""
-    ]
-}

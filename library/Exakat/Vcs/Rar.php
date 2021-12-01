@@ -32,7 +32,7 @@ class Rar extends Vcs {
     }
 
     protected function selfCheck() {
-        $res = shell_exec("{$this->executable} 2>&1");
+        $res = $this->shell("{$this->executable} 2>&1");
         if (strpos($res, 'UNRAR') === false) {
             throw new HelperException('rar');
         }
@@ -49,7 +49,7 @@ class Rar extends Vcs {
         $archiveFile = tempnam(sys_get_temp_dir(), 'archiveRar') . '.rar';
         file_put_contents($archiveFile, $binary);
 
-        shell_exec("{$this->executable} x $archiveFile {$this->destinationFull}");
+        $this->shell("{$this->executable} x $archiveFile {$this->destinationFull}");
 
         unlink($archiveFile);
     }
@@ -57,7 +57,7 @@ class Rar extends Vcs {
     public function getInstallationInfo() {
         $stats = array();
 
-        $res = shell_exec("{$this->executable} 2>&1") ?? '';
+        $res = $this->shell("{$this->executable} 2>&1");
         if (stripos($res, 'not found') !== false) {
             $stats['installed'] = 'No';
         } elseif (preg_match('/UNRAR\s+([0-9\.]+)/is', $res, $r)) {

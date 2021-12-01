@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Configuration &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Commands" href="Commands.html" />
+    <link rel="prev" title="Upgrading" href="Upgrading.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../User/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Support.html">Library &amp; Framework Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Cobbler.html">Cobbler</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rules.html">1. Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rulesets.html">2. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#common-behavior">Common Behavior</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-philosophy">General Philosophy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reminder-of-precedences">Reminder of precedences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-options">Common Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#engine-configuration">Engine configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-file">Configuration File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-options">Available Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-rulesets">Custom rulesets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#check-install">Check Install</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Annex.html">Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Configuration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Administrator/Configuration.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="configuration">
+<span id="administrator-configuration"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="common-behavior">
+<h2>Common Behavior<a class="headerlink" href="#common-behavior" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="general-philosophy">
+<h3>General Philosophy<a class="headerlink" href="#general-philosophy" title="Permalink to this headline">¶</a></h3>
+<p>Exakat tries to avoid configuration as much as possible, so as to focus on working out of the box, rather than spend time on pre-requisite.</p>
+<p>As such, it probably does more work, but that may be dismissed later, at reading time.</p>
+<p>More configuration options appear with the evolution of the engine.</p>
+</div>
+<div class="section" id="reminder-of-precedences">
+<h3>Reminder of precedences<a class="headerlink" href="#reminder-of-precedences" title="Permalink to this headline">¶</a></h3>
+<p>The exakat engine read directives from three places :</p>
+<ol class="arabic simple">
+<li><p>The command line options</p></li>
+<li><p>The .exakat.ini file at the root of the code</p></li>
+<li><p>The config.ini file in the project directory</p></li>
+<li><p>The exakat.ini file in the config directory</p></li>
+<li><p>The default values in the code</p></li>
+</ol>
+<p>The precedence of the directives is the same as the list above : command line options always have highest priority, config.ini files are in second, when command line are not available, and finally, the default values are read in the code.</p>
+<p>Some of the directives are only available in the config.ini files.</p>
+</div>
+<div class="section" id="common-options">
+<h3>Common Options<a class="headerlink" href="#common-options" title="Permalink to this headline">¶</a></h3>
+<p>All options are the same, whatever the command provided to exakat. -f always means files, and -q always means quick.</p>
+<p>Any option that a command doesn’t understand is ignored.</p>
+<p>Any option that is not recognized is ignored and reported (with visibility).</p>
+</div>
+</div>
+<div class="section" id="engine-configuration">
+<h2>Engine configuration<a class="headerlink" href="#engine-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Engine configuration is were the exakat engine general configuration are stored. For example, the php binaries or the neo4j folder are there. Engine configurations affect all projects.</p>
+<div class="section" id="configuration-file">
+<h3>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this headline">¶</a></h3>
+<p>The Exakat engine is configured in the ‘config/exakat.ini’ file.</p>
+<p>This file is created with the ‘doctor’ command, or simply by copying another such file from another installation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">doctor</span>
+</pre></div>
+</div>
+<p>When the doctor can’t find the ‘config/config.ini’ file, it attempts to create one, with reasonable values. It is recommended to use this to create the exakat.ini skeleton, and later, modify it.</p>
+</div>
+<div class="section" id="available-options">
+<h3>Available Options<a class="headerlink" href="#available-options" title="Permalink to this headline">¶</a></h3>
+<p>Here are the currently available options in Exakat’s configuration file : config/config.ini</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 81%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>graphdb</p></td>
+<td><p>The graph database to use.
+Currently, it may be gsneo4j, or tinkergraph.</p></td>
+</tr>
+<tr class="row-odd"><td><p>gsneo4j_host</p></td>
+<td><p>The host to connect to reach the graph database, when using gsneo4j driver.
+The default value is ‘localhost’</p></td>
+</tr>
+<tr class="row-even"><td><p>gsneo4j_host</p></td>
+<td><p>The port to use on the host to reach the graph database, when using gsneo4j driver..
+The default value is ‘8182’</p></td>
+</tr>
+<tr class="row-odd"><td><p>gsneo4j_folder</p></td>
+<td><p>The folder where the code for the graph database resides, when using gsneo4j driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
+</tr>
+<tr class="row-even"><td><p>tinkergraph_host</p></td>
+<td><p>The host to connect to reach the graph database, when using tinkergraph driver.
+The default value is ‘localhost’</p></td>
+</tr>
+<tr class="row-odd"><td><p>tinkergraph_port</p></td>
+<td><p>The port to use on the host to reach the graph database, when using tinkergraph driver.
+The default value is ‘8182’</p></td>
+</tr>
+<tr class="row-even"><td><p>tinkergraph_folder</p></td>
+<td><p>The folder where the code for the graph database resides, when using tinkergraph driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
+</tr>
+<tr class="row-odd"><td><p>gsneo4jv3_host</p></td>
+<td><p>The host to connect to reach the graph database, when using gsneo4j driver.
+The default value is ‘localhost’</p></td>
+</tr>
+<tr class="row-even"><td><p>gsneo4jve_host</p></td>
+<td><p>The port to use on the host to reach the graph database, when using gsneo4j driver..
+The default value is ‘8182’</p></td>
+</tr>
+<tr class="row-odd"><td><p>gsneo4jv3_folder</p></td>
+<td><p>The folder where the code for the graph database resides, when using gsneo4j driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
+</tr>
+<tr class="row-even"><td><p>tinkergraphv3_host</p></td>
+<td><p>The host to connect to reach the graph database, when using tinkergraph driver.
+The default value is ‘localhost’</p></td>
+</tr>
+<tr class="row-odd"><td><p>tinkergraphv3_port</p></td>
+<td><p>The port to use on the host to reach the graph database, when using tinkergraph driver.
+The default value is ‘8182’</p></td>
+</tr>
+<tr class="row-even"><td><p>tinkergraphv3_folder</p></td>
+<td><p>The folder where the code for the graph database resides, when using tinkergraph driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
+</tr>
+<tr class="row-odd"><td><p>project_rulesets</p></td>
+<td><p>List of analysis rulesets to be run. The list may include extra rulesets that are not
+used by the default reports : you can then summon them manually.
+project_themes[] = ‘Theme’, one per line.</p></td>
+</tr>
+<tr class="row-even"><td><p>project_themes</p></td>
+<td><p>Obsolete. Use the one above : project_rulesets</p></td>
+</tr>
+<tr class="row-odd"><td><p>project_reports</p></td>
+<td><p>The list of reports that can be produced when running ‘project’ command.
+This list may automatically add extra rulesets if a report requires them. For example,
+the ‘Ambassador’ report requires ‘Security’ ruleset, while ‘Text’ has no pre-requisite.
+project_reports is ‘Ambassador’, by default.
+project_reports[] = ‘Report’, one per line.</p></td>
+</tr>
+<tr class="row-even"><td><p>token_limit</p></td>
+<td><p>Maximum size of the analyzed project, in number of PHP tokens (excluding whitespace).
+Use this to avoid running a really long analyze without knowing it.
+Default is 1 million.</p></td>
+</tr>
+<tr class="row-odd"><td><p>php</p></td>
+<td><p>Link to the PHP binary. This binary is the one that runs Exakat. It is recommended to use
+PHP 7.3, or 7.4. The same binary may be used with the following options.</p></td>
+</tr>
+<tr class="row-even"><td><p>php82</p></td>
+<td><p>Path to the PHP 8.2.x binary. This binary is needed to test the compilation with the 8.2
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-odd"><td><p>php81</p></td>
+<td><p>Path to the PHP 8.1.x binary. This binary is needed to test the compilation with the 8.1
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-even"><td><p>php80</p></td>
+<td><p>Path to the PHP 8.0.x binary. This binary is needed to test the compilation with the 8.0
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-odd"><td><p>php74</p></td>
+<td><p>Path to the PHP 7.4.x binary. This binary is needed to test the compilation with the 7.4
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-even"><td><p>php73</p></td>
+<td><p>Path to the PHP 7.3.x binary. This binary is needed to test the compilation with the 7.3
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-odd"><td><p>php72</p></td>
+<td><p>Path to the PHP 7.2.x binary. This binary is needed to test the compilation with the 7.2
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-even"><td><p>php71</p></td>
+<td><p>Path to the PHP 7.1.x binary. This binary is needed to test the compilation with the 7.1
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-odd"><td><p>php70</p></td>
+<td><p>Path to the PHP 7.0.x binary. This binary is needed to test the compilation with the 7.0
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-even"><td><p>php56</p></td>
+<td><p>Path to the PHP 5.6.x binary. This binary is needed to test the compilation with the 5.6
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-odd"><td><p>php55</p></td>
+<td><p>Path to the PHP 5.5.x binary. This binary is needed to test the compilation with the 5.5
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-even"><td><p>php54</p></td>
+<td><p>Path to the PHP 5.4.x binary. This binary is needed to test the compilation with the 5.4
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-odd"><td><p>php53</p></td>
+<td><p>Path to the PHP 5.3.x binary. This binary is needed to test the compilation with the 5.3
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-even"><td><p>php52</p></td>
+<td><p>Path to the PHP 5.2.x binary. This binary is needed to test the compilation with the 5.2
+series or if the analyze should be run with this version (see project’s config.ini).
+Comment it out if you don’t want this version tested. It is not recommended to use this
+version for the analyze</p></td>
+</tr>
+<tr class="row-odd"><td><p>php_extensions</p></td>
+<td><p>List of PHP extensions to use when spotting functions, methods, constants, classes, etc.
+Default to ‘all’, which are all in the source code
+Can be set to ‘none’ to skip the detection</p></td>
+</tr>
+</tbody>
+</table>
+<p>Note : php** configuration may be either a valid PHP binary path, or a valid Docker image. The path on the system may be <cite>/usr/bin/php</cite>, <cite>/usr/sbin/php80</cite>, or <cite>/usr/local/Cellar/php71/7.1.30/bin/php</cite>. The Docker configuration must have the form <cite>abc/def:tag</cite>. The image’s name may be any value, as long as Exakat manage to run it, and get the valid PHP signature, with <cite>php -v</cite>. When using Docker, the docker server must be running.</p>
+</div>
+<div class="section" id="custom-rulesets">
+<h3>Custom rulesets<a class="headerlink" href="#custom-rulesets" title="Permalink to this headline">¶</a></h3>
+<p>Create custom rulesets by creating a ‘config/rulesets.ini’ directive files.</p>
+<p>This file is a .INI file, build with multiple sections. Each section is the name of a ruleset : for example, ‘mine’ is the name for the ruleset below.</p>
+<p>There may be several sections, as long as the names are distinct.</p>
+<p>It is recommended to use all low-case names for custom rulesets. Exakat uses names with a first capital letter, which prevents conflicts. Behavior is undefined if a custom ruleset has the same name as a default ruleset.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;mine&#39;</span><span class="p">]</span>
+<span class="n">analyzer</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Structures/AddZero&#39;</span><span class="p">;</span>
+<span class="n">analyzer</span><span class="p">[]</span> <span class="o">=</span> <span class="s1">&#39;Performances/ArrayMergeInLoops&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The list of analyzer in the ruleset is based on the ‘analyzer’ array. The analyzer is identified by its ‘shortname’. Analyzer shortname may be found in the documentation (<a class="reference internal" href="../Reference/Rules.html#rules"><span class="std std-ref">Rules</span></a> or within the Ambassador report). Analyzers names have a ‘A/B’ structure.</p>
+<p>The list of available rulesets, including the custom ones, is listed with the <cite>doctor</cite> command.</p>
+</div>
+</div>
+<div class="section" id="check-install">
+<h2>Check Install<a class="headerlink" href="#check-install" title="Permalink to this headline">¶</a></h2>
+<p>Once the prerequisite are installed, it is advised to run to check if all is found :</p>
+<p><cite>php exakat.phar doctor</cite></p>
+<p>After this run, you may edit ‘config/config.ini’ to change some of the default values. Most of the time, the default values will be OK for a quick start.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Commands.html" class="btn btn-neutral float-right" title="Commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Upgrading.html" class="btn btn-neutral float-left" title="Upgrading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015-2020, Damien Seguy.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

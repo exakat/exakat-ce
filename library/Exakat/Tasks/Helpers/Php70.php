@@ -159,7 +159,6 @@ class Php70 extends Php {
     public const T_NS_SEPARATOR                  = 390;
     public const T_ELLIPSIS                      = 391;
     public const T_DOUBLE_COLON                  = 387;
-
     public const T_COALESCE_EQUAL                = 1000;
     public const T_FN                            = 1000;
     public const T_BAD_CHARACTER                 = 1000;
@@ -170,5 +169,9 @@ class Php70 extends Php {
     public const T_NULLSAFE_OBJECT_OPERATOR      = 1000;
     public const T_MATCH                         = 1000;
     public const T_ATTRIBUTE                     = 1000;
+    public const T_ENUM                                             = 1000;
+    public const T_READONLY                                         = 1000;
+    public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = 1000;
+    public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 1000;
 }
 ?>

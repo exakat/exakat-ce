@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 /*
  * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.

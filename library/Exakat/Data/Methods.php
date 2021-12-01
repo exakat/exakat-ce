@@ -32,6 +32,9 @@ class Methods {
     public const STRICT = true;
     public const LOOSE  = false;
 
+    public const INVERSE  = false;
+    public const DIRECT   = true;
+
     private const ARGS_COL = array('arg0', 'arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6', 'arg7', 'arg8', 'arg9', 'arg10', 'arg11');
 
     public function __construct(Config $config) {
@@ -180,6 +183,69 @@ WHERE methods.class = "PHP" AND
         return $return;
     }
 
+    public function getNativeMethodArgType(): array {
+        $return = array();
+
+            $query = <<<'SQL'
+SELECT lower(class) as class, lower(name) AS name, arg0, arg1 FROM args_type WHERE class != 'PHP' AND arg0 != ''
+SQL;
+        $res = $this->sqlite->query($query);
+
+        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+            if (!isset($return['\\' . $row['class']])) {
+                $return['\\' . $row['class']] = array();
+            }
+
+            foreach(range(0, 11) as $i) {
+                if (empty($row['arg' . $i])) {
+                    continue;
+                }
+
+                $types = explode(',', $row['arg' . $i]);
+                foreach($types as &$type) {
+                    if ($type[0] !== '\\') {
+                        $type = '\\' . $type;
+                    }
+                }
+                unset($type);
+                $return['\\' . $row['class']][$row['name']][$i] = $types;
+            }
+        }
+
+        return $return;
+    }
+
+    public function getNativeMethodReturn(): array {
+        $return = array();
+
+        $query = <<<'SQL'
+SELECT lower(class) AS class, 
+       lower(name) AS name, 
+       return 
+       FROM args_type 
+       WHERE class != 'PHP' AND 
+             return != ''
+SQL;
+        $res = $this->sqlite->query($query);
+
+        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+            if (!isset($return['\\' . $row['class']])) {
+                $return['\\' . $row['class']] = array();
+            }
+
+            $types = explode(',', $row['return']);
+            foreach($types as &$type) {
+                if ($type[0] !== '\\') {
+                    $type = '\\' . $type;
+                }
+            }
+            unset($type);
+            $return['\\' . $row['class']][$row['name']] = $types;
+       }
+
+        return $return;
+    }
+
     public function getInternalParameterType(): array {
         $return = array();
 
@@ -196,6 +262,23 @@ SQL;
             }
 
             $return[$id] = $position;
+        }
+
+        return $return;
+    }
+
+    public function getInternalParameterNames(array $function): array {
+        $return = array();
+
+        $list = makeList($function);
+        $query = <<<SQL
+SELECT name, arg0, arg1, arg2, arg3, arg4, arg5, arg5, arg6, arg7, arg8, arg9, arg10, arg11 FROM args_names WHERE class='PHP' AND name in ($list);
+SQL;
+        $res = $this->sqlite->query($query);
+
+        $return = array();
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+            $return['\\' . $row['name']] = $row;
         }
 
         return $return;
@@ -301,6 +384,43 @@ SQL;
         }
 
         $return = array_merge(...$return);
+
+        return $return;
+    }
+
+    public function getArgsByType(string $type = 'int', bool $not = self::DIRECT): array {
+        $return = array_fill(0, 12, array());
+
+        $not = $not === self::DIRECT ? '' : ' NOT ';
+
+        $query = <<<SQL
+SELECT CASE WHEN arg0  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg0 ,
+       CASE WHEN arg1  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg1 ,
+       CASE WHEN arg2  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg2 ,
+       CASE WHEN arg3  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg3 ,
+       CASE WHEN arg4  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg4 ,
+       CASE WHEN arg5  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg5 ,
+       CASE WHEN arg6  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg6 ,
+       CASE WHEN arg7  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg7 ,
+       CASE WHEN arg8  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg8 ,
+       CASE WHEN arg9  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg9 ,
+       CASE WHEN arg10 $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg10,
+       CASE WHEN arg11 $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg11,
+       CASE WHEN class = 'PHP' THEN lower('\' || name) ELSE lower('\' || class || '::' || name) END AS function
+    FROM args_type
+SQL;
+        $res = $this->sqlite->query($query);
+
+        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+            $function = $row['function'];
+            unset($row['function']);
+            foreach($row as $arg => $typed) {
+                $arg = $arg[3];
+                if (!empty($typed)) {
+                    $return[$arg][] = $function;
+                }
+            }
+        }
 
         return $return;
     }

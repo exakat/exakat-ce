@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>with a Bare metal installation &mdash; Exakat 1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="with a Docker installation" href="Docker.html" />
+    <link rel="prev" title="Release Note" href="../Changelog.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Exakat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Release Note</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GETTING STARTED</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">with a Bare metal installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bare-metal-install-with-projects-folder">Bare metal install, with projects folder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initialization">Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#execution">Execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#more-reports">More reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-run">New run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bare-metal-install-within-the-code">Bare metal install, within the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">More reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">New run</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Docker.html">with a Docker installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../User/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/PHPversion.html">PHP Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Support.html">Library &amp; Framework Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Scoping.html">Scoping analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Rule.html">Rule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../User/Cobbler.html">Cobbler</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REFERENCE GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rules.html">1. Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Rulesets.html">2. Rulesets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Reports.html">3. Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cobblers.html">4. Cobblers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/Cases.html">5. Real Code Cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ADMINISTRATOR GUIDE</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Administrator/Commands.html">Commands</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">OTHERS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Definitions.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Annex.html">Annex</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Exakat</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>with a Bare metal installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Gettingstarted/Bare.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="with-a-bare-metal-installation">
+<span id="bare"></span><h1>with a Bare metal installation<a class="headerlink" href="#with-a-bare-metal-installation" title="Permalink to this headline">¶</a></h1>
+<p>Here are 2 tutorials to run Exakat on your code. You may install exakat with the <cite>projects</cite> folder, and centralize multiple audits in one place, or run exakat in-code, right from the source code. You may also run exakat on a host machine (aka, bare-metal), or as a docker container.</p>
+<ul class="simple">
+<li><p>Bare metal install</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>with projects folder</p></li>
+<li><p>within the code</p></li>
+</ul>
+</div></blockquote>
+<p>All tutorials follow the same steps :</p>
+<ul class="simple">
+<li><p>Project initialisation</p></li>
+<li><p>Audit run</p></li>
+<li><p>Reports access</p></li>
+</ul>
+<div class="section" id="bare-metal-install-with-projects-folder">
+<h2>Bare metal install, with projects folder<a class="headerlink" href="#bare-metal-install-with-projects-folder" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
+<p>Refer to the <a class="reference internal" href="../Administrator/Installation.html#installation"><span class="std std-ref">Installation</span></a> section in the ADMINISTRATOR GUIDE to install Exakat.</p>
+</div>
+<div class="section" id="initialization">
+<h3>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">¶</a></h3>
+<p>First, fetch the code to be audited. This has to be done once. Later, the code may be updated.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span> <span class="o">-</span><span class="n">R</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sculpin</span><span class="o">/</span><span class="n">sculpin</span>
+</pre></div>
+</div>
+<p>This command inits the project in the ‘projects’ folder, with the name ‘sculpin’, then clone the code with the provided repository. By default, the cloning is done by git.</p>
+<p>Exakat requires a copy of the code to run an audit. When accessing via VCS, such as git, mercurial, svn, etc., read-only access is sufficient and recommended. Exakat doesn’t write anything in the code, nor stage, commit or push.</p>
+<p>More information on options in the _Commands.</p>
+</div>
+<div class="section" id="execution">
+<h3>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h3>
+<p>After initialization, you may run an audit :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span>
+</pre></div>
+</div>
+<p>This command runs the whole auditing cycle : code loading, code audits and report building. It is ready to work with the initial configuration. The configuration may be adapted later.</p>
+<p>Once the run is finished, the reports are place in the folder <cite>projects/sculpin/</cite>. For example, a HTML version is available in <cite>projects/sculpin/report/index.html</cite>. Simply open the ‘projects/sculpin/report/index.html’ file in a browser.</p>
+</div>
+<div class="section" id="more-reports">
+<h3>More reports<a class="headerlink" href="#more-reports" title="Permalink to this headline">¶</a></h3>
+<p>Once the ‘project’ command has been fully run, you may run the ‘report’ command to create different reports. Usually, ‘Diplomat’ has the most complete report, and other focused reports are available.</p>
+<p>It is possible to create the remaining reports, once an audit has been finished. Here is an example of a Uml report.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">report</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span> <span class="o">-</span><span class="nb">format</span> <span class="n">Uml</span> <span class="o">-</span><span class="n">file</span> <span class="n">uml</span>
+</pre></div>
+</div>
+<p>This export the current project in UML format. The file is called ‘uml.dot’ : dot is added by exakat, as the report has to be opened by <a class="reference external" href="http://www.graphviz.org/">graphviz</a> compatible software.</p>
+<p>The full list of available reports are in the <a class="reference internal" href="../Reference/Reports.html#reports"><span class="std std-ref">Reports</span></a> section.</p>
+<p>Once it is finished, the reports are in the folder <cite>projects/sculpin/</cite> under different names.</p>
+</div>
+<div class="section" id="new-run">
+<h3>New run<a class="headerlink" href="#new-run" title="Permalink to this headline">¶</a></h3>
+<p>After adding some modifications in the code, commit them in the repository. Then, run :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">update</span>  <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span>
+<span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="n">sculpin</span>
+</pre></div>
+</div>
+<p>This command updates the repository to the last modification, then runs the whole audit again. If the code is not using a VCS repository, then the update command has no effect on the code. You should update the code manually, by replacing it with a newer version.</p>
+<p>Once the audit is finished, the reports are in the same folders as previously : <cite>projects/sculpin/report</cite> (HTML version).</p>
+<p>The reports replace any previous report. To keep a report of a previous version, move it away from the current location, or give it another name.</p>
+</div>
+</div>
+<div class="section" id="bare-metal-install-within-the-code">
+<h2>Bare metal install, within the code<a class="headerlink" href="#bare-metal-install-within-the-code" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial runs exakat from the source code repository.</p>
+<div class="section" id="id1">
+<h3>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Refer to the <a class="reference internal" href="../Administrator/Installation.html#installation"><span class="std std-ref">Installation</span></a> section in the ADMINISTRATOR GUIDE to install Exakat.</p>
+</div>
+<div class="section" id="id2">
+<h3>Initialization<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Go to the directory that contains the source code.</p>
+<p>Create a configuration file called <cite>.exakat.yml</cite>, with the following content :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span>
+</pre></div>
+</div>
+<p>This is the minimum configuration for that file. It is sufficient for this tutorial, and we will produce more reports later. You will read more about _Configuration in the dedicated section.</p>
+</div>
+<div class="section" id="id3">
+<h3>Execution<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>After creating the configuration file above, an audit may be run :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">project</span>
+</pre></div>
+</div>
+<p>This command runs the whole cycle : code loading, code audits and report building. It works without initial configuration.</p>
+<p>Once it is finished, the reports are in the current folder. Simply open the ‘report/index.html’ file in a browser.</p>
+</div>
+<div class="section" id="id4">
+<h3>More reports<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>When running exakat inside code, audits must be configured before the run of the audit.</p>
+<p>Edit the .exakat.yml file, and update the file with the following lines :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span>
+<span class="n">project_reports</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">Uml</span>
+  <span class="o">-</span> <span class="n">Plantuml</span>
+  <span class="o">-</span> <span class="n">Ambassador</span>
+</pre></div>
+</div>
+<p>Then, run the audit as explained in the previous section.</p>
+<p>This configuration produces 3 reports : “Ambassador”, which is the default report, “Uml”, available in the ‘uml.dot’ file, and “Plantuml”, that may be opened with <a class="reference external" href="http://plantuml.com/">plantuml</a>.</p>
+<p>The full list of available reports are in the ‘Command’ section.</p>
+</div>
+<div class="section" id="id5">
+<h3>New run<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>After some modifications in the code, run again exakat with the same command than the first time. Since the audit is run within the code source, no update operation is needed.</p>
+<p>Check the <cite>config.ini</cite> file before running the audit, to check if all the reports you want are configured.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">project</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Docker.html" class="btn btn-neutral float-right" title="with a Docker installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../Changelog.html" class="btn btn-neutral float-left" title="Release Note" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015-2020, Damien Seguy.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

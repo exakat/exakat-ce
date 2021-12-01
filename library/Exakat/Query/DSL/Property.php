@@ -41,7 +41,7 @@ class Property extends DSL {
             // Default, a string
             return new Command('sideEffect{ it.get().property("' . $property . '", "' . str_replace('$', '\\$', $value) . '"); }', array());
         } else {
-            die("No processing for type ".gettype($value)." in Property DSL.");
+            die('No processing for type ' . gettype($value) . ' in Property DSL.');
         }
     }
 }

@@ -50,7 +50,7 @@ union( __.identity(),
             __.timeLimit($TIME_LIMIT).hasLabel(within(["Variable", "Phpvariable", "Ternary", "Coalesce", "Parenthesis"]))
               .union( 
                  // literal local value
-                  __.hasLabel(within(["Variable", "Phpvariable"])).in("DEFINITION").hasLabel("Variabledefinition").out("DEFAULT"),
+                  __.hasLabel(within(["Variable", "Variablearray", "Variableobject", "Phpvariable"])).in("DEFINITION").hasLabel("Variabledefinition").out("DEFAULT"),
 
                  // literal value, passed as an argument (Method, closure, function)
                   __.hasLabel(within(["Variable", "Phpvariable"])).in("DEFINITION").in("NAME").hasLabel('Parameter').as("p1").in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),

@@ -31,6 +31,8 @@ class DotExakatConfig extends Config {
 
     public function __construct() {
         $this->dotExakat = getcwd() . '/.exakat.ini';
+
+        $this->config['project'] = new Project();
         // also support json?
     }
 
@@ -97,11 +99,8 @@ class DotExakatConfig extends Config {
 
         if (is_string($this->config['file_extensions'])) {
             $this->config['file_extensions'] = listToArray($this->config['file_extensions']);
-            foreach($this->config['file_extensions'] as &$ext) {
-                $ext = trim($ext, '. ');
-            }
-            unset($ext);
         }
+        $this->config['file_extensions'] = $this->cleanFileExtensions($this->config['file_extensions']);
 
         if (is_string($this->config['project_reports'])) {
             $this->config['project_reports'] = listToArray($this->config['project_reports']);

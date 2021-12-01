@@ -226,8 +226,8 @@ class Doctor extends Tasks {
         }
 
         // stubs
-        if (!file_exists($this->config->dir_root.'/stubs')) {
-            mkdir($this->config->dir_root.'/stubs', 0755);
+        if (!file_exists($this->config->dir_root . '/stubs')) {
+            mkdir($this->config->dir_root . '/stubs', 0755);
         }
 
         // projects

@@ -5,7 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   ?= sphinx-build
 #SPHINXBUILD   = /Users/famille/Library/Python/2.7/bin/sphinx-build
-SPHINXBUILD   = /usr/local/bin/sphinx-build 
+SPHINXBUILD   = /opt/homebrew/bin/sphinx-build 
 PAPER         =
 BUILDDIR      = _build
 

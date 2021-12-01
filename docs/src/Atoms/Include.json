@@ -1,7 +1,0 @@
-{
-    "name": "Include",
-    "description": "A inclusion, with `require` or `include`, with `_once` or not.",
-    "url": [
-        ""
-    ]
-}

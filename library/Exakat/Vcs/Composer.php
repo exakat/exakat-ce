@@ -32,7 +32,7 @@ class Composer extends Vcs {
     }
 
     protected function selfCheck() {
-        $res = shell_exec("{$this->executable} --version 2>&1");
+        $res = $this->shell("{$this->executable} --version 2>&1");
         if (strpos($res, 'Composer') === false) {
             throw new HelperException('Composer');
         }
@@ -50,13 +50,13 @@ class Composer extends Vcs {
 
         mkdir($this->destinationFull, 0755);
         file_put_contents("{$this->destinationFull}/composer.json", $json);
-        shell_exec("cd {$this->destinationFull}; {$this->executable} -q install");
+        $this->shell("cd {$this->destinationFull}; {$this->executable} -q install");
     }
 
     public function update() {
         $this->check();
 
-        shell_exec("cd {$this->destinationFull}; {$this->executable} -q update");
+        $this->shell("cd {$this->destinationFull}; {$this->executable} -q update");
 
         $composerPath = "{$this->destinationFull}/composer.json";
         if (!file_exists($composerPath)) {
@@ -89,7 +89,7 @@ class Composer extends Vcs {
     public function getInstallationInfo() {
         $stats = array();
 
-        $res = trim(shell_exec("{$this->executable} -V 2>&1"));
+        $res = trim($this->shell("{$this->executable} -V 2>&1"));
         // remove colors from shell syntax
         $res = preg_replace('/\e\[[\d;]*m/', '', $res);
         if (preg_match('/Composer version ([0-9\.a-z@_\(\)\-]+) /', $res, $r)) {//

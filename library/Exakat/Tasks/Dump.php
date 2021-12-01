@@ -29,7 +29,6 @@ use Exakat\Exceptions\MissingGremlin;
 use Exakat\Exceptions\NoSuchAnalyzer;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\NoSuchRuleset;
-use Exakat\Exceptions\NotProjectInGraph;
 use Exakat\GraphElements;
 use Exakat\Log;
 use Exakat\Query\Query;
@@ -264,13 +263,16 @@ class Dump extends Tasks {
                   ->savePropertyAs('analyzer', 'analyzer')
                   ->outIs('ANALYZED')
                   ->atomIsNot('Noresult')
-                  ->initVariable(array('ligne',                  'fullcode_',                  'file', 'theFunction', 'theClass', 'theNamespace'),
-                                 array('it.get().value("line")', 'it.get().value("fullcode")', '"None"', '""', '""', '""')
-                                )
+                  ->initVariable('ligne',        'it.get().value("line")')
+                  ->initVariable('fullcode_',    'it.get().value("fullcode")')
+                  ->initVariable('file',         '"None"')
+                  ->initVariable('theFunction',  '""')
+                  ->initVariable('theClass',     '""')
+                  ->initVariable('theNamespace', '""')
             ->raw(<<<GREMLIN
 where( __.until( hasLabel("Project") ).repeat( 
     __.in($this->linksDown)
-      .sideEffect{ if (it.get().label() in ["Function", "Closure", "Arrayfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
+      .sideEffect{ if (it.get().label() in ["Function", "Closure", "Arrowfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
       .sideEffect{ if (it.get().label() in ["Class", "Trait", "Interface", "Classanonymous"]) { theClass = it.get().value("fullcode")} }
       .sideEffect{ if (it.get().label() == "Namespace") { theNamespace = it.get().value("fullnspath"); } }
       .sideEffect{ if (it.get().label() == "File") { file = it.get().value("fullcode")} }
@@ -426,7 +428,7 @@ GREMLIN
 .sideEffect{ implementList = []; }.where(__.out("IMPLEMENTS").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ implementList.push( it.get().value("fullnspath"));}.fold() )
 .sideEffect{ useList = []; }.where(__.out("USE").hasLabel("Usetrait").out("USE").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
 .sideEffect{ usesOptions = []; }.where(__.out("USE").hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
-.sideEffect{ lines = [];}.where( __.out("METHOD", "USE", "PPP", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
+.sideEffect{ lines = [it.get().value("line")];}.where( __.out("METHOD", "MAGICMETHOD", "USE", "PPP", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
 .sideEffect{ file = "";}.where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV() ).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 .sideEffect{ phpdoc = ""; }.where(__.out("PHPDOC").sideEffect{ phpdoc = it.get().value("fullcode"); }.fold() )
 .sideEffect{ attributes = []; }.where(__.out("ATTRIBUTE").sideEffect{ attributes.add(it.get().value("fullcode")); }.fold() )
@@ -506,7 +508,7 @@ GREMLIN
         $query->atomIs('Interface', Analyzer::WITHOUT_CONSTANTS)
               ->raw(<<<GREMLIN
  sideEffect{ extendList = ''; }.where(__.out("EXTENDS").sideEffect{ extendList = it.get().value("fullnspath"); }.fold() )
-.sideEffect{ lines = [];}.where( __.out("METHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
+.sideEffect{ lines = [it.get().value("line")];}.where( __.out("METHOD", "MAGICMETHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
 .sideEffect{ file = [];}.where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 .sideEffect{ phpdoc = ''; }.where(__.out("PHPDOC").sideEffect{ phpdoc = it.get().value("fullcode"); }.fold() )
 .sideEffect{ attributes = []; }.where(__.out("ATTRIBUTE").sideEffect{ attributes.add(it.get().value("fullcode")); }.fold() )
@@ -572,7 +574,7 @@ GREMLIN
               ->raw(<<<GREMLIN
  sideEffect{ useList = []; }.where(__.out("USE").hasLabel("Usetrait").out("USE").sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
 .sideEffect{ usesOptions = []; }.where(__.out("USE").hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
-.sideEffect{ lines = [];}.where( __.out("METHOD", "USE", "PPP").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
+.sideEffect{ lines = [it.get().value("line")];}.where( __.out("METHOD", "MAGICMETHOD", "CONST", "USE", "PPP").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
 .sideEffect{ file = "";}.where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 .sideEffect{ phpdoc = ""; }.where(__.out("PHPDOC").sideEffect{ phpdoc = it.get().value("fullcode"); }.fold() )
 .sideEffect{ attributes = []; }.where(__.out("ATTRIBUTE").sideEffect{ attributes.add(it.get().value("fullcode")); }.fold() )
@@ -1203,7 +1205,7 @@ GREMLIN
         $query->atomIs(array('Function', 'Closure', 'Arrowfunction'), Analyzer::WITHOUT_CONSTANTS)
               ->raw(<<<GREMLIN
  sideEffect{ 
-    lines = []; 
+    lines = [it.get().value("line")]; 
     reference = it.get().properties("reference").any(); 
     fullnspath = it.get().value("fullnspath"); 
     returntype = []; 

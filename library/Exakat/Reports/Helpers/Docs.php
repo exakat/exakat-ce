@@ -61,7 +61,7 @@ class Docs {
         assert($ini['exakatSince'] !== null, "No exakatSince documentation for '$analyzer'.");
 
         $ini['parameter'] = array();
-        $ranks = array_intersect(array_keys($ini), array('parameter1', 'parameter2', 'parameter3'));
+        $ranks = array_filter(array_keys($ini), function (string $s) { return preg_match('/^parameter\d+$/', $s) ?? false;});
         foreach($ranks as $rank) {
             $ini['parameter'][] = $ini[$rank];
             unset($ini[$rank]);

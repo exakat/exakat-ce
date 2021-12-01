@@ -32,7 +32,7 @@ class SevenZ extends Vcs {
     }
 
     protected function selfCheck() {
-        $res = shell_exec("{$this->executable}  2>&1") ?? '';
+        $res = $this->shell("{$this->executable}  2>&1");
         if (strpos($res, '7-Zip') === false) {
             throw new HelperException('7z');
         }
@@ -49,7 +49,7 @@ class SevenZ extends Vcs {
         $archiveFile = tempnam(sys_get_temp_dir(), 'archive7Z') . '.7z';
         file_put_contents($archiveFile, $binary);
 
-        shell_exec("{$this->executable} x $archiveFile -oc:{$this->destinationFull}");
+        $this->shell("{$this->executable} x $archiveFile -oc:{$this->destinationFull}");
 
         unlink($archiveFile);
     }
@@ -57,7 +57,7 @@ class SevenZ extends Vcs {
     public function getInstallationInfo() {
         $stats = array();
 
-        $res = shell_exec("{$this->executable}  2>&1") ?? '';
+        $res = $this->shell("{$this->executable}  2>&1");
         if (stripos($res, 'not found') !== false) {
             $stats['installed'] = 'No';
         } elseif (preg_match('/p7zip Version ([0-9\.]+)/is', $res, $r)) {
