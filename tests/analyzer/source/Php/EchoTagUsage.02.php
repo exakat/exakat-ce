@@ -1,1 +1,0 @@
-<?= print 1; ?>a<?php echo 'b'; ?>

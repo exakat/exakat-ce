@@ -1,3 +1,0 @@
-<?php
-$match = match ($a) {};
-?>

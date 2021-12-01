@@ -1,6 +1,0 @@
-<?php
-CURLPIPE_HTTP1;
-\CURLPIPE_HTTP1;
-curlpipe_http1;
-$a->CURLPIPE_HTTP1;
-?>
