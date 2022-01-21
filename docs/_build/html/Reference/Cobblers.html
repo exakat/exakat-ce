@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/exakat.css" type="text/css" />
 
   
   
@@ -99,6 +100,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Tutorials.html">Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
 <ul>
@@ -118,7 +120,205 @@
 <li class="toctree-l1"><a class="reference internal" href="Reports.html">3. Reports</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">4. Cobblers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction">4.1. Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#list-of-cobblers">4.2. List of Cobblers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-cobblers">4.2. List of Cobblers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-phpdoc">4.2.1. Create Phpdoc</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#before">4.2.1.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#after">4.2.1.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reverse-cobbler">4.2.1.3. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specs">4.2.1.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#split-property-definitions">4.2.2. Split Property Definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#split-property-definitions-before">4.2.2.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#split-property-definitions-after">4.2.2.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#suggested-analysis">4.2.2.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#split-property-definitions-specs">4.2.2.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#var-to-public">4.2.3. Var To Public</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#var-to-public-before">4.2.3.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#var-to-public-after">4.2.3.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parameters">4.2.3.3. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#related-cobblers">4.2.3.4. Related Cobblers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#var-to-public-specs">4.2.3.5. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#make-static-closures-and-arrow-functions">4.2.4. Make Static Closures And Arrow Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#make-static-closures-and-arrow-functions-before">4.2.4.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#make-static-closures-and-arrow-functions-after">4.2.4.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#make-static-closures-and-arrow-functions-suggested-analysis">4.2.4.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#make-static-closures-and-arrow-functions-reverse-cobbler">4.2.4.4. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#make-static-closures-and-arrow-functions-specs">4.2.4.5. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-static-from-closures-and-arrow-functions">4.2.5. Remove Static From Closures And Arrow Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-static-from-closures-and-arrow-functions-before">4.2.5.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-static-from-closures-and-arrow-functions-after">4.2.5.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-static-from-closures-and-arrow-functions-suggested-analysis">4.2.5.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-static-from-closures-and-arrow-functions-reverse-cobbler">4.2.5.4. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-static-from-closures-and-arrow-functions-specs">4.2.5.5. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-typehint">4.2.6. Remove Typehint</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-typehint-before">4.2.6.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-typehint-after">4.2.6.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-typehint-type-to-remove">4.2.6.3. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-typehint-suggested-analysis">4.2.6.4. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-typehint-reverse-cobbler">4.2.6.5. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-typehint-specs">4.2.6.6. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rename-parameter">4.2.7. Rename Parameter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rename-parameter-before">4.2.7.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-parameter-after">4.2.7.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-parameter-method">4.2.7.3. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-parameter-specs">4.2.7.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#set-null-type">4.2.8. Set Null Type</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#set-null-type-before">4.2.8.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-null-type-after">4.2.8.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-null-type-reverse-cobbler">4.2.8.3. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-null-type-specs">4.2.8.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#set-type-void">4.2.9. Set Type Void</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#set-type-void-before">4.2.9.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-type-void-after">4.2.9.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-type-void-suggested-analysis">4.2.9.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-type-void-related-cobbler">4.2.9.4. Related Cobblers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-type-void-reverse-cobbler">4.2.9.5. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-type-void-specs">4.2.9.6. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#set-typehints">4.2.10. Set Typehints</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#set-typehints-before">4.2.10.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-typehints-after">4.2.10.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-typehints-int-or-float">4.2.10.3. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-typehints-suggested-analysis">4.2.10.4. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-typehints-related-cobbler">4.2.10.5. Related Cobblers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-typehints-specs">4.2.10.6. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#gather-use-expression">4.2.11. Gather Use Expression</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gather-use-expression-before">4.2.11.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gather-use-expression-after">4.2.11.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gather-use-expression-suggested-analysis">4.2.11.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gather-use-expression-specs">4.2.11.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#use-available-alias">4.2.12. Use Available Alias</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#use-available-alias-before">4.2.12.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-available-alias-after">4.2.12.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-available-alias-suggested-analysis">4.2.12.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-available-alias-specs">4.2.12.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#add-no-scream">4.2.13. Add No Scream &#64;</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#add-no-scream-before">4.2.13.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-no-scream-after">4.2.13.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-no-scream-suggested-analysis">4.2.13.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-no-scream-reverse-cobbler">4.2.13.4. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-no-scream-specs">4.2.13.5. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#array-to-bracket">4.2.14. Array To Bracket</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#array-to-bracket-before">4.2.14.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#array-to-bracket-after">4.2.14.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#array-to-bracket-specs">4.2.14.3. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#plus-one-to-pre-plusplus">4.2.15. Plus One To Pre Plusplus</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#plus-one-to-pre-plusplus-before">4.2.15.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plus-one-to-pre-plusplus-after">4.2.15.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plus-one-to-pre-plusplus-specs">4.2.15.3. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#post-to-pre-plusplus">4.2.16. Post to Pre Plusplus</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#post-to-pre-plusplus-before">4.2.16.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#post-to-pre-plusplus-after">4.2.16.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#post-to-pre-plusplus-specs">4.2.16.3. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-instructions">4.2.17. Remove Instructions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-instructions-before">4.2.17.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-instructions-after">4.2.17.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-instructions-suggested-analysis">4.2.17.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-instructions-specs">4.2.17.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-noscream">4.2.18. Remove Noscream &#64;</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-noscream-before">4.2.18.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-noscream-after">4.2.18.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-noscream-suggested-analysis">4.2.18.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-noscream-reverse-cobbler">4.2.18.4. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-noscream-specs">4.2.18.5. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-parenthesis">4.2.19. Remove Parenthesis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-parenthesis-before">4.2.19.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-parenthesis-after">4.2.19.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-parenthesis-suggested-analysis">4.2.19.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-parenthesis-specs">4.2.19.4. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rename-a-function">4.2.20. Rename A Function</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rename-a-function-before">4.2.20.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-a-function-after">4.2.20.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-a-function-name">4.2.20.3. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-a-function-suggested-analysis">4.2.20.4. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-a-function-related-cobbler">4.2.20.5. Related Cobblers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-a-function-reverse-cobbler">4.2.20.6. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-a-function-specs">4.2.20.7. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rename-functioncalls">4.2.21. Rename FunctionCalls</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rename-functioncalls-before">4.2.21.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-functioncalls-after">4.2.21.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-functioncalls-destination">4.2.21.3. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-functioncalls-suggested-analysis">4.2.21.4. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-functioncalls-related-cobbler">4.2.21.5. Related Cobblers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-functioncalls-reverse-cobbler">4.2.21.6. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-functioncalls-specs">4.2.21.7. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rename-methodcall">4.2.22. Rename Methodcall</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rename-methodcall-before">4.2.22.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-methodcall-after">4.2.22.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-methodcall-destination">4.2.22.3. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-methodcall-suggested-analysis">4.2.22.4. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-methodcall-related-cobbler">4.2.22.5. Related Cobblers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-methodcall-reverse-cobbler">4.2.22.6. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rename-methodcall-specs">4.2.22.7. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#switch-to-match">4.2.23. Switch To Match</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#switch-to-match-before">4.2.23.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#switch-to-match-after">4.2.23.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#switch-to-match-suggested-analysis">4.2.23.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#switch-to-match-related-cobbler">4.2.23.4. Related Cobblers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#switch-to-match-reverse-cobbler">4.2.23.5. Reverse Cobbler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#switch-to-match-specs">4.2.23.6. Specs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id154">4.2.23.7. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id156">4.2.23.8. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configfile">4.2.23.9. Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id159">4.2.23.10. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#name">4.2.24. name</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#name-before">4.2.24.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#name-after">4.2.24.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#name-specs">4.2.24.3. Specs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-the-attribute">4.2.25. Remove The Attribute</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-the-attribute-before">4.2.25.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-the-attribute-after">4.2.25.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-the-attribute-specs">4.2.25.3. Specs</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Cases.html">5. Real Code Cases</a></li>
@@ -211,6 +411,1641 @@
 </div>
 <div class="section" id="list-of-cobblers">
 <h2><span class="section-number">4.2. </span>List of Cobblers<a class="headerlink" href="#list-of-cobblers" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="create-phpdoc">
+<span id="attributes-createphpdoc"></span><span id="id2"></span><h3><span class="section-number">4.2.1. </span>Create Phpdoc<a class="headerlink" href="#create-phpdoc" title="Permalink to this headline">¶</a></h3>
+<p>Create PHPdoc comments for classes, interfaces, traits, methods and functions.</p>
+<p>Parameters and return types are collected, along with the name of the structure.</p>
+<div class="section" id="before">
+<span id="create-phpdoc-before"></span><h4><span class="section-number">4.2.1.1. </span>Before<a class="headerlink" href="#before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="err">&#39;</span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">class</span> <span class="nc">y</span> <span class="p">{</span>
+    <span class="k">function</span> <span class="nf">a1</span><span class="p">(</span><span class="nx">string</span> <span class="nv">$error</span><span class="p">,</span> <span class="nx">R</span> <span class="nv">$r</span> <span class="o">=</span> <span class="k">null</span><span class="p">)</span> <span class="o">:</span> <span class="nx">int</span><span class="o">|</span><span class="nx">string</span>
+    <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="after">
+<span id="create-phpdoc-after"></span><h4><span class="section-number">4.2.1.2. </span>After<a class="headerlink" href="#after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * Name : y</span>
+<span class="sd"> */</span>
+<span class="k">class</span> <span class="nc">y</span> <span class="p">{</span>
+   <span class="sd">/**</span>
+<span class="sd">    * Name : a1</span>
+<span class="sd">    *</span>
+<span class="sd">    * string $error</span>
+<span class="sd">    * null|R $r</span>
+<span class="sd">    * @return int|string</span>
+<span class="sd">    *</span>
+<span class="sd">    */</span>
+    <span class="k">function</span> <span class="nf">a1</span><span class="p">(</span><span class="nx">string</span> <span class="nv">$error</span><span class="p">,</span> <span class="nx">R</span> <span class="nv">$r</span> <span class="o">=</span> <span class="k">null</span><span class="p">)</span> <span class="o">:</span> <span class="nx">int</span><span class="o">|</span><span class="nx">string</span>
+    <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reverse-cobbler">
+<span id="create-phpdoc-reverse-cobbler"></span><h4><span class="section-number">4.2.1.3. </span>Reverse Cobbler<a class="headerlink" href="#reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><span class="xref std std-ref">No anchor for Attributes/RemovePhpdoc</span></p></li>
+</ul>
+</div>
+<div class="section" id="specs">
+<span id="create-phpdoc-specs"></span><h4><span class="section-number">4.2.1.4. </span>Specs<a class="headerlink" href="#specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Attributes/CreatePhpdoc</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="split-property-definitions">
+<span id="classes-splitpropertydefinitions"></span><span id="id3"></span><h3><span class="section-number">4.2.2. </span>Split Property Definitions<a class="headerlink" href="#split-property-definitions" title="Permalink to this headline">¶</a></h3>
+<p>Split multiple properties definition into independent definitions.</p>
+<p>This applies to classes and traits.</p>
+<div class="section" id="split-property-definitions-before">
+<span id="id4"></span><h4><span class="section-number">4.2.2.1. </span>Before<a class="headerlink" href="#split-property-definitions-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+        <span class="k">private</span> <span class="nv">$x</span><span class="p">,</span> <span class="nv">$y</span><span class="p">,</span> <span class="nv">$z</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="split-property-definitions-after">
+<span id="id5"></span><h4><span class="section-number">4.2.2.2. </span>After<a class="headerlink" href="#split-property-definitions-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+        <span class="k">private</span> <span class="nv">$x</span><span class="p">;</span>
+        <span class="k">private</span> <span class="nv">$y</span><span class="p">;</span>
+        <span class="k">private</span> <span class="nv">$z</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="suggested-analysis">
+<span id="split-property-definitions-suggested-analysis"></span><h4><span class="section-number">4.2.2.3. </span>Suggested Analysis<a class="headerlink" href="#suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#multiple-property-declaration-on-one-line"><span class="std std-ref">Multiple Property Declaration On One Line</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="split-property-definitions-specs">
+<span id="id6"></span><h4><span class="section-number">4.2.2.4. </span>Specs<a class="headerlink" href="#split-property-definitions-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Classes/SplitPropertyDefinitions</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="var-to-public">
+<span id="classes-vartopublic"></span><span id="id8"></span><h3><span class="section-number">4.2.3. </span>Var To Public<a class="headerlink" href="#var-to-public" title="Permalink to this headline">¶</a></h3>
+<p>Replace the var syntax with public keyword.</p>
+<p>It is also possible to replace it with protected or private, with the parameter.</p>
+<div class="section" id="var-to-public-before">
+<span id="id9"></span><h4><span class="section-number">4.2.3.1. </span>Before<a class="headerlink" href="#var-to-public-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">$y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="var-to-public-after">
+<span id="id10"></span><h4><span class="section-number">4.2.3.2. </span>After<a class="headerlink" href="#var-to-public-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">public</span> <span class="nv">$y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parameters">
+<span id="var-to-public-var-to-visibility"></span><h4><span class="section-number">4.2.3.3. </span>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 70%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>var_to_visibility</p></td>
+<td><p>public</p></td>
+<td><p>string</p></td>
+<td><p>The destination visibility to be used. May be one of: public, protected or private.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="related-cobblers">
+<span id="var-to-public-related-cobbler"></span><h4><span class="section-number">4.2.3.4. </span>Related Cobblers<a class="headerlink" href="#related-cobblers" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#set-typehints"><span class="std std-ref">Set Typehints</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="var-to-public-specs">
+<span id="id11"></span><h4><span class="section-number">4.2.3.5. </span>Specs<a class="headerlink" href="#var-to-public-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Classes/VarToPublic</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="make-static-closures-and-arrow-functions">
+<span id="functions-makestaticfunction"></span><span id="id13"></span><h3><span class="section-number">4.2.4. </span>Make Static Closures And Arrow Functions<a class="headerlink" href="#make-static-closures-and-arrow-functions" title="Permalink to this headline">¶</a></h3>
+<p>Add the static option to closures and arrow functions. This prevents the defining environment to be included in the closure.</p>
+<div class="section" id="make-static-closures-and-arrow-functions-before">
+<span id="id14"></span><h4><span class="section-number">4.2.4.1. </span>Before<a class="headerlink" href="#make-static-closures-and-arrow-functions-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span> <span class="o">=</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
+    <span class="nv">$b</span> <span class="o">=</span> <span class="nx">fn</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="make-static-closures-and-arrow-functions-after">
+<span id="id15"></span><h4><span class="section-number">4.2.4.2. </span>After<a class="headerlink" href="#make-static-closures-and-arrow-functions-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span> <span class="o">=</span> <span class="k">static</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
+    <span class="nv">$b</span> <span class="o">=</span> <span class="k">static</span> <span class="nx">fn</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="make-static-closures-and-arrow-functions-suggested-analysis">
+<span id="id16"></span><h4><span class="section-number">4.2.4.3. </span>Suggested Analysis<a class="headerlink" href="#make-static-closures-and-arrow-functions-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#could-be-static-closure"><span class="std std-ref">Could Be Static Closure</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="make-static-closures-and-arrow-functions-reverse-cobbler">
+<span id="id17"></span><h4><span class="section-number">4.2.4.4. </span>Reverse Cobbler<a class="headerlink" href="#make-static-closures-and-arrow-functions-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><span class="xref std std-ref">No anchor for Functions/RemoveStaticFromFunction</span></p></li>
+</ul>
+</div>
+<div class="section" id="make-static-closures-and-arrow-functions-specs">
+<span id="id18"></span><h4><span class="section-number">4.2.4.5. </span>Specs<a class="headerlink" href="#make-static-closures-and-arrow-functions-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Functions/MakeStaticFunction</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="remove-static-from-closures-and-arrow-functions">
+<span id="functions-removestaticfromclosure"></span><span id="id20"></span><h3><span class="section-number">4.2.5. </span>Remove Static From Closures And Arrow Functions<a class="headerlink" href="#remove-static-from-closures-and-arrow-functions" title="Permalink to this headline">¶</a></h3>
+<p>Removes the static option from closures and arrow functions.</p>
+<div class="section" id="remove-static-from-closures-and-arrow-functions-before">
+<span id="id21"></span><h4><span class="section-number">4.2.5.1. </span>Before<a class="headerlink" href="#remove-static-from-closures-and-arrow-functions-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span> <span class="o">=</span> <span class="k">static</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
+    <span class="nv">$b</span> <span class="o">=</span> <span class="k">static</span> <span class="nx">fn</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-static-from-closures-and-arrow-functions-after">
+<span id="id22"></span><h4><span class="section-number">4.2.5.2. </span>After<a class="headerlink" href="#remove-static-from-closures-and-arrow-functions-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span> <span class="o">=</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
+    <span class="nv">$b</span> <span class="o">=</span> <span class="nx">fn</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-static-from-closures-and-arrow-functions-suggested-analysis">
+<span id="id23"></span><h4><span class="section-number">4.2.5.3. </span>Suggested Analysis<a class="headerlink" href="#remove-static-from-closures-and-arrow-functions-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#cannot-use-static-for-closure"><span class="std std-ref">Cannot Use Static For Closure</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-static-from-closures-and-arrow-functions-reverse-cobbler">
+<span id="id24"></span><h4><span class="section-number">4.2.5.4. </span>Reverse Cobbler<a class="headerlink" href="#remove-static-from-closures-and-arrow-functions-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#make-static-closures-and-arrow-functions"><span class="std std-ref">Make Static Closures And Arrow Functions</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-static-from-closures-and-arrow-functions-specs">
+<span id="id25"></span><h4><span class="section-number">4.2.5.5. </span>Specs<a class="headerlink" href="#remove-static-from-closures-and-arrow-functions-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Functions/RemoveStaticFromClosure</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="remove-typehint">
+<span id="functions-removetypes"></span><span id="id27"></span><h3><span class="section-number">4.2.6. </span>Remove Typehint<a class="headerlink" href="#remove-typehint" title="Permalink to this headline">¶</a></h3>
+<p>This cobbler remove the typehint mentions in the code. This might yield some speed when executing, since those tests will be not conveyed at runtime.</p>
+<p>Typehints from arguments, method returns and properties are all removed.</p>
+<div class="section" id="remove-typehint-before">
+<span id="id28"></span><h4><span class="section-number">4.2.6.1. </span>Before<a class="headerlink" href="#remove-typehint-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="nx">string</span> <span class="nv">$p</span><span class="p">;</span>
+
+    <span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="nx">D\E</span> <span class="nv">$arg</span><span class="p">)</span> <span class="o">:</span> <span class="nx">void</span> <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-typehint-after">
+<span id="id29"></span><h4><span class="section-number">4.2.6.2. </span>After<a class="headerlink" href="#remove-typehint-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="nv">$p</span><span class="p">;</span>
+
+    <span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="nv">$arg</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-typehint-type-to-remove">
+<span id="id30"></span><h4><span class="section-number">4.2.6.3. </span>Parameters<a class="headerlink" href="#remove-typehint-type-to-remove" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 7%" />
+<col style="width: 4%" />
+<col style="width: 77%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>type_to_remove</p></td>
+<td><p>all</p></td>
+<td><p>data</p></td>
+<td><p>A comma separated list of types to remove. For example : never,string,ABC;. Use ‘All’ for everyt type.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="remove-typehint-suggested-analysis">
+<span id="id31"></span><h4><span class="section-number">4.2.6.4. </span>Suggested Analysis<a class="headerlink" href="#remove-typehint-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#php-8-1-typehints"><span class="std std-ref">PHP 8.1 Typehints</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-typehint-reverse-cobbler">
+<span id="id32"></span><h4><span class="section-number">4.2.6.5. </span>Reverse Cobbler<a class="headerlink" href="#remove-typehint-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#set-typehints"><span class="std std-ref">Set Typehints</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-typehint-specs">
+<span id="id33"></span><h4><span class="section-number">4.2.6.6. </span>Specs<a class="headerlink" href="#remove-typehint-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Functions/RemoveTypes</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.2.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="rename-parameter">
+<span id="functions-renameparameter"></span><span id="id35"></span><h3><span class="section-number">4.2.7. </span>Rename Parameter<a class="headerlink" href="#rename-parameter" title="Permalink to this headline">¶</a></h3>
+<p>Change the name of a parameter to a new name.</p>
+<p>The destination parameter name is a constant.
+Suggestions : rename all parameters from the top method (in classes)
+rename parameters $a into $b (currently, no $a available)</p>
+<p>Limits : this cobbler doesn’t check that another parameter is already using that name, nor if a local variable is also using that name. This may lead to unexpected results.</p>
+<div class="section" id="rename-parameter-before">
+<span id="id36"></span><h4><span class="section-number">4.2.7.1. </span>Before<a class="headerlink" href="#rename-parameter-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="nx">foo</span><span class="p">(</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">);</span>
+
+<span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="nv">$a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">$a</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-parameter-after">
+<span id="id37"></span><h4><span class="section-number">4.2.7.2. </span>After<a class="headerlink" href="#rename-parameter-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="nx">foo</span><span class="p">(</span><span class="nx">b</span><span class="o">:</span> <span class="mi">1</span><span class="p">);</span>
+
+<span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="nv">$b</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">$b</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-parameter-method">
+<span id="id38"></span><h4><span class="section-number">4.2.7.3. </span>Parameters<a class="headerlink" href="#rename-parameter-method" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 81%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>oldName</p></td>
+<td><p>$A</p></td>
+<td><p>string</p></td>
+<td><p>The original name of the parameter.</p></td>
+</tr>
+<tr class="row-odd"><td><p>newName</p></td>
+<td><p>$B</p></td>
+<td><p>string</p></td>
+<td><p>The new name of the parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p>method</p></td>
+<td></td>
+<td><p>string</p></td>
+<td><p>The name of the target method. Use a full qualified name for a function, and the class name::method for methods.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="rename-parameter-specs">
+<span id="id39"></span><h4><span class="section-number">4.2.7.4. </span>Specs<a class="headerlink" href="#rename-parameter-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Functions/RenameParameter</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="set-null-type">
+<span id="functions-setnulltype"></span><span id="id41"></span><h3><span class="section-number">4.2.8. </span>Set Null Type<a class="headerlink" href="#set-null-type" title="Permalink to this headline">¶</a></h3>
+<p>Adds a Null type to typehints when necessary.</p>
+<p>This cobbler only adds a null type when there is already another type. It doesn’t add a null type when no type is set.</p>
+<p>It works on methods, functions, closures and arrow functions. It doesn’t work on properties.</p>
+<p>The null type is added as a question mark <cite>?</cite> when the type is unique, and as null when the types are multiple.</p>
+<div class="section" id="set-null-type-before">
+<span id="id42"></span><h4><span class="section-number">4.2.8.1. </span>Before<a class="headerlink" href="#set-null-type-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">function</span> <span class="nf">foo</span><span class="p">()</span> <span class="o">:</span> <span class="nx">int</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">rand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-null-type-after">
+<span id="id43"></span><h4><span class="section-number">4.2.8.2. </span>After<a class="headerlink" href="#set-null-type-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">function</span> <span class="nf">foo</span><span class="p">()</span> <span class="o">:</span> <span class="o">?</span><span class="nx">int</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">rand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-null-type-reverse-cobbler">
+<span id="id44"></span><h4><span class="section-number">4.2.8.3. </span>Reverse Cobbler<a class="headerlink" href="#set-null-type-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#remove-typehint"><span class="std std-ref">Remove Typehint</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="set-null-type-specs">
+<span id="id45"></span><h4><span class="section-number">4.2.8.4. </span>Specs<a class="headerlink" href="#set-null-type-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Functions/SetNullType</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="set-type-void">
+<span id="functions-settypevoid"></span><span id="id47"></span><h3><span class="section-number">4.2.9. </span>Set Type Void<a class="headerlink" href="#set-type-void" title="Permalink to this headline">¶</a></h3>
+<p>Adds the void typehint to functions and methods, when possible</p>
+<div class="section" id="set-type-void-before">
+<span id="id48"></span><h4><span class="section-number">4.2.9.1. </span>Before<a class="headerlink" href="#set-type-void-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">function</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-type-void-after">
+<span id="id49"></span><h4><span class="section-number">4.2.9.2. </span>After<a class="headerlink" href="#set-type-void-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">function</span> <span class="nf">foo</span><span class="p">()</span> <span class="o">:</span> <span class="nx">void</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-type-void-suggested-analysis">
+<span id="id50"></span><h4><span class="section-number">4.2.9.3. </span>Suggested Analysis<a class="headerlink" href="#set-type-void-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#could-be-void"><span class="std std-ref">Could Be Void</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="set-type-void-related-cobbler">
+<span id="id51"></span><h4><span class="section-number">4.2.9.4. </span>Related Cobblers<a class="headerlink" href="#set-type-void-related-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#set-typehints"><span class="std std-ref">Set Typehints</span></a></p></li>
+<li><p><a class="reference internal" href="#set-null-type"><span class="std std-ref">Set Null Type</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="set-type-void-reverse-cobbler">
+<span id="id52"></span><h4><span class="section-number">4.2.9.5. </span>Reverse Cobbler<a class="headerlink" href="#set-type-void-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#remove-typehint"><span class="std std-ref">Remove Typehint</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="set-type-void-specs">
+<span id="id53"></span><h4><span class="section-number">4.2.9.6. </span>Specs<a class="headerlink" href="#set-type-void-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Functions/SetTypeVoid</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="set-typehints">
+<span id="functions-settypehints"></span><span id="id55"></span><h3><span class="section-number">4.2.10. </span>Set Typehints<a class="headerlink" href="#set-typehints" title="Permalink to this headline">¶</a></h3>
+<p>Automagically add scalar typehints to methods and properties. Arguments and return values are both supported.</p>
+<p>When multiple possible types are identified, no typehint is added. If a typehint is already set, no typehint is added.</p>
+<p>Magic methods, such as __get(), __set(), __construct(), __desctruct(), etc are not modified by this cobbler.</p>
+<p>Methods which have parent’s methods (resp. children’s) are skipped for argument typing (resp return typing) : this may introduce a incompatible definition. On the other hand, methods which have children’s methods (resp. parents’) are modified for argument typing (resp return typing), thanks to covariance (resp. contravariance).</p>
+<p>Void (as a scalar type) and Null types are processed in a separate cobbler.</p>
+<p>By default, and in case of conflict, array is chosen over iterable and int is chosen over float. There are parameter to alter this behavior.</p>
+<div class="section" id="set-typehints-before">
+<span id="id56"></span><h4><span class="section-number">4.2.10.1. </span>Before<a class="headerlink" href="#set-typehints-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="nx">int</span> <span class="nv">$p</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+    <span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="nx">int</span> <span class="nv">$a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span> <span class="nx">int</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">intdiv</span><span class="p">(</span><span class="nv">$a</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">p</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-typehints-after">
+<span id="id57"></span><h4><span class="section-number">4.2.10.2. </span>After<a class="headerlink" href="#set-typehints-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="nx">int</span> <span class="nv">$p</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+    <span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="nx">int</span> <span class="nv">$a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span> <span class="nx">int</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">intdiv</span><span class="p">(</span><span class="nv">$a</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">p</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-typehints-int-or-float">
+<span id="id58"></span><h4><span class="section-number">4.2.10.3. </span>Parameters<a class="headerlink" href="#set-typehints-int-or-float" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 76%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>array_or_iterable</p></td>
+<td><p>array</p></td>
+<td><p>string</p></td>
+<td><p>When array and iterable are the only suggestions, choose ‘array’, ‘iterable’, or ‘omit’. By default, it is array.</p></td>
+</tr>
+<tr class="row-odd"><td><p>int_or_float</p></td>
+<td><p>float</p></td>
+<td><p>string</p></td>
+<td><p>When int and float are the only suggestions, choose ‘int’, ‘float’, or ‘omit’. By default, it is float.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="set-typehints-suggested-analysis">
+<span id="id59"></span><h4><span class="section-number">4.2.10.4. </span>Suggested Analysis<a class="headerlink" href="#set-typehints-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#could-be-void"><span class="std std-ref">Could Be Void</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="set-typehints-related-cobbler">
+<span id="id60"></span><h4><span class="section-number">4.2.10.5. </span>Related Cobblers<a class="headerlink" href="#set-typehints-related-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#var-to-public"><span class="std std-ref">Var To Public</span></a></p></li>
+<li><p><a class="reference internal" href="#split-property-definitions"><span class="std std-ref">Split Property Definitions</span></a></p></li>
+<li><p><a class="reference internal" href="#set-null-type"><span class="std std-ref">Set Null Type</span></a></p></li>
+<li><p><a class="reference internal" href="#set-type-void"><span class="std std-ref">Set Type Void</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="set-typehints-specs">
+<span id="id61"></span><h4><span class="section-number">4.2.10.6. </span>Specs<a class="headerlink" href="#set-typehints-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Functions/SetTypehints</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a>, <a class="reference external" href="https://www.exakat.io/exakat-cloud">Exakat Cloud</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="gather-use-expression">
+<span id="namespaces-gatheruse"></span><span id="id63"></span><h3><span class="section-number">4.2.11. </span>Gather Use Expression<a class="headerlink" href="#gather-use-expression" title="Permalink to this headline">¶</a></h3>
+<p>Move lone use expression to the beginning of the file</p>
+<div class="section" id="gather-use-expression-before">
+<span id="id64"></span><h4><span class="section-number">4.2.11.1. </span>Before<a class="headerlink" href="#gather-use-expression-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">use</span> <span class="nx">A</span><span class="p">;</span>
+    <span class="o">++</span><span class="nv">$a</span><span class="p">;</span>
+    <span class="k">use</span> <span class="nx">B</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gather-use-expression-after">
+<span id="id65"></span><h4><span class="section-number">4.2.11.2. </span>After<a class="headerlink" href="#gather-use-expression-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">use</span> <span class="nx">A</span><span class="p">;</span>
+    <span class="k">use</span> <span class="nx">B</span><span class="p">;</span>
+    <span class="o">++</span><span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gather-use-expression-suggested-analysis">
+<span id="id66"></span><h4><span class="section-number">4.2.11.3. </span>Suggested Analysis<a class="headerlink" href="#gather-use-expression-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#hidden-use-expression"><span class="std std-ref">Hidden Use Expression</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="gather-use-expression-specs">
+<span id="id67"></span><h4><span class="section-number">4.2.11.4. </span>Specs<a class="headerlink" href="#gather-use-expression-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Namespaces/GatherUse</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="use-available-alias">
+<span id="namespaces-usealias"></span><span id="id69"></span><h3><span class="section-number">4.2.12. </span>Use Available Alias<a class="headerlink" href="#use-available-alias" title="Permalink to this headline">¶</a></h3>
+<p>Apply systematically the use expression in the code.</p>
+<div class="section" id="use-available-alias-before">
+<span id="id70"></span><h4><span class="section-number">4.2.12.1. </span>Before<a class="headerlink" href="#use-available-alias-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">use</span> <span class="nx">A\B\C</span> <span class="k">as</span> <span class="nx">D</span><span class="p">;</span>
+    <span class="k">new</span> <span class="nx">A\B\C</span><span class="p">();</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="use-available-alias-after">
+<span id="id71"></span><h4><span class="section-number">4.2.12.2. </span>After<a class="headerlink" href="#use-available-alias-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">use</span> <span class="nx">A\B\C</span> <span class="k">as</span> <span class="nx">D</span><span class="p">;</span>
+    <span class="k">new</span> <span class="nx">D</span><span class="p">();</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="use-available-alias-suggested-analysis">
+<span id="id72"></span><h4><span class="section-number">4.2.12.3. </span>Suggested Analysis<a class="headerlink" href="#use-available-alias-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#could-use-alias"><span class="std std-ref">Could Use Alias</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="use-available-alias-specs">
+<span id="id73"></span><h4><span class="section-number">4.2.12.4. </span>Specs<a class="headerlink" href="#use-available-alias-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Namespaces/UseAlias</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="add-no-scream">
+<span id="structures-addnoscream"></span><span id="id75"></span><h3><span class="section-number">4.2.13. </span>Add No Scream &#64;<a class="headerlink" href="#add-no-scream" title="Permalink to this headline">¶</a></h3>
+<p>Adds the no scream operator <cite>&#64;</cite> to an expression.</p>
+<div class="section" id="add-no-scream-before">
+<span id="id76"></span><h4><span class="section-number">4.2.13.1. </span>Before<a class="headerlink" href="#add-no-scream-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-no-scream-after">
+<span id="id77"></span><h4><span class="section-number">4.2.13.2. </span>After<a class="headerlink" href="#add-no-scream-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="o">@</span><span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-no-scream-suggested-analysis">
+<span id="id78"></span><h4><span class="section-number">4.2.13.3. </span>Suggested Analysis<a class="headerlink" href="#add-no-scream-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><span class="xref std std-ref">No anchor for Utils/Selector</span></p></li>
+</ul>
+</div>
+<div class="section" id="add-no-scream-reverse-cobbler">
+<span id="id79"></span><h4><span class="section-number">4.2.13.4. </span>Reverse Cobbler<a class="headerlink" href="#add-no-scream-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#remove-noscream"><span class="std std-ref">Remove Noscream &#64;</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="add-no-scream-specs">
+<span id="id80"></span><h4><span class="section-number">4.2.13.5. </span>Specs<a class="headerlink" href="#add-no-scream-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/AddNoScream</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="array-to-bracket">
+<span id="structures-arraytobracket"></span><span id="id82"></span><h3><span class="section-number">4.2.14. </span>Array To Bracket<a class="headerlink" href="#array-to-bracket" title="Permalink to this headline">¶</a></h3>
+<p>This cobbler updates the array() syntax, and changes it to the bracket syntax.</p>
+<div class="section" id="array-to-bracket-before">
+<span id="id83"></span><h4><span class="section-number">4.2.14.1. </span>Before<a class="headerlink" href="#array-to-bracket-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+<span class="nv">$a</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="array-to-bracket-after">
+<span id="id84"></span><h4><span class="section-number">4.2.14.2. </span>After<a class="headerlink" href="#array-to-bracket-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+<span class="nv">$a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="array-to-bracket-specs">
+<span id="id85"></span><h4><span class="section-number">4.2.14.3. </span>Specs<a class="headerlink" href="#array-to-bracket-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/ArrayToBracket</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="plus-one-to-pre-plusplus">
+<span id="structures-plusonetopre"></span><span id="id87"></span><h3><span class="section-number">4.2.15. </span>Plus One To Pre Plusplus<a class="headerlink" href="#plus-one-to-pre-plusplus" title="Permalink to this headline">¶</a></h3>
+<p>Transforms a <cite>+ 1</cite> or <cite>- 1</cite> operation into a plus-plus (or minus-minus).</p>
+<div class="section" id="plus-one-to-pre-plusplus-before">
+<span id="id88"></span><h4><span class="section-number">4.2.15.1. </span>Before<a class="headerlink" href="#plus-one-to-pre-plusplus-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span> <span class="o">=</span> <span class="nv">$a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plus-one-to-pre-plusplus-after">
+<span id="id89"></span><h4><span class="section-number">4.2.15.2. </span>After<a class="headerlink" href="#plus-one-to-pre-plusplus-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="o">++</span><span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plus-one-to-pre-plusplus-specs">
+<span id="id90"></span><h4><span class="section-number">4.2.15.3. </span>Specs<a class="headerlink" href="#plus-one-to-pre-plusplus-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/PlusOneToPre</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a>, <a class="reference external" href="https://www.exakat.io/exakat-cloud">Exakat Cloud</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="post-to-pre-plusplus">
+<span id="structures-posttopre"></span><span id="id93"></span><h3><span class="section-number">4.2.16. </span>Post to Pre Plusplus<a class="headerlink" href="#post-to-pre-plusplus" title="Permalink to this headline">¶</a></h3>
+<p>Transforms a post plus-plus (or minus-minus) operator, into a pre plus-plus (or minus-minus) operator.</p>
+<div class="section" id="post-to-pre-plusplus-before">
+<span id="id94"></span><h4><span class="section-number">4.2.16.1. </span>Before<a class="headerlink" href="#post-to-pre-plusplus-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span><span class="o">++</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="post-to-pre-plusplus-after">
+<span id="id95"></span><h4><span class="section-number">4.2.16.2. </span>After<a class="headerlink" href="#post-to-pre-plusplus-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="o">++</span><span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="post-to-pre-plusplus-specs">
+<span id="id96"></span><h4><span class="section-number">4.2.16.3. </span>Specs<a class="headerlink" href="#post-to-pre-plusplus-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/PostToPre</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a>, <a class="reference external" href="https://www.exakat.io/exakat-cloud">Exakat Cloud</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="remove-instructions">
+<span id="structures-removecode"></span><span id="id99"></span><h3><span class="section-number">4.2.17. </span>Remove Instructions<a class="headerlink" href="#remove-instructions" title="Permalink to this headline">¶</a></h3>
+<p>Removes atomic instructions from the code. The whole expression is removed, and the slot is closed.</p>
+<p>This cobbler works with element of a block, and not with part of larger expression (like remove a condition in a if/then, or remove the block expression of a while).</p>
+<div class="section" id="remove-instructions-before">
+<span id="id100"></span><h4><span class="section-number">4.2.17.1. </span>Before<a class="headerlink" href="#remove-instructions-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// Code to be removed</span>
+    <span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">do</span>          <span class="c1">// can remove the while expression</span>
+        <span class="o">++</span><span class="nv">$a</span><span class="p">;</span>   <span class="c1">// removing the block of the do...wihle will generate an compilation error</span>
+    <span class="k">while</span> <span class="p">(</span><span class="nv">$a</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">);</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-instructions-after">
+<span id="id101"></span><h4><span class="section-number">4.2.17.2. </span>After<a class="headerlink" href="#remove-instructions-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-instructions-suggested-analysis">
+<span id="id102"></span><h4><span class="section-number">4.2.17.3. </span>Suggested Analysis<a class="headerlink" href="#remove-instructions-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#useless-instructions"><span class="std std-ref">Useless Instructions</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-instructions-specs">
+<span id="id103"></span><h4><span class="section-number">4.2.17.4. </span>Specs<a class="headerlink" href="#remove-instructions-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/RemoveCode</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="remove-noscream">
+<span id="structures-removenoscream"></span><span id="id105"></span><h3><span class="section-number">4.2.18. </span>Remove Noscream &#64;<a class="headerlink" href="#remove-noscream" title="Permalink to this headline">¶</a></h3>
+<p>Removes the &#64; operator.</p>
+<div class="section" id="remove-noscream-before">
+<span id="id106"></span><h4><span class="section-number">4.2.18.1. </span>Before<a class="headerlink" href="#remove-noscream-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="o">@</span><span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-noscream-after">
+<span id="id107"></span><h4><span class="section-number">4.2.18.2. </span>After<a class="headerlink" href="#remove-noscream-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-noscream-suggested-analysis">
+<span id="id108"></span><h4><span class="section-number">4.2.18.3. </span>Suggested Analysis<a class="headerlink" href="#remove-noscream-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#operator"><span class="std std-ref">&#64; Operator</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-noscream-reverse-cobbler">
+<span id="id109"></span><h4><span class="section-number">4.2.18.4. </span>Reverse Cobbler<a class="headerlink" href="#remove-noscream-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>This cobbler is its own reverse.</p></li>
+</ul>
+</div>
+<div class="section" id="remove-noscream-specs">
+<span id="id110"></span><h4><span class="section-number">4.2.18.5. </span>Specs<a class="headerlink" href="#remove-noscream-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/RemoveNoScream</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a>, <a class="reference external" href="https://www.exakat.io/exakat-cloud">Exakat Cloud</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="remove-parenthesis">
+<span id="structures-removeparenthesis"></span><span id="id113"></span><h3><span class="section-number">4.2.19. </span>Remove Parenthesis<a class="headerlink" href="#remove-parenthesis" title="Permalink to this headline">¶</a></h3>
+<p>Remove useless parenthesis from return expression.</p>
+<div class="section" id="remove-parenthesis-before">
+<span id="id114"></span><h4><span class="section-number">4.2.19.1. </span>Before<a class="headerlink" href="#remove-parenthesis-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+<span class="k">function</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-parenthesis-after">
+<span id="id115"></span><h4><span class="section-number">4.2.19.2. </span>After<a class="headerlink" href="#remove-parenthesis-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+<span class="k">function</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-parenthesis-suggested-analysis">
+<span id="id116"></span><h4><span class="section-number">4.2.19.3. </span>Suggested Analysis<a class="headerlink" href="#remove-parenthesis-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#no-parenthesis-for-language-construct"><span class="std std-ref">No Parenthesis For Language Construct</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-parenthesis-specs">
+<span id="id117"></span><h4><span class="section-number">4.2.19.4. </span>Specs<a class="headerlink" href="#remove-parenthesis-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/RemoveParenthesis</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="rename-a-function">
+<span id="structures-renamefunction"></span><span id="id119"></span><h3><span class="section-number">4.2.20. </span>Rename A Function<a class="headerlink" href="#rename-a-function" title="Permalink to this headline">¶</a></h3>
+<p>Give a function with a new name.</p>
+<p>This cobbler doesn’t update the name of the functioncalls.</p>
+<p>This cobbler may be used with functions, and methods. Functions may be identified with their fully qualified name (i.e. pathfoo) and methods with the extended fully qualified name (i.e. : pathaClass::methodName).</p>
+<div class="section" id="rename-a-function-before">
+<span id="id120"></span><h4><span class="section-number">4.2.20.1. </span>Before<a class="headerlink" href="#rename-a-function-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">function</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-a-function-after">
+<span id="id121"></span><h4><span class="section-number">4.2.20.2. </span>After<a class="headerlink" href="#rename-a-function-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">function</span> <span class="nf">bar</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-a-function-name">
+<span id="id122"></span><h4><span class="section-number">4.2.20.3. </span>Parameters<a class="headerlink" href="#rename-a-function-name" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 17%" />
+<col style="width: 15%" />
+<col style="width: 57%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>name</p></td>
+<td><p>foo</p></td>
+<td><p>string</p></td>
+<td><p>The new name of the function.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="rename-a-function-suggested-analysis">
+<span id="id123"></span><h4><span class="section-number">4.2.20.4. </span>Suggested Analysis<a class="headerlink" href="#rename-a-function-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><span class="xref std std-ref">No anchor for Utils/Selector</span></p></li>
+</ul>
+</div>
+<div class="section" id="rename-a-function-related-cobbler">
+<span id="id124"></span><h4><span class="section-number">4.2.20.5. </span>Related Cobblers<a class="headerlink" href="#rename-a-function-related-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#rename-functioncalls"><span class="std std-ref">Rename FunctionCalls</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="rename-a-function-reverse-cobbler">
+<span id="id125"></span><h4><span class="section-number">4.2.20.6. </span>Reverse Cobbler<a class="headerlink" href="#rename-a-function-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>This cobbler is its own reverse.</p></li>
+</ul>
+</div>
+<div class="section" id="rename-a-function-specs">
+<span id="id126"></span><h4><span class="section-number">4.2.20.7. </span>Specs<a class="headerlink" href="#rename-a-function-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/RenameFunction</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="rename-functioncalls">
+<span id="structures-renamefunctioncall"></span><span id="id128"></span><h3><span class="section-number">4.2.21. </span>Rename FunctionCalls<a class="headerlink" href="#rename-functioncalls" title="Permalink to this headline">¶</a></h3>
+<p>Rename a function call to another function.</p>
+<div class="section" id="rename-functioncalls-before">
+<span id="id129"></span><h4><span class="section-number">4.2.21.1. </span>Before<a class="headerlink" href="#rename-functioncalls-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-functioncalls-after">
+<span id="id130"></span><h4><span class="section-number">4.2.21.2. </span>After<a class="headerlink" href="#rename-functioncalls-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nx">bar</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-functioncalls-destination">
+<span id="id131"></span><h4><span class="section-number">4.2.21.3. </span>Parameters<a class="headerlink" href="#rename-functioncalls-destination" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 71%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>origin</p></td>
+<td><p>strtolower</p></td>
+<td><p>string</p></td>
+<td><p>The function name to rename. It will be use lower-cased, and as a fully qualified name.</p></td>
+</tr>
+<tr class="row-odd"><td><p>destination</p></td>
+<td><p>mb_strtolower</p></td>
+<td><p>string</p></td>
+<td><p>The function name to rename. It will be use as is. FQN is possible.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="rename-functioncalls-suggested-analysis">
+<span id="id132"></span><h4><span class="section-number">4.2.21.4. </span>Suggested Analysis<a class="headerlink" href="#rename-functioncalls-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><span class="xref std std-ref">No anchor for Utils/Selector</span></p></li>
+</ul>
+</div>
+<div class="section" id="rename-functioncalls-related-cobbler">
+<span id="id133"></span><h4><span class="section-number">4.2.21.5. </span>Related Cobblers<a class="headerlink" href="#rename-functioncalls-related-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#rename-a-function"><span class="std std-ref">Rename A Function</span></a></p></li>
+<li><p><a class="reference internal" href="#rename-methodcall"><span class="std std-ref">Rename Methodcall</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="rename-functioncalls-reverse-cobbler">
+<span id="id134"></span><h4><span class="section-number">4.2.21.6. </span>Reverse Cobbler<a class="headerlink" href="#rename-functioncalls-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>This cobbler is its own reverse.</p></li>
+</ul>
+</div>
+<div class="section" id="rename-functioncalls-specs">
+<span id="id135"></span><h4><span class="section-number">4.2.21.7. </span>Specs<a class="headerlink" href="#rename-functioncalls-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/RenameFunctionCall</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="rename-methodcall">
+<span id="structures-renamemethodcall"></span><span id="id137"></span><h3><span class="section-number">4.2.22. </span>Rename Methodcall<a class="headerlink" href="#rename-methodcall" title="Permalink to this headline">¶</a></h3>
+<p>Rename a method, in a methodcall, with a new name.</p>
+<p>This cobbler doesn’t update the definition of the method. It works both on static and non-static methods.</p>
+<div class="section" id="rename-methodcall-before">
+<span id="id138"></span><h4><span class="section-number">4.2.22.1. </span>Before<a class="headerlink" href="#rename-methodcall-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$o</span><span class="o">-&gt;</span><span class="na">method</span><span class="p">();</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-methodcall-after">
+<span id="id139"></span><h4><span class="section-number">4.2.22.2. </span>After<a class="headerlink" href="#rename-methodcall-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$o</span><span class="o">-&gt;</span><span class="na">newName</span><span class="p">();</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rename-methodcall-destination">
+<span id="id140"></span><h4><span class="section-number">4.2.22.3. </span>Parameters<a class="headerlink" href="#rename-methodcall-destination" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 71%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>origin</p></td>
+<td><p>strtolower</p></td>
+<td><p>string</p></td>
+<td><p>The function name to rename. It will be use lower-cased, and as a fully qualified name.</p></td>
+</tr>
+<tr class="row-odd"><td><p>destination</p></td>
+<td><p>mb_strtolower</p></td>
+<td><p>string</p></td>
+<td><p>The function name to rename. It will be use as is. FQN is possible.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="rename-methodcall-suggested-analysis">
+<span id="id141"></span><h4><span class="section-number">4.2.22.4. </span>Suggested Analysis<a class="headerlink" href="#rename-methodcall-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><span class="xref std std-ref">No anchor for Utils/Selector</span></p></li>
+</ul>
+</div>
+<div class="section" id="rename-methodcall-related-cobbler">
+<span id="id142"></span><h4><span class="section-number">4.2.22.5. </span>Related Cobblers<a class="headerlink" href="#rename-methodcall-related-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#rename-functioncalls"><span class="std std-ref">Rename FunctionCalls</span></a></p></li>
+<li><p><a class="reference internal" href="#rename-a-function"><span class="std std-ref">Rename A Function</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="rename-methodcall-reverse-cobbler">
+<span id="id143"></span><h4><span class="section-number">4.2.22.6. </span>Reverse Cobbler<a class="headerlink" href="#rename-methodcall-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><span class="xref std std-ref">No anchor for Structures/RemoveMethodCall</span></p></li>
+</ul>
+</div>
+<div class="section" id="rename-methodcall-specs">
+<span id="id144"></span><h4><span class="section-number">4.2.22.7. </span>Specs<a class="headerlink" href="#rename-methodcall-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/RenameMethodcall</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="switch-to-match">
+<span id="structures-switchtomatch"></span><span id="id146"></span><h3><span class="section-number">4.2.23. </span>Switch To Match<a class="headerlink" href="#switch-to-match" title="Permalink to this headline">¶</a></h3>
+<p>Transforms a switch() into a match() expression.</p>
+<p>The switch() syntax must have each of the cases assigning the same variable (or similar). There should not be any other operation, besides break;</p>
+<div class="section" id="switch-to-match-before">
+<span id="id147"></span><h4><span class="section-number">4.2.23.1. </span>Before<a class="headerlink" href="#switch-to-match-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="k">switch</span><span class="p">(</span><span class="nv">$a</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+            <span class="nv">$b</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="mi">2</span><span class="o">:</span>
+            <span class="nv">$b</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">default</span><span class="o">:</span>
+            <span class="nv">$b</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="switch-to-match-after">
+<span id="id148"></span><h4><span class="section-number">4.2.23.2. </span>After<a class="headerlink" href="#switch-to-match-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+    <span class="nv">$b</span> <span class="o">=</span> <span class="nx">match</span><span class="p">(</span><span class="nv">$a</span><span class="p">)</span> <span class="p">{</span>
+        <span class="mi">1</span> <span class="o">=&gt;</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+        <span class="mi">2</span> <span class="o">=&gt;</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span>
+        <span class="k">default</span> <span class="o">=&gt;</span> <span class="s1">&#39;0&#39;</span>
+    <span class="p">};</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="switch-to-match-suggested-analysis">
+<span id="id149"></span><h4><span class="section-number">4.2.23.3. </span>Suggested Analysis<a class="headerlink" href="#switch-to-match-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#could-use-match"><span class="std std-ref">Could Use Match</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="switch-to-match-related-cobbler">
+<span id="id150"></span><h4><span class="section-number">4.2.23.4. </span>Related Cobblers<a class="headerlink" href="#switch-to-match-related-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#post-to-pre-plusplus"><span class="std std-ref">Post to Pre Plusplus</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="switch-to-match-reverse-cobbler">
+<span id="id151"></span><h4><span class="section-number">4.2.23.5. </span>Reverse Cobbler<a class="headerlink" href="#switch-to-match-reverse-cobbler" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="#remove-instructions"><span class="std std-ref">Remove Instructions</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="switch-to-match-specs">
+<span id="id152"></span><h4><span class="section-number">4.2.23.6. </span>Specs<a class="headerlink" href="#switch-to-match-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Structures/SwitchToMatch</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="utils-multi"></span></div>
+<div class="section" id="id154">
+<span id="id155"></span><h4><span class="section-number">4.2.23.7. </span>Before<a class="headerlink" href="#id154" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id156">
+<span id="id157"></span><h4><span class="section-number">4.2.23.8. </span>After<a class="headerlink" href="#id156" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configfile">
+<span id="id158"></span><h4><span class="section-number">4.2.23.9. </span>Parameters<a class="headerlink" href="#configfile" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 13%" />
+<col style="width: 12%" />
+<col style="width: 57%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Default</p></td>
+<td><p>Type</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>configFile</p></td>
+<td></td>
+<td><p>string</p></td>
+<td><p>The .yaml file in the project folder.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id159">
+<span id="id160"></span><h4><span class="section-number">4.2.23.10. </span>Specs<a class="headerlink" href="#id159" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Utils/Multi</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td><p><a class="reference external" href="https://www.exakat.io/entreprise-edition">Entreprise Edition</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="name">
+<span id="classes-removemethod"></span><span id="id162"></span><h3><span class="section-number">4.2.24. </span>name<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h3>
+<p>Fully qualified name of the method to remove. Only one allowed.</p>
+<div class="section" id="name-before">
+<span id="id163"></span><h4><span class="section-number">4.2.24.1. </span>Before<a class="headerlink" href="#name-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="c1">// removing method \x::method1</span>
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">function</span> <span class="nf">method1</span><span class="p">()</span> <span class="p">{}</span>
+    <span class="k">function</span> <span class="nf">method2</span><span class="p">()</span> <span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="name-after">
+<span id="id164"></span><h4><span class="section-number">4.2.24.2. </span>After<a class="headerlink" href="#name-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="c1">// removed method \x::method1</span>
+<span class="k">class</span> <span class="nc">x</span> <span class="p">{</span>
+    <span class="k">function</span> <span class="nf">method2</span><span class="p">()</span> <span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="name-specs">
+<span id="id165"></span><h4><span class="section-number">4.2.24.3. </span>Specs<a class="headerlink" href="#name-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 58%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Classes/RemoveMethod</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="remove-the-attribute">
+<span id="attributes-removeattribute"></span><span id="id166"></span><h3><span class="section-number">4.2.25. </span>Remove The Attribute<a class="headerlink" href="#remove-the-attribute" title="Permalink to this headline">¶</a></h3>
+<p>Remove attributes from all supporting structures.</p>
+<p>Attributes are located on functions, classes, class constants, properties, methods and arguments.</p>
+<div class="section" id="remove-the-attribute-before">
+<span id="id167"></span><h4><span class="section-number">4.2.25.1. </span>Before<a class="headerlink" href="#remove-the-attribute-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="c1">#[Attribute]</span>
+<span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="c1">#[AttributeArgument] $arg) {</span>
+
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-the-attribute-after">
+<span id="id168"></span><h4><span class="section-number">4.2.25.2. </span>After<a class="headerlink" href="#remove-the-attribute-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+
+<span class="k">function</span> <span class="nf">foo</span><span class="p">(</span><span class="nv">$arg</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-the-attribute-specs">
+<span id="id169"></span><h4><span class="section-number">4.2.25.3. </span>Specs<a class="headerlink" href="#remove-the-attribute-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 36%" />
+<col style="width: 64%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Attributes/RemoveAttribute</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 

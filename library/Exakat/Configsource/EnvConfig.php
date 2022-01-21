@@ -55,7 +55,7 @@ class EnvConfig extends Config {
             $this->config['project_rulesets'] = $this->cleanProjectReports($this->config['project_rulesets']);
         }
 
-        return 'environnment';
+        return empty($this->config) ? self::NOT_LOADED : 'environnment';
     }
 }
 

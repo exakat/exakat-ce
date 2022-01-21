@@ -147,7 +147,7 @@ class Initproject extends Tasks {
                     break;
 
                 case 'bazaar' :
-                    list(, $projectName) = explode(':', $repositoryURL);
+                    list(, $projectName) = explode(':', $repositoryURL, 3);
                     break;
 
                 case 'zip' :

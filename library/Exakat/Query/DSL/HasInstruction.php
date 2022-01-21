@@ -30,7 +30,7 @@ class HasInstruction extends DSL {
         if (func_num_args() === 1) {
             list($atoms) = func_get_args();
         } else {
-            $atoms = 'Namespaces';
+            $atoms = 'Namespace';
         }
 
         $this->assertAtom($atoms);

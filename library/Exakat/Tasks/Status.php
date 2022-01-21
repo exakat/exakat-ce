@@ -81,11 +81,11 @@ class Status extends Tasks {
         }
 
         $status = array('project'          => (string) $project,
-                        'files'            => $this->datastore->getHash('files')         ?? '',
-                        'filesIgnored'     => $this->datastore->getHash('filesIgnored')  ?? '',
-                        'loc'              => $this->datastore->getHash('loc')           ?? '',
-                        'loc_all'          => $this->datastore->getHash('locTotal')      ?? '',
-                        'tokens'           => $this->datastore->getHash('tokens')        ?? '',
+                        'files'            => (int) ($this->datastore->getHash('files')         ?? 0),
+                        'filesIgnored'     => (int) ($this->datastore->getHash('filesIgnored')  ?? 0),
+                        'loc'              => (int) ($this->datastore->getHash('loc')           ?? 0),
+                        'loc_all'          => (int) ($this->datastore->getHash('locTotal')      ?? 0),
+                        'tokens'           => (int) ($this->datastore->getHash('tokens')        ?? 0),
                         'vcs'              => $this->datastore->getHash('vcs_type')      ?? '',
                         'url'              => $this->datastore->getHash('vcs_url')       ?? '',
                         'branch'           => $this->datastore->getHash('vcs_branch')    ?? '',

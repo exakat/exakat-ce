@@ -38,7 +38,8 @@ class Mercurial extends Vcs {
         $this->check();
 
         $sourceArg = escapeshellarg($source);
-        $this->shell("cd {$this->destinationFull}; {$this->executable} clone $sourceArg code");
+        $codePath = dirname($this->destinationFull);
+        $this->shell("cd {$codePath}; {$this->executable} clone $sourceArg code");
     }
 
     public function update() {

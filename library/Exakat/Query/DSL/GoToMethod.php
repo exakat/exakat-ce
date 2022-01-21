@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 class GoToMethod extends DSL {
     public function run(): Command {
         list($name) = func_get_args();
-        
+
         $name = mb_strtolower($name);
 
         // also handle variables

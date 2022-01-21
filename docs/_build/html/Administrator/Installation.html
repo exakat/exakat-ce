@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/exakat.css" type="text/css" />
 
   
   
@@ -99,6 +100,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Tutorials.html">Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
 <ul>
@@ -149,7 +151,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-guide-as-github-action">Installation guide as Github Action</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#github-action">Github Action</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#github-action-for-exakat">Github Action for Exakat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-up-github-action-for-exakat">Set up Github Action for Exakat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-status-badge">Create status badge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#github-action-configuration-directives">Github Action Configuration directives</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#upload-reports-as-artefact">Upload reports as artefact</a></li>
 </ul>
@@ -509,13 +512,13 @@ docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat
 <h2>Installation guide as Github Action<a class="headerlink" href="#installation-guide-as-github-action" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="github-action">
 <h3>Github Action<a class="headerlink" href="#github-action" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="https://docs.github.com/en/actions">Github Action</a> is a way to “Automate, customize, and execute your software development workflows right in your repository”. Exakat may be run on Github platform.</p>
+<p><a class="reference external" href="https://docs.github.com/en/actions">Github Action</a> is a way to “Automate, customize, and execute your software development workflows right in your repository”. Exakat runs on Github platform.</p>
 </div>
-<div class="section" id="github-action-for-exakat">
-<h3>Github Action for Exakat<a class="headerlink" href="#github-action-for-exakat" title="Permalink to this headline">¶</a></h3>
-<p>To add Exakat to your repository on Github, create a file <cite>.github/workflows/test.yml</cite>, at the root of your repository (<cite>.github/workflows</cite> might already exists).</p>
-<p>In the file, use the following YAML code. It will create an automatic action, on push and pull_request actions, that runs Exakat and display the issues found in the workflow panel. It is also possible to run manually this action.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">on</span><span class="p">:</span> <span class="p">[</span><span class="n">push</span><span class="p">,</span> <span class="n">pull_request</span><span class="p">]</span>
+<div class="section" id="set-up-github-action-for-exakat">
+<h3>Set up Github Action for Exakat<a class="headerlink" href="#set-up-github-action-for-exakat" title="Permalink to this headline">¶</a></h3>
+<p>To add Exakat to your repository on Github, create a file <cite>.github/workflows/exakat.yml</cite>, at the root of your repository (<cite>.github/workflows</cite> might already exists, otherwise create it).</p>
+<p>In the file, use the following YAML code. It creates an automatic action, on push and pull_request actions, that runs Exakat and display the issues found in the workflow panel. It is also possible to run manually this action, with the <a class="reference external" href="https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow">workflow_dispatch</a> : after installing the exakat.yaml file, go to the ‘Actions’ tab and locate the ‘Run workflow’ button.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">on</span><span class="p">:</span> <span class="p">[</span><span class="n">push</span><span class="p">,</span> <span class="n">pull_request</span><span class="p">,</span> <span class="n">workflow_dispatch</span><span class="p">]</span>
 <span class="n">name</span><span class="p">:</span> <span class="n">Test</span>
 <span class="n">jobs</span><span class="p">:</span>
   <span class="n">exakat</span><span class="p">:</span>
@@ -528,12 +531,17 @@ docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat
 </pre></div>
 </div>
 <p>Note : it is recommended to edit this file directly on github.com, as it cannot be pushed from a remote repository.</p>
-<p>Then, you can use the <cite>Action</cite> button, next to ‘Pull requests’. This will run Exakat on the repository, with the ‘CI-checks’ ruleset, and in the ‘Perfile’ format.</p>
+<p>Then, you can use the <cite>Action</cite> button, next to ‘Pull requests’, or push a new commit to trigger this. This will run Exakat on the repository, with the ‘CI-checks’ ruleset, and in the ‘Perfile’ format.</p>
+</div>
+<div class="section" id="create-status-badge">
+<h3>Create status badge<a class="headerlink" href="#create-status-badge" title="Permalink to this headline">¶</a></h3>
+<p>Github action creates automatically status badge, that can be displayed on the repository or other websites, and keep you updated of the last exakat run.</p>
+<p>In the ‘Actions’ tag, select the workflow, and find the ‘…’ on the right. Click on it, and the first item will be ‘Create status badge’. Then, follow the instructions to get a Markdown badge.</p>
 </div>
 <div class="section" id="github-action-configuration-directives">
 <h3>Github Action Configuration directives<a class="headerlink" href="#github-action-configuration-directives" title="Permalink to this headline">¶</a></h3>
-<p>It is possible to provide custom directives to the Exakat Github action, by using the ‘with’ keyword in the configuration. Here is an example :</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">on</span><span class="p">:</span> <span class="p">[</span><span class="n">push</span><span class="p">,</span> <span class="n">pull_request</span><span class="p">]</span>
+<p>Exakat for Github action provide support for custom directives, by using the ‘with’ keyword in the configuration. Here is an example :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">on</span><span class="p">:</span> <span class="p">[</span><span class="n">push</span><span class="p">,</span> <span class="n">pull_request</span><span class="p">,</span> <span class="n">workflow_dispatch</span><span class="p">]</span>
 <span class="n">name</span><span class="p">:</span> <span class="n">Test</span>
 <span class="n">jobs</span><span class="p">:</span>
   <span class="n">exakat</span><span class="p">:</span>
@@ -546,32 +554,50 @@ docker run -it -v $(pwd)/projects:/usr/src/exakat/projects --rm --name my-exakat
     <span class="o">-</span> <span class="k">with</span><span class="p">:</span>
       <span class="n">ignore_rules</span><span class="p">:</span> <span class="s1">&#39;Classes/StaticMethodsCalledFromObject,Php/ShouldUseCoalesce,Functions/UsesDefaultArguments&#39;</span>
       <span class="n">ignore_dirs</span><span class="p">:</span> <span class="s1">&#39;/path/to/repos#1,/path/to/repos#2,/path/to/repos#3&#39;</span>
+      <span class="n">project_reports</span><span class="p">:</span> <span class="n">Sarif</span><span class="p">,</span><span class="n">Diplomat</span><span class="p">,</span><span class="n">Perfile</span>
 </pre></div>
 </div>
 <p>The supported directives are the following:</p>
 <ul class="simple">
-<li><p><strong>exit_on_issues</strong> : default to true. The github action returns with exit code 1 if any issue is found during the review. Set this to empty string, to have the action return 0. You may also configure the step with <a class="reference external" href="https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error">continue-on-error</a>.</p></li>
+<li><p><strong>exit_on_issues</strong> : default to true. Use empty string for false. The github action returns with exit code 1 if any issue is found during the review. Set this to empty string, to have the action return 0. You may also configure the step with <a class="reference external" href="https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error">continue-on-error</a>.</p></li>
 <li><p><strong>ignore_rules</strong> : default to empty. A comma-separated list of Exakat rule short names, that will be excluded from the review. For example : ignore_rules: Structures/AddOne,Structures/PlusEgalOne.</p></li>
 <li><p><strong>ignore_dirs</strong> : default to empty. A comma-separated list folders that will be omitted. They are relative to the root of the repository.</p></li>
 <li><p><strong>include_dirs</strong> : default to empty. A comma-separated list folders that must be added. They are relative to the root of the repository, and will be added after the ignore_dirs directive.</p></li>
 <li><p><strong>file_extensions</strong> : default to exakat’s default value. A comma-separated list of file extensions to filter the processed files. Default list is php,php3,inc,tpl,phtml,tmpl,phps,ctp,module. This configuration replaces the default one.</p></li>
 <li><p><strong>project_reports</strong> : default to Perfile. A comma-separated list of Exakat reports to be processed. For example : Perfile,Sarif,Diplomat. Reports such as ‘Diplomat’ must be uploaded elsewhere (with <a class="reference external" href="https://github.com/actions/upload-artifact">upload artifact</a>), as the produced file will be written in the Github Action, which is later removed.</p></li>
 </ul>
+<p>Other exakat directives may be provided by using the <a class="reference internal" href="../User/Configuration.html#user-in-code-configuration"><span class="std std-ref">In-code Configuration</span></a>, aka .exakat.yaml or .exakat.ini.</p>
 <div class="section" id="upload-reports-as-artefact">
 <h4>Upload reports as artefact<a class="headerlink" href="#upload-reports-as-artefact" title="Permalink to this headline">¶</a></h4>
-<p>When producing a report with Github action, the result is either send to STDOUT, aka the log in the Github interface. Or, it is written in the Github action. When this is done, the report must be uploaded out of the Github action to be preserved.</p>
-<p>Github upload, aka <a class="reference external" href="mailto:actions/upload-artifact&#37;&#52;&#48;v2">actions/upload-artifact<span>&#64;</span>v2</a>, may be used for that purpose. Add the following configuration in the action file :</p>
+<p>When producing a report with Github action, the result is either send to STDOUT, aka the log in the Github interface : this is the case for the Perfile report. Or, it is written in the Github action’s container. Then, the report must be uploaded out of the container to be preserved.</p>
+<p><a class="reference external" href="https://github.com/actions/upload-artifact">Github upload</a>, aka <a class="reference external" href="mailto:actions/upload-artifact&#37;&#52;&#48;v2">actions/upload-artifact<span>&#64;</span>v2</a>, is a solution to upload the results. Add the following configuration in the action file :</p>
+<dl>
+<dt>::</dt><dd><ul>
+<li><p>name: Exakat
+uses: docker://exakat/exakat-ga</p></li>
+<li><p>with:
+///… possible other directives
+project_reports: Diplomat
+/// project_reports may include other reports, like Sarif and Perfile</p></li>
+<li><p>uses: <a class="reference external" href="mailto:actions/upload-artifact&#37;&#52;&#48;v2">actions/upload-artifact<span>&#64;</span>v2</a>
+with:</p>
+<blockquote>
+<div><p>name: my-exakat-report
+path: /github/workspace/diplomat</p>
+</div></blockquote>
+</li>
+</ul>
+</dd>
+</dl>
+<p>The report files are stored in the <code class="docutils literal notranslate"><span class="pre">/github/workspace</span></code> folder, with different names depending on the requested exakat report. For example, the <cite>Sarif</cite> report is exported to the file ‘exakat.sarif’, while the <cite>Diplomat</cite> report is stored in the folder called ‘diplomat’. Thus, the configuration shall be :</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">upload</span><span class="o">-</span><span class="n">artifact</span><span class="nd">@v2</span>
   <span class="k">with</span><span class="p">:</span>
-    <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">exakat</span><span class="o">-</span><span class="n">report</span>
-    <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">workspace</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">report</span>
-</pre></div>
-</div>
-<p>The path to report is stored in the <code class="docutils literal notranslate"><span class="pre">/github/workspace</span></code> folder, with different names depending on the requested exakat report. For example, the <cite>Yaml</cite> report is exported to ‘exakat.yaml’, while the <cite>Diplomat</cite> report is stored in a folder called ‘diplomat’. Thus, the configuration shall be :</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">upload</span><span class="o">-</span><span class="n">artifact</span><span class="nd">@v2</span>
-  <span class="k">with</span><span class="p">:</span>
-    <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">exakat</span><span class="o">-</span><span class="n">report</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">exakat</span><span class="o">-</span><span class="n">diplomat</span><span class="o">-</span><span class="n">report</span>
     <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">workspace</span><span class="o">/</span><span class="n">diplomat</span>
+<span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">upload</span><span class="o">-</span><span class="n">artifact</span><span class="nd">@v2</span>
+  <span class="k">with</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">exakat</span><span class="o">-</span><span class="n">sharif</span><span class="o">-</span><span class="n">report</span>
+    <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">workspace</span><span class="o">/</span><span class="n">exakat</span><span class="o">.</span><span class="n">sharif</span>
 </pre></div>
 </div>
 </div>

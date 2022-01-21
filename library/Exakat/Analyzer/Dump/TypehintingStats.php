@@ -65,11 +65,6 @@ class TypehintingStats extends AnalyzerArrayHashResults {
 
         //nullable typehinted
         $this->atomIs('Parameter')
-             ->filter(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot('Void')
-             )
              ->isNullable()
              ->count();
         $argNullable = $this->rawQuery()->toInt();
@@ -77,28 +72,25 @@ class TypehintingStats extends AnalyzerArrayHashResults {
         //nullable typehinted
         $this->atomIs(self::FUNCTIONS_ALL)
              ->isNullable()
-             ->filter(
-                $this->side()
-                     ->outIs('RETURNTYPE')
-                     ->atomIsNot('Void')
-             )
              ->count();
         $returnNullable = $this->rawQuery()->toInt();
 
         //scalar typehint used
         $this->atomIs('Scalartypehint')
+             ->fullnspathIsNot('\\null')
              ->count();
         $scalartype = $this->rawQuery()->toInt();
 
         //typehinted
         $this->atomIs('Scalartypehint')
+             ->fullnspathIsNot('\\null')
              ->groupCount('fullnspath')
              ->raw('cap("m")');
         $scalartypes1 = $this->rawQuery()->toArray();
 
         //typehinted 2
         $this->atomIs(array('Identifier', 'Nsname'))
-             ->fullnspathIs(array('\\resource', '\\mixed', '\\numeric', '\\false'))
+             ->fullnspathIs(array('\\resource', '\\mixed', '\\numeric', '\\false', '\\never'))
              ->groupCount('fullnspath')
              ->raw('cap("m")');
         $scalartypes2 = $this->rawQuery()->toArray();
@@ -177,8 +169,9 @@ class TypehintingStats extends AnalyzerArrayHashResults {
              ->count();
         $totalProperties = $this->rawQuery()->toInt();
 
-        //multiple properties
-        $this->atomIs(array('Method', 'Closure', 'Magicmethod', 'Arrowfunction', 'Function'))
+        //union properties
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->is('typehint', 'or')
              ->filter(
                 $this->side()
                      ->outIs('RETURNTYPE')
@@ -187,7 +180,72 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                      ->raw('is(gte(2))')
              )
              ->count();
-        $multipleTypehints = $this->rawQuery()->toInt();
+        $unionTypehints1 = $this->rawQuery()->toInt();
+
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('ARGUMENT')
+             ->is('typehint', 'or')
+             ->filter(
+                $this->side()
+                     ->outIs('TYPEHINT')
+                     ->fullnspathIsNot(array('\\void', '\\null'))
+                     ->count()
+                     ->raw('is(gte(2))')
+             )
+             ->count();
+        $unionTypehints2 = $this->rawQuery()->toInt();
+
+        $this->atomIs('Ppp')
+             ->is('typehint', 'or')
+             ->filter(
+                $this->side()
+                     ->outIs('TYPEHINT')
+                     ->fullnspathIsNot(array('\\void', '\\null'))
+                     ->count()
+                     ->raw('is(gte(2))')
+             )
+             ->count();
+        $unionTypehints3 = $this->rawQuery()->toInt();
+        $unionTypehints = $unionTypehints1 + $unionTypehints2 + $unionTypehints3;
+
+        //intersection properties
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->is('typehint', 'and')
+             ->filter(
+                $this->side()
+                     ->outIs('RETURNTYPE')
+                     ->fullnspathIsNot(array('\\void', '\\null'))
+                     ->count()
+                     ->raw('is(gte(2))')
+             )
+             ->count();
+        $intersectionTypehints1 = $this->rawQuery()->toInt();
+
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('ARGUMENT')
+             ->is('typehint', 'and')
+             ->filter(
+                $this->side()
+                     ->outIs('TYPEHINT')
+                     ->fullnspathIsNot(array('\\void', '\\null'))
+                     ->count()
+                     ->raw('is(gte(2))')
+             )
+             ->count();
+        $intersectionTypehints2 = $this->rawQuery()->toInt();
+
+        $this->atomIs('Ppp')
+             ->is('typehint', 'and')
+             ->filter(
+                $this->side()
+                     ->outIs('TYPEHINT')
+                     ->fullnspathIsNot(array('\\void', '\\null'))
+                     ->count()
+                     ->raw('is(gte(2))')
+             )
+             ->count();
+        $intersectionTypehints3 = $this->rawQuery()->toInt();
+        $intersectionTypehints = $intersectionTypehints1 + $intersectionTypehints2 + $intersectionTypehints3;
 
         $return = compact('totalArguments',
                           'totalFunctions',
@@ -200,7 +258,8 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                           'interfaceTypehint',
                           'typedProperties',
                           'totalProperties',
-                          'multipleTypehints'
+                          'unionTypehints',
+                          'intersectionTypehints'
                           );
         $return = $return + $scalartypes + $objecttypes;
 

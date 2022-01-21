@@ -75,6 +75,7 @@ class DSLFactory {
                                           'PPP',
                                           'DEFAULT',
                                           'RETURNED',
+                                          'TYPEHINT',
                                           );
 
             foreach($data as $token){

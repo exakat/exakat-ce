@@ -40,8 +40,8 @@ class ProcessLevels extends DSL {
         $command = new Command(<<<GREMLIN
 where(
     __.sideEffect{ levels = []; }
-      .repeat( __.out('BLOCK', 'EXPRESSION', 'THEN', 'ELSE', 'CASES')).emit().times($MAX_LOOPING)
-      .not(hasLabel('Sequence', 'Block'))
+      .repeat( __.out("BLOCK", "EXPRESSION", "THEN", "ELSE", "CASES")).emit().times($MAX_LOOPING)
+      .not(hasLabel("Sequence", "Block"))
       .path()
       .sideEffect{ levels.add(Math.round((it.get().size() - 1 ) / 2 - 1));}
       .fold()

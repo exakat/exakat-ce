@@ -56,7 +56,7 @@ class Install extends Tasks {
             print "Starting download of tinkergraph.\n";
             $tinkerpop = file_get_contents('https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-' . self::TINKERGRAPH_VERSION . '-bin.zip');
 
-            if (hash('sha256', $tinkerpop) !== substr(file_get_contents('https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-' . self::TINKERGRAPH_VERSION . '-bin.zip.sha256') ?? '', 0, 64)) {
+            if (hash('sha256', $tinkerpop) !== substr(@file_get_contents('https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-' . self::TINKERGRAPH_VERSION . '-bin.zip.sha256') ?? '', 0, 64)) {
                 die('SHA256 checksum doesn\'t match the downloaded version of tinkerpop. Aborting install' . PHP_EOL);
             } else {
                 print "Gremlin server checksum OK\n";

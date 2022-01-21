@@ -102,7 +102,7 @@ SQL;
         $this->globals[] = "('{$origin}','{$destination}')";
     }
 
-    public function addCall(string $type, string $fullnspath, Atom $call): void {
+    public function addCall(string $type, string $fullnspath, AtomInterface $call): void {
         if (empty($fullnspath)) {
             return;
         }
@@ -183,7 +183,7 @@ SQL;
         }
     }
 
-    public function addDefinition(string $type, string $fullnspath, Atom $definition): void {
+    public function addDefinition(string $type, string $fullnspath, AtomInterface $definition): void {
         if (empty($fullnspath)) {
             return;
         }

@@ -23,8 +23,10 @@
 
 namespace Exakat\Exceptions;
 
+use Exception;
+
 class InvalidPHPBinary extends \Exception {
-    public function __construct(string $message = '', int $code = 0, \Exception $previous = null) {
+    public function __construct(string $message = '', int $code = 0, Exception $previous = null) {
 
         parent::__construct("This PHP version ($message) is not valid for running Exakat. You need PHP 7.0 or later.\n", $code, $previous);
     }

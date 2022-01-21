@@ -53,12 +53,14 @@ class Extension extends Analyzer {
             return ;
         }
 
+        $ini->functions = array_filter($ini->functions ?? array());
         if (!empty($ini->functions)) {
             $functions = makeFullNsPath($ini->functions);
             $this->atomFunctionIs($functions);
             $this->prepareQuery();
         }
 
+        $ini->constants = array_filter($ini->constants ?? array());
         if (!empty($ini->constants)) {
             $this->atomIs(self::STATIC_NAMES)
                  ->analyzerIs('Constants/ConstantUsage')
@@ -66,6 +68,7 @@ class Extension extends Analyzer {
             $this->prepareQuery();
         }
 
+        $ini->classes = array_filter($ini->classes ?? array());
         if (!empty($ini->classes)) {
             $classes = makeFullNsPath($ini->classes);
 
@@ -110,6 +113,7 @@ class Extension extends Analyzer {
             }
         }
 
+        $ini->interfaces = array_filter($ini->interfaces ?? array());
         if (!empty($ini->interfaces)) {
             $interfaces = makeFullNsPath($ini->interfaces);
 
@@ -123,6 +127,21 @@ class Extension extends Analyzer {
             }
         }
 
+        $ini->enums = array_filter($ini->enums ?? array());
+        if (!empty($ini->enums)) {
+            $enums = makeFullNsPath($ini->enums);
+
+            $usedEnums = array_intersect(self::getCalledEnums(), $enums);
+
+            if (!empty($usedEnums)) {
+                $usedEnums = array_values($usedEnums);
+                $this->analyzerIs('Enums/EnumUsage')
+                     ->fullnspathIs($usedEnums);
+                $this->prepareQuery();
+            }
+        }
+
+        $ini->traits = array_filter($ini->traits ?? array());
         if (!empty($ini->traits)) {
             $traits = makeFullNsPath($ini->traits);
 
@@ -136,6 +155,7 @@ class Extension extends Analyzer {
             }
         }
 
+        $ini->namespaces = array_filter($ini->namespaces ?? array());
         if (!empty($ini->namespaces)) {
             $namespaces = makeFullNsPath($ini->namespaces);
 
@@ -149,6 +169,7 @@ class Extension extends Analyzer {
             }
         }
 
+        $ini->directives = array_filter($ini->directives ?? array());
         if (!empty($ini->directives)) {
             $usedDirectives = array_intersect(self::getCalledDirectives(), $ini->directives);
 
@@ -161,6 +182,7 @@ class Extension extends Analyzer {
             }
         }
 
+        $ini->classconstants = array_filter($ini->classconstants ?? array());
         if (!empty($ini->classconstants)) {
             $classesconstants = array();
             foreach((array) $ini->classconstants as $c) {
@@ -182,6 +204,7 @@ class Extension extends Analyzer {
 
         // Methods, with typehints (parameters and properties)
         // TODO : Methods with returntypes, local new.
+        $ini->methods = array_filter($ini->methods ?? array());
         if (!empty($ini->methods)) {
             $methods = array();
             foreach(array_filter((array) $ini->methods) as $m) {
@@ -207,6 +230,7 @@ class Extension extends Analyzer {
             $this->prepareQuery();
         }
 
+        $ini->staticMethods = array_filter($ini->staticMethods ?? array());
         if (!empty($ini->staticMethods)) {
             $methods = array();
             foreach(array_filter((array) $ini->staticMethods) as $m) {
@@ -230,6 +254,7 @@ class Extension extends Analyzer {
 
         // Properties, with typehints (parameters and properties)
         // TODO : Properties with returntypes, local new.
+        $ini->properties = array_filter($ini->properties ?? array());
         if (!empty($ini->properties)) {
             $properties = array();
             foreach(array_filter((array) $ini->properties) as $p) {
@@ -254,6 +279,7 @@ class Extension extends Analyzer {
             $this->prepareQuery();
         }
 
+        $ini->staticProperties = array_filter($ini->staticProperties ?? array());
         if (!empty($ini->staticProperties)) {
             $properties = array();
             foreach(array_filter((array) $ini->properties) as $p) {

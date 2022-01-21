@@ -10,7 +10,17 @@ Here is a list of words, commonly used when using Exakat, with their definitions
     `Analysis`
         An `Analysis` is a pattern that may be detected in the code. The analysis has a human-redable description,  and a specific implementation.
 
++ `C`
+    `CIT`
+        Acronym for Class-Interface-Trait. Sometimes, this includes also Enum. All those structures share the same namespace.
+
+    `CPM`
+        Acronym for Constant-Property-Method.
+
 + `D`
+    `Directive`
+        A configuration option.
+
     `Dump`
         The phase of execution, which prepare the results from the graph database to the data storage for reports.
 

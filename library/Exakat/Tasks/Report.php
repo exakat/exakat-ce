@@ -24,6 +24,7 @@ namespace Exakat\Tasks;
 
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\ProjectNeeded;
+use Exakat\Exceptions\NoSuchRuleset;
 use Exakat\Exceptions\InvalidProjectName;
 use Exakat\Exceptions\ProjectNotInited;
 use Exakat\Exceptions\NoDump;
@@ -54,6 +55,21 @@ class Report extends Tasks {
 
         if (!file_exists($this->config->dump)) {
             throw new NoDump((string) $this->config->project);
+        }
+
+        $rulesets = $this->config->project_rulesets;
+        $unknown = array();
+        foreach($rulesets as $ruleset) {
+            if ($ruleset === 'None') {
+                // this one is empty on purpose
+                continue;
+            }
+            if ( empty($this->rulesets->getRulesetsAnalyzers(array($ruleset) ) ) ) {
+                $unknown[] = $ruleset;
+            }
+        }
+        if (!empty($unknown)) {
+            throw new NoSuchRuleset(implode(', ', $unknown), $this->rulesets->getSuggestionRuleset($unknown));
         }
 
         $dump = Dump::factory($this->config->dump, Dump::READ);

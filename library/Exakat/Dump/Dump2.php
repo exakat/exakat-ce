@@ -73,12 +73,20 @@ CREATE TABLE cit (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                     type STRING,
                     abstract INTEGER,
                     final INTEGER,
-                    phpdoc STRING,
                     begin INTEGER,
                     end INTEGER,
                     file INTEGER,
                     line INTEGER,
                     extends STRING DEFAULT ""
+                  )
+SQL;
+        $this->sqlite->query($query);
+
+        $query = <<<'SQL'
+CREATE TABLE phpdoc (  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       type STRING,
+                       type_id INTEGER,
+                       phpdoc STRING
                   )
 SQL;
         $this->sqlite->query($query);
@@ -102,9 +110,7 @@ CREATE TABLE methods (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                         abstract INTEGER,
                         reference INTEGER,
                         visibility STRING,
-                        returntype STRING,
-                        returntype_fnp STRING,
-                        phpdoc STRING,
+                        returntype_type STRING,
                         begin INTEGER,
                         end INTEGER
                      )
@@ -120,10 +126,19 @@ CREATE TABLE arguments (id INTEGER PRIMARY KEY AUTOINCREMENT,
                         reference INTEGER,
                         variadic INTEGER,
                         init STRING,
+                        expression INTEGER,
                         line INTEGER,
-                        typehint STRING,
-                        typehint_fnp STRING,
-                        phpdoc STRING
+                        typehint_type STRING
+                     )
+SQL;
+        $this->sqlite->query($query);
+
+        $query = <<<'SQL'
+CREATE TABLE typehints (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        type STRING,
+                        object INTEGER,
+                        name STRING,
+                        fnp STRING
                      )
 SQL;
         $this->sqlite->query($query);
@@ -133,12 +148,12 @@ CREATE TABLE properties (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                            property INTEGER,
                            citId INTEGER,
                            visibility STRING,
+                           var INTEGER,
                            static INTEGER,
-                           phpdoc STRING,
                            value STRING,
+                           expression INTEGER,
                            line INTEGER,
-                           typehint STRING,
-                           typehint_fnp STRING
+                           typehint_type STRING
                            )
 SQL;
         $this->sqlite->query($query);
@@ -148,8 +163,7 @@ CREATE TABLE classconstants ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                               constant INTEGER,
                               citId INTEGER,
                               visibility STRING,
-                              value STRING,
-                              phpdoc STRING
+                              value STRING
                             )
 SQL;
         $this->sqlite->query($query);
@@ -160,8 +174,8 @@ CREATE TABLE constants (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                           namespaceId INTEGER,
                           file STRING,
                           value STRING,
-                          phpdoc STRING,
-                          type STRING
+                          type STRING,
+                          expression INTEGER
                        )
 SQL;
         $this->sqlite->query($query);
@@ -180,11 +194,9 @@ CREATE TABLE functions (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                           function STRING,
                           type STRING,
                           namespaceId INTEGER,
-                          returntype STRING,
-                          returntype_fnp STRING,
+                          returntype_type STRING,
                           reference INTEGER,
                           file STRING,
-                          phpdoc STRING,
                           begin INTEGER,
                           end INTEGER,
                           CONSTRAINT "unique" UNIQUE (function, begin)
@@ -313,7 +325,7 @@ SQL;
     public function fetchTableFunctions(): Results {
         $res = $this->sqlite->query(<<<'SQL'
 SELECT functions.*, 
-GROUP_CONCAT((CASE arguments.typehint WHEN ' ' THEN '' ELSE arguments.typehint || ' ' END ) || 
+GROUP_CONCAT((CASE typehints.type WHEN ' ' THEN '' ELSE typehints.type || ' ' END ) || 
               CASE arguments.reference WHEN 0 THEN '' ELSE '&' END || 
               CASE arguments.variadic WHEN 0 THEN '' ELSE '...' END  || arguments.name || 
               (CASE arguments.init WHEN ' ' THEN '' ELSE ' = ' || arguments.init END),
@@ -324,6 +336,9 @@ FROM functions
 LEFT JOIN arguments
     ON functions.id = arguments.methodId AND
        arguments.citId = 0
+LEFT JOIN typehints
+     ON arguments.id = typehints.object AND
+        typehints.type = 'argument'
 GROUP BY functions.id
 
 SQL
@@ -356,7 +371,7 @@ SQL
     public function fetchTableMethods(): Results {
         $res = $this->sqlite->query(<<<'SQL'
 SELECT methods.*, 
-       GROUP_CONCAT((CASE arguments.typehint WHEN ' ' THEN '' ELSE arguments.typehint || ' ' END ) || 
+       GROUP_CONCAT((CASE typehints.name WHEN ' ' THEN '' ELSE typehints.name || ' ' END ) || 
                      CASE arguments.reference WHEN 0 THEN '' ELSE '&' END || 
                      CASE arguments.variadic WHEN 0 THEN '' ELSE '...' END  || arguments.name || 
                      (CASE arguments.init WHEN ' ' THEN '' ELSE ' = ' || arguments.init END),
@@ -365,9 +380,12 @@ SELECT methods.*,
        lower(namespaces.namespace) || lower(cit.name) || '::' || lower(methods.method) AS fullnspath,
        cit.name AS class,
        cit.file AS file,
-       methods.begin AS line
+       methods.begin AS line,
+       group_concat(typehints.name) AS typehint
 
     FROM methods
+    LEFT JOIN typehints
+        ON methods.id = typehints.object
     LEFT JOIN arguments
         ON methods.id = arguments.methodId
     JOIN cit
@@ -435,20 +453,22 @@ SELECT cit.type || ' ' || cit.name AS theClass,
        methods.method,
        arguments.name AS argument,
        init,
-       typehint,
-       typehint_fnp,
+       group_concat(typehints.name) as typehint,
+       group_concat(typehints.fnp) as fnp,
        rank,
        arguments.line,
        cit.file
 FROM cit
 JOIN methods 
     ON methods.citId = cit.id
+JOIN typehints 
+    ON methods.id = typehints.object
 JOIN arguments 
     ON methods.id = arguments.methodId AND
        arguments.citId != 0
 JOIN namespaces 
     ON cit.namespaceId = namespaces.id
-WHERE type in ("class", "trait", "interface")
+WHERE cit.type in ("class", "trait", "interface")
 ORDER BY fullnspath
 SQL
         );
@@ -460,14 +480,16 @@ SQL
         $res = $this->sqlite->query(<<<'SQL'
 SELECT cit.type || ' ' || cit.name AS theClass, 
        namespaces.namespace || "\\" || lower(cit.name) AS fullnspath,
-       returntype, 
+       group_concat(typehints.name) as returntype, 
        methods.method
 FROM cit
 JOIN methods 
     ON methods.citId = cit.id
+JOIN typehints 
+    ON methods.id = typehints.object
 JOIN namespaces 
     ON cit.namespaceId = namespaces.id
-WHERE type in ("class", "trait", "interface")
+WHERE cit.type in ("class", "trait", "interface")
 ORDER BY fullnspath
 SQL
         );

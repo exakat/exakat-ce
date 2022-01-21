@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class SameTypehintAs extends DSL {
     public function run(): Command {
-        assert(func_num_args() === 1, 'One argument ncessary for ' . __METHOD__);
+        $this->assertArguments(1, func_num_args(), __METHOD__);
         list($variable) = func_get_args();
 
         $this->assertVariable($variable);

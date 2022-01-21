@@ -25,8 +25,6 @@ namespace Exakat\Tasks\LoadFinal;
 use Exakat\Analyzer\Analyzer;
 
 class SpotPHPNativeConstants extends LoadFinal {
-    private $PHPconstants = array();
-
     public function run(): void {
         if (empty($this->PHPconstants)) {
             return;

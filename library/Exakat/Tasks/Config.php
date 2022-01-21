@@ -35,7 +35,7 @@ class Config extends Tasks {
 
         // May be in-code!!
         if ($this->config->inside_code === Configuration::INSIDE_CODE) {
-            $projectConfig = new DotExakatYamlConfig();
+            $projectConfig = new DotExakatYamlConfig($this->config->project, $this->config->projects_root);
             $projectConfig->loadConfig($project);
         } elseif ($this->config->project === null) {
             $projectConfig = new ProjectConfig($this->config->projects_root);

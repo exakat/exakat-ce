@@ -5,6 +5,11 @@
         "name": "$matches"
     },
     {
+        "function": "\\preg_match",
+        "position": 2,
+        "name": "$r"
+    },
+    {
         "function": "\\preg_match_all",
         "position": 2,
         "name": "$matches"
@@ -18,6 +23,16 @@
         "function": "\\fsockopen",
         "position": 3,
         "name": "$errstr"
+    },
+    {
+        "function": "\\fopen",
+        "position": 3,
+        "name": "$fp"
+    },
+    {
+        "function": "\\fopen",
+        "position": 3,
+        "name": "$handle"
     },
     {
         "function": "\\pfsockopen",

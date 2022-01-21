@@ -53,7 +53,7 @@ class Query {
     private $sides            = array();
     private $stopped          = self::QUERY_RUNNING;
 
-    public function __construct(int $id, Project $project, string $analyzer, string $php, ?array $dependsOn = array()) {
+    public function __construct(int $id, Project $project, string $analyzer, string $php, array $dependsOn = array()) {
         $this->id        = $id;
         $this->project   = $project;
         $this->analyzer  = $analyzer;

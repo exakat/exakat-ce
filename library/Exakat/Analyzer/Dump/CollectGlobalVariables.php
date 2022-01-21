@@ -42,8 +42,8 @@ CREATE TABLE globalVariables ( id INTEGER PRIMARY KEY AUTOINCREMENT,
 SQL;
 
     public function analyze(): void {
-        $this->atomIs('Virtualglobal', Analyzer::WITHOUT_CONSTANTS)
-             ->codeIsNot('$GLOBALS', Analyzer::TRANSLATE, Analyzer::CASE_SENSITIVE)
+        $this->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
+             ->codeIsNot('$GLOBALS', self::TRANSLATE, self::CASE_SENSITIVE)
              ->outIs('DEFINITION')
              ->savePropertyAs('label', 'type')
              ->outIsIE('DEFINITION')

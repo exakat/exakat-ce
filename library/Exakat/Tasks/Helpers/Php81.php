@@ -173,5 +173,6 @@ class Php81 extends Php {
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 404;
     public const T_BAD_CHARACTER                                    = 405;
     public const T_DOUBLE_COLON                                     = 397;
+    public const T_CHARACTER                                        = 1000;
 }
 ?>

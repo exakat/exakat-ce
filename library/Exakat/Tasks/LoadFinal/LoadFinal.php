@@ -31,8 +31,8 @@ class LoadFinal {
     protected $config     = null;
     protected $datastore  = null;
 
-    private $PHPconstants = array();
-    private $PHPfunctions = array();
+    protected $PHPconstants = array();
+    protected $PHPfunctions = array();
 
     protected $log        = null;
 

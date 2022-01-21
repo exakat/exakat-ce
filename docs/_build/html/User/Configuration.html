@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/exakat.css" type="text/css" />
 
   
   
@@ -99,6 +100,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Tutorials.html">Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
 <ul class="current">
@@ -111,6 +113,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#general-philosophy">General Philosophy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#precedence">Precedence</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#common-options">Common Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-placements">Option placements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-availability">Option availability</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#project-configuration">Project Configuration</a><ul>
@@ -129,9 +133,26 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#in-code-configuration">In-code Configuration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#exakat-in-code-example">Exakat in-code example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exakat-in-code-yaml-example">Exakat in-code YAML example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exakat-in-code-ini-example">Exakat in-code INI example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#exakat-in-code-skeleton">Exakat in-code skeleton</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Available Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Available Options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">include_dirs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">ignore_dirs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ignore-rules">ignore_rules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#include-rules">include_rules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">file_extensions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">project_name</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">project_url</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">project_vcs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">project_description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">project_description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">project_packagist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#project-rulesets">project_rulesets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#project-reports">project_reports</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rulesets">rulesets</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#commandline-configuration">Commandline Configuration</a></li>
@@ -253,14 +274,15 @@
 </div>
 <div class="section" id="precedence">
 <h3>Precedence<a class="headerlink" href="#precedence" title="Permalink to this headline">¶</a></h3>
-<p>The exakat engine read directives from five places, with the following precedence :</p>
+<p>The exakat engine read directives from six places, with the following precedence :</p>
 <ol class="arabic simple">
 <li><p>The command line options</p></li>
 <li><p>The .exakat.ini or .exakat.yaml file at the root of the code</p></li>
-<li><p>The config.ini file in the project directory</p></li>
-<li><p>The exakat.ini file in the config directory</p></li>
-<li><p>The default values in the code</p></li>
 </ol>
+<p>3. The environment variables
+3. The config.ini file in the project directory
+4. The exakat.ini file in the config directory
+5. The default values in the code</p>
 <p>The precedence of the directives is the same as the list above : command line options always have highest priority, config.ini files are in second, when command line are not available, and finally, the default values are read in the code.</p>
 <p>Some of the directives are only available in the config.ini files, or at the engine level.</p>
 </div>
@@ -269,6 +291,153 @@
 <p>All options are the same, whatever the command provided to exakat. -f always means files, and -q always means quick.</p>
 <p>Any option that a command doesn’t understand is ignored.</p>
 <p>Any option that is not recognized is ignored and reported (with visibility).</p>
+</div>
+<div class="section" id="option-placements">
+<span id="user-option-placements"></span><h3>Option placements<a class="headerlink" href="#option-placements" title="Permalink to this headline">¶</a></h3>
+<p>This table show in which file the directive may be placed to be used. ‘exakat’ is the config/exakat.ini file, ‘project’ is the projects/–name–/config.ini file, and ‘in-code’ is the .exakat.yaml/ini file, directly in the code.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>name</p></td>
+<td><p>exakat</p></td>
+<td><p>project</p></td>
+<td><p>in-code</p></td>
+</tr>
+<tr class="row-even"><td><p>phpversion</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>ignore_dirs</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>include_dirs</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>ignore_rules</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>file_extensions</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>project_name</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>project_description</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>project_url</p></td>
+<td></td>
+<td><p>X</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>project_vcs</p></td>
+<td></td>
+<td><p>X</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>project_reports</p></td>
+<td></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>project_rulesets</p></td>
+<td></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>project_vcs</p></td>
+<td></td>
+<td><p>X</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>project_packagist</p></td>
+<td></td>
+<td><p>X</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>project_cobblers</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>rulesets</p></td>
+<td></td>
+<td></td>
+<td><p>X</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="option-availability">
+<span id="user-option-availability"></span><h3>Option availability<a class="headerlink" href="#option-availability" title="Permalink to this headline">¶</a></h3>
+<p>This table show which operation (audit, cobbler) is parametered by which directive.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 40%" />
+<col style="width: 18%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>name</p></td>
+<td><p>project / analyze</p></td>
+<td><p>cobble</p></td>
+</tr>
+<tr class="row-even"><td><p>phpversion</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>ignore_dirs</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>include_dirs</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>ignore_rules</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>file_extensions</p></td>
+<td><p>X</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>project_reports</p></td>
+<td><p>X</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>project_rulesets</p></td>
+<td><p>X</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>project_vcs</p></td>
+<td></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>project_cobblers</p></td>
+<td></td>
+<td><p>X</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="project-configuration">
@@ -327,20 +496,23 @@ file_extensions may be a comma-separated list of values as a string, or an array
 </div>
 </div>
 <div class="section" id="in-code-configuration">
-<h2>In-code Configuration<a class="headerlink" href="#in-code-configuration" title="Permalink to this headline">¶</a></h2>
+<span id="user-in-code-configuration"></span><h2>In-code Configuration<a class="headerlink" href="#in-code-configuration" title="Permalink to this headline">¶</a></h2>
 <p>In-code configuration is a configuration file that sits at the root of the code. When exakat finds it, it uses it for in-code auditing.</p>
-<p>The file is <cite>.exakat.yaml</cite>, and is a valid YAML file. <cite>.exakat.yml</cite> is also valid, but not recommended.</p>
-<p>In case the file is found but not valid, Exakat reverts to default values.</p>
+<ul class="simple">
+<li><p>The file is <cite>.exakat.ini</cite>, and is a valid INI file. It has priority over the YAML version.</p></li>
+<li><p>The file is <cite>.exakat.yaml</cite>, and is a valid YAML file. <cite>.exakat.yml</cite> is also valid, but not recommended.</p></li>
+</ul>
+<p>In case those files are not found, or valid, Exakat reverts to default values.</p>
 <p>Unrecognized values are ignored.</p>
-<div class="section" id="exakat-in-code-example">
-<h3>Exakat in-code example<a class="headerlink" href="#exakat-in-code-example" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="exakat-in-code-yaml-example">
+<h3>Exakat in-code YAML example<a class="headerlink" href="#exakat-in-code-yaml-example" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="p">:</span> <span class="n">exakat</span>
 <span class="n">project_name</span><span class="p">:</span> <span class="n">exakat</span>
 <span class="n">project_rulesets</span><span class="p">:</span>
 <span class="o">-</span> <span class="n">my_ruleset</span>
 <span class="o">-</span> <span class="n">Security</span>
 <span class="n">project_report</span><span class="p">:</span>
-<span class="o">-</span> <span class="n">Ambassador</span>
+<span class="o">-</span> <span class="n">Diplomat</span>
 <span class="n">file_extensions</span><span class="p">:</span> <span class="n">php</span><span class="p">,</span><span class="n">php3</span><span class="p">,</span><span class="n">phtml</span>
 <span class="n">include_dirs</span><span class="p">:</span>
   <span class="o">-</span> <span class="o">/</span>
@@ -355,6 +527,23 @@ file_extensions may be a comma-separated list of values as a string, or an array
   <span class="n">my_ruleset</span><span class="p">:</span>
       <span class="o">-</span> <span class="n">Structures</span><span class="o">/</span><span class="n">AddZero</span>
       <span class="o">-</span> <span class="n">Structures</span><span class="o">/</span><span class="n">MultiplyByOne</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="exakat-in-code-ini-example">
+<h3>Exakat in-code INI example<a class="headerlink" href="#exakat-in-code-ini-example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="o">=</span> <span class="n">exakat</span>
+<span class="n">project_name</span><span class="o">=</span> <span class="n">exakat</span>
+<span class="n">project_rulesets</span><span class="p">[]</span> <span class="o">=</span> <span class="n">my_ruleset</span>
+<span class="n">project_rulesets</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Security</span>
+<span class="n">project_report</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Diplomat</span>
+<span class="n">file_extensions</span><span class="o">=</span> <span class="n">php</span><span class="p">,</span><span class="n">php3</span><span class="p">,</span><span class="n">phtml</span>
+<span class="n">include_dirs</span><span class="p">[]</span> <span class="o">=</span> <span class="o">/</span>
+<span class="n">ignore_dirs</span><span class="p">[]</span> <span class="o">=</span> <span class="o">/</span><span class="n">tests</span>
+<span class="n">ignore_dirs</span><span class="p">[]</span> <span class="o">=</span> <span class="o">/</span><span class="n">vendor</span>
+<span class="n">ignore_dirs</span><span class="p">[]</span> <span class="o">=</span> <span class="o">/</span><span class="n">docs</span>
+<span class="n">ignore_dirs</span><span class="p">[]</span> <span class="o">=</span> <span class="o">/</span><span class="n">media</span>
+<span class="n">ignore_rules</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Structures</span><span class="o">/</span><span class="n">AddZero</span>
 </pre></div>
 </div>
 </div>
@@ -387,77 +576,82 @@ file_extensions may be a comma-separated list of values as a string, or an array
 </div>
 <div class="section" id="id1">
 <h3>Available Options<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<p>Here are the currently available options in Exakat’s project configuration file : projects/&amp;lt;project name&amp;gt;/config.ini</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 20%" />
-<col style="width: 80%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Option</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>include_dirs[]</p></td>
-<td><p>This is the list of files and dir to include in the project’s directory. It is chrooted
-in the project’s folder. Values provided with a starting / are used as a path prefix.
-Values without / are used as a substring, anywhere in the path.
-include_dirs are added AFTER ignore_dirs, so as to partially ignore a folder, such as
-the vendor folder from composer.</p></td>
-</tr>
-<tr class="row-odd"><td><p>ignore_dirs[]</p></td>
-<td><p>This is the list of files and dir to ignore in the project’s directory. It is chrooted in
-the project’s folder. Values provided with a starting / are used as a path prefix. Values
-without / are used as a substring, anywhere in the path.</p></td>
-</tr>
-<tr class="row-even"><td><p>ignore_rules[]</p></td>
-<td><p>The rules mentioned in this list are ignored when running the audit. Rules are ignored
+<p>Here are the currently available options in Exakat’s project configuration file : projects/–project name–/config.ini.</p>
+<p>When a value is ignored, it will be filled with the default value of the project, or the server. When defined, they replace those default values.</p>
+<div class="section" id="id2">
+<h4>include_dirs<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>This is the list of files and dir to include in the project’s directory. It is chrooted  in the project’s folder. Values provided with a starting / are used as a path prefix.</p>
+<p>Values without / are used as a substring, anywhere in the path. include_dirs are added AFTER ignore_dirs, so as to partially ignore a folder, such as the vendor folder from composer.</p>
+<p>This an array of strings, which are dirnames or filenames.</p>
+</div>
+<div class="section" id="id3">
+<h4>ignore_dirs<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>This is the list of files and dir to ignore in the project’s directory. It is chrooted in the project’s folder. Values provided with a starting / are used as a path prefix. Values without / are used as a substring, anywhere in the path.</p>
+<p>This an array of strings, which are dirnames or filenames.</p>
+</div>
+<div class="section" id="ignore-rules">
+<h4>ignore_rules<a class="headerlink" href="#ignore-rules" title="Permalink to this headline">¶</a></h4>
+<p>The rules mentioned in this list are ignored when running the audit. Rules are ignored
 after loading the rulesets configuration : as such, it is possible to ignore rules inside
-a ruleset, without ignoring the whole ruleset.
-The rules in this list are Exakat’s short name : ignore_rules[] = “Structures/AddZero”</p></td>
-</tr>
-<tr class="row-odd"><td><p>include_rules[]</p></td>
-<td><p>There is no include_rules directive. Create a custom Ruleset, and include it with
-project_rulesets (see below)</p></td>
-</tr>
-<tr class="row-even"><td><p>file_extensions</p></td>
-<td><p>This is the list of file extensions that is considered as PHP scripts. All others are
-ignored. All files bearing those extensions are subject to check, though they are
-scanned first for PHP tags before being analyzed. The extensions are comma separated,
-without dot.
-The default are : php, php3, inc, tpl, phtml, tmpl, phps, ctp</p></td>
-</tr>
-<tr class="row-odd"><td><p>project_name</p></td>
-<td><p>This is the project name, as it appears at the top left in the Ambassador report.</p></td>
-</tr>
-<tr class="row-even"><td><p>project_url</p></td>
-<td><p>This is the repository URL for the project. It is used to get the source for the project.</p></td>
-</tr>
-<tr class="row-odd"><td><p>project_vcs</p></td>
-<td><p>This is the VCS used to fetch the project source.</p></td>
-</tr>
-<tr class="row-even"><td><p>project_description</p></td>
-<td><p>This is the description of the project.
-This is free text, used in reports. The default is : ‘’ (empty string)</p></td>
-</tr>
-<tr class="row-odd"><td><p>project_packagist</p></td>
-<td><p>This is the packagist name for the code, when the code is fetched with composer.</p></td>
-</tr>
-<tr class="row-even"><td><p>project_rulesets</p></td>
-<td><p>This is the list of default rules to run for this project.
-The default are : CompatibilityPHP70, CompatibilityPHP71, CompatibilityPHP72,
-CompatibilityPHP73, CompatibilityPHP74, CompatibilityPHP80, Suggestions, Dead code,
-Security, Analyze, Top10, Preferences, Appinfo, Appcontent, Suggestions
-This an array of strings, which are all ruleset names</p></td>
-</tr>
-<tr class="row-odd"><td><p>project_reports</p></td>
-<td><p>This is the list of default reports to run for this project.
-The default are : Diplomat
-This an array of strings, which are all reports names</p></td>
-</tr>
-</tbody>
-</table>
+a ruleset, without ignoring the whole ruleset.</p>
+<p>The rules in this list are Exakat’s short name : ignore_rules[] = “Structures/AddZero”</p>
+<p>This an array of strings, which are all rules names</p>
+</div>
+<div class="section" id="include-rules">
+<h4>include_rules<a class="headerlink" href="#include-rules" title="Permalink to this headline">¶</a></h4>
+<p>There is no include_rules directive. Create a custom Ruleset, and include it with project_rulesets (see below).</p>
+<p>This an array of strings, which are all rules names.</p>
+</div>
+<div class="section" id="id4">
+<h4>file_extensions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>This is the list of file extensions that is considered as PHP scripts. All others are ignored. All files bearing those extensions are subject to check, though they are scanned first for PHP tags before being analyzed. The extensions are comma separated, without dot.</p>
+<p>This an array of strings, which are all extension names, without the ‘.’ dot.</p>
+</div>
+<div class="section" id="id5">
+<h4>project_name<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<p>This is the project name, as it appears at the top left in the Ambassador report.</p>
+<p>This is a string.</p>
+</div>
+<div class="section" id="id6">
+<h4>project_url<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<p>This is the repository URL for the project. It is used to get the source for the project.</p>
+</div>
+<div class="section" id="id7">
+<h4>project_vcs<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p>This is the VCS used to fetch the project source.</p>
+<p>This is a string.</p>
+</div>
+<div class="section" id="id8">
+<h4>project_description<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<p>This is the description of the project.</p>
+<p>This is free text, used in reports.</p>
+</div>
+<div class="section" id="id9">
+<h4>project_description<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<p>This is the description of the project.</p>
+<p>This is free text, used in reports.</p>
+</div>
+<div class="section" id="id10">
+<h4>project_packagist<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<p>This is the packagist name for the code, when the code is fetched with composer.</p>
+<p>This is a single string.</p>
+</div>
+<div class="section" id="project-rulesets">
+<h4>project_rulesets<a class="headerlink" href="#project-rulesets" title="Permalink to this headline">¶</a></h4>
+<p>This is the list of default rules to run for this project.</p>
+<p>This an array of strings, which are ruleset names.</p>
+</div>
+<div class="section" id="project-reports">
+<h4>project_reports<a class="headerlink" href="#project-reports" title="Permalink to this headline">¶</a></h4>
+<p>This is the list of default reports to run for this project.</p>
+<p>This an array of strings, which are all reports names</p>
+</div>
+<div class="section" id="rulesets">
+<h4>rulesets<a class="headerlink" href="#rulesets" title="Permalink to this headline">¶</a></h4>
+<p>This is a list of custom ruleset, along with the ruleset names.</p>
+<p>This directive is only available with YAML format.</p>
+<p>This an array of hashes. The keys of the hashes are the custom rulsets, and their value is an array of rule short names.</p>
+</div>
 </div>
 </div>
 <div class="section" id="commandline-configuration">
@@ -469,10 +663,265 @@ This an array of strings, which are all reports names</p></td>
 <p>Some analyzer may be configured individually. Those parameters are then specific to one analyzer, and it only affects their behavior.</p>
 <p>Analyzers may be configured in the <cite>project/*/config.ini</cite>; they may also be configured globally in the <cite>config/exakat.ini</cite> file.</p>
 <dl class="simple">
+<dt><a class="reference internal" href="../Reference/Rules.html#array-consistence"><span class="std std-ref">Array() / [  ] Consistence</span></a></dt><dd><ul class="simple">
+<li><p>array_ratio : 10</p>
+<ul>
+<li><p>Percentage of arrays in one of the syntaxes, to trigger the other syntax as a violation.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-array-dimensions"><span class="std std-ref">Too Many Array Dimensions</span></a></dt><dd><ul class="simple">
+<li><p>maxDimensions : 3</p>
+<ul>
+<li><p>Number of valid dimensions in an array.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#custom-class-usage"><span class="std std-ref">Custom Class Usage</span></a></dt><dd><ul class="simple">
+<li><p>forbiddenClasses :</p>
+<ul>
+<li><p>List of classes to be avoided</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#cancel-common-method"><span class="std std-ref">Cancel Common Method</span></a></dt><dd><ul class="simple">
+<li><p>cancelThreshold : 75</p>
+<ul>
+<li><p>Minimal number of cancelled methods to suggest the cancellation of the parent.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#could-be-parent-method"><span class="std std-ref">Could Be Parent Method</span></a></dt><dd><ul class="simple">
+<li><p>minChildren : 4</p>
+<ul>
+<li><p>Minimal number of children using this method.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#fossilized-method"><span class="std std-ref">Fossilized Method</span></a></dt><dd><ul class="simple">
+<li><p>fossilizationThreshold : 6</p>
+<ul>
+<li><p>Minimal number of overwriting methods to consider a method difficult to update.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
 <dt><a class="reference internal" href="../Reference/Rules.html#immutable-signature"><span class="std std-ref">Immutable Signature</span></a></dt><dd><ul class="simple">
 <li><p>maxOverwrite : 8</p>
 <ul>
 <li><p>Minimal number of method overwrite to consider that any refactor on the method signature is now hard.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#make-magic-concrete"><span class="std std-ref">Make Magic Concrete</span></a></dt><dd><ul class="simple">
+<li><p>magicMemberUsage : 1</p>
+<ul>
+<li><p>Minimal number of magic member usage across the code, to trigger a concrete property.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-children"><span class="std std-ref">Too Many Children</span></a></dt><dd><ul class="simple">
+<li><p>childrenClassCount : 15</p>
+<ul>
+<li><p>Threshold for too many children classes for one class.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-dereferencing"><span class="std std-ref">Too Many Dereferencing</span></a></dt><dd><ul class="simple">
+<li><p>tooManyDereferencing : 7</p>
+<ul>
+<li><p>Maximum number of dereferencing.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-finds"><span class="std std-ref">Too Many Finds</span></a></dt><dd><ul class="simple">
+<li><p>minimumFinds : 5</p>
+<ul>
+<li><p>Minimal number of prefixed methods to report.</p></li>
+</ul>
+</li>
+<li><p>findPrefix : find</p>
+<ul>
+<li><p>list of prefix to use when detecting the ‘find’. Comma-separated list, case insensitive.</p></li>
+</ul>
+</li>
+<li><p>findSuffix :</p>
+<ul>
+<li><p>list of fix to use when detecting the ‘find’. Comma-separated list, case insensitive.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-injections"><span class="std std-ref">Too Many Injections</span></a></dt><dd><ul class="simple">
+<li><p>injectionsCount : 5</p>
+<ul>
+<li><p>Threshold for too many injected parameters for one class.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#large-try-block"><span class="std std-ref">Large Try Block</span></a></dt><dd><ul class="simple">
+<li><p>tryBlockMaxSize : 5</p>
+<ul>
+<li><p>Maximal number of expressions in the try block.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#long-preparation-for-throw"><span class="std std-ref">Long Preparation For Throw</span></a></dt><dd><ul class="simple">
+<li><p>preparationLineCount : 8</p>
+<ul>
+<li><p>Minimal number of lines before the throw.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#missing-include"><span class="std std-ref">Missing Include</span></a></dt><dd><ul class="simple">
+<li><p>constant_or_variable_name : 100</p>
+<ul>
+<li><p>Literal value to be used when including files. For example, by configuring ‘Files_MissingInclude[“HOME_DIR”] = “/tmp/myDir/”;’, then ‘include HOME_DIR . “my_class.php”; will be actually be used as ‘/tmp/myDir/my_class.php’. Constants must be configured with their correct case. Variable must be configured with their initial ‘$’. Configure any number of variable and constant names.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#could-make-a-function"><span class="std std-ref">Could Make A Function</span></a></dt><dd><ul class="simple">
+<li><p>centralizeThreshold : 8</p>
+<ul>
+<li><p>Minimal number of calls of the function with one common argument.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#hardcoded-passwords"><span class="std std-ref">Hardcoded Passwords</span></a></dt><dd><ul class="simple">
+<li><p>passwordsKeys : password_keys.json</p>
+<ul>
+<li><p>List of array index and property names that shall be checked for potential secret key storages.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#prefix-and-suffixes-with-typehint"><span class="std std-ref">Prefix And Suffixes With Typehint</span></a></dt><dd><ul class="simple">
+<li><p>prefixedType : prefixedType[‘is’] = ‘bool’;</p></li>
+</ul>
+</dd>
+</dl>
+<p>prefixedType[‘has’] = ‘bool’;
+prefixedType[‘set’] = ‘void’;
+prefixedType[‘list’] = ‘array’;</p>
+<blockquote>
+<div><blockquote>
+<div><ul class="simple">
+<li><p>List of prefixes and their expected returntype</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>suffixedType : prefixedType[‘list’] = ‘bool’;</p></li>
+</ul>
+</div></blockquote>
+<p>prefixedType[‘int’] = ‘int’;
+prefixedType[‘string’] = ‘string’;
+prefixedType[‘name’] = ‘string’;
+prefixedType[‘description’] = ‘string’;
+prefixedType[‘id’] = ‘int’;
+prefixedType[‘uuid’] = ‘Uuid’;</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>List of suffixes and their expected returntype</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-local-variables"><span class="std std-ref">Too Many Local Variables</span></a></dt><dd><ul class="simple">
+<li><p>tooManyLocalVariableThreshold : 15</p>
+<ul>
+<li><p>Minimal number of variables in one function or method to report.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-parameters"><span class="std std-ref">Too Many Parameters</span></a></dt><dd><ul class="simple">
+<li><p>parametersCount : 8</p>
+<ul>
+<li><p>Minimal number of parameters to report.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-much-indented"><span class="std std-ref">Too Much Indented</span></a></dt><dd><ul class="simple">
+<li><p>indentationAverage : 1</p>
+<ul>
+<li><p>Minimal average of indentation in a method to report. Default is 1.0, which means that the method is on average at one level of indentation or more.</p></li>
+</ul>
+</li>
+<li><p>minimumSize : 3</p>
+<ul>
+<li><p>Minimal number of expressions in a method to apply this analysis.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#useless-argument"><span class="std std-ref">Useless Argument</span></a></dt><dd><ul class="simple">
+<li><p>maxUsageCount : 30</p>
+<ul>
+<li><p>Maximum count of function usage. Use this to limit the amount of processed arguments.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#abstract-away"><span class="std std-ref">Abstract Away</span></a></dt><dd><ul class="simple">
+<li><p>abstractableCalls :</p>
+<ul>
+<li><p>Functions that shouldn’t be called directly, unless in a method.</p></li>
+</ul>
+</li>
+<li><p>abstractableClasses :</p>
+<ul>
+<li><p>Classes that shouldn’t be instantiated directly, unless in a method.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#memoize-magiccall"><span class="std std-ref">Memoize MagicCall</span></a></dt><dd><ul class="simple">
+<li><p>minMagicCallsToGet : 2</p>
+<ul>
+<li><p>Minimal number of calls of a magic property to make it worth locally caching.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#php-keywords-as-names"><span class="std std-ref">PHP Keywords As Names</span></a></dt><dd><ul class="simple">
+<li><p>reservedNames :</p>
+<ul>
+<li><p>Other reserved names : all in a string, comma separated.</p></li>
+</ul>
+</li>
+<li><p>allowedNames :</p>
+<ul>
+<li><p>PHP reserved names that can be used in the code. All in a string, comma separated.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-many-native-calls"><span class="std std-ref">Too Many Native Calls</span></a></dt><dd><ul class="simple">
+<li><p>nativeCallCounts : 3</p>
+<ul>
+<li><p>Number of native calls found inside another call.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#keep-files-access-restricted"><span class="std std-ref">Keep Files Access Restricted</span></a></dt><dd><ul class="simple">
+<li><p>filePrivileges : 0777</p>
+<ul>
+<li><p>List of forbidden file modes (comma separated).</p></li>
 </ul>
 </li>
 </ul>
@@ -493,10 +942,55 @@ This an array of strings, which are all reports names</p></td>
 </li>
 </ul>
 </dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#long-arguments"><span class="std std-ref">Long Arguments</span></a></dt><dd><ul class="simple">
+<li><p>codeTooLong : 100</p>
+<ul>
+<li><p>Minimum size of a functioncall or a methodcall to be considered too long.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#too-long-a-block"><span class="std std-ref">Too Long A Block</span></a></dt><dd><ul class="simple">
+<li><p>longBlock : 200</p>
+<ul>
+<li><p>Size of a block for it to be too long. A block is commanded by a for, foreach, while, do…while, if/then else structure.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#max-level-of-nesting"><span class="std std-ref">Max Level Of Nesting</span></a></dt><dd><ul class="simple">
+<li><p>maxLevel : 4</p>
+<ul>
+<li><p>Maximum level of nesting for control flow structures in one scope.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#nested-ifthen"><span class="std std-ref">Nested Ifthen</span></a></dt><dd><ul class="simple">
+<li><p>nestedIfthen : 3</p>
+<ul>
+<li><p>Maximal number of acceptable nesting of if-then structures</p></li>
+</ul>
+</li>
+</ul>
+</dd>
 <dt><a class="reference internal" href="../Reference/Rules.html#operator"><span class="std std-ref">&#64; Operator</span></a></dt><dd><ul class="simple">
 <li><p>authorizedFunctions : noscream_functions.json</p>
 <ul>
 <li><p>Functions that are authorized to sports a &#64;.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#duplicate-literal"><span class="std std-ref">Duplicate Literal</span></a></dt><dd><ul class="simple">
+<li><p>minDuplicate : 15</p>
+<ul>
+<li><p>Minimal number of duplication before the literal is reported.</p></li>
+</ul>
+</li>
+<li><p>ignoreList : 0,1,2,10</p>
+<ul>
+<li><p>Common values that have to be ignored. Comma separated list.</p></li>
 </ul>
 </li>
 </ul>

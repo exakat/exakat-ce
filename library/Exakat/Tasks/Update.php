@@ -26,7 +26,6 @@ use Exakat\Config;
 use Exakat\Exceptions\InvalidProjectName;
 use Exakat\Exceptions\NoCodeInProject;
 use Exakat\Exceptions\NoSuchProject;
-use Exakat\Exceptions\NoFileToProcess;
 use Exakat\Vcs\Vcs;
 
 class Update extends Tasks {
@@ -59,7 +58,6 @@ class Update extends Tasks {
         $projects = array_diff($projects, array('test'));
 
         echo 'Updating ' . count($projects) . ' projects' . PHP_EOL;
-        sleep(3); // This is letting the user understand the command.
         shuffle($projects);
         foreach ($projects as $project) {
             display("updating $project\n");
@@ -87,6 +85,13 @@ class Update extends Tasks {
             throw new NoCodeInProject($this->config->project);
         }
 
+        // clean all previous sql caches
+        $files = glob("{$this->config->project_dir}/.exakat/dump-*.php");
+        display("Removing ".count($files)." dump-*.php files\n");
+        foreach($files as $file) {
+            unlink($files);
+        }
+ 
         $this->update($this->config);
     }
 
@@ -105,12 +110,6 @@ class Update extends Tasks {
         display($vcs->getName() . " updated to $new");
 
         display('Running files');
-        $updateCache = new Files();
-        try {
-            $updateCache->run();
-        } catch (NoFileToProcess $e) {
-            display("No file to process\n");
-            // OK, just carry on.
-        }
+        shell_exec($this->config->php . ' exakat files -p ' . $updateConfig->project);
     }
 }

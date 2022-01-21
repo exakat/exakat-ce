@@ -36,10 +36,11 @@ class DereferencingLevels extends AnalyzerHashAnalyzer {
              )
              ->processDereferencing(0)
              ->raw('map{levels}');
-
         $results = $this->rawQuery();
+
         $counts = array_count_values($results->toArray());
-        foreach($counts  as $key => $value) {
+
+        foreach($counts as $key => $value) {
             $this->analyzerValues[] = array($this->shortAnalyzer, $key, $value);
         }
         $this->prepareQuery();

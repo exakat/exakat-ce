@@ -92,7 +92,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             }
         }
         if ($extra !== null) {
-            $result = array_map(function ($x) use ($extra) { return array_merge($x, $extra); }, $result);
+            $result = array_map(function (array $x) use ($extra) : array { return array_merge($x, $extra); }, $result);
         }
 
         $this->data = $result;
@@ -108,7 +108,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             $result[] = array('', array_pop($value));
         }
         if ($extra !== null) {
-            $result = array_map($result, function ($x) use ($extra) { return array_merge($x, $extra); });
+            $result = array_map($result, function (array $x) use ($extra) : array { return array_merge($x, $extra); });
         }
 
         $this->data = $result;
@@ -151,7 +151,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         return isset($this->data[$offset]);
     }
 
-    public function offsetGet($offset) : mixed {
+    public function offsetGet($offset): mixed {
         return $this->data[$offset];
     }
 
@@ -171,11 +171,11 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         }
     }
 
-    public function current() : mixed {
+    public function current(): mixed {
         return current($this->data);
     }
 
-    public function key() : mixed {
+    public function key(): mixed {
         if ($this->type === self::ARRAY) {
             return key($this->data);
         }

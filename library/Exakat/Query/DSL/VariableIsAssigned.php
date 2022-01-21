@@ -25,7 +25,7 @@ namespace Exakat\Query\DSL;
 
 class VariableIsAssigned extends DSL {
     public function run(): Command {
-        assert(func_num_args() === 1, 'Wrong number of argument for ' . __METHOD__ . '. 1 is expected, ' . func_num_args() . ' provided');
+        $this->assertArguments(1, func_num_args(), __METHOD__);
         list($times) = func_get_args();
 
         $gremlin = <<<GREMLIN

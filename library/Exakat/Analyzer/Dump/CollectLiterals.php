@@ -22,6 +22,7 @@
 
 namespace Exakat\Analyzer\Dump;
 
+use Exakat\Dump\Dump;
 
 class CollectLiterals extends AnalyzerTable {
     protected $analyzerName = 'Local Variable Counts';
@@ -95,6 +96,7 @@ map{
         x['block'] = it.get().values('block')[0];
     } else {
         x['block'] = '';
+        x['encoding'] = '';
     }
     x;
 }
@@ -104,6 +106,30 @@ GREMLIN
 );
         $this->prepareQuery();
     }
+
+    public function getDump(): array {
+        if (!$this->hasResults()) {
+            return array();
+        }
+
+        // todo : we need all the other tables of literals
+        $dump = Dump::factory($this->config->dump);
+        $r = $dump->fetchTable('literalString', array('name'));
+        $report['string'] = $r->toArray();
+
+        $r = $dump->fetchTable('literalInteger', array('name'));
+        $report['integer'] = $r->toArray();
+
+        return $report;
+    }
+
+    public function hasResults(): bool {
+        $dump = Dump::factory($this->config->dump);
+        $r = $dump->fetchTable('literalString');
+
+        return !empty($r);
+    }
+
 }
 
 ?>

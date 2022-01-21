@@ -31,6 +31,7 @@ use Exakat\Exceptions\NoPhpBinary;
 use Exakat\Exceptions\HelperException;
 use Exakat\Exceptions\NoSuchReport;
 use Exakat\Tasks\Helpers\ReportConfig;
+use Symfony\Component\Yaml\Yaml as Symfony_Yaml;
 
 class Doctor extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -65,8 +66,29 @@ class Doctor extends Tasks {
         }
 
         if ($this->config->json === true) {
-            print json_encode($stats);
+            print json_encode($stats, JSON_PRETTY_PRINT);
             return;
+        }
+
+        if ($this->config->yaml === true) {
+            print Symfony_Yaml::dump($stats);
+            return;
+        }
+
+        if ($this->config->quiet !== true) {
+            print $this->displayCli($stats);
+        }
+    }
+
+    private function displayCli(array $stats): string {
+        $stats['exakat']['rulesets']       = $this->array2list($stats['exakat']['rulesets']);
+        $stats['exakat']['extra rulesets'] = $this->array2list($stats['exakat']['extra rulesets']);
+        $stats['exakat']['ignored rules']  = $this->array2list($stats['exakat']['ignored rules']);
+        $stats['exakat']['exakat.ini']     = $this->array2list($stats['exakat']['exakat.ini']);
+        $stats['exakat']['reports']        = $this->array2list($stats['exakat']['reports'] );
+
+        if (isset($stats['exakat']['extensions'])) {
+            $stats['exakat']['extensions']  = $this->array2list($stats['exakat']['extensions']);
         }
 
         $doctor = '';
@@ -78,9 +100,7 @@ class Doctor extends Tasks {
             $doctor .= PHP_EOL;
         }
 
-        if ($this->config->quiet !== true) {
-            print $doctor;
-        }
+        return $doctor;
     }
 
     private function checkPreRequisite(): array {
@@ -90,7 +110,7 @@ class Doctor extends Tasks {
         $stats['exakat']['executable']  = $this->config->executable;
         $stats['exakat']['version']     = Exakat::VERSION;
         $stats['exakat']['build']       = Exakat::BUILD;
-        $stats['exakat']['exakat.ini']  = $this->array2list($this->config->configFiles);
+        $stats['exakat']['exakat.ini']  = $this->config->configFiles;
         $stats['exakat']['graphdb']     = $this->config->graphdb;
         $reportList = array();
         foreach($this->config->project_reports as $project_report) {
@@ -103,15 +123,15 @@ class Doctor extends Tasks {
             $this->reportList[] = $reportConfig->getName();
         }
         sort($this->reportList);
-        $stats['exakat']['reports']      = $this->array2list($reportList);
+        $stats['exakat']['reports']        = $reportList;
 
-        $stats['exakat']['rulesets']       = $this->array2list($this->config->project_rulesets);
-        $stats['exakat']['extra rulesets'] = $this->array2list(array_keys($this->config->rulesets));
-        $stats['exakat']['ignored rules']  = $this->array2list($this->config->ignore_rules);
+        $stats['exakat']['rulesets']       = $this->config->project_rulesets;
+        $stats['exakat']['extra rulesets'] = array_keys($this->config->rulesets);
+        $stats['exakat']['ignored rules']  = $this->config->ignore_rules;
 
         $stats['exakat']['tokenslimit'] = number_format((int) $this->config->token_limit, 0, '', ' ');
         if ($list = $this->config->ext->getPharList()) {
-            $stats['exakat']['extensions']  = $this->array2list($list);
+            $stats['exakat']['extensions']  = $list;
         }
 
         $stubs = exakat('stubs');
@@ -227,7 +247,7 @@ class Doctor extends Tasks {
 
         // stubs
         if (!file_exists($this->config->dir_root . '/stubs')) {
-            mkdir($this->config->dir_root . '/stubs', 0755);
+//            mkdir($this->config->dir_root . '/stubs', 0755);
         }
 
         // projects

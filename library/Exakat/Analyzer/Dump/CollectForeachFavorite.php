@@ -53,10 +53,6 @@ class CollectForeachFavorite extends AnalyzerArrayHashResults {
             $valuesSQL[] = array($name, $count);
         }
 
-        if (empty($valuesSQL)) {
-            return;
-        }
-
         $this->analyzerValues = $valuesSQL;
 
         $this->prepareQuery();

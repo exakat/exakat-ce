@@ -29,16 +29,20 @@ use Exakat\Config as Configuration;
 class DotExakatConfig extends Config {
     private $dotExakat = '';
 
-    public function __construct() {
-        $this->dotExakat = getcwd() . '/.exakat.ini';
+    public function __construct(Project $project, string $project_root) {
+        if ($project->isDefault()) {
+            $this->config['inside_code'] = Configuration::INSIDE_CODE;
+            $this->dotExakat = getcwd() . '/.exakat.ini';
+        } else {
+            $this->config['inside_code'] = Configuration::WITH_PROJECTS;
+            $this->dotExakat = $project_root . (string) $project . '/.exakat.ini';
+        }
 
-        $this->config['project'] = new Project();
-        // also support json?
+        $this->config['project'] = $project;
     }
 
     public function loadConfig(Project $project): ?string {
         if (!file_exists($this->dotExakat)) {
-            $this->config['inside_code'] = Configuration::WITH_PROJECTS;
             $this->config['project']     = new Project();
             return self::NOT_LOADED;
         }
@@ -80,8 +84,6 @@ class DotExakatConfig extends Config {
                            'project_rulesets'   => 'CompatibilityPHP53,CompatibilityPHP54,CompatibilityPHP55,CompatibilityPHP56,CompatibilityPHP70,CompatibilityPHP71,CompatibilityPHP72,CompatibilityPHP73,CompatibilityPHP74,Dead code,Security,Analyze,Preferences,Appinfo,Appcontent',
                            'project_reports'    => array('Text'),
                         );
-
-        $this->config['inside_code'] = Configuration::INSIDE_CODE;
 
         foreach($defaults as $name => $value) {
             if (empty($this->config[$name])) {

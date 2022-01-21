@@ -28,6 +28,7 @@ use Exakat\Exceptions\NoCodeInProject;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Vcs\Vcs;
+use Exakat\Fileset\{All, Filenames, FileExtensions, IgnoreDirs};
 
 class Files extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -59,7 +60,13 @@ class Files extends Tasks {
         $files = array();
 
         display("Searching for files \n");
-        self::findFiles($this->config->code_dir, $files, $ignoredFiles, $this->config);
+        $set = new All($this->config->code_dir);
+        $set->addFilter(new Filenames($this->config->dir_root));
+        $set->addFilter(new FileExtensions($this->config->file_extensions));
+        $set->addFilter(new IgnoreDirs($this->config->ignore_dirs, $this->config->include_dirs));
+        
+        $files = $set->getFiles();
+        $ignoredFiles = $set->getIgnored();
         display('Found ' . count($files) . " files.\n");
 
         $filesRows = array();
@@ -218,98 +225,6 @@ class Files extends Tasks {
         $this->datastore->addRow('hash', array('licence_file' => 'unknown'));
 
         return false;
-    }
-
-    public static function findFiles(string $path, array &$files, array &$ignoredFiles, Config $config): void {
-        $ignoreFileNames = parse_ini_file("{$config->dir_root}/data/ignore_files.ini");
-        $ignoreFileNames = array_flip($ignoreFileNames['files']);
-
-        // Regex to ignore files and folders
-        $ignoreDirs = array();
-        foreach($config->ignore_dirs as $ignore) {
-            // ignore mis configuration
-            if (empty($ignore)) {
-                continue;
-            }
-
-            if ($ignore[0] === '/') {
-                $ignoreDirs[] = "$ignore*";
-            } else {
-                $ignoreDirs[] = "*$ignore*";
-            }
-        }
-
-        // Regex to include files and folders
-        $includeDirs = array();
-        foreach($config->include_dirs as $include) {
-            if (empty($include)) {
-                continue;
-            }
-
-            if ($include === '/') {
-                $includeDirs[] = '/.*';
-            } elseif ($include[0] === '/') {
-                $includeDirs[] = "$include*";
-            } else {
-                $includeDirs[] = "*$include*'";
-            }
-        }
-
-        $d = getcwd();
-        if (!file_exists($path)) {
-            display( "No such file as '$path' when looking for files\n");
-            $files = array();
-            $ignoredFiles = array();
-            return ;
-        }
-        chdir($path);
-        $allFiles = rglob('.');
-        $allFiles = array_map(function (string $path): string { return ltrim($path, '.'); }, $allFiles);
-        chdir($d);
-
-        $exts = $config->file_extensions;
-
-        foreach($allFiles as $file) {
-            foreach($ignoreDirs as $ignore) {
-                if (fnmatch($ignore, $file)) {
-                    $ignoredFiles[] = $file;
-                    continue 2;
-                }
-            }
-
-            $files[] = $file;
-        }
-
-        foreach($ignoredFiles as $id => $file) {
-            foreach($includeDirs as $ignore) {
-                if (fnmatch($ignore, $file)) {
-                    $files[] = $file;
-                    unset($ignoredFiles[$id]);
-                    continue 2;
-                }
-            }
-        }
-
-        foreach($files as $id => $file) {
-            if (is_link($path . $file)) {
-                unset($files[$id]);
-                $ignoredFiles[$file] = "Symbolic link ($file)";
-                continue;
-            }
-            $f = basename($file);
-            if (isset($ignoreFileNames[mb_strtolower($f)])) {
-                unset($files[$id]);
-                $ignoredFiles[$file] = "Ignored file ($file)";
-                continue;
-            }
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if (!in_array(mb_strtolower($ext), $exts)) {
-                // selection of extensions
-                unset($files[$id]);
-                $ignoredFiles[$file] = "Ignored extension ($ext)";
-                continue;
-            }
-        }
     }
 
     public function __destruct() {

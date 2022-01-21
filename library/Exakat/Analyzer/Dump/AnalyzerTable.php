@@ -34,7 +34,7 @@ abstract class AnalyzerTable extends AnalyzerDump {
 
         $result = $this->gremlin->query($query);
 
-        if (count($result) === 0) {
+        if (empty($result)) {
             return ;
         }
 
@@ -65,7 +65,7 @@ abstract class AnalyzerTable extends AnalyzerDump {
 
         $result = $this->rawQuery();
 
-        if (count($result) === 0) {
+        if (empty($result)) {
             return ;
         }
 
@@ -81,6 +81,7 @@ abstract class AnalyzerTable extends AnalyzerDump {
 
         $valuesSQL = array();
         foreach($c as $row) {
+            // Possible NULL in row here.
             $valuesSQL[] = "(NULL, '" . implode("', '", array_map(array('\\Sqlite3', 'escapeString'), $row)) . "') \n";
         }
 

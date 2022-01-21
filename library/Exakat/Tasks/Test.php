@@ -73,7 +73,7 @@ class Test extends Tasks {
         $args = array ( 1 => 'dump',
                         2 => '-p',
                         3 => 'test',
-                        4 => '-load-dump',
+                        4 => '--load-dump',
                         5 => '-u',
                         );
         $configThema = new Config($args);

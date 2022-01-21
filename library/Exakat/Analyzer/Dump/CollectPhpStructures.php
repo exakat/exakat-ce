@@ -29,8 +29,8 @@ class CollectPhpStructures extends AnalyzerTable {
 
     protected $analyzerSQLTable = <<<'SQL'
 CREATE TABLE phpStructures (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            name STRING,
                             type STRING,
+                            name STRING,
                             count INTEGER
 )
 SQL;

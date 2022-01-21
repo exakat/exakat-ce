@@ -528,7 +528,6 @@ class GraphsonV3 implements SerializerInterface
 
             if(!is_numeric($key) && !is_string($key))
             {
-
                 throw new InternalException('Failed to deconvert Map item from graphson 3.0. A key was of type [' . gettype($key) . '], only Integers and Strings are supported', 500);
             }
             $deconverted[$key] = $value;
@@ -605,7 +604,7 @@ class GraphsonV3 implements SerializerInterface
         $result = $this->deconvert($tree);
         foreach($result as $value)
         {
-            if(isset($value['key']) && isset($value['key']['id']))
+            if(isset($value['key']['id']))
             {
                 $deconvert[$value['key']['id']] = $value;
             }

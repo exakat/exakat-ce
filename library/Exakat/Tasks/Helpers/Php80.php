@@ -173,5 +173,6 @@ class Php80 extends Php {
     public const T_ENUM                                             = 1000;
     public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = 1000;
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 1000;
+    public const T_CHARACTER                                        = 1000;
 }
 ?>

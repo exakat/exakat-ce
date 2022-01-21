@@ -23,11 +23,13 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Analyzer\Analyzer;
+
 class HasClassTrait extends DSL {
     public function run(): Command {
         $return = $this->dslfactory->factory('hasInstruction');
 
-        return $return->run(array('Class', 'Classanonymous', 'Trait'));
+        return $return->run(Analyzer::CLASSES_TRAITS);
     }
 }
 ?>

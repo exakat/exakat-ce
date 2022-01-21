@@ -47,7 +47,7 @@ class AtomIs extends DSL {
             $gremlin = <<<GREMLIN
 union( __.identity(), 
        __.repeat(
-            __.timeLimit($TIME_LIMIT).hasLabel(within(["Variable", "Phpvariable", "Ternary", "Coalesce", "Parenthesis"]))
+            __.timeLimit($TIME_LIMIT).hasLabel(within(["Variable", "Variablearray", "Variableobject", "Phpvariable", "Ternary", "Coalesce", "Parenthesis"]))
               .union( 
                  // literal local value
                   __.hasLabel(within(["Variable", "Variablearray", "Variableobject", "Phpvariable"])).in("DEFINITION").hasLabel("Variabledefinition").out("DEFAULT"),
@@ -78,7 +78,7 @@ union( __.identity(),
             .union( __.hasLabel(within(["Identifier", "Nsname", "Staticconstant"])).in("DEFINITION").out("VALUE"),
             
                       // local variable
-                      __.hasLabel(within(["Variable"])).in("DEFINITION").hasLabel('Variabledefinition').optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT"),
+                      __.hasLabel(within(["Variable"])).not(__.in("LEFT").hasLabel("Assignation")).in("DEFINITION").hasLabel('Variabledefinition').has("isConst").optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT"),
                       
                       // literal value, passed as an argument (Method, closure, function)
                       __.hasLabel(within(["Variable"])).in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").out("DEFAULT"),

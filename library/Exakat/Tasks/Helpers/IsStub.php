@@ -167,8 +167,12 @@ class IsStub extends Plugin {
                 }
                 break;
 
-            case 'Usenamespace' :
             case 'Ppp' :
+            case 'Parameter' :
+                $this->checkTypes($extras['TYPEHINT'] ?? array());
+                break;
+
+            case 'Usenamespace' :
                 foreach($extras as $extra) {
                     $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
                     $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
@@ -216,22 +220,8 @@ class IsStub extends Plugin {
                 break;
 
             case 'Interface' :
-                foreach($extras['ATTRIBUTE'] as $extra) {
-                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->stubInterfaces, \STRICT_COMPARISON)) {
-                        $extra->isStub = true;
-                    }
-                }
-
                 foreach($extras['EXTENDS'] as $extra) {
                     if (in_array($extras['EXTENDS']->fullnspath ?? self::NOT_PROVIDED, $this->stubInterfaces, \STRICT_COMPARISON)) {
-                        $extra->isStub = true;
-                    }
-                }
-                break;
-
-            case 'Trait' :
-                foreach($extras['ATTRIBUTE'] as $extra) {
-                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->stubInterfaces, \STRICT_COMPARISON)) {
                         $extra->isStub = true;
                     }
                 }
@@ -267,14 +257,9 @@ class IsStub extends Plugin {
             case 'Function' :
             case 'Closure' :
             case 'Arrowfunction' :
-                foreach($extras as $extra) {
-                    $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
-                    $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
-
-                    if (in_array(makeFullnspath($path), $this->stubClasses, \STRICT_COMPARISON)) {
-                        $extra->isStub = true;
-                    }
-                }
+            case 'Method' :
+            case 'Magicmethod' :
+                $this->checkTypes($extras['RETURNTYPE'] ?? array());
                 break;
 
             case 'Newcall' :
@@ -315,7 +300,6 @@ class IsStub extends Plugin {
                 break;
 
             case 'Isset' :
-            case 'Isset' :
             case 'Empty' :
             case 'Unset' :
             case 'Exit'  :
@@ -327,6 +311,17 @@ class IsStub extends Plugin {
 
             default :
                 // Nothing
+        }
+    }
+    
+    private function checkTypes(array $extras) : void {
+        foreach($extras as $extra) {
+            $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
+            $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
+    
+            if (in_array(makeFullnspath($path), $this->stubClasses, \STRICT_COMPARISON)) {
+                $extra->isStub = true;
+            }
         }
     }
 }

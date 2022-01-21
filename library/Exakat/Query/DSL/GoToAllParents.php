@@ -27,6 +27,7 @@ use Exakat\Analyzer\Analyzer;
 
 class GoToAllParents extends DSL {
     public function run(): Command {
+        $this->assertArguments(1, func_num_args(), __METHOD__);
         list($self) = func_get_args();
 
         $MAX_LOOPING = self::$MAX_LOOPING;

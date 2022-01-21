@@ -91,6 +91,7 @@ $links
     private function toStyle(array $array = array()): string {
         $return = array();
         foreach($array as $name => $value) {
+            $value = addslashes((string) $value);
             $return[] = "$name=\"$value\"";
         }
 

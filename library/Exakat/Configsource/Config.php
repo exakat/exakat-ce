@@ -26,10 +26,15 @@ use Exakat\Project as Project;
 use Symfony\Component\Yaml\Yaml as Symfony_Yaml;
 
 abstract class Config {
-    const NOT_LOADED = null;
+    public const NOT_LOADED = null;
 
     protected $config  = array();
     protected $options = array();
+
+    protected $ignore_dirs;
+    protected $include_dirs;
+    
+    protected Project $project; 
 
     abstract public function loadConfig(Project $project): ?string ;
 
@@ -38,7 +43,11 @@ abstract class Config {
     }
 
     public function get(string $index) {
-        return $this->config[$index] ?? null;
+        if (!isset($this->config[$index])) {
+            print "No such config as $index in " . get_class(static::class) . PHP_EOL;
+            return null;
+        }
+        return $this->config[$index];
     }
 
     public function toIni(): string {
@@ -142,26 +151,26 @@ abstract class Config {
 
         return Symfony_Yaml::dump($yaml);
     }
-    
-    protected function cleanFileExtensions(array $extensions) : array {
-        $filter = function($s) { 
-            if (!is_string($s)) { return ''; } 
-            return trim($s, '. '); 
+
+    protected function cleanFileExtensions(array $extensions): array {
+        $filter = function ($s) {
+            if (!is_string($s)) { return ''; }
+            return trim($s, '. ');
         };
         $extensions = array_map($filter, $extensions);
         $extensions = array_filter($extensions);
-        
+
         return $extensions;
     }
 
-    protected function cleanProjectReports(array $reports) : array {
-        $filter = function($s) { 
-            if (!is_string($s)) { return ''; } 
-            return trim($s, '. -/'); 
+    protected function cleanProjectReports(array $reports): array {
+        $filter = function ($s) {
+            if (!is_string($s)) { return ''; }
+            return trim($s, '. -/');
         };
         $reports = array_map($filter, $reports);
         $reports = array_filter($reports);
-        
+
         return $reports;
     }
 }

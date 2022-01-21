@@ -294,6 +294,9 @@ class IsRead extends Plugin {
                 break;
 
             case 'Closure' :
+                if (isset($extras['RETURNTYPE'])) {
+                    return;
+                }
                 foreach($extras as $extra) {
                     if (in_array($extra->atom, $this->variables, STRICT_COMPARISON)) {
                         $extra->isRead = true;

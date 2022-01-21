@@ -35,7 +35,7 @@ class DatastoreConfig extends Config {
     protected $project_description = '';
     protected $project_branch      = '';
     protected $project_tag         = '';
-    protected $project             = '';
+    protected Project $project;
     protected $file_extensions     = array();
     protected $stubs               = array();
 
