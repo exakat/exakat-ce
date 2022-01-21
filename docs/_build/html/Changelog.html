@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/exakat.css" type="text/css" />
 
   
   
@@ -99,6 +100,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Gettingstarted/Bare.html">with a Bare metal installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Gettingstarted/Docker.html">with a Docker installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gettingstarted/Tutorials.html">Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
 <ul>
@@ -201,11 +203,11 @@
   <div class="section" id="release-note">
 <h1>Release Note<a class="headerlink" href="#release-note" title="Permalink to this headline">¶</a></h1>
 <p>Here is the release note of exakat.</p>
-<p><strong>Version 2.3.0 (Wei, 2021-11-18)</strong></p>
+<p><strong>Version 2.3.3 (Wei Zheng, 2021-12-16)</strong></p>
 <ul class="simple">
 <li><dl class="simple">
-<dt>Architecture</dt><dd><ul>
-<li></li>
+<dt>Cobbler</dt><dd><ul>
+<li><p>New Cobbler : removes attributes</p></li>
 </ul>
 </dd>
 </dl>
@@ -219,18 +221,144 @@
 </li>
 <li><dl class="simple">
 <dt>Analysis</dt><dd><ul>
-<li><p>New analysis : report the missing mixed returntype for jsonserialize</p></li>
-<li><p>New analysis : report final with constants</p></li>
-<li><p>New analysis : report never usage (typehint)</p></li>
-<li><p>New analysis : report PHP 8.1 typehint incompatibilities</p></li>
-<li><p>New analysis : report PHP 8.0 typehint incompatibilities</p></li>
+<li><p>New analysis : suggest using ?-&gt; when Null is a possiblity</p></li>
+<li><p>New analysis : Report backward incompatibility with overloaded interface constants</p></li>
+<li><p>New analysis : Mark variables as local constants when only assigned once</p></li>
+<li><p>New analysis : suggest using iterable, based on array|traversable usage</p></li>
+<li><p>New analysis : Report usage of PHP 8.1 intersection typehints</p></li>
+<li><p>Refactored analysis : Hidden Nullable rule now handles intersection types</p></li>
+<li><p>Refactored analysis : ‘Use Nullable’ covers properties too</p></li>
+<li><p>Refactored analysis : ‘Could Be stringable’ is extended to trait usage</p></li>
+<li><p>Refactored analysis : skip static and globals when counting variable usage in methods</p></li>
+<li><p>Refactored analysis : PHP 8.0 Union type detection includes properties</p></li>
+<li><p>Added tests to Complete/Overloaded* (CPM)</p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
 <dt>Tokenizer</dt><dd><ul>
+<li><p>Fixed a bug with Ternary and constants</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Version 2.3.2 (Wei Zheng, 2021-12-16)</strong></p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Cobbler</dt><dd><ul>
+<li><p>New cobbler : removes a method</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Report</dt><dd><ul>
 <li></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Analysis</dt><dd><ul>
+<li><p>New analysis : suggest ::class instead of get_class()</p></li>
+<li><p>New analysis : report when a class extends stdclass (for dynamic properties review)</p></li>
+<li><p>New analysis : Reports when checks are made on the existence of properties</p></li>
+<li><p>Upgraded analysis : Useless Typechecks is upgraded with union and intersectional type checks</p></li>
+<li><p>Upgraded analysis : Reporting invalid access to protected CPM</p></li>
+<li><p>Upgraded analysis : Removed Used Properties with classes with dynamic properties</p></li>
+<li><p>Fixed bug in PropagateConstants</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Tokenizer</dt><dd><ul>
+<li><p>Added detection of typehints for variables</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Version 2.3.1 (Li Shimin, 2021-12-01)</strong></p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Cobbler</dt><dd><ul>
+<li><p>Fixed bug with Settypehint when multiple types are available</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Report</dt><dd><ul>
+<li><p>New Pdff report : PHP Document File Format</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Analysis</dt><dd><ul>
+<li><p>New analysis : report promoted properties</p></li>
+<li><p>New analysis : report deprecated PHP 8.2 callable</p></li>
+<li><p>New analysis : report new in initializers</p></li>
+<li><p>New analysis : report nested attributes</p></li>
+<li><p>New analysis : report direct calls to Trait methods and properties</p></li>
+<li><p>New analysis : report auto vivification of false (PHP 8.1)</p></li>
+<li><p>New analysis : report implicit float to integer conversion for arrays</p></li>
+<li><p>Updated analysis : Declare Static and Global early.</p></li>
+<li><p>Updated analysis : No Null For Native now uses typehints</p></li>
+<li><p>Updated analysis : refined No Static variable in method</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Tokenizer</dt><dd><ul>
+<li><p>Fixed bug with __METHOD__ when it is called outside a method</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Version 2.3.0 (Wei, 2021-11-18)</strong></p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Architecture</dt><dd><ul>
+<li><p>Catchup tokens from PHP 5.6 till 7.2</p></li>
+<li><p>Report unknown Rulesets during reports command</p></li>
+<li><p>Extended ‘catalog’ command to list rules too</p></li>
+<li><p>Extended ‘catalog’ command to return YAML format</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Report</dt><dd><ul>
+<li><p>Added several new analysis to the Rector report</p></li>
+<li><p>Added mixed and never to Appinfo report</p></li>
+<li><p>Ugraded Sarif report with bartlett/sarif-php-sdk</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Analysis</dt><dd><ul>
+<li><p>New analysis : report the missing mixed returntype for jsonserialize</p></li>
+<li><p>New analysis : report final with constants</p></li>
+<li><p>New analysis : report never usage (typehint)</p></li>
+<li><p>New analysis : report PHP 8.1 typehint incompatibilities</p></li>
+<li><p>New analysis : report PHP 8.0 typehint incompatibilities</p></li>
+<li><p>New analysis : report PHP 8.0 named parameters</p></li>
+<li><p>New analysis : report First Class Callable Syntax</p></li>
+<li><p>New analysis : New Functions in PHP 8.1</p></li>
+<li><p>New analysis : Removed functions in PHP 8.1</p></li>
+<li><p>New analysis : Prepare ‘never’ for PHP 8.1</p></li>
+<li><p>New analysis : Prepare ‘mixed’ for PHP 8.0</p></li>
+<li><p>New analysis : detect mixed and never usage as typehints</p></li>
+<li><p>Upgraded analysis : Wrong Number of arguments also works with new first class callable syntax</p></li>
+<li><p>Upgraded analysis : Typehint stats now includes union and intersection types</p></li>
+<li><p>Upgraded analysis : Removed functions in PHP 8.0</p></li>
 </ul>
 </dd>
 </dl>

@@ -43,9 +43,12 @@ class IsNullable extends DSL {
         }
 
         if ($nullable === self::IMPLICIT) {
-            return new Command('where( __.out("RETURNTYPE", "TYPEHINT").hasLabel("Null") )');
+            return new Command('where( __.out("RETURNTYPE", "TYPEHINT").or(
+                __.hasLabel("Scalartypehint").has("fullnspath", "\\\\null"),
+                __.hasLabel("Null")
+                ))');
         } else {
-            return new Command('where( __.out("RETURNTYPE", "TYPEHINT").hasLabel("Null").not( __.in("DEFAULT").not( __.in("LEFT"))) )');
+            return new Command('where( __.out("RETURNTYPE", "TYPEHINT").hasLabel("Scalartypehint").has("fullnspath", "\\\\null") )');
         }
     }
 }

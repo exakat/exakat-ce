@@ -37,7 +37,7 @@ sideEffect{
 .optional( __.out("METHOD"))
 .out('ARGUMENT')
 .filter{it.get().value("rank") == ranked || ("rankName" in it.get().keys() && it.get().value("rankName") == rankedName) || (variadic == true && it.get().value("rank") >= ranked);}
-
+.not(hasLabel("Void"))
 GREMLIN
 );
 

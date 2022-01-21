@@ -26,7 +26,7 @@ use Exakat\Exakat;
 use Exakat\Extensions\Extension;
 
 class AutoloadExt implements Autoloader {
-    const LOAD_ALL = null;
+    public const LOAD_ALL = null;
 
     private $pharList   = array();
     private $extensions = array();

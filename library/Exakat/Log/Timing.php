@@ -36,10 +36,10 @@ class Timing extends Log {
     }
 
 
-    public function log(string $step): void {
+    public function log(string $message): void {
         $this->end = microtime(\TIME_AS_NUMBER);
 
-        parent::log($step . "\t" . ($this->end - $this->begin) . "\t" . ($this->end - $this->start));
+        parent::log($message . "\t" . ($this->end - $this->begin) . "\t" . ($this->end - $this->start));
         $this->begin = $this->end;
     }
 }

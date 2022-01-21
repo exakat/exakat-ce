@@ -31,9 +31,17 @@ class GoToTypehint extends DSL {
 
         $gremlin = <<<'GREMLIN'
 coalesce(
+    // (new x)
+    __.hasLabel("Parenthesis").out("CODE").hasLabel("New").out("NEW").out("TYPEHINT"),
+    __.hasLabel("Parenthesis").out("CODE").hasLabel("Clone").out("CLONE").out("TYPEHINT"),
+
     __.hasLabel("Variable", "Variableobject", "Variablearray").in("DEFINITION").in("NAME").hasLabel("Parameter").out("TYPEHINT"),
+    // depends on Complete/Variabletypehint
+    __.hasLabel("Variable", "Variableobject", "Variablearray").in("DEFINITION").hasLabel("Variabledefinition").out("TYPEHINT"),
+
     __.hasLabel("Member").in("DEFINITION").hasLabel("Propertydefinition").in("PPP").hasLabel("Ppp").out("TYPEHINT"),
     __.hasLabel("Staticproperty").in("DEFINITION").hasLabel("Propertydefinition").in("PPP").hasLabel("Ppp").out("TYPEHINT"),
+
     __.hasLabel("Staticconstant").in("DEFINITION").hasLabel("Constant").out("TYPEHINT"),
     __.hasLabel("Identifier", "Nsname").in("DEFINITION").hasLabel("Constant").out("TYPEHINT")
 )

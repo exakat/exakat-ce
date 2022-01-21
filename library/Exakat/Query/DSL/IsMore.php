@@ -64,10 +64,13 @@ class IsMore extends DSL {
         // It is a gremlin property
         if ($this->isProperty($value)) {
             assert($this->assertProperty($value));
-            return " it.get().value(\"{$value}\").toLong()";
+            return "it.get().value(\"{$value}\").toLong()";
         }
 
         assert(false, '$value must be int or gremlin variable or property in ' . __METHOD__);
+        
+        return '';
+
     }
 }
 ?>

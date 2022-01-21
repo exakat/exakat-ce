@@ -102,6 +102,18 @@ class Methods {
         return $return;
     }
 
+    public function getNewArgsInterval(): array {
+        $query = 'SELECT class, args_min, args_max FROM methods WHERE Class != "PHP" AND name = "__construct"';
+        $res = $this->sqlite->query($query);
+        $return = array();
+
+        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+            $return[] = $row;
+        }
+
+        return $return;
+    }
+
     public function getFunctionsLastArgsNotBoolean(): array {
         $clauses = array();
         foreach(self::ARGS_COL as $position => $name) {
@@ -356,6 +368,7 @@ SQL;
         foreach($return as &$list) {
             $list = array_merge(...$list);
         }
+        unset($list);
 
         return $return;
     }

@@ -60,9 +60,6 @@ class Precedence {
                         'T_BANG'                        => 6,
                         'T_REFERENCE'                   => 6, // Special for reference's usage of &
 
-                        'T_YIELD'                       => 9,
-                        'T_YIELD_FROM'                  => 9,
-
                         'T_SLASH'                       => 10,
                         'T_STAR'                        => 10,
                         'T_PERCENTAGE'                  => 10,
@@ -84,6 +81,7 @@ class Precedence {
                         'T_IS_IDENTICAL'                => 37,
                         'T_IS_NOT_IDENTICAL'            => 37,
                         'T_SPACESHIP'                   => 37,
+
 
                         'T_AND'                         => 42,    // &
                         'T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG' => 42,    // & in PHP 8.1
@@ -121,6 +119,9 @@ class Precedence {
                         'T_LOGICAL_XOR'                 => 101, // xor
 
                         'T_LOGICAL_OR'                  => 102, // or
+
+                        'T_YIELD'                       => 110,
+                        'T_YIELD_FROM'                  => 110,
 
                         'T_ECHO'                        => 110,
                         'T_HALT_COMPILER'               => 110,

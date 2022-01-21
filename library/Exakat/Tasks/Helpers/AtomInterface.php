@@ -23,15 +23,69 @@
 namespace Exakat\Tasks\Helpers;
 
 use stdClass;
+use Exakat\Tasks\Load;
 
-interface AtomInterface {
-    public function toArray(): array;
+abstract class AtomInterface {
+    public $id           = 0;
+    public $atom         = 'No Atom Set';
+    public $code         = '';
+    public $lccode       = '';
+    public $fullcode     = '';
+    public $line         = Load::NO_LINE;
+    public $token        = '';
+    public $rank         = ''; // Not 0
+    public $rankName     = '';
+    public $alternative  = Load::NOT_ALTERNATIVE;
+    public $reference    = Load::NOT_REFERENCE;
+    public $heredoc      = false;
+    public $delimiter    = null;
+    public $noDelimiter  = null;
+    public $variadic     = Load::NOT_VARIADIC;
+    public $count        = null;
+    public $fullnspath   = '';
+    public $absolute     = Load::NOT_ABSOLUTE;
+    public $alias        = '';
+    public $origin       = '';
+    public $encoding     = '';
+    public $block        = '';
+    public $intval       = Intval::NO_VALUE;
+    public $strval       = Strval::NO_VALUE;
+    public $boolean      = Boolval::NO_VALUE;
+    public $enclosing    = Load::NO_ENCLOSING;
+    public $args_max     = '';
+    public $args_min     = '';
+    public $bracket      = Load::NOT_BRACKET;
+    public $flexible     = Load::NOT_FLEXIBLE;
+    public $close_tag    = Load::NO_CLOSING_TAG;
+    public $propertyname = '';
+    public $constant     = Load::NOT_CONSTANT_EXPRESSION;
+    public $globalvar    = false;
+    public $binaryString = Load::NOT_BINARY;
+    public $isNull       = false;
+    public $visibility   = '';
+    public $final        = '';
+    public $abstract     = false;
+    public $readonly     = false;
+    public $static       = '';
+    public $noscream     = 0;
+    public $trailing     = 0;
+    public $isRead       = 0;
+    public $isModified   = 0;
+    public $use          = '';
+    public $typehint     = 'one';
+    public $isPhp        = 0;
+    public $isExt        = 0;
+    public $isStub       = 0;
+    public $position     = 0;
+    public Whitespace $ws ;
 
-    public function toGraphsonLine(int &$id): stdClass;
+    public abstract function toArray(): array;
 
-    public function boolProperties(): array;
+    public abstract function toGraphsonLine(int &$id): stdClass;
 
-    public function isA(array $atoms): bool;
+    public abstract function boolProperties(): array;
+
+    public abstract function isA(array $atoms): bool;
 }
 
 ?>

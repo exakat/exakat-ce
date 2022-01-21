@@ -23,6 +23,8 @@
 namespace Exakat\Tasks;
 
 use Exakat\Reports\Reports;
+use Symfony\Component\Yaml\Yaml as Symfony_Yaml;
+use Exakat\Exceptions\NoSuchReport;
 
 class Catalog extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -42,12 +44,28 @@ class Catalog extends Tasks {
         $data['rulesets'] = $rulesets;
 
         // List of reports
-        $reports = Reports::$FORMATS;
+        $r = Reports::$FORMATS;
+        $reports = array();
+        foreach($r as $report) {
+            try {
+                Reports::getInstance($report);
+                $reports[] = $report;
+            } catch (NoSuchReport $e) {
+                // just ignore this
+            }
+        }
         sort($reports);
         $data['reports'] = $reports;
 
+        // List of rules
+        $rules = exakat('rulesets')->listAllAnalyzer();
+        sort($rules);
+        $data['rules'] = $rules;
+
         if ($this->config->json === true) {
             print json_encode($data);
+        } elseif ($this->config->yaml === true) {
+            print Symfony_Yaml::dump($data);
         } else {
             $display = '';
 

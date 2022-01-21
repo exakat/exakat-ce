@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/exakat.css" type="text/css" />
 
   
   
@@ -99,6 +100,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Tutorials.html">Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
 <ul>
@@ -132,7 +134,40 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#engine-configuration">Engine configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-file">Configuration File</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#available-options">Available Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-options">Available Options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#graphdb">graphdb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gsneo4j-host">gsneo4j_host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">gsneo4j_host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gsneo4j-folder">gsneo4j_folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tinkergraph-host">tinkergraph_host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tinkergraph-port">tinkergraph_port</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tinkergraph-folder">tinkergraph_folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gsneo4jv3-host">gsneo4jv3_host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gsneo4jv3-port">gsneo4jv3_port</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gsneo4jv3-folder">gsneo4jv3_folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tinkergraphv3-host">tinkergraphv3_host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tinkergraphv3-port">tinkergraphv3_port</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tinkergraphv3-folder">tinkergraphv3_folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#project-rulesets">project_rulesets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#project-reports">project_reports</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#token-limit">token_limit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php">php</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php82">php82</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php81">php81</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php80">php80</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php74">php74</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php73">php73</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php72">php72</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php71">php71</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php70">php70</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php56">php56</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php55">php55</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php54">php54</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php53">php53</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php52">php52</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#php-extensions">php_extensions</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#custom-rulesets">Custom rulesets</a></li>
 </ul>
 </li>
@@ -225,16 +260,17 @@
 </div>
 <div class="section" id="reminder-of-precedences">
 <h3>Reminder of precedences<a class="headerlink" href="#reminder-of-precedences" title="Permalink to this headline">¶</a></h3>
-<p>The exakat engine read directives from three places :</p>
+<p>The exakat engine read directives from six places, with the following precedence :</p>
 <ol class="arabic simple">
 <li><p>The command line options</p></li>
-<li><p>The .exakat.ini file at the root of the code</p></li>
+<li><p>The .exakat.ini or .exakat.yaml file at the root of the code</p></li>
+<li><p>The environment variables</p></li>
 <li><p>The config.ini file in the project directory</p></li>
 <li><p>The exakat.ini file in the config directory</p></li>
 <li><p>The default values in the code</p></li>
 </ol>
-<p>The precedence of the directives is the same as the list above : command line options always have highest priority, config.ini files are in second, when command line are not available, and finally, the default values are read in the code.</p>
-<p>Some of the directives are only available in the config.ini files.</p>
+<p>The precedence of the directives is the same as the list above.</p>
+<p>Some of the directives are only available in some specific configuration locations : they may not have usefulness in every places. See <a class="reference internal" href="../User/Configuration.html#user-option-availability"><span class="std std-ref">Option availability</span></a>.</p>
 </div>
 <div class="section" id="common-options">
 <h3>Common Options<a class="headerlink" href="#common-options" title="Permalink to this headline">¶</a></h3>
@@ -258,179 +294,161 @@
 <div class="section" id="available-options">
 <h3>Available Options<a class="headerlink" href="#available-options" title="Permalink to this headline">¶</a></h3>
 <p>Here are the currently available options in Exakat’s configuration file : config/config.ini</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 81%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Option</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>graphdb</p></td>
-<td><p>The graph database to use.
-Currently, it may be gsneo4j, or tinkergraph.</p></td>
-</tr>
-<tr class="row-odd"><td><p>gsneo4j_host</p></td>
-<td><p>The host to connect to reach the graph database, when using gsneo4j driver.
-The default value is ‘localhost’</p></td>
-</tr>
-<tr class="row-even"><td><p>gsneo4j_host</p></td>
-<td><p>The port to use on the host to reach the graph database, when using gsneo4j driver..
-The default value is ‘8182’</p></td>
-</tr>
-<tr class="row-odd"><td><p>gsneo4j_folder</p></td>
-<td><p>The folder where the code for the graph database resides, when using gsneo4j driver.
-The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
-</tr>
-<tr class="row-even"><td><p>tinkergraph_host</p></td>
-<td><p>The host to connect to reach the graph database, when using tinkergraph driver.
-The default value is ‘localhost’</p></td>
-</tr>
-<tr class="row-odd"><td><p>tinkergraph_port</p></td>
-<td><p>The port to use on the host to reach the graph database, when using tinkergraph driver.
-The default value is ‘8182’</p></td>
-</tr>
-<tr class="row-even"><td><p>tinkergraph_folder</p></td>
-<td><p>The folder where the code for the graph database resides, when using tinkergraph driver.
-The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
-</tr>
-<tr class="row-odd"><td><p>gsneo4jv3_host</p></td>
-<td><p>The host to connect to reach the graph database, when using gsneo4j driver.
-The default value is ‘localhost’</p></td>
-</tr>
-<tr class="row-even"><td><p>gsneo4jve_host</p></td>
-<td><p>The port to use on the host to reach the graph database, when using gsneo4j driver..
-The default value is ‘8182’</p></td>
-</tr>
-<tr class="row-odd"><td><p>gsneo4jv3_folder</p></td>
-<td><p>The folder where the code for the graph database resides, when using gsneo4j driver.
-The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
-</tr>
-<tr class="row-even"><td><p>tinkergraphv3_host</p></td>
-<td><p>The host to connect to reach the graph database, when using tinkergraph driver.
-The default value is ‘localhost’</p></td>
-</tr>
-<tr class="row-odd"><td><p>tinkergraphv3_port</p></td>
-<td><p>The port to use on the host to reach the graph database, when using tinkergraph driver.
-The default value is ‘8182’</p></td>
-</tr>
-<tr class="row-even"><td><p>tinkergraphv3_folder</p></td>
-<td><p>The folder where the code for the graph database resides, when using tinkergraph driver.
-The default value is ‘tinkergraph’, and is located near exakat.phar</p></td>
-</tr>
-<tr class="row-odd"><td><p>project_rulesets</p></td>
-<td><p>List of analysis rulesets to be run. The list may include extra rulesets that are not
-used by the default reports : you can then summon them manually.
-project_themes[] = ‘Theme’, one per line.</p></td>
-</tr>
-<tr class="row-even"><td><p>project_themes</p></td>
-<td><p>Obsolete. Use the one above : project_rulesets</p></td>
-</tr>
-<tr class="row-odd"><td><p>project_reports</p></td>
-<td><p>The list of reports that can be produced when running ‘project’ command.
-This list may automatically add extra rulesets if a report requires them. For example,
-the ‘Ambassador’ report requires ‘Security’ ruleset, while ‘Text’ has no pre-requisite.
-project_reports is ‘Ambassador’, by default.
-project_reports[] = ‘Report’, one per line.</p></td>
-</tr>
-<tr class="row-even"><td><p>token_limit</p></td>
-<td><p>Maximum size of the analyzed project, in number of PHP tokens (excluding whitespace).
-Use this to avoid running a really long analyze without knowing it.
-Default is 1 million.</p></td>
-</tr>
-<tr class="row-odd"><td><p>php</p></td>
-<td><p>Link to the PHP binary. This binary is the one that runs Exakat. It is recommended to use
-PHP 7.3, or 7.4. The same binary may be used with the following options.</p></td>
-</tr>
-<tr class="row-even"><td><p>php82</p></td>
-<td><p>Path to the PHP 8.2.x binary. This binary is needed to test the compilation with the 8.2
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-odd"><td><p>php81</p></td>
-<td><p>Path to the PHP 8.1.x binary. This binary is needed to test the compilation with the 8.1
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-even"><td><p>php80</p></td>
-<td><p>Path to the PHP 8.0.x binary. This binary is needed to test the compilation with the 8.0
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-odd"><td><p>php74</p></td>
-<td><p>Path to the PHP 7.4.x binary. This binary is needed to test the compilation with the 7.4
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-even"><td><p>php73</p></td>
-<td><p>Path to the PHP 7.3.x binary. This binary is needed to test the compilation with the 7.3
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-odd"><td><p>php72</p></td>
-<td><p>Path to the PHP 7.2.x binary. This binary is needed to test the compilation with the 7.2
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-even"><td><p>php71</p></td>
-<td><p>Path to the PHP 7.1.x binary. This binary is needed to test the compilation with the 7.1
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-odd"><td><p>php70</p></td>
-<td><p>Path to the PHP 7.0.x binary. This binary is needed to test the compilation with the 7.0
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-even"><td><p>php56</p></td>
-<td><p>Path to the PHP 5.6.x binary. This binary is needed to test the compilation with the 5.6
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-odd"><td><p>php55</p></td>
-<td><p>Path to the PHP 5.5.x binary. This binary is needed to test the compilation with the 5.5
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-even"><td><p>php54</p></td>
-<td><p>Path to the PHP 5.4.x binary. This binary is needed to test the compilation with the 5.4
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-odd"><td><p>php53</p></td>
-<td><p>Path to the PHP 5.3.x binary. This binary is needed to test the compilation with the 5.3
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-even"><td><p>php52</p></td>
-<td><p>Path to the PHP 5.2.x binary. This binary is needed to test the compilation with the 5.2
-series or if the analyze should be run with this version (see project’s config.ini).
-Comment it out if you don’t want this version tested. It is not recommended to use this
-version for the analyze</p></td>
-</tr>
-<tr class="row-odd"><td><p>php_extensions</p></td>
-<td><p>List of PHP extensions to use when spotting functions, methods, constants, classes, etc.
-Default to ‘all’, which are all in the source code
-Can be set to ‘none’ to skip the detection</p></td>
-</tr>
-</tbody>
-</table>
+<div class="section" id="graphdb">
+<h4>graphdb<a class="headerlink" href="#graphdb" title="Permalink to this headline">¶</a></h4>
+<p>The graph database to use.
+Currently, it may be gsneo4jv3, or tinkergraphv3.</p>
+</div>
+<div class="section" id="gsneo4j-host">
+<h4>gsneo4j_host<a class="headerlink" href="#gsneo4j-host" title="Permalink to this headline">¶</a></h4>
+<p>The host to connect to reach the graph database, when using gsneo4j driver.
+The default value is ‘localhost’</p>
+</div>
+<div class="section" id="id1">
+<h4>gsneo4j_host<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>The port to use on the host to reach the graph database, when using gsneo4j driver..
+The default value is ‘8182’</p>
+</div>
+<div class="section" id="gsneo4j-folder">
+<h4>gsneo4j_folder<a class="headerlink" href="#gsneo4j-folder" title="Permalink to this headline">¶</a></h4>
+<p>The folder where the code for the graph database resides, when using gsneo4j driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p>
+</div>
+<div class="section" id="tinkergraph-host">
+<h4>tinkergraph_host<a class="headerlink" href="#tinkergraph-host" title="Permalink to this headline">¶</a></h4>
+<p>The host to connect to reach the graph database, when using tinkergraph driver.
+The default value is ‘localhost’</p>
+</div>
+<div class="section" id="tinkergraph-port">
+<h4>tinkergraph_port<a class="headerlink" href="#tinkergraph-port" title="Permalink to this headline">¶</a></h4>
+<p>The port to use on the host to reach the graph database, when using tinkergraph driver.
+The default value is ‘8182’</p>
+</div>
+<div class="section" id="tinkergraph-folder">
+<h4>tinkergraph_folder<a class="headerlink" href="#tinkergraph-folder" title="Permalink to this headline">¶</a></h4>
+<p>The folder where the code for the graph database resides, when using tinkergraph driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p>
+</div>
+<div class="section" id="gsneo4jv3-host">
+<h4>gsneo4jv3_host<a class="headerlink" href="#gsneo4jv3-host" title="Permalink to this headline">¶</a></h4>
+<p>The host to connect to reach the graph database, when using gsneo4jv3 driver.
+The default value is ‘localhost’</p>
+</div>
+<div class="section" id="gsneo4jv3-port">
+<h4>gsneo4jv3_port<a class="headerlink" href="#gsneo4jv3-port" title="Permalink to this headline">¶</a></h4>
+<p>The host to connect to reach the graph database, when using gsneo4jv3 driver.
+The default value is ‘8182’</p>
+</div>
+<div class="section" id="gsneo4jv3-folder">
+<h4>gsneo4jv3_folder<a class="headerlink" href="#gsneo4jv3-folder" title="Permalink to this headline">¶</a></h4>
+<p>The folder where the code for the graph database resides, when using gsneo4jv3 driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p>
+</div>
+<div class="section" id="tinkergraphv3-host">
+<h4>tinkergraphv3_host<a class="headerlink" href="#tinkergraphv3-host" title="Permalink to this headline">¶</a></h4>
+<p>The host to connect to reach the graph database, when using tinkergraphv3 driver.
+The default value is ‘localhost’</p>
+</div>
+<div class="section" id="tinkergraphv3-port">
+<h4>tinkergraphv3_port<a class="headerlink" href="#tinkergraphv3-port" title="Permalink to this headline">¶</a></h4>
+<p>The host to connect to reach the graph database, when using tinkergraphv3 driver.
+The default value is ‘8182’</p>
+</div>
+<div class="section" id="tinkergraphv3-folder">
+<h4>tinkergraphv3_folder<a class="headerlink" href="#tinkergraphv3-folder" title="Permalink to this headline">¶</a></h4>
+<p>The folder where the code for the graph database resides, when using tinkergraphv3 driver.
+The default value is ‘tinkergraph’, and is located near exakat.phar</p>
+</div>
+<div class="section" id="project-rulesets">
+<h4>project_rulesets<a class="headerlink" href="#project-rulesets" title="Permalink to this headline">¶</a></h4>
+<p>List of rulesets to be run. The list may include extra rulesets that are not requested by the individual reports. That way, they will be available for the generic reports.</p>
+<p>project_rulesets[] = ‘Security’</p>
+</div>
+<div class="section" id="project-reports">
+<h4>project_reports<a class="headerlink" href="#project-reports" title="Permalink to this headline">¶</a></h4>
+<p>The list of reports that produced when running ‘project’ command, without the -format option. This list may automatically add extra rulesets if a report requires them. For example, the ‘Ambassador’ report requires ‘Security’ ruleset, while ‘Text’ has no pre-requisite.</p>
+<p>project_reports contains ‘Diplomat’, by default.</p>
+</div>
+<div class="section" id="token-limit">
+<h4>token_limit<a class="headerlink" href="#token-limit" title="Permalink to this headline">¶</a></h4>
+<p>Maximum size of the analyzed project, in number of PHP tokens (excluding whitespace). Use this to avoid running a really long analyze without knowing it.</p>
+<p>Default is 1 million.</p>
+</div>
+<div class="section" id="php">
+<h4>php<a class="headerlink" href="#php" title="Permalink to this headline">¶</a></h4>
+<p>Link to the PHP binary. This binary is the one that runs Exakat. It is recommended to use PHP 8.0, or 8.1. The same binary may be used with the following options.</p>
+</div>
+<div class="section" id="php82">
+<h4>php82<a class="headerlink" href="#php82" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 8.2.x binary. This binary is needed to test the compilation with the 8.2 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php81">
+<h4>php81<a class="headerlink" href="#php81" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 8.1.x binary. This binary is needed to test the compilation with the 8.1 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php80">
+<h4>php80<a class="headerlink" href="#php80" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 8.0.x binary. This binary is needed to test the compilation with the 8.0 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php74">
+<h4>php74<a class="headerlink" href="#php74" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 7.4.x binary. This binary is needed to test the compilation with the 7.4 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php73">
+<h4>php73<a class="headerlink" href="#php73" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 7.3.x binary. This binary is needed to test the compilation with the 7.3 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php72">
+<h4>php72<a class="headerlink" href="#php72" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 7.2.x binary. This binary is needed to test the compilation with the 7.2 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php71">
+<h4>php71<a class="headerlink" href="#php71" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 7.1.x binary. This binary is needed to test the compilation with the 7.1 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php70">
+<h4>php70<a class="headerlink" href="#php70" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 7.0.x binary. This binary is needed to test the compilation with the 7.0 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php56">
+<h4>php56<a class="headerlink" href="#php56" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 5.6.x binary. This binary is needed to test the compilation with the 5.6 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php55">
+<h4>php55<a class="headerlink" href="#php55" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 5.5.x binary. This binary is needed to test the compilation with the 5.5 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php54">
+<h4>php54<a class="headerlink" href="#php54" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 5.4.x binary. This binary is needed to test the compilation with the 5.4 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php53">
+<h4>php53<a class="headerlink" href="#php53" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 5.3.x binary. This binary is needed to test the compilation with the 5.3 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php52">
+<h4>php52<a class="headerlink" href="#php52" title="Permalink to this headline">¶</a></h4>
+<p>Path to the PHP 5.2.x binary. This binary is needed to test the compilation with the 5.2 series or if the analyze should be run with this version (see project’s config.ini).</p>
+<p>Comment it out if you don’t want this version tested. It is not recommended to use this  version for the analyze</p>
+</div>
+<div class="section" id="php-extensions">
+<h4>php_extensions<a class="headerlink" href="#php-extensions" title="Permalink to this headline">¶</a></h4>
+<p>List of PHP extensions to use when spotting functions, methods, constants, classes, etc.</p>
+<p>Default to ‘all’, which are all in the source code. Can be set to ‘none’ to skip the detection</p>
 <p>Note : php** configuration may be either a valid PHP binary path, or a valid Docker image. The path on the system may be <cite>/usr/bin/php</cite>, <cite>/usr/sbin/php80</cite>, or <cite>/usr/local/Cellar/php71/7.1.30/bin/php</cite>. The Docker configuration must have the form <cite>abc/def:tag</cite>. The image’s name may be any value, as long as Exakat manage to run it, and get the valid PHP signature, with <cite>php -v</cite>. When using Docker, the docker server must be running.</p>
+</div>
 </div>
 <div class="section" id="custom-rulesets">
 <h3>Custom rulesets<a class="headerlink" href="#custom-rulesets" title="Permalink to this headline">¶</a></h3>

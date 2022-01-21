@@ -83,6 +83,7 @@ abstract class DSL {
                              'isPhp',
                              'isExt',
                              'isStub',
+                             'typehint',
                              );
 
     protected const BOOLEAN_PROPERTY = array('abstract',
@@ -161,7 +162,7 @@ abstract class DSL {
         $this->analyzerQuoted         = $analyzerQuoted;
 
         if (empty(self::$linksDown)) {
-            self::$linksDown = GraphElements::linksAsList();
+            self::$linksDown = GraphElements::linksDownAsList();
         }
 
         if (empty(self::$ATOMS)) {
@@ -302,7 +303,7 @@ abstract class DSL {
     }
 
     protected function isProperty($property): bool {
-        return property_exists(Atom::class, $property) || in_array($property, array('label', 'self', 'ignored_dir', 'virtual', 'analyzer', 'propagated', 'isPhp', 'isExt', 'isStub'));
+        return property_exists(Atom::class, $property) || in_array($property, array('typehint', 'label', 'self', 'ignored_dir', 'virtual', 'analyzer', 'propagated', 'isPhp', 'isExt', 'isStub'));
     }
 
     protected function assertProperty($property): bool {
@@ -366,6 +367,29 @@ abstract class DSL {
         }
 
         return implode('', $return);
+    }
+    
+    protected function assertArguments(int $maxCount, int $actualCount, string $method) : void {
+        assert($actualCount === $maxCount, 
+            'Wrong number of argument for ' . $method . '. '.$maxCount.' is expected, ' . $actualCount . ' provided.');
+    }
+    
+    protected function protectValue($value) : string {
+        if (is_string($value)) {
+            if ($this->isVariable($value)) {
+                return $value;
+            } else {
+                return '"'.addslashes($value).'"';
+            }
+        } elseif (is_int($value)) {
+            return (string) $value;
+        } elseif (is_null($value)) {
+            return 'null';
+        } elseif (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        } else {
+            assert(false, "Could not process value type : ".get_type($value));
+        }
     }
 }
 

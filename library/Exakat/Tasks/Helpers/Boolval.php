@@ -91,19 +91,26 @@ class Boolval extends Plugin {
                 break;
 
             case 'Integer' :
+                $value = (string) $atom->code;
+                // remove the digit separator
+                $value = str_replace('_', '', $value);
+
                 // similar to the case of Intval, but tailored for boolean
-                if (strtolower(substr($atom->code, 0, 2)) === '0b') {
-                    $actual = bindec(substr($atom->code, 2));
-                } elseif (strtolower(substr($atom->code, 0, 2)) === '0x') {
-                    $actual = hexdec(substr($atom->code, 2));
-                } elseif (strtolower($atom->code[0]) === '0') {
+                if (strtolower(substr($value, 0, 2)) === '0b') {
+                    $actual = bindec(substr($value, 2));
+                } elseif (strtolower(substr($value, 0, 2)) === '0x') {
+                    $actual = hexdec(substr($value, 2));
+                } elseif (strtolower(substr($value, 0, 2)) === '0o') {
+                    // PHP 8.1 only
+                    $actual = octdec(substr($value, 2));
+                } elseif (strtolower($value[0]) === '0') {
                     // PHP 7 will just stop.
                     // PHP 5 will work until it fails
-                    $actual = octdec(substr($atom->code, 1));
-                } elseif ($atom->code[0] === '+' || $atom->code[0] === '-') {
-                    $actual = pow(-1, substr_count($atom->code, '-')) * (int) strtr($atom->code, '+-', '  ');
+                    $actual = octdec(substr($value, 1));
+                } elseif ($value[0] === '+' || $value[0] === '-') {
+                    $actual = pow(-1, substr_count($value, '-')) * (int) strtr($value, '+-', '  ');
                 } else {
-                    $actual = $atom->code;
+                    $actual = $value;
                 }
 
                 $atom->boolean = (bool) $actual;

@@ -22,17 +22,15 @@
 
 namespace Exakat\Analyzer\Dump;
 
-use Exakat\Analyzer\Analyzer;
-
 class CollectNativeCallsPerExpressions extends AnalyzerHashHashResults {
     protected $analyzerName = 'NativeCallPerExpression';
 
     public function analyze(): void {
-        $MAX_LOOPING = Analyzer::MAX_LOOPING;
+        $MAX_LOOPING = self::MAX_LOOPING;
 
-        $this->atomIs('Sequence', Analyzer::WITHOUT_CONSTANTS)
+        $this->atomIs('Sequence', self::WITHOUT_CONSTANTS)
               ->outIs('EXPRESSION')
-              ->atomIsNot(array('Case', 'Catch', 'Class', 'Classanonymous', 'Closure', 'Default', 'Dowhile', 'Finally', 'For', 'Foreach', 'Function', 'Ifthen', 'Include', 'Namespace', 'Php', 'Return', 'Switch', 'Trait', 'Try', 'While'), Analyzer::WITHOUT_CONSTANTS)
+              ->atomIsNot(array('Arrowfunction', 'Case', 'Catch', 'Class', 'Classanonymous', 'Closure', 'Default', 'Dowhile', 'Enum', 'Finally', 'For', 'Foreach', 'Function', 'Ifthen', 'Include', 'Namespace', 'Php', 'Return', 'Switch', 'Trait', 'Try', 'While'), self::WITHOUT_CONSTANTS)
               ->_as('results')
               ->raw(<<<GREMLIN
 groupCount("m").by( __.emit( ).repeat( __.out({$this->linksDown}).not(hasLabel("Closure", "Arrowfunction", "Classanonymous")) ).times($MAX_LOOPING).hasLabel("Functioncall")

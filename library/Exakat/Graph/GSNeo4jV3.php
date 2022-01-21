@@ -101,11 +101,6 @@ class GSNeo4jV3 extends Graph {
                                           'graph'    => 'graph',
                                           'emptySet' => true,
                                    ) );
-                                           $this->db = new Connection(array( 'host'     => $this->config->gsneo4jv3_host,
-                                          'port'     => $this->config->gsneo4jv3_port,
-                                          'graph'    => 'graph',
-                                          'emptySet' => true,
-                                   ) );
 
         $this->db->message->registerSerializer('\Exakat\Graph\Helpers\GraphsonV3', true);
         $this->status = self::UNCHECKED;

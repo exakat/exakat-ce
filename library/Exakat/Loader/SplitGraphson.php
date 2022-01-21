@@ -53,15 +53,15 @@ class SplitGraphson extends Loader {
 
     private $dictCode = null;
 
-    private $sqlite3   = null;
+    private $sqlite   = null;
 
     private $log = null;
 
-    public function __construct(\Sqlite3 $sqlite3, Atom $id0) {
+    public function __construct(\Sqlite3 $sqlite, Atom $id0) {
         $this->config         = exakat('config');
         $this->graphdb        = exakat('graphdb');
 
-        $this->sqlite3        = $sqlite3;
+        $this->sqlite3        = $sqlite;
         $this->path           = "{$this->config->tmp_dir}/graphdb.graphson";
         $this->pathLink       = "{$this->config->tmp_dir}/graphdb.link.graphson";
         $this->pathProperties = "{$this->config->tmp_dir}/graphdb.properties.graphson";
@@ -100,6 +100,7 @@ class SplitGraphson extends Loader {
         $res = $this->graphdb->query($query);
         $project_id = $res->toUuid();
 
+        // @todo : move this to a Graph class method (it knows the project_id)
         $query = 'g.V().hasLabel("File").not(where( __.in("PROJECT"))).addE("PROJECT").from(__.V(' . $project_id . '));';
         $this->graphdb->query($query);
 
@@ -332,6 +333,7 @@ GREMLIN;
             $link[2] = $this->graphdb->fixId($link[2]);
             $link = implode('-', $link);
         }
+        unset($link);
 
         $total = 0; // local total
         $append = array();

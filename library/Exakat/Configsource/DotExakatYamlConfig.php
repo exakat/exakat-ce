@@ -29,27 +29,35 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 class DotExakatYamlConfig extends Config {
-    const YAML_FILE = '.exakat.yml';
+    public const YAML_FILE = '.exakat.yml';
     private $dotExakatYaml = '';
     private $rulesets = array();
 
-    public function __construct() {
-        $this->dotExakatYaml = getcwd() . '/' . self::YAML_FILE;
+    public function __construct(Project $project, string $projects_root) {
+        if ($project->isDefault()) {
+            $this->config['inside_code'] = Configuration::INSIDE_CODE;
+            $this->dotExakatYaml = getcwd() . '/' . self::YAML_FILE;
+        } else {
+            $this->config['inside_code'] = Configuration::WITH_PROJECTS;
+            $this->dotExakatYaml = $projects_root . '/projects/' . (string) $project . '/code/' . self::YAML_FILE;
+        }
 
         if (!file_exists($this->dotExakatYaml)) {
             $secondary = substr($this->dotExakatYaml, 0, -3) . 'yaml';
             if (file_exists($secondary)) {
                 $this->dotExakatYaml = $secondary;
+            } else {
+                $this->dotExakatYaml = '';
             }
         }
-        
-        $this->config['project'] = new Project();
+
+        $this->config['project'] = $project;
     }
 
     public function loadConfig(Project $project): ?string {
         if (!file_exists($this->dotExakatYaml)) {
-            $this->config['inside_code'] = Configuration::WITH_PROJECTS;
             $this->config['project']     = new Project();
+
             return self::NOT_LOADED;
         }
 
@@ -128,57 +136,66 @@ class DotExakatYamlConfig extends Config {
                            'ignore_rules'        => array(),
                         );
 
-        $this->config['inside_code'] = Configuration::INSIDE_CODE;
-
-        foreach($defaults as $name => $default_value) {
-            $this->config[$name] = empty($tmp_config[$name]) ? $default_value : $tmp_config[$name];
+        foreach(array_keys($defaults) as $name) {
+            if (!empty($tmp_config[$name])) {
+                $this->config[$name] = $tmp_config[$name];
+            }
             unset($tmp_config[$name]);
         }
-        
+
         if (!empty($tmp_config)) {
             display(count($tmp_config) . ' entries were found in .exakat.yaml, but could not be processed : ' . implode(', ', array_keys($tmp_config)));
         }
 
-        if (isset($tmp_config['project_themes'])) {
-            display("please, rename project_themes into project_rulesets in your .exakat.yaml file\n");
+        if (isset($this->config['project_themes'])) {
+            if (isset($tmp_config['project_themes'])) {
+                display("please, rename project_themes into project_rulesets in your .exakat.yaml file\n");
 
-            if (empty($this->config['project_rulesets'])) {
-                $this->config['project_rulesets'] = $this->config['project_themes'];
+                if (empty($this->config['project_rulesets'])) {
+                    $this->config['project_rulesets'] = $this->config['project_themes'];
+                }
             }
         }
 
-        if (is_string($this->config['other_php_versions'])) {
-            $this->config['other_php_versions'] = listToArray($this->config['other_php_versions']);
-            foreach($this->config['other_php_versions'] as &$version) {
-                $version = str_replace('.', '', trim($version));
+        if (isset($this->config['other_php_versions'])) {
+            if (is_string($this->config['other_php_versions'])) {
+                $this->config['other_php_versions'] = listToArray($this->config['other_php_versions']);
+                foreach($this->config['other_php_versions'] as &$version) {
+                    $version = str_replace('.', '', trim($version));
+                }
+                unset($version);
             }
-            unset($version);
         }
 
-        if (is_string($this->config['file_extensions'])) {
-            $this->config['file_extensions'] = listToArray($this->config['file_extensions']);
-        }
-        $this->config['file_extensions'] = $this->cleanFileExtensions($this->config['file_extensions']);
-
-        if (is_string($this->config['project_reports'])) {
-            $this->config['project_reports'] = listToArray($this->config['project_reports']);
-            foreach($this->config['project_reports'] as &$ext) {
-                $ext = trim($ext);
+        if (isset($this->config['file_extensions'])) {
+            if (is_string($this->config['file_extensions'])) {
+                $this->config['file_extensions'] = listToArray($this->config['file_extensions']);
             }
-            unset($ext);
+            $this->config['file_extensions'] = $this->cleanFileExtensions($this->config['file_extensions']);
         }
 
-        if (is_string($this->config['project_rulesets'])) {
-            $this->config['project_rulesets'] = listToArray($this->config['project_rulesets']);
-            foreach($this->config['project_rulesets'] as &$ext) {
-                $ext = trim($ext);
+
+        if (isset($this->config['project_reports'])) {
+            if (is_string($this->config['project_reports'])) {
+                $this->config['project_reports'] = listToArray($this->config['project_reports']);
+                foreach($this->config['project_reports'] as &$ext) {
+                    $ext = trim($ext);
+                }
+                unset($ext);
             }
-            unset($ext);
         }
 
-        if (isset($this->config['project'])) {
-            $this->config['project'] = new Project($this->config['project']);
-        } elseif (isset($this->config['project_name'])) {
+        if (isset($this->config['project_rulesets'])) {
+            if (is_string($this->config['project_rulesets'])) {
+                $this->config['project_rulesets'] = listToArray($this->config['project_rulesets']);
+                foreach($this->config['project_rulesets'] as &$ext) {
+                    $ext = trim($ext);
+                }
+                unset($ext);
+            }
+        }
+
+        if (isset($this->config['project_name'])) {
             $this->config['project'] = new Project(mb_strtolower(preg_replace('/\W/', '_', $this->config['project_name'] )));
         } else {
             $this->config['project'] = new Project('in-code-audit');
@@ -202,8 +219,9 @@ class DotExakatYamlConfig extends Config {
         }
 
         // Collect stubs. Stubs MUST be in the same code repository, so they are chrooted with the current directory.
-        $stubs = array();
-        $code_dir = getcwd();
+//        $stubs = array();
+//        $code_dir = getcwd();
+        /*
         $this->config['stubs'] = makeArray($this->config['stubs']);
         foreach($this->config['stubs'] as $stub) {
             $d = getcwd();
@@ -234,6 +252,7 @@ class DotExakatYamlConfig extends Config {
             }
         }
         $this->config['stubs'] = array_unique(array_merge(...array_values($stubs)));
+        */
 
         return self::YAML_FILE;
     }
@@ -243,20 +262,29 @@ class DotExakatYamlConfig extends Config {
     }
 
     public function getConfig(string $dir_root = ''): string {
+        $defaultConfig = new DefaultConfig();
+
         // $vendor
-        if ($this->config['include_dirs'] === array('/')) {
+        if (!isset($this->config['include_dirs'])) {
+            $include_dirs = 'include_dirs[] = "";';
+        } elseif ($this->config['include_dirs'] === array('/')) {
             $include_dirs = 'include_dirs[] = "";';
         } else {
             $include_dirs = 'include_dirs[] = "' . implode("\";\ninclude_dirs[] = \"", $this->config['include_dirs']) . "\";\n";
         }
-        $file_extensions  = implode(',', $this->config['file_extensions']);
+        
+        if (isset($this->config['file_extensions'])) {
+            $file_extensions  = implode(',', $this->config['file_extensions'] ?? []);
+        } else {
+            $file_extensions  = $defaultConfig->get('file_extensions');
+        }
 
         $default = array();
         $iniFiles = glob("$dir_root/human/en/*/*.ini");
         foreach($iniFiles as $file) {
             $ini = parse_ini_file($file, \INI_PROCESS_SECTIONS);
             if (isset($ini['parameter1'])) {
-                $default[basename(dirname($file)) . '/' . basename($file, '.ini')][$ini['parameter1']['name']] = $ini['parameter1']['default'];
+                $default[basename(dirname($file)) . '/' . basename($file, '.ini')][$ini['parameter1']['name']] = $ini['parameter1']['default'] ?? '';
             }
         }
 
@@ -275,14 +303,14 @@ class DotExakatYamlConfig extends Config {
         $configIni = array(
 'project'             => (string) $this->config['project'],
 'project_name'        => (string) $this->config['project_name'],
-'project_url'         => (string) $this->config['project_url'],
-'project_vcs'         => (string) $this->config['project_vcs'],
-'project_description' => (string) $this->config['project_description'],
-'project_branch'      => (string) $this->config['project_branch'],
-'project_tag'         => (string) $this->config['project_tag'],
-'include_dirs'        => $this->config['include_dirs'],
-'ignore_dirs'         => $this->config['ignore_dirs'],
-'ignore_rules'        => $this->config['ignore_rules'],
+'project_url'         => (string) ($this->config['project_url']         ?? ''),
+'project_vcs'         => (string) ($this->config['project_vcs']         ?? ''),
+'project_description' => (string) ($this->config['project_description'] ?? ''),
+'project_branch'      => (string) ($this->config['project_branch']      ?? ''),
+'project_tag'         => (string) ($this->config['project_tag']         ?? ''),
+'include_dirs'        => $this->config['include_dirs'] ?? $defaultConfig->get('include_dirs'),
+'ignore_dirs'         => $this->config['ignore_dirs']  ?? $defaultConfig->get('ignore_dirs'),
+'ignore_rules'        => $this->config['ignore_rules'] ?? $defaultConfig->get('ignore_rules'),
 'file_extensions'     => $file_extensions,
 'custom'              => $default,
         );

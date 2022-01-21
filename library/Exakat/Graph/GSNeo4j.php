@@ -100,11 +100,6 @@ class GSNeo4j extends Graph {
                                           'graph'    => 'graph',
                                           'emptySet' => true,
                                    ) );
-                                           $this->db = new Connection(array( 'host'     => $this->config->gsneo4j_host,
-                                          'port'     => $this->config->gsneo4j_port,
-                                          'graph'    => 'graph',
-                                          'emptySet' => true,
-                                   ) );
         $this->status = self::UNCHECKED;
     }
 

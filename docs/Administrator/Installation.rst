@@ -351,19 +351,19 @@ Installation guide as Github Action
 Github Action
 #############
 
-`Github Action <https://docs.github.com/en/actions>`_ is a way to "Automate, customize, and execute your software development workflows right in your repository". Exakat may be run on Github platform.
+`Github Action <https://docs.github.com/en/actions>`_ is a way to "Automate, customize, and execute your software development workflows right in your repository". Exakat runs on Github platform.
  
  
-Github Action for Exakat
-########################
+Set up Github Action for Exakat
+###############################
 
-To add Exakat to your repository on Github, create a file `.github/workflows/test.yml`, at the root of your repository (`.github/workflows` might already exists).
+To add Exakat to your repository on Github, create a file `.github/workflows/exakat.yml`, at the root of your repository (`.github/workflows` might already exists, otherwise create it).
 
-In the file, use the following YAML code. It will create an automatic action, on push and pull_request actions, that runs Exakat and display the issues found in the workflow panel. It is also possible to run manually this action. 
+In the file, use the following YAML code. It creates an automatic action, on push and pull_request actions, that runs Exakat and display the issues found in the workflow panel. It is also possible to run manually this action, with the `workflow_dispatch <https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow>`_ : after installing the exakat.yaml file, go to the 'Actions' tab and locate the 'Run workflow' button. 
 
 :: 
 
-    on: [push, pull_request]
+    on: [push, pull_request, workflow_dispatch]
     name: Test
     jobs:
       exakat:
@@ -376,16 +376,23 @@ In the file, use the following YAML code. It will create an automatic action, on
 
 Note : it is recommended to edit this file directly on github.com, as it cannot be pushed from a remote repository. 
 
-Then, you can use the `Action` button, next to 'Pull requests'. This will run Exakat on the repository, with the 'CI-checks' ruleset, and in the 'Perfile' format. 
+Then, you can use the `Action` button, next to 'Pull requests', or push a new commit to trigger this. This will run Exakat on the repository, with the 'CI-checks' ruleset, and in the 'Perfile' format. 
+
+Create status badge
+###################
+
+Github action creates automatically status badge, that can be displayed on the repository or other websites, and keep you updated of the last exakat run. 
+
+In the 'Actions' tag, select the workflow, and find the '...' on the right. Click on it, and the first item will be 'Create status badge'. Then, follow the instructions to get a Markdown badge.
 
 Github Action Configuration directives
 ######################################
 
-It is possible to provide custom directives to the Exakat Github action, by using the 'with' keyword in the configuration. Here is an example : 
+Exakat for Github action provide support for custom directives, by using the 'with' keyword in the configuration. Here is an example : 
 
 :: 
 
-    on: [push, pull_request]
+    on: [push, pull_request, workflow_dispatch]
     name: Test
     jobs:
       exakat:
@@ -398,40 +405,50 @@ It is possible to provide custom directives to the Exakat Github action, by usin
         - with:
           ignore_rules: 'Classes/StaticMethodsCalledFromObject,Php/ShouldUseCoalesce,Functions/UsesDefaultArguments'
           ignore_dirs: '/path/to/repos#1,/path/to/repos#2,/path/to/repos#3'
+          project_reports: Sarif,Diplomat,Perfile
 
 The supported directives are the following: 
 
-
-* **exit_on_issues** : default to true. The github action returns with exit code 1 if any issue is found during the review. Set this to empty string, to have the action return 0. You may also configure the step with `continue-on-error <https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error>`_.
+* **exit_on_issues** : default to true. Use empty string for false. The github action returns with exit code 1 if any issue is found during the review. Set this to empty string, to have the action return 0. You may also configure the step with `continue-on-error <https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error>`_.
 * **ignore_rules** : default to empty. A comma-separated list of Exakat rule short names, that will be excluded from the review. For example : ignore_rules: Structures/AddOne,Structures/PlusEgalOne. 
 * **ignore_dirs** : default to empty. A comma-separated list folders that will be omitted. They are relative to the root of the repository.
 * **include_dirs** : default to empty. A comma-separated list folders that must be added. They are relative to the root of the repository, and will be added after the ignore_dirs directive.
 * **file_extensions** : default to exakat's default value. A comma-separated list of file extensions to filter the processed files. Default list is php,php3,inc,tpl,phtml,tmpl,phps,ctp,module. This configuration replaces the default one. 
 * **project_reports** : default to Perfile. A comma-separated list of Exakat reports to be processed. For example : Perfile,Sarif,Diplomat. Reports such as 'Diplomat' must be uploaded elsewhere (with `upload artifact <https://github.com/actions/upload-artifact>`_), as the produced file will be written in the Github Action, which is later removed.
 
+Other exakat directives may be provided by using the :ref:`user-in-code-configuration`, aka .exakat.yaml or .exakat.ini.
+
 Upload reports as artefact
 ++++++++++++++++++++++++++
 
-When producing a report with Github action, the result is either send to STDOUT, aka the log in the Github interface. Or, it is written in the Github action. When this is done, the report must be uploaded out of the Github action to be preserved. 
+When producing a report with Github action, the result is either send to STDOUT, aka the log in the Github interface : this is the case for the Perfile report. Or, it is written in the Github action's container. Then, the report must be uploaded out of the container to be preserved. 
 
-Github upload, aka actions/upload-artifact@v2, may be used for that purpose. Add the following configuration in the action file : 
+`Github upload <https://github.com/actions/upload-artifact>`_, aka actions/upload-artifact@v2, is a solution to upload the results. Add the following configuration in the action file : 
+
+::
+        - name: Exakat
+          uses: docker://exakat/exakat-ga
+        - with:
+          ///... possible other directives
+          project_reports: Diplomat
+          /// project_reports may include other reports, like Sarif and Perfile
+        - uses: actions/upload-artifact@v2
+          with:
+            name: my-exakat-report
+            path: /github/workspace/diplomat
+
+The report files are stored in the ``/github/workspace`` folder, with different names depending on the requested exakat report. For example, the `Sarif` report is exported to the file 'exakat.sarif', while the `Diplomat` report is stored in the folder called 'diplomat'. Thus, the configuration shall be : 
 
 ::
 
     - uses: actions/upload-artifact@v2
       with:
-        name: my-exakat-report
-        path: /github/workspace/path/to/report
-
-
-The path to report is stored in the ``/github/workspace`` folder, with different names depending on the requested exakat report. For example, the `Yaml` report is exported to 'exakat.yaml', while the `Diplomat` report is stored in a folder called 'diplomat'. Thus, the configuration shall be : 
-
-::
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: my-exakat-report
+        name: my-exakat-diplomat-report
         path: /github/workspace/diplomat
+    - uses: actions/upload-artifact@v2
+      with:
+        name: my-exakat-sharif-report
+        path: /github/workspace/exakat.sharif
 
 
 Exakat Docker image for Github Action
@@ -447,6 +464,7 @@ You can run it in any given directory like this:
     cd /path/to/code
     docker pull exakat/exakat-ga
     docker run --rm -it -v ${PWD}:/app exakat/exakat-ga:latest
+
 
 Using multiple PHP versions
 ---------------------------

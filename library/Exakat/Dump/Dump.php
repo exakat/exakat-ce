@@ -93,6 +93,8 @@ abstract class Dump {
                         'compilation73',
                         'compilation74',
                         'compilation80',
+                        'compilation81',
+                        'compilation82',
                         'composer',
                         'configFiles',
                         'externallibraries',
@@ -125,6 +127,8 @@ abstract class Dump {
                 $c = array_map(array($this->sqlite, 'escapeString'), $c);
                 $c = '(NULL, \'' . implode('\', \'', $c) . '\')';
             }
+            unset($c);
+
             $sql = 'REPLACE INTO results ("id", "fullcode", "file", "line", "namespace", "class", "function", "analyzer", "severity") VALUES ' . implode(', ', $chunk);
             $this->sqlite->query($sql);
         }
@@ -149,6 +153,7 @@ abstract class Dump {
             foreach($chunk as &$c) {
                 $c = "(NULL, '" . $c . "', 0)";
             }
+            unset($c);
             $sql = 'REPLACE INTO resultsCounts ("id", "analyzer", "count") VALUES ' . implode(', ', $chunk);
             $this->sqlite->query($sql);
         }

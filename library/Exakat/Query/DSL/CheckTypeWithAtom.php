@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class CheckTypeWithAtom extends DSL {
     public function run(): Command {
-        assert(func_num_args() === 1, 'Wrong number of argument for ' . __METHOD__);
+        $this->assertArguments(1, func_num_args(), __METHOD__);
         list($var) = func_get_args();
 
         assert($this->assertVariable($var, self::VARIABLE_READ));

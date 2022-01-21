@@ -25,6 +25,7 @@ namespace Exakat\Tasks;
 use Exakat\Cobbler\Cobbler;
 use Exakat\Config;
 use Exakat\Vcs\Vcs;
+use Exakat\Exceptions\NeedsAnalyzerThema;
 
 class Cobble extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -70,11 +71,15 @@ class Cobble extends Tasks {
                                    'project' => $this->config->project));
         }
 
+        if (empty($this->config->program)) {
+            throw new NeedsAnalyzerThema();
+        }
+
         $this->logTime('Cobbling');
         foreach($this->config->program as $program) {
-            $cobbler = Cobbler::getInstance($program);
+            $cobbler = Cobbler::getInstance($program, $this->config);
 
-            if (!empty($cobbler->dependsOn())) {
+            if (!$this->config->noDependencies && !empty($cobbler->dependsOn())) {
                 display("Analysis\n");
                 $configThema = $this->config->duplicate(array(
                     'norefresh' => true,
@@ -138,7 +143,6 @@ class Cobble extends Tasks {
         $export->run();
 
         $this->logTime('End');
-
     }
 
     private function logTime(string $step): void {

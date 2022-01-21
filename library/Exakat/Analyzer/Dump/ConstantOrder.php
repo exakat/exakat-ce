@@ -45,7 +45,7 @@ SQL;
               ->as('built_fullcode')
               ->back('first')
               ->outIs('VALUE')
-              ->atomIsNot(array('Integer', 'String'))
+              ->atomIsNot(array('Integer', 'String', 'Null', 'Float', 'Boolean'))
               ->atomInside(array('Nsname', 'Identifier', 'Staticconstant'))
               ->hasNoIn(array('CLASS'))
               ->as('building')

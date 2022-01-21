@@ -57,6 +57,7 @@ class Appinfo extends Data {
                             'Trailing Comma In Use'         => 'Php/TrailingUseComma',
                             'PHP 8.0 Variable Syntax'       => 'Php/Php80VariableSyntax',
                             'Attributes'                    => 'Php/UseAttributes',
+                            'Nested Attributes'             => 'Attributes/NestedAttributes',
 
                             'File upload'                   => 'Structures/FileUploadUsage',
                             'Environment Variables'         => 'Php/UsesEnv',
@@ -140,18 +141,22 @@ class Appinfo extends Data {
                             'Closures'                    => 'Closure',
                             'Arrow functions'             => 'Arrowfunction',
 //                            'Callback'                    => 'Functions/MarkCallable',
+                            'first class callable'        => 'Php/FirstClassCallable',
 
                             'Typehint'                    => 'Functions/Typehints',
                             'Scalar Typehint'             => 'Php/ScalarTypehintUsage',
                             'Return Typehint'             => 'Php/ReturnTypehintUsage',
                             'Nullable Typehint'           => 'Php/UseNullableType',
+                            'Never typehint'              => 'Php/NeverTypehintUsage',
+                            'Mixed Typehint'              => 'Php/MixedUsage',
                             'PHP 8.0 Scalar Typehints'    => 'Php/Php80OnlyTypeHints',
-                            'PHP 8.0 Union Typehints'     => 'Php/Php80OnlyTypeHints',
+                            'PHP 8.0 Union Typehints'     => 'Php/Php80UnionTypehints',
+                            'PHP 8.1 Intersection Typehints' => 'Php/Php81IntersectionTypehints',
                             'Static variables'            => 'Variables/StaticVariables',
-                            'Never typehint'              => 'PHp/NeverTypehintUsage',
 
                             'Function dereferencing'      => 'Structures/FunctionSubscripting',
                             'Constant scalar expression'  => 'Structures/ConstantScalarExpression',
+                            'Named parameters'            => 'Php/NamedParameterUsage',
                             '... usage'                   => 'Php/EllipsisUsage',
                             'func_get_args'               => 'Functions/VariableArguments',
 
@@ -161,6 +166,7 @@ class Appinfo extends Data {
                             'Recursive Functions'         => 'Functions/Recursive',
                             'Generator Functions'         => 'Functions/IsGenerator',
                             'Conditioned Function'        => 'Functions/ConditionedFunctions',
+                            'New initializers'            => 'Php/NewInitializers',
                     ),
 
                     'Classes' => array(
@@ -188,6 +194,7 @@ class Appinfo extends Data {
                             'Cloning'                    => 'Classes/CloningUsage',
                             'Dynamic class call'         => 'Classes/VariableClasses',
                             'Typed properties'           => 'Php/TypedPropertyUsage',
+                            'Promoted properties'        => 'Classes/PromotedProperties',
                             'Covariance'                 => 'Php/UseCovariance',
                             'Contravariance'             => 'Php/UseContravariance',
 
@@ -232,6 +239,7 @@ class Appinfo extends Data {
                             'Multiple catch'      => 'Php/TryMultipleCatch',
                             'Multiple Exceptions' => 'Exceptions/MultipleCatch',
                             'Finally'             => 'Structures/TryFinally',
+                            'Non-capturing catch' => 'Exceptions/CatchUndefinedVariable',
 
                             'Trigger error'       => 'Php/TriggerErrorUsage',
                             'Error messages'      => 'Structures/ErrorMessages',

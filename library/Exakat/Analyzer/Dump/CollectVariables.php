@@ -22,8 +22,6 @@
 
 namespace Exakat\Analyzer\Dump;
 
-use Exakat\Analyzer\Analyzer;
-
 class CollectVariables extends AnalyzerTable {
     protected $analyzerName = 'variables';
 
@@ -38,14 +36,14 @@ CREATE TABLE variables (  id INTEGER PRIMARY KEY AUTOINCREMENT,
 SQL;
 
     public function analyze(): void {
-        $this->atomIs(array('Variable', 'Variablearray', 'Variableobject'), Analyzer::WITHOUT_CONSTANTS)
+        $this->atomIs(self::VARIABLES_USER, self::WITHOUT_CONSTANTS)
              ->tokenIs('T_VARIABLE')
              ->savePropertyAs('fullcode', 'variable')
              ->savePropertyAs('label', 'type')
              ->raw(<<<'GREMLIN'
 sideEffect{
     variable = variable.replaceAll("&", "").replaceAll("\\.\\.\\.", "").replaceAll("@", "");
-    types = ['Variable' : 'var','Variablearray' : 'array', 'Variableobject' : 'object'];
+    types = ['Variable' : 'var', 'Variablearray' : 'array', 'Variableobject' : 'object'];
     type = types[type];
 }
 GREMLIN

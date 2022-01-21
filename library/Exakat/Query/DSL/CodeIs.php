@@ -44,7 +44,7 @@ class CodeIs extends DSL {
 
             default:
             case 3:
-                list($code,$translate, $caseSensitive) = func_get_args();
+                list($code, $translate, $caseSensitive) = func_get_args();
         }
 
         if (is_array($code) && empty($code)) {

@@ -77,13 +77,13 @@ class Results {
         return array_column($this->values, $column);
     }
 
-    public function toGroupedBy(string $col1, string $col2 = null): array {
+    public function toGroupedBy(string $col1, string $col2 = ''): array {
         if ($this->values === null) {
             $this->load();
         }
 
         $return = array();
-        if ($col2 === null) {
+        if (empty($col2)) {
             foreach($this->values as $row) {
                 if (isset($return[$row[$col1]]) ) {
                     $return[$row[$col1]][] = $row;

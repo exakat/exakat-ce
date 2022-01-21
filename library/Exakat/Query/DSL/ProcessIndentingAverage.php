@@ -32,7 +32,7 @@ class ProcessIndentingAverage extends DSL {
         $minimumSize          = abs((int) func_get_arg(1));
 
         if ($indentationThreshold === 0) {
-            return self::NO_QUERY;
+            return new Command(Query::NO_QUERY);
         }
 
         $MAX_LOOPING = self::$MAX_LOOPING;

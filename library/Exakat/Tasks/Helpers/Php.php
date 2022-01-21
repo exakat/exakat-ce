@@ -97,14 +97,164 @@ abstract class Php {
                      '`'  => self::T_BACKTICK,
                    );
 
+    // PHP tokens : Here for overloading in by PHP** classes. 
+    public const T_LNUMBER                                          = -1;
+    public const T_DNUMBER                                          = -1;
+    public const T_STRING                                           = -1;
+    public const T_NAME_FULLY_QUALIFIED                             = -1;
+    public const T_NAME_RELATIVE                                    = -1;
+    public const T_NAME_QUALIFIED                                   = -1;
+    public const T_VARIABLE                                         = -1;
+    public const T_INLINE_HTML                                      = -1;
+    public const T_ENCAPSED_AND_WHITESPACE                          = -1;
+    public const T_CONSTANT_ENCAPSED_STRING                         = -1;
+    public const T_STRING_VARNAME                                   = -1;
+    public const T_NUM_STRING                                       = -1;
+    public const T_INCLUDE                                          = -1;
+    public const T_INCLUDE_ONCE                                     = -1;
+    public const T_EVAL                                             = -1;
+    public const T_REQUIRE                                          = -1;
+    public const T_REQUIRE_ONCE                                     = -1;
+    public const T_LOGICAL_OR                                       = -1;
+    public const T_LOGICAL_XOR                                      = -1;
+    public const T_LOGICAL_AND                                      = -1;
+    public const T_PRINT                                            = -1;
+    public const T_YIELD                                            = -1;
+    public const T_YIELD_FROM                                       = -1;
+    public const T_INSTANCEOF                                       = -1;
+    public const T_NEW                                              = -1;
+    public const T_CLONE                                            = -1;
+    public const T_EXIT                                             = -1;
+    public const T_IF                                               = -1;
+    public const T_ELSEIF                                           = -1;
+    public const T_ELSE                                             = -1;
+    public const T_ENDIF                                            = -1;
+    public const T_ECHO                                             = -1;
+    public const T_DO                                               = -1;
+    public const T_WHILE                                            = -1;
+    public const T_ENDWHILE                                         = -1;
+    public const T_FOR                                              = -1;
+    public const T_ENDFOR                                           = -1;
+    public const T_FOREACH                                          = -1;
+    public const T_ENDFOREACH                                       = -1;
+    public const T_DECLARE                                          = -1;
+    public const T_ENDDECLARE                                       = -1;
+    public const T_AS                                               = -1;
+    public const T_SWITCH                                           = -1;
+    public const T_ENDSWITCH                                        = -1;
+    public const T_CASE                                             = -1;
+    public const T_DEFAULT                                          = -1;
+    public const T_MATCH                                            = -1;
+    public const T_BREAK                                            = -1;
+    public const T_CONTINUE                                         = -1;
+    public const T_GOTO                                             = -1;
+    public const T_FUNCTION                                         = -1;
+    public const T_FN                                               = -1;
+    public const T_CONST                                            = -1;
+    public const T_RETURN                                           = -1;
+    public const T_TRY                                              = -1;
+    public const T_CATCH                                            = -1;
+    public const T_FINALLY                                          = -1;
+    public const T_THROW                                            = -1;
+    public const T_USE                                              = -1;
+    public const T_INSTEADOF                                        = -1;
+    public const T_GLOBAL                                           = -1;
+    public const T_STATIC                                           = -1;
+    public const T_ABSTRACT                                         = -1;
+    public const T_FINAL                                            = -1;
+    public const T_PRIVATE                                          = -1;
+    public const T_PROTECTED                                        = -1;
+    public const T_PUBLIC                                           = -1;
+    public const T_READONLY                                         = -1;
+    public const T_VAR                                              = -1;
+    public const T_UNSET                                            = -1;
+    public const T_ISSET                                            = -1;
+    public const T_EMPTY                                            = -1;
+    public const T_HALT_COMPILER                                    = -1;
+    public const T_CLASS                                            = -1;
+    public const T_TRAIT                                            = -1;
+    public const T_INTERFACE                                        = -1;
+    public const T_ENUM                                             = -1;
+    public const T_EXTENDS                                          = -1;
+    public const T_IMPLEMENTS                                       = -1;
+    public const T_NAMESPACE                                        = -1;
+    public const T_LIST                                             = -1;
+    public const T_ARRAY                                            = -1;
+    public const T_CALLABLE                                         = -1;
+    public const T_LINE                                             = -1;
+    public const T_FILE                                             = -1;
+    public const T_DIR                                              = -1;
+    public const T_CLASS_C                                          = -1;
+    public const T_TRAIT_C                                          = -1;
+    public const T_METHOD_C                                         = -1;
+    public const T_FUNC_C                                           = -1;
+    public const T_NS_C                                             = -1;
+    public const T_ATTRIBUTE                                        = -1;
+    public const T_PLUS_EQUAL                                       = -1;
+    public const T_MINUS_EQUAL                                      = -1;
+    public const T_MUL_EQUAL                                        = -1;
+    public const T_DIV_EQUAL                                        = -1;
+    public const T_CONCAT_EQUAL                                     = -1;
+    public const T_MOD_EQUAL                                        = -1;
+    public const T_AND_EQUAL                                        = -1;
+    public const T_OR_EQUAL                                         = -1;
+    public const T_XOR_EQUAL                                        = -1;
+    public const T_SL_EQUAL                                         = -1;
+    public const T_SR_EQUAL                                         = -1;
+    public const T_COALESCE_EQUAL                                   = -1;
+    public const T_BOOLEAN_OR                                       = -1;
+    public const T_BOOLEAN_AND                                      = -1;
+    public const T_IS_EQUAL                                         = -1;
+    public const T_IS_NOT_EQUAL                                     = -1;
+    public const T_IS_IDENTICAL                                     = -1;
+    public const T_IS_NOT_IDENTICAL                                 = -1;
+    public const T_IS_SMALLER_OR_EQUAL                              = -1;
+    public const T_IS_GREATER_OR_EQUAL                              = -1;
+    public const T_SPACESHIP                                        = -1;
+    public const T_SL                                               = -1;
+    public const T_SR                                               = -1;
+    public const T_INC                                              = -1;
+    public const T_DEC                                              = -1;
+    public const T_INT_CAST                                         = -1;
+    public const T_DOUBLE_CAST                                      = -1;
+    public const T_STRING_CAST                                      = -1;
+    public const T_ARRAY_CAST                                       = -1;
+    public const T_OBJECT_CAST                                      = -1;
+    public const T_BOOL_CAST                                        = -1;
+    public const T_UNSET_CAST                                       = -1;
+    public const T_OBJECT_OPERATOR                                  = -1;
+    public const T_NULLSAFE_OBJECT_OPERATOR                         = -1;
+    public const T_DOUBLE_ARROW                                     = -1;
+    public const T_COMMENT                                          = -1;
+    public const T_DOC_COMMENT                                      = -1;
+    public const T_OPEN_TAG                                         = -1;
+    public const T_OPEN_TAG_WITH_ECHO                               = -1;
+    public const T_CLOSE_TAG                                        = -1;
+    public const T_WHITESPACE                                       = -1;
+    public const T_START_HEREDOC                                    = -1;
+    public const T_END_HEREDOC                                      = -1;
+    public const T_DOLLAR_OPEN_CURLY_BRACES                         = -1;
+    public const T_CURLY_OPEN                                       = -1;
+    public const T_PAAMAYIM_NEKUDOTAYIM                             = -1;
+    public const T_NS_SEPARATOR                                     = -1;
+    public const T_ELLIPSIS                                         = -1;
+    public const T_COALESCE                                         = -1;
+    public const T_POW                                              = -1;
+    public const T_POW_EQUAL                                        = -1;
+    public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = -1;
+    public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = -1;
+    public const T_BAD_CHARACTER                                    = -1;
+    public const T_DOUBLE_COLON                                     = -1;
+    public const T_CHARACTER                                        = -1;
+
     public static function getInstance($tokens): self {
         $errors = array();
 
         if (empty($tokens)) {
-            throw new NoRecognizedTokens($tokens);
+            throw new NoRecognizedTokens('<No token provided>');
         }
 
-        $versions = array('Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
+        $versions = array('Php82', 'Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
 
         foreach($versions as $version) {
             $errors = array();
@@ -120,7 +270,7 @@ abstract class Php {
             }
         }
 
-        throw new NoRecognizedTokens();
+        throw new NoRecognizedTokens(implode(', ', $errors));
     }
 }
 ?>

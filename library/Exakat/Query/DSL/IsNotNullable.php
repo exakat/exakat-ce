@@ -36,11 +36,11 @@ class IsNotNullable extends DSL {
                 break;
 
             default:
-                assert(func_num_args() == 1, 'Wrong number of argument for ' . __METHOD__ . '. 1 is expected, ' . func_num_args() . ' provided');
+                assert(false, 'Wrong number of argument for ' . __METHOD__ . '. 1 is expected, ' . func_num_args() . ' provided');
         }
 
         if ($nullable === IsNullable::IMPLICIT) {
-            return new Command('not( __.out("RETURNTYPE", "TYPEHINT").hasLabel("Null") )');
+            return new Command('not( __.out("RETURNTYPE", "TYPEHINT").hasLabel("Scalartypehint").has("fullnspath", "\\\\null") )');
         } else {
             return new Command('not( __.out("RETURNTYPE", "TYPEHINT").hasLabel("Null").not( __.in("DEFAULT") ) )');
         }

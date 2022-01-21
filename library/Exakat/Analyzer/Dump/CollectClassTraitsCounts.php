@@ -22,13 +22,11 @@
 
 namespace Exakat\Analyzer\Dump;
 
-use Exakat\Analyzer\Analyzer;
-
 class CollectClassTraitsCounts extends AnalyzerHashHashResults {
     protected $analyzerName = 'ClassTraits';
 
     public function analyze(): void {
-        $this->atomIs(self::CLASSES_ALL, Analyzer::WITHOUT_CONSTANTS)
+        $this->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->raw(<<<'GREMLIN'
 groupCount("m").by( __.out("USE").out("USE").count() ).cap("m")
 GREMLIN

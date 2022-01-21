@@ -39,6 +39,7 @@ class CommandLine extends Config {
                                  '-D'         => 'delete',
                                  '-l'         => 'lint',
                                  '-json'      => 'json',
+                                 '-yaml'      => 'yaml',
                                  '-array'     => 'array',
                                  '-dot'       => 'dot',
 
@@ -158,6 +159,8 @@ class CommandLine extends Config {
                                     'baseline'      => 1,
                                     'install'       => 1,
                                     );
+
+    private $args = array();
 
     public function __construct() {
         $this->config['command'] = '<no-command>';

@@ -100,8 +100,8 @@ SQL;
 
         $query = <<<'SQL'
 CREATE TABLE phpStructures (  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                              name STRING,
                               type STRING,
+                              name STRING,
                               count INTEGER
 )
 SQL;

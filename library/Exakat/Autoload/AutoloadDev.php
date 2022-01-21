@@ -25,7 +25,7 @@ namespace Exakat\Autoload;
 use Phar;
 
 class AutoloadDev implements Autoloader {
-    const LOAD_ALL = null;
+    public const LOAD_ALL = null;
 
     private $path = '';
 

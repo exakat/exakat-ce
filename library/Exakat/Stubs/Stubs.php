@@ -24,7 +24,7 @@ namespace Exakat\Stubs;
 
 class Stubs {
     private $stubs       = array();
-    private $stubs_dir   = array();
+    private string $stubsDir    = '';
 
     public function __construct(string $stubsDir) {
         $this->stubsDir = $stubsDir;

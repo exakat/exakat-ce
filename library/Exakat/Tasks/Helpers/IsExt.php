@@ -187,8 +187,12 @@ class IsExt extends Plugin {
                 }
                 break;
 
-            case 'Usenamespace' :
             case 'Ppp' :
+            case 'Parameter' :
+                $this->checkTypes($extras['TYPEHINT'] ?? array());
+                break;
+
+            case 'Usenamespace' :
                 foreach($extras as $extra) {
                     $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
                     $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
@@ -236,22 +240,8 @@ class IsExt extends Plugin {
                 break;
 
             case 'Interface' :
-                foreach($extras['ATTRIBUTE'] as $extra) {
-                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->extInterfaces, \STRICT_COMPARISON)) {
-                        $extra->isExt = true;
-                    }
-                }
-
                 foreach($extras['EXTENDS'] as $extra) {
                     if (in_array($extras['EXTENDS']->fullnspath ?? self::NOT_PROVIDED, $this->extInterfaces, \STRICT_COMPARISON)) {
-                        $extra->isExt = true;
-                    }
-                }
-                break;
-
-            case 'Trait' :
-                foreach($extras['ATTRIBUTE'] as $extra) {
-                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->extInterfaces, \STRICT_COMPARISON)) {
                         $extra->isExt = true;
                     }
                 }
@@ -287,14 +277,9 @@ class IsExt extends Plugin {
             case 'Function' :
             case 'Closure' :
             case 'Arrowfunction' :
-                foreach($extras as $extra) {
-                    $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
-                    $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
-
-                    if (in_array(makeFullnspath($path), $this->extClasses, \STRICT_COMPARISON)) {
-                        $extra->isExt = true;
-                    }
-                }
+            case 'Method' :
+            case 'Magicmethod' :
+                $this->checkTypes($extras['RETURNTYPE'] ?? array());
                 break;
 
             case 'Newcall' :
@@ -335,7 +320,6 @@ class IsExt extends Plugin {
                 break;
 
             case 'Isset' :
-            case 'Isset' :
             case 'Empty' :
             case 'Unset' :
             case 'Exit'  :
@@ -347,6 +331,17 @@ class IsExt extends Plugin {
 
             default :
                 // Nothing
+        }
+    }
+    
+    private function checkTypes(array $extras) : void {
+        foreach($extras as $extra) {
+            $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
+            $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
+    
+            if (in_array(makeFullnspath($path), $this->extClasses, \STRICT_COMPARISON)) {
+                $extra->isExt = true;
+            }
         }
     }
 }

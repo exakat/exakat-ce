@@ -27,11 +27,11 @@ use Exakat\Query\Query;
 
 class Not extends DSL {
     public function run(): Command {
-        assert(func_num_args() === 1, 'Wrong number of arguments with ' . __METHOD__ . '. ' . func_num_args() . ' provided, while 1 is expected.');
+        $this->assertArguments(1, func_num_args(), __METHOD__);
         list($filter) = func_get_args();
 
         if (!$filter instanceof Command) {
-            assert(false, 'Not requires a Command object, it received a ' . gettype($filter));
+            assert(false, 'Not() requires a Command object, it received a ' . gettype($filter));
         }
 
         if ($filter->gremlin === Query::STOP_QUERY) {

@@ -81,6 +81,9 @@ class RulesetConfig extends Config {
 
     public static function cleanRulesets(array $rulesets): array {
         // hash=>array
+
+        // This will filter out rules made of a single string
+        $rulesets = array_filter($rulesets, 'is_array');
         $rulesets = array_map('array_values', $rulesets);
 
         $rulesets = array_map(function (array $rules): array {

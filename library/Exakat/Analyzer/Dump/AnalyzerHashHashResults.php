@@ -41,7 +41,7 @@ abstract class AnalyzerHashHashResults extends AnalyzerDump {
             return ;
         }
         $c = $c[0];
-        if (!is_array($c) || count($c) === 0) {
+        if (!is_array($c) || empty($c)) {
             return ;
         }
 

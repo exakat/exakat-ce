@@ -153,6 +153,7 @@ class Project extends Tasks {
         $diff = array();
         $rulesetsToRunShort = array();
         foreach($rulesetsToRun as $rule) {
+            $rule = trim($rule, '"');
             if (in_array(strtolower($rule), $availableRulesets, \STRICT_COMPARISON)) {
                 $rulesetsToRunShort[] = $rule;
             } else {
@@ -171,7 +172,7 @@ class Project extends Tasks {
         }
 
         display("Running project '" . (string) $this->config->project . "'" . PHP_EOL);
-        display('Running the following analysis : ' . implode(', ', $rulesetsToRun));
+        display('Running the following rulesets : ' . implode(', ', $rulesetsToRun));
         display('Producing the following reports : ' . implode(', ', $namesToRun));
 
         display('Running files' . PHP_EOL);

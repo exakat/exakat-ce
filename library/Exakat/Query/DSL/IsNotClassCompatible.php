@@ -33,26 +33,32 @@ class IsNotClassCompatible extends DSL {
 
         $MAX_LOOPING = self::$MAX_LOOPING;
         $gremlin = <<<GREMLIN
+ sideEffect{ t = $typehint;
+             fnp = $fnp;
+             if (fnp instanceof String) {
+                fnp = [fnp];
+             }
+  }
     // collect all types available
- where( 
+.where( 
     __.sideEffect{ x = []; }
       .union(
                 __.filter{ true },
-                __.repeat(__.out("EXTENDS", "IMPLEMENTS").in("DEFINITION")).times($MAX_LOOPING).emit()
+                __.out("EXTENDS", "IMPLEMENTS").emit().repeat(__.in("DEFINITION").out("EXTENDS", "IMPLEMENTS")).times($MAX_LOOPING)
       )
       .has("fullnspath")
       .sideEffect{ x.add(it.get().value("fullnspath")) ; }
       .fold() 
 )
 .filter{
-    if ($typehint == 'one') {
-        x.intersect($fnp).size() == 0;
-    } else if ($typehint == 'or') {
-        x.intersect($fnp).size() == 0;
-    } else if ($typehint == 'and') {
-        $fnp.findAll{ fnp ->
+    if (t == "one") {
+        x.intersect(fnp).size() == 0;
+    } else if (t == "or") {
+        x.intersect(fnp).size() == 0;
+    } else if (t == "and") {
+        fnp.findAll{ fnp ->
             fnp in x
-        }.size() != $fnp.size();
+        }.size() != fnp.size();
     } else {
         // We should never go here
         die; 

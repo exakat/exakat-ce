@@ -32,23 +32,25 @@ class Encoding extends Plugin {
             case 'Identifier' :
                 $atom->encoding = mb_detect_encoding($atom->noDelimiter);
                 if ($atom->encoding === 'UTF-8') {
-                    $blocks = unicode_blocks($name->noDelimiter);
-                    $name->block = array_keys($blocks)[0] ?? '';
+                    $blocks = unicode_blocks($atom->noDelimiter);
+                    $atom->block = array_keys($blocks)[0] ?? '';
                 }
-            
-            case 'String' : 
+                break;
+
+            case 'String' :
                 // Case of a Quoted string " $a "
                 if (!empty($extras)) {
                     $atom->encoding    = 'none';
                     $atom->block       = 'none';
                     break;
-                } 
+                }
 
                 $atom->encoding = mb_detect_encoding($atom->noDelimiter);
                 if ($atom->encoding === 'UTF-8') {
                     $blocks = unicode_blocks($atom->noDelimiter);
                     $atom->block = array_keys($blocks)[0] ?? '';
                 }
+                break;
 
         default :
             // Nothing, really

@@ -58,12 +58,16 @@ class Strval extends Plugin {
 
         switch ($atom->atom) {
             case 'Integer' :
-                $value = $atom->code;
+                $value = (string) $atom->code;
+                // remove the digit separator
+                $value = str_replace('_', '', $value);
 
                 if (strtolower(substr($value, 0, 2)) === '0b') {
                     $actual = bindec(substr($value, 2));
                 } elseif (strtolower(substr($value, 0, 2)) === '0x') {
                     $actual = hexdec(substr($value, 2));
+                } elseif (strtolower(substr($value, 0, 2)) === '0o') {
+                    $actual = octdec(substr($value, 2));
                 } elseif (strtolower($value[0]) === '0') {
                     // PHP 7 will just stop.
                     // PHP 5 will work until it fails

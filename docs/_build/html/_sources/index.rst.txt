@@ -20,6 +20,7 @@ Contents:
 
    Gettingstarted/Bare
    Gettingstarted/Docker   
+   Gettingstarted/Tutorials   
    
 .. toctree::
    :maxdepth: 1

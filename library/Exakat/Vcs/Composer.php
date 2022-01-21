@@ -45,7 +45,7 @@ class Composer extends Vcs {
         $composer = new \stdClass();
         $composer->{'minimum-stability'} = 'dev';
         $composer->require = new \stdClass();
-        $composer->require->$source = 'dev-master';
+        $composer->require->$source = '*';
         $json = json_encode($composer, JSON_PRETTY_PRINT);
 
         mkdir($this->destinationFull, 0755);
@@ -70,20 +70,23 @@ class Composer extends Vcs {
         $json = json_decode($jsonText);
         $component = array_keys( (array) $json->require)[0];
 
+        if (!file_exists("{$this->destinationFull}/composer.lock")) {
+            return '';
+        }
         $jsonLockText = file_get_contents("{$this->destinationFull}/composer.lock");
         if (empty($jsonLockText)) {
-            return $jsonLockText;
+            return '';
         }
         $jsonLock = json_decode($jsonLockText);
 
         $return = '';
         foreach ($jsonLock->packages as $package) {
             if ($package->name === $component) {
-                $return = "{$package->source->reference} (version : {$package->version})";
+                return "{$package->source->reference} (version : {$package->version})";
             }
         }
 
-        return $return;
+        return '';
     }
 
     public function getInstallationInfo() {

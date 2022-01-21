@@ -32,7 +32,7 @@ class Collector extends Loader {
 
     private $datastore  = null;
 
-    public function __construct(\Sqlite3 $sqlite3, Atom $id0) {
+    public function __construct(\Sqlite3 $sqlite, Atom $id0) {
         $this->datastore = exakat('datastore');
     }
 

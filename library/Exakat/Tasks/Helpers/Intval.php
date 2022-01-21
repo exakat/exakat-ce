@@ -59,6 +59,8 @@ class Intval extends Plugin {
         switch ($atom->atom) {
             case 'Integer' :
                 $value = (string) $atom->code;
+                // remove the digit separator
+                $value = str_replace('_', '', $value);
 
                 if (strtolower(substr($value, 0, 2)) === '0b') {
                     $actual = bindec(substr($value, 2));

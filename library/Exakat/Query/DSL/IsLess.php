@@ -37,12 +37,9 @@ class IsLess extends DSL {
 
             case 1:
                 list($value1) = func_get_args();
-
                 $g1 = $this->makeGremlin($value1);
 
                 return new Command("is(lt($g1))");
-
-                break;
 
             default:
                 assert(false, 'Wrong number of argument for ' . __METHOD__ . '. 2 or 1 are expected, ' . func_num_args() . ' provided');

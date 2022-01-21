@@ -25,19 +25,55 @@ namespace Exakat\Query\DSL;
 
 
 class CollectMethods extends DSL {
+    public const METHOD_ALL = 1;
+    public const METHOD_ABSTRACT = 2;
+    public const METHOD_CONCRETE = 3;
+
     public function run(): Command {
-        list($variable) = func_get_args();
+        switch(func_num_args()) {
+            case 1 :
+                $variable = func_get_arg(0);
+                $methods = self::METHOD_ALL;
+                break;
+
+            case 2:
+                $variable = func_get_arg(0);
+                $methods = func_get_arg(1);
+                break;
+
+            default:
+                assert(false, 'collectMethods needs 1 or 2 arguments : ' . func_num_args() . ' were provided.');
+        }
 
         $this->assertVariable($variable, self::VARIABLE_WRITE);
 
+        switch($methods) {
+            default:
+            case self::METHOD_ALL:
+                $final = "{$variable} = {$variable}.keySet();";
+                break;
+
+            case self::METHOD_ABSTRACT:
+                $final = "{$variable} = {$variable}.findAll{ k,v -> v == true}.keySet();";
+                break;
+
+            case self::METHOD_CONCRETE:
+                $final = "{$variable} = {$variable}.findAll{ k,v -> v == false}.keySet();";
+                break;
+        }
+
+        // methods are collected from current class till above.
+        // No trait involved
+        // only the first method found is used (others, with same name are ignored)
+        // abstract option is included
         $command = new Command(<<<GREMLIN
- sideEffect{ {$variable} = []; }
+ sideEffect{ {$variable} = [:]; }
 .where(
     __
     .where( 
         __.out("METHOD", "MAGICMETHOD")
+          .sideEffect{ if({$variable}[it.get().value("lccode")] == null) { {$variable}[it.get().value("lccode")] = it.get().properties("abstract").any(); } }
           .out("NAME")
-          .sideEffect{ {$variable}.add(it.get().value("lccode")) ; }
           .fold() 
         )
     .where(
@@ -46,13 +82,14 @@ class CollectMethods extends DSL {
         .where( 
             __
               .out("METHOD", "MAGICMETHOD")
+              .sideEffect{ if({$variable}[it.get().value("lccode")] == null) { {$variable}[it.get().value("lccode")] = it.get().properties("abstract").any(); } }
               .out("NAME")
-              .sideEffect{ {$variable}.add(it.get().value("lccode")) ;  }
               .fold() 
             )
             .fold()
     )
 )
+.sideEffect{ $final }
 GREMLIN
 );
         return $command;

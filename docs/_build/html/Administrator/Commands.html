@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/exakat.css" type="text/css" />
 
   
   
@@ -99,6 +100,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Bare.html">with a Bare metal installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Docker.html">with a Docker installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gettingstarted/Tutorials.html">Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">USER GUIDE</span></p>
 <ul>
@@ -148,57 +150,61 @@
 <li class="toctree-l3"><a class="reference internal" href="#id5">Options</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#cobble">cobble</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Options</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#doctor">doctor</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id6">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#results">Results</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Options</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#help">help</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id8">Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Results</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#init">init</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id9">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id10">Options</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id11">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Tips</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#project">project</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id12">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id13">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Options</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#remove">remove</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id14">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id15">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Options</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#show">show</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id16">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id17">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18">Options</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#report">report</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id18">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id19">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id19">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20">Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#report-formats">Report formats</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#update">update</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id20">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id21">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id21">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">Options</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#upgrade">upgrade</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id22">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id23">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">Options</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#install">Install</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id24">Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id25">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id25">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id26">Options</a></li>
 </ul>
 </li>
 </ul>
@@ -286,6 +292,7 @@
 <li><p><a class="reference internal" href="#catalog">catalog</a></p></li>
 <li><p><a class="reference internal" href="#clean">clean</a></p></li>
 <li><p><a class="reference internal" href="#cleandb">cleandb</a></p></li>
+<li><p><a class="reference internal" href="#cobble">cobble</a></p></li>
 <li><p><a class="reference internal" href="#doctor">doctor</a></p></li>
 <li><p><a class="reference internal" href="#help">help</a></p></li>
 <li><p><a class="reference internal" href="#init">init</a></p></li>
@@ -352,7 +359,6 @@ This takes into account &lt;project&gt; configuration</p></td>
 <ul class="simple">
 <li><p><cite>-R</cite> is not compulsory : you may omit it, then, provide PHP files in the <cite>projects/&lt;name&gt;/code</cite> folder by the mean you want.</p></li>
 </ul>
-<p>:: _baseline:</p>
 </div>
 </div>
 <div class="section" id="baseline">
@@ -383,12 +389,11 @@ name.</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _catalog:</p>
 </div>
 </div>
 <div class="section" id="catalog">
 <h2>catalog<a class="headerlink" href="#catalog" title="Permalink to this headline">¶</a></h2>
-<p>Catalog list all available rulesets and reports with the current exakat.</p>
+<p>Catalog list available rules, rulesets, and reports with the current exakat.</p>
 <p>This is a help command, to help find the available values for various options.</p>
 <div class="section" id="id3">
 <h3>Options<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
@@ -407,9 +412,12 @@ name.</p></td>
 <td><p>No</p></td>
 <td><p>Returns the catalog as JSON, for further processing.</p></td>
 </tr>
+<tr class="row-odd"><td><p>-yaml</p></td>
+<td><p>No</p></td>
+<td><p>Returns the catalog as YAML, for further processing.</p></td>
+</tr>
 </tbody>
 </table>
-<p>:: _clean:</p>
 </div>
 </div>
 <div class="section" id="clean">
@@ -439,7 +447,6 @@ name.</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _cleandb:</p>
 </div>
 </div>
 <div class="section" id="cleandb">
@@ -483,14 +490,45 @@ name.</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _doctor:</p>
+</div>
+</div>
+<div class="section" id="cobble">
+<h2>cobble<a class="headerlink" href="#cobble" title="Permalink to this headline">¶</a></h2>
+<p>Runs a cobbler on the source code. A cobbler is a set of modifications, to fix or improve the source code.</p>
+<div class="section" id="id6">
+<h3>Options<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 5%" />
+<col style="width: 83%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Option</p></td>
+<td><p>Req</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p>-P</p></td>
+<td><p>Yes</p></td>
+<td><p>The name of the cobbler to run.</p></td>
+</tr>
+<tr class="row-odd"><td><p>-branch</p></td>
+<td><p>Yes</p></td>
+<td><p>The name of the branch where the modified code will be written.</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="doctor">
 <h2>doctor<a class="headerlink" href="#doctor" title="Permalink to this headline">¶</a></h2>
 <p>Check the current installation of Exakat.</p>
-<div class="section" id="id6">
-<h3>Command<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h3>Command<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">doctor</span>
 </pre></div>
 </div>
@@ -624,8 +662,8 @@ zip :
 <li><p>Optional installations (such as svn, zip, etc.) are not necessarily reported if they are not installed.</p></li>
 </ul>
 </div>
-<div class="section" id="id7">
-<h3>Options<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id8">
+<h3>Options<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -657,7 +695,6 @@ This is useful to automate installation finalization</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _help:</p>
 </div>
 </div>
 <div class="section" id="help">
@@ -666,8 +703,8 @@ This is useful to automate installation finalization</p></td>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">help</span>
 </pre></div>
 </div>
-<div class="section" id="id8">
-<h3>Results<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id9">
+<h3>Results<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <p>This displays :</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Usage</span><span class="p">]</span> <span class="p">:</span>   <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">Project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">R</span> <span class="o">&lt;</span><span class="n">Repository</span><span class="o">&gt;</span>
             <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">Project</span> <span class="n">name</span><span class="o">&gt;</span>
@@ -675,20 +712,19 @@ This is useful to automate installation finalization</p></td>
             <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">version</span>
 </pre></div>
 </div>
-<p>:: _init:</p>
 </div>
 </div>
 <div class="section" id="init">
 <h2>init<a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h2>
 <p>Initialize a new project.</p>
-<div class="section" id="id9">
-<h3>Command<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id10">
+<h3>Command<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">R</span> <span class="n">vcs_url</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">git</span><span class="o">|-</span><span class="n">svn</span><span class="o">|-</span><span class="n">bzr</span><span class="o">|-</span><span class="n">hg</span><span class="o">|-</span><span class="n">composer</span><span class="o">|-</span><span class="n">symlink</span><span class="o">|-</span><span class="n">copy</span><span class="o">|-</span><span class="n">tgz</span><span class="o">|-</span><span class="mi">7</span><span class="n">z</span><span class="o">|-</span><span class="nb">zip</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">D</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id10">
-<h3>Options<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id11">
+<h3>Options<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -767,8 +803,8 @@ This is useful to automate installation finalization</p></td>
 </tbody>
 </table>
 </div>
-<div class="section" id="id11">
-<h3>Tips<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id12">
+<h3>Tips<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><cite>-R</cite> is not compulsory : you may omit it, then, provide PHP files in the <cite>projects/&lt;name&gt;/code</cite> folder by the mean you want.</p></li>
 <li><p>Default VCS used is git.</p></li>
@@ -794,21 +830,20 @@ This is useful to automate installation finalization</p></td>
 <span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">init</span> <span class="o">-</span><span class="n">p</span> <span class="n">symlinkProject</span> <span class="o">-</span><span class="n">symlink</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">public_html</span>
 </pre></div>
 </div>
-<p>:: _project:</p>
 </div>
 </div>
 <div class="section" id="project">
 <h2>project<a class="headerlink" href="#project" title="Permalink to this headline">¶</a></h2>
 <p>Runs a new analyze on a project.</p>
 <p>The results of the analysis are available in the <cite>projects/&lt;name&gt;/</cite> folder. <cite>report</cite> and <cite>faceted</cite> are two HTML reports.</p>
-<div class="section" id="id12">
-<h3>Command<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id13">
+<h3>Command<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">project</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id13">
-<h3>Options<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id14">
+<h3>Options<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -830,20 +865,19 @@ This is useful to automate installation finalization</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _remove:</p>
 </div>
 </div>
 <div class="section" id="remove">
 <h2>remove<a class="headerlink" href="#remove" title="Permalink to this headline">¶</a></h2>
 <p>Destroy a project. All code source, configuration and any results from exakat are destroyed.</p>
-<div class="section" id="id14">
-<h3>Command<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id15">
+<h3>Command<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">remove</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id15">
-<h3>Options<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id16">
+<h3>Options<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -865,20 +899,19 @@ This is useful to automate installation finalization</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _remove:</p>
 </div>
 </div>
 <div class="section" id="show">
 <h2>show<a class="headerlink" href="#show" title="Permalink to this headline">¶</a></h2>
 <p>Displays the the full command line to create an exakat project.</p>
-<div class="section" id="id16">
-<h3>Command<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id17">
+<h3>Command<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">show</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id17">
-<h3>Options<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id18">
+<h3>Options<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -896,7 +929,6 @@ This is useful to automate installation finalization</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _report:</p>
 </div>
 </div>
 <div class="section" id="report">
@@ -905,14 +937,14 @@ This is useful to automate installation finalization</p></td>
 <p>Reports may be produced as soon as exakat has reach the phase of ‘analysis’. If the analysis phase hasn’t finished, then some results may be unavailable. Run report again later to get the full report.
 For example, the ‘Uml’ report may be run fully as soon as exakat is in analysis phase.</p>
 <p>It is possible to extract a report even after the graph database has been cleaned. This allows running several projects one after each other, yet have access to several reports.</p>
-<div class="section" id="id18">
-<h3>Command<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id19">
+<h3>Command<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">report</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="o">-</span><span class="nb">format</span> <span class="o">&lt;</span><span class="n">Format</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">file</span> <span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id19">
-<h3>Options<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id20">
+<h3>Options<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -1003,20 +1035,19 @@ spaces.</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _update:</p>
 </div>
 </div>
 <div class="section" id="update">
 <h2>update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
 <p>Update the code base of a project.</p>
-<div class="section" id="id20">
-<h3>Command<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id21">
+<h3>Command<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">update</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id21">
-<h3>Options<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id22">
+<h3>Options<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -1038,7 +1069,6 @@ spaces.</p></td>
 </tr>
 </tbody>
 </table>
-<p>:: _upgrade:</p>
 </div>
 </div>
 <div class="section" id="upgrade">
@@ -1047,14 +1077,14 @@ spaces.</p></td>
 <p>Use -u option to actually replace the current phar archive.</p>
 <p>Use -version option to downgrade or upgrade to a specific version.</p>
 <p>In case the upgrade command file, you may also download manually the <cite>.phar</cite> from the exakat.io website : <a class="reference external" href="https://www.exakat.io/versions/">www.exakat.io</a>. Then replace the current version with the new one.</p>
-<div class="section" id="id22">
-<h3>Command<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id23">
+<h3>Command<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exakat</span> <span class="n">upgrade</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id23">
-<h3>Options<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id24">
+<h3>Options<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />
@@ -1083,8 +1113,8 @@ Example value : 1.8.8</p></td>
 <div class="section" id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
 <p>Install exakat’s graph dependency. This command is an integrated installation script, and it is only accessible once the .phar is downloaded locally.</p>
-<div class="section" id="id24">
-<h3>Command<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id25">
+<h3>Command<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mkdir exakat
 cd exakat
 
@@ -1094,8 +1124,8 @@ exakat.phar upgrade
 </pre></div>
 </div>
 </div>
-<div class="section" id="id25">
-<h3>Options<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id26">
+<h3>Options<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 12%" />

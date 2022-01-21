@@ -35,7 +35,7 @@ abstract class AnalyzerHashResults extends AnalyzerDump {
 
         $result = $this->rawQuery();
 
-        if (count($result) === 0) {
+        if (empty($result)) {
             return ;
         }
 
