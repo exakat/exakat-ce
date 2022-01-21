@@ -767,7 +767,8 @@
 <h4><span class="section-number">3.3.8.1. </span>Composer<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h4>
 <p>The Composer report provide elements for the require attribute in the composer.json.</p>
 <p>It helps documenting the composer.json, by providing more information, extracted from the code.</p>
-<p>This report makes a copy then updates the composer.json, if available. It creates a totally new composer.json if the latter is not available.</p>
+<p>This report makes a copy then updates the composer.json, when available; otherwise, it creates a totally new composer.json.</p>
+<p>The report provides a calculated value for “php”: “^7.3” and all the identified PHP extensions (such as “ext-exif”, “ext-gd”, “ext-finfo”, etc). Core PHP extensions are omitted.</p>
 <p>It is recommended to review manually the results of the suggested composer.json before using it.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span><span class="p">,</span><span class="n">File</span><span class="p">,</span><span class="n">Line</span>
 <span class="mi">0</span><span class="p">,</span><span class="o">/</span><span class="n">features</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">/</span><span class="n">FeatureContext</span><span class="o">.</span><span class="n">php</span><span class="p">,</span><span class="mi">61</span>

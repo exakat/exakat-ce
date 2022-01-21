@@ -155,6 +155,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#rule-level-configuration">Rule-level Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#commandline-configuration">Commandline Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#specific-analysis-configurations">Specific analysis configurations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#check-install">Check Install</a></li>
@@ -388,7 +389,7 @@
 </div>
 <div class="section" id="option-availability">
 <span id="user-option-availability"></span><h3>Option availability<a class="headerlink" href="#option-availability" title="Permalink to this headline">¶</a></h3>
-<p>This table show which operation (audit, cobbler) is parametered by which directive.</p>
+<p>This table shows which operation (audit, cobbler) is parametered by which directive.</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 42%" />
@@ -653,6 +654,28 @@ a ruleset, without ignoring the whole ruleset.</p>
 <p>This an array of hashes. The keys of the hashes are the custom rulsets, and their value is an array of rule short names.</p>
 </div>
 </div>
+</div>
+<div class="section" id="rule-level-configuration">
+<h2>Rule-level Configuration<a class="headerlink" href="#rule-level-configuration" title="Permalink to this headline">¶</a></h2>
+<p>There are configuration which are available for each rule. They are common and always available.</p>
+<p>The namespaces where this rule applies. Only results within the listed namespaces will be reported. All others are omitted.</p>
+<p>By défault, all namespaces are used.</p>
+<p>Namespaces may be specified similarly to file paths : <cite>\ns</cite>, with the leading backslash, for absolute namespaces : then, they are treated as prefixes.
+<cite>ns</cite>, without the leading backslash, for relative namespaces : then, they are treated as any part of the namespace.
+It is possible to use <cite>*</cite> and <cite>?</cite>, like for path in a file systems.</p>
+<p>The folders where this rule applies. Only results within the listed folders will be reported. All others are omitted, unless added with include_dirs.</p>
+<p>By défault, all folders are used.</p>
+<p>folders may be specified similarly to file paths : <cite>/ns</cite>, with the leading backslash, for absolute path : then, they are treated as prefixes.
+<cite>ns</cite>, without the leading backslash, for relative folders : then, they are treated as any part of the path.
+It is possible to use <cite>*</cite> and <cite>?</cite>, like for path in a file systems.</p>
+<p>The folders where this rule applies. Only results within the listed folders will be reported. All others are omitted, unless added with include_dirs.</p>
+<p>By défault, all folders are used.</p>
+<p>folders may be specified similarly to file paths : <cite>/ns</cite>, with the leading backslash, for absolute path : then, they are treated as prefixes.
+<cite>ns</cite>, without the leading backslash, for relative folders : then, they are treated as any part of the path.
+It is possible to use <cite>*</cite> and <cite>?</cite>, like for path in a file systems.</p>
+<p>The file’s extensions where this rule applies. Only files with the listed extensions will be reported.</p>
+<p>By default, all the configured extensions are used.</p>
+<p>Note that this filter is applied after the file_extensions configuration is used to select the audited files in the repository. So, this directive shall, at worse, only use extensions that are already applied.</p>
 </div>
 <div class="section" id="commandline-configuration">
 <h2>Commandline Configuration<a class="headerlink" href="#commandline-configuration" title="Permalink to this headline">¶</a></h2>
@@ -999,6 +1022,14 @@ prefixedType[‘uuid’] = ‘Uuid’;</p>
 <li><p>variableLength : 20</p>
 <ul>
 <li><p>Minimum size of a long variable name, including the initial $.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="../Reference/Rules.html#abstract-class-constants"><span class="std std-ref">Abstract Class Constants</span></a></dt><dd><ul class="simple">
+<li><p>minimum : 2</p>
+<ul>
+<li><p>Minimal number of constant found in children to report this as a potential abstract class.</p></li>
 </ul>
 </li>
 </ul>

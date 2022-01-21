@@ -22,8 +22,6 @@
 
 namespace Exakat\Analyzer\Dump;
 
-use Exakat\Analyzer\Analyzer;
-
 class CollectGlobalVariables extends AnalyzerTable {
     protected $analyzerName = 'globalVariables';
 

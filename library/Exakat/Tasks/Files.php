@@ -107,9 +107,6 @@ class Files extends Tasks {
                                }, $files);
         file_put_contents($this->tmpFileName, implode("\n", $tmpFiles));
 
-        $vcsClass = Vcs::getVcs($this->config);
-        $vcs = new $vcsClass($this->config->project, $this->config->code_dir);
-
         $SQLresults = $this->checkCompilations();
 
         $SQLresults += $this->checkShortTags();

@@ -243,12 +243,12 @@ class Analyze extends Tasks {
                 $end = microtime(true);
                 display( "$analyzerClass : generic exception \n");
                 $this->log->log("$analyzerClass\t" . ($end - $begin) . "\texception : " . get_class($e) . "\terror : " . $e->getMessage());
-                if (strpos($e->getMessage(), 'The server exceeded one of the timeout settings ') !== false) {
-                    $counts = $this->gremlin->query('g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer->getInBaseName() . '").property("count", __.out("ANALYZED").count()).values("count")')->toInt();
-                    $this->datastore->addRow('analyzed', array($analyzerClass => $counts ) );
-                } else {
+                if (strpos($e->getMessage(), 'The server exceeded one of the timeout settings ') === false) {
                     display($e->getMessage());
                     $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
+                } else {
+                    $counts = $this->gremlin->query('g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer->getInBaseName() . '").property("count", __.out("ANALYZED").count()).values("count")')->toInt();
+                    $this->datastore->addRow('analyzed', array($analyzerClass => $counts ) );
                 }
                 $this->checkAnalyzed();
 

@@ -86,17 +86,16 @@ GREMLIN;
         // This is needed AFTER functionnames are found
         $this->spotFallbackConstants();
         $this->log('spotFallbackConstants');
-        $task = new FixFullnspathConstants();
-        $task->run();
-        $this->log('FixFullnspathConstants');
 
-        $task = new FinishIsModified();
-        $task->run();
-        $this->log('FinishIsModified');
-
-        $task = new IsInIgnoredDir();
-        $task->run();
-        $this->log('IsInIgnoredDir');
+        $list = array('\Exakat\Tasks\LoadFinal\FixFullnspathConstants',
+                      '\Exakat\Tasks\LoadFinal\FinishIsModified',
+                      '\Exakat\Tasks\LoadFinal\IsInIgnoredDir',
+                      );
+        foreach($list as $class) {
+            $task = new $class();
+            $task->run();
+            $this->log($class);
+        }
 
         display('End load final');
         $this->logTime('Final');

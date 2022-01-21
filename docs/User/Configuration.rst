@@ -97,7 +97,7 @@ This table show in which file the directive may be placed to be used. 'exakat' i
 Option availability
 ###################
 
-This table show which operation (audit, cobbler) is parametered by which directive.
+This table shows which operation (audit, cobbler) is parametered by which directive.
 
 +---------------------+--------------------+---------+
 | name                | project / analyze  | cobble  |
@@ -380,6 +380,53 @@ This directive is only available with YAML format.
 
 This an array of hashes. The keys of the hashes are the custom rulsets, and their value is an array of rule short names.
 
+Rule-level Configuration
+-------------------------
+
+There are configuration which are available for each rule. They are common and always available. 
+
+namespaces
+##########
+
+The namespaces where this rule applies. Only results within the listed namespaces will be reported. All others are omitted. 
+
+By défault, all namespaces are used. 
+
+Namespaces may be specified similarly to file paths : `\\ns`, with the leading backslash, for absolute namespaces : then, they are treated as prefixes. 
+`ns`, without the leading backslash, for relative namespaces : then, they are treated as any part of the namespace. 
+It is possible to use `*` and `?`, like for path in a file systems.
+
+ignore_dirs
+###########
+
+The folders where this rule applies. Only results within the listed folders will be reported. All others are omitted, unless added with include_dirs.
+
+By défault, all folders are used. 
+
+folders may be specified similarly to file paths : `/ns`, with the leading backslash, for absolute path : then, they are treated as prefixes. 
+`ns`, without the leading backslash, for relative folders : then, they are treated as any part of the path. 
+It is possible to use `*` and `?`, like for path in a file systems.
+
+include_dirs
+############
+
+The folders where this rule applies. Only results within the listed folders will be reported. All others are omitted, unless added with include_dirs.
+
+By défault, all folders are used. 
+
+folders may be specified similarly to file paths : `/ns`, with the leading backslash, for absolute path : then, they are treated as prefixes. 
+`ns`, without the leading backslash, for relative folders : then, they are treated as any part of the path. 
+It is possible to use `*` and `?`, like for path in a file systems.
+
+file_extensions
+###############
+
+The file's extensions where this rule applies. Only files with the listed extensions will be reported. 
+
+By default, all the configured extensions are used.
+
+Note that this filter is applied after the file_extensions configuration is used to select the audited files in the repository. So, this directive shall, at worse, only use extensions that are already applied. 
+ 
 
 Commandline Configuration
 -------------------------

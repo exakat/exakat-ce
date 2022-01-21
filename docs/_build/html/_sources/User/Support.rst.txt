@@ -207,7 +207,7 @@ PHP extensions are described with the list of structures they define : functions
 * `ext/exif <https://www.php.net/manual/en/book.exif.php>`_
 * `ext/expect <https://www.php.net/manual/en/book.expect.php>`_
 * `ext/fam <http://oss.sgi.com/projects/fam/>`_
-* `ext/fann <https://www.php.net/manual/en/book.fann.php>`_
+* ext/fann
 * `ext/fdf <http://www.adobe.com/devnet/acrobat/fdftoolkit.html>`_
 * `ext/ffi <https://www.php.net/manual/en/book.ffi.php>`_
 * `ext/ffmpeg <http://ffmpeg-php.sourceforge.net/>`_

@@ -231,6 +231,7 @@ class Dump extends Tasks {
         $skipAnalysis      = array();
         $ignore_dirs       = array();
         $ignore_namespaces = array();
+        $filters           = array();
         $analyzers = array_filter($analyzers, function (string $s): bool { return substr($s, 0, 9) !== 'Complete/' && substr($s, 0, 5) !== 'Dump/'; });
         // Remove analysis that are not exported via dump
         foreach($analyzers as $id => $analyzer) {
@@ -239,6 +240,8 @@ class Dump extends Tasks {
                 unset($analyzers[$id]);
                 $skipAnalysis[] = $analyzer;
             }
+            
+            $filters[] = $a->getFilters();
 
             if (!empty($this->config->{$analyzer}['ignore_dirs'])) {
                 $ignore_dirs[$analyzer] = is_array( $this->config->{$analyzer}['ignore_dirs']) ? $this->config->{$analyzer}['ignore_dirs'] : array($this->config->{$analyzer}['ignore_dirs']);
@@ -264,7 +267,8 @@ class Dump extends Tasks {
             }
         }
         $this->dump->removeResults($analyzers);
-
+        $filters = array_merge(...$filters);
+        
         $chunks = array_chunk($analyzers, 100);
         // Gremlin only accepts chunks of 255 maximum
 
@@ -303,21 +307,11 @@ GREMLIN
                     continue;
                 }
 
-                if (isset($ignore_dirs[$result['analyzer']])) {
-                    foreach($ignore_dirs[$result['analyzer']] as $regex) {
-                        if (preg_match($regex, $result['file'])) {
-                            --$counts[$result['analyzer']];
-                            continue 2;
-                        }
-                    }
-                }
-
-                if (isset($ignore_namespaces[$result['analyzer']])) {
-                    foreach($ignore_namespaces[$result['analyzer']] as $regex) {
-                        if (preg_match($regex, $result['namespace'])) {
-                            --$counts[$result['analyzer']];
-                            continue 2;
-                        }
+                foreach($filters as $filter) {
+                    if (!$filter->filterFile($result)) {
+                        display ('Skipping '.$result['file'].' ('.get_class($filter).') '.PHP_EOL);
+                        --$counts[$result['analyzer']];
+                        continue 2;
                     }
                 }
 
@@ -1605,11 +1599,7 @@ GREMLIN
             }
             $unique[$row['name'] . $row['line']] = 1;
 
-            if (strpos($row['fullnspath'], '@') !== false) {
-                $this->methodIds[$row['fullnspath']] = ++$this->methodCount;
-                // case of closure or arrow function
-                $ns = '';
-            } else {
+            if (strpos($row['fullnspath'], '@') === false) {
                 $this->methodIds[$row['fullnspath']] = ++$this->methodCount;
                 $n = $row['namespace'];
                 if ($n[-1] !== '\\') {
@@ -1619,6 +1609,10 @@ GREMLIN
                 $k = array_pop($ns);
 
                 $ns = $namespacesId[$k];
+            } else {
+                $this->methodIds[$row['fullnspath']] = ++$this->methodCount;
+                // case of closure or arrow function
+                $ns = '';
             }
 
             $toDump[] = array($this->methodCount,

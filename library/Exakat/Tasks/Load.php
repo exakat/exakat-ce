@@ -1393,7 +1393,6 @@ class Load extends Tasks {
         $finally->ws->closing = '';
         $finally->fullcode = $this->tokens[$finallyId][1] . static::FULLCODE_BLOCK;
 
-        $extras['FINALLY'] = $finally;
         $this->runPlugins($finally, array('BLOCK' => $finallyBlock));
 
         return $finally;
@@ -1609,6 +1608,7 @@ class Load extends Tasks {
                     $arg = $this->processSingle('Parameter');
                 }
                 $this->moveToNext();
+                $uses[] = $arg;
 
                 $useFullcode[] = $arg->fullcode;
                 $arg->rank = ++$rank;
@@ -1626,7 +1626,7 @@ class Load extends Tasks {
                                                        $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
                 }
             } while ($this->nextIs(array($this->phptokens::T_COMMA), 0));
-            $this->runPlugins($function, $uses);
+            $this->runPlugins($function, array('USE' => $uses));
         }
 
         // Process return type
@@ -2241,7 +2241,6 @@ class Load extends Tasks {
                 $return->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
             } while( $this->nextIs(array($this->phptokens::T_INLINE_HTML)));
 
-            $current = $this->id + 1;
             if ($this->nextIs(array($this->phptokens::T_OPEN_TAG_WITH_ECHO))) {
                 $return = $this->processOpenWithEcho();
 
@@ -2284,8 +2283,6 @@ class Load extends Tasks {
             // This generates unused Void Atoms, but is required to return a value.
             $this->moveToNext();
             $return = $this->addAtomVoid();
-//            $this->addToSequence($return);
-//            $this->sequence->ws->separators[] = '/*X*/ ';
         }
 
         return $return;
@@ -2737,7 +2734,7 @@ class Load extends Tasks {
                 }
 
                 if ($this->nextIs(array($this->phptokens::T_ELLIPSIS), 0)) {
-                    $variadic = self::ELLIPSIS;                    $variadicId = $this->id;
+                    $variadic = self::ELLIPSIS;                    
                     $ellipsisWS = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
                     $this->moveToNext();
                 }
@@ -3896,11 +3893,11 @@ class Load extends Tasks {
             }
 
             $this->addLink($element, $default, 'DEFAULT');
-            if ($default->atom !== 'Void') {
+            if ($default->atom === 'Void') {
+                $this->runPlugins($element);
+            } else {
                 $element->fullcode .= " = {$default->fullcode}";
                 $this->runPlugins($element, array('DEFAULT' => $default));
-            } else {
-                $this->runPlugins($element);
             }
             $fullcode[] = $element->fullcode;
             $extras[] = $element;
@@ -5492,10 +5489,12 @@ class Load extends Tasks {
             $use->use = 'function';
         }
 
+        $rank = -1;
         $useType = $use->use;
         --$this->id;
         $usesDefinitions = array();
         do {
+            ++$rank;
             $prefix = '';
             $this->moveToNext();
             $this->checkPhpdoc();
@@ -5526,6 +5525,7 @@ class Load extends Tasks {
                 $as = $this->processAlias($useType);
                 $as->fullnspath = makeFullNsPath($namespace->fullcode, $useType === 'const');
                 $as->ws->totype = '';
+                $as->rank = $rank;
                 $fullcode[] = $as->fullcode;
                 $as->alias = mb_strtolower(substr($as->fullcode, strrpos($as->fullcode, ' as ') + 4));
 
@@ -5641,6 +5641,7 @@ class Load extends Tasks {
                 $this->moveToNext(); // Skip }
             } else {
                 $this->addLink($use, $namespace, 'USE');
+                $namespace->rank = $rank;
                 $usesDefinitions[] = $namespace;
                 $namespace->use    = $useType;
                 $namespace->ws->totype = '';
@@ -5672,6 +5673,7 @@ class Load extends Tasks {
 
         } while ($this->nextIs(array($this->phptokens::T_COMMA)));
         $this->runPlugins($use, $usesDefinitions);
+        $use->count = $rank + 1; // final rank is the count total
 
         $use->fullcode = $this->tokens[$current][1] . ($useType !== 'class' ? ' ' . $useType : '') . ' ' . implode(', ', $fullcode);
 
@@ -6413,13 +6415,11 @@ class Load extends Tasks {
         $current = $this->id;
         $signExpression = $this->tokens[$this->id][1];
         $whitespaces    = array($this->tokens[$this->id][1] . $this->tokens[$this->id][4]);
-        $code = $signExpression . '1';
         while ($this->nextIs(array($this->phptokens::T_PLUS,
                                    $this->phptokens::T_MINUS))) {
             $this->moveToNext();
             $signExpression = $this->tokens[$this->id][1] . $signExpression;
             $whitespaces[] = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
-            $code *= $this->tokens[$this->id][1] . '1';
         }
 
         if (($this->nextIs(array($this->phptokens::T_LNUMBER)) ||

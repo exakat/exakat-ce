@@ -6,7 +6,7 @@ Release Note
 
 Here is the release note of exakat. 
 
-**Version 2.3.4 (Yuchi Gong, 2022-01-19)**
+**Version 2.3.6 (Yuchi Gong, 2022-02-16)**
 
 
 + Cobbler
@@ -16,7 +16,41 @@ Here is the release note of exakat.
     + 
 
 + Analysis
-    + New analysis : Report unchecked divisions
+    + 
+
++ Tokenizer
+    + 
+
+**Version 2.3.5 (Yuchi Gong, 2022-02-02)**
+
+
++ Cobbler
+    + 
+
++ Report
+    + 
+
++ Analysis
+    + Refactored analysis : PHP 8.0 new types now covers mixed and also properties.
+    + Refactored analysis : PHP 8.0 union type differentiate between ?A and null|A
+    + Refactored analysis : CIT same names was extended to Enumeration
+
++ Tokenizer
+    + 
+
+**Version 2.3.4 (Yuchi Gong, 2022-01-19)**
+
+
++ Cobbler
+    + New cobbler : remove unused use expression
+    + Added 4 directives to each rules : namespaces, ignore_dirs, include_dirs and file_extensions. They filter out some of the results.
+
++ Report
+    + Composer : upgrade the list of core PHP extensions
+
++ Analysis
+    + New analysis : Mark simple getters/setters in classes
+    + New analysis : Report unchecked divisions (int and operators)
     + New analysis : report possible abstract constants in classes (which should be defined in a parent)
     + New analysis : report recycled variables
     + Refactored analysis : Upgraded 'Object references' with union and intersectional types
@@ -31,6 +65,7 @@ Here is the release note of exakat.
     + Refactored analysis : Clone with non-arrays now checks PHP native functions too
     + Refactored analysis : Excluded powers from calculations in IsZero
     + Refactored analysis : Fixed discrepancy between ' and " handling of \
+    + Extended tests : match without default
 
 + Tokenizer
     + Fixed a bug where static keyword is processed as a simple nsname

@@ -381,7 +381,9 @@ The Composer report provide elements for the require attribute in the composer.j
 
 It helps documenting the composer.json, by providing more information, extracted from the code.
 
-This report makes a copy then updates the composer.json, if available. It creates a totally new composer.json if the latter is not available. 
+This report makes a copy then updates the composer.json, when available; otherwise, it creates a totally new composer.json. 
+
+The report provides a calculated value for "php": "^7.3" and all the identified PHP extensions (such as "ext-exif", "ext-gd", "ext-finfo", etc). Core PHP extensions are omitted. 
 
 It is recommended to review manually the results of the suggested composer.json before using it.
 

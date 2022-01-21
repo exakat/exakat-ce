@@ -163,7 +163,7 @@ Total : 433 analysis
 * :ref:`non-constant-index-in-array`
 * :ref:`undefined-constants`
 * :ref:`instantiating-abstract-class`
-* :ref:`class,-interface-or-trait-with-identical-names`
+* :ref:`class,-interface,-enum-or-trait-with-identical-names`
 * :ref:`empty-try-catch`
 * :ref:`undefined-classes`
 * :ref:`htmlentities-calls`
@@ -545,7 +545,7 @@ Total : 433 analysis
 * :ref:`float-conversion-as-index`
 * :ref:`cannot-call-trait-method-directly`
 * :ref:`overwritten-foreach-var`
-* :ref:`variables-recycledvariables`
+* :ref:`recycled-variables`
 * :ref:`check-division-by-zero`
 
 
@@ -3506,7 +3506,7 @@ Total : 102 analysis
 * :ref:`declare-static-once`
 * :ref:`could-use-match`
 * :ref:`could-use-nullable-object-operator`
-* :ref:`classes-couldbeiterable`
+* :ref:`could-be-iterable`
 
 
 
@@ -3603,7 +3603,7 @@ Total : 25 analysis
 * :ref:`could-be-self`
 * :ref:`could-be-parent`
 * :ref:`could-be-generator`
-* :ref:`classes-couldbeiterable`
+* :ref:`could-be-iterable`
 
 
 
@@ -3856,7 +3856,7 @@ Total : 1420 analysis
 * :ref:`custom-constant-usage`
 * :ref:`instantiating-abstract-class`
 * :ref:`classes-mutually-extending-each-other`
-* :ref:`class,-interface-or-trait-with-identical-names`
+* :ref:`class,-interface,-enum-or-trait-with-identical-names`
 * :ref:`empty-try-catch`
 * :ref:`ext-pcntl`
 * :ref:`undefined-classes`
@@ -5039,12 +5039,12 @@ Total : 1420 analysis
 * :ref:`could-use-nullable-object-operator`
 * :ref:`cant-overload-constants`
 * :ref:`variable-is-a-local-constant`
-* :ref:`classes-couldbeiterable`
+* :ref:`could-be-iterable`
 * :ref:`intersection-typehint`
 * :ref:`abstract-class-constants`
-* :ref:`variables-recycledvariables`
+* :ref:`recycled-variables`
 * :ref:`check-division-by-zero`
-* :ref:`patterns-gettersetter`
+* :ref:`getter-and-setter`
 
 
 

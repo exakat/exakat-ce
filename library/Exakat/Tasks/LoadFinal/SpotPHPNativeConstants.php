@@ -31,8 +31,8 @@ class SpotPHPNativeConstants extends LoadFinal {
         }
         $constants = array_merge(...$this->PHPconstants);
         $constants = array_filter($constants, function (string $x): bool { return strpos($x, '\\') === false;});
-        $constantsPHP = array_values($constants);
-        $constantsPHP = makeFullNsPath($constantsPHP, \FNP_CONSTANT);
+        $PHPconstants = array_values($constants);
+        $PHPconstants = makeFullNsPath($PHPconstants, \FNP_CONSTANT);
 
         // Constants like A\E_ALL are ignored here
 
@@ -42,7 +42,7 @@ class SpotPHPNativeConstants extends LoadFinal {
               ->is('absolute', true)
               ->has('fullnspath')
               ->hasNoIn('DEFINITION')
-              ->fullnspathIs($constantsPHP, Analyzer::CASE_SENSITIVE)
+              ->fullnspathIs($PHPconstants, Analyzer::CASE_SENSITIVE)
               ->property('isPhp', true)
               ->returnCount();
         $query->prepareRawQuery();
@@ -77,7 +77,7 @@ class SpotPHPNativeConstants extends LoadFinal {
             array_collect_by($found, $r[1], $constant);
         }
 
-        $used = array_intersect(array_keys($found), $constantsPHP);
+        $used = array_intersect(array_keys($found), $PHPconstants);
         if (empty($used)) {
             display('No PHP Constants');
             return;

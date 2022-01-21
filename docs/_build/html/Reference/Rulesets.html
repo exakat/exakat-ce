@@ -355,7 +355,7 @@
 <span id="id1"></span><h1><span class="section-number">2. </span>Rulesets<a class="headerlink" href="#rulesets" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction">
 <h2><span class="section-number">2.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>Exakat provides unique 1428 rules to detect BUGS, CODE SMELLS, SECURITY OR QUALITY ISSUES in your PHP code.</p>
+<p>Exakat provides unique 1432 rules to detect BUGS, CODE SMELLS, SECURITY OR QUALITY ISSUES in your PHP code.</p>
 <p>For more smoothly usage, the ruleset concept allow you to run a set of rules based on a decidated focus. Beawre that a Ruleset run all the associated rules and any needed dependencies.</p>
 <p>Rulesets are configured with the -T option, when running exakat in command line. For example :</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">php</span> <span class="n">exakat</span><span class="o">.</span><span class="n">phar</span> <span class="n">analyze</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">project</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">T</span> <span class="o">&lt;</span><span class="n">Security</span><span class="o">&gt;</span>
@@ -491,7 +491,7 @@
 <div class="section" id="analyze">
 <span id="ruleset-analyze"></span><h3><span class="section-number">2.3.1. </span>Analyze<a class="headerlink" href="#analyze" title="Permalink to this headline">¶</a></h3>
 <p>This ruleset centralizes a large number of classic trap and pitfalls when writing PHP.</p>
-<p>Total : 437 analysis</p>
+<p>Total : 433 analysis</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="Rules.html#adding-zero"><span class="std std-ref">Adding Zero</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#ambiguous-array-index"><span class="std std-ref">Ambiguous Array Index</span></a></p></li>
@@ -501,7 +501,6 @@
 <li><p><a class="reference internal" href="Rules.html#non-static-methods-called-in-a-static"><span class="std std-ref">Non Static Methods Called In A Static</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#old-style-constructor"><span class="std std-ref">Old Style Constructor</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#static-methods-called-from-object"><span class="std std-ref">Static Methods Called From Object</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#constants-with-strange-names"><span class="std std-ref">Constants With Strange Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#empty-function"><span class="std std-ref">Empty Function</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#redeclared-php-functions"><span class="std std-ref">Redeclared PHP Functions</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#methods-without-return"><span class="std std-ref">Methods Without Return</span></a></p></li>
@@ -586,7 +585,6 @@
 <li><p><a class="reference internal" href="Rules.html#lone-blocks"><span class="std std-ref">Lone Blocks</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#this-is-not-for-static-methods"><span class="std std-ref">$this Is Not For Static Methods</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#global-usage"><span class="std std-ref">Global Usage</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#php-keywords-as-names"><span class="std std-ref">PHP Keywords As Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#logical-should-use-symbolic-operators"><span class="std std-ref">Logical Should Use Symbolic Operators</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#could-use-self"><span class="std std-ref">Could Use self</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#catch-overwrite-variable"><span class="std std-ref">Catch Overwrite Variable</span></a></p></li>
@@ -720,7 +718,6 @@
 <li><p><a class="reference internal" href="Rules.html#avoid-using-stdclass"><span class="std std-ref">Avoid Using stdClass</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#too-many-local-variables"><span class="std std-ref">Too Many Local Variables</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#illegal-name-for-method"><span class="std std-ref">Illegal Name For Method</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#class-should-be-final-by-ocramius"><span class="std std-ref">Class Should Be Final By Ocramius</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#long-arguments"><span class="std std-ref">Long Arguments</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#assigned-twice"><span class="std std-ref">Assigned Twice</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-boolean-as-default"><span class="std std-ref">No Boolean As Default</span></a></p></li>
@@ -731,7 +728,6 @@
 <li><p><a class="reference internal" href="Rules.html#used-once-property"><span class="std std-ref">Used Once Property</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#property-used-in-one-method-only"><span class="std std-ref">Property Used In One Method Only</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-need-for-else"><span class="std std-ref">No Need For Else</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#strange-name-for-variables"><span class="std std-ref">Strange Name For Variables</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#strange-name-for-constants"><span class="std std-ref">Strange Name For Constants</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#too-many-finds"><span class="std std-ref">Too Many Finds</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#should-use-setcookie"><span class="std std-ref">Should Use SetCookie()</span></a></p></li>
@@ -778,7 +774,7 @@
 <li><p><a class="reference internal" href="Rules.html#invalid-regex"><span class="std std-ref">Invalid Regex</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#use-named-boolean-in-argument-definition"><span class="std std-ref">Use Named Boolean In Argument Definition</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#same-variable-foreach"><span class="std std-ref">Same Variable Foreach</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#never-used-parameter"><span class="std std-ref">Never Used Parameter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#never-called-parameter"><span class="std std-ref">Never Called Parameter</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#identical-on-both-sides"><span class="std std-ref">Identical On Both Sides</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#identical-consecutive-expression"><span class="std std-ref">Identical Consecutive Expression</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-reference-for-ternary"><span class="std std-ref">No Reference For Ternary</span></a></p></li>
@@ -903,7 +899,6 @@
 <li><p><a class="reference internal" href="Rules.html#modified-typed-parameter"><span class="std std-ref">Modified Typed Parameter</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#assumptions"><span class="std std-ref">Assumptions</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#unsupported-types-with-operators"><span class="std std-ref">Unsupported Types With Operators</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#could-be-stringable"><span class="std std-ref">Could Be Stringable</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#wrong-attribute-configuration"><span class="std std-ref">Wrong Attribute Configuration</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#cancelled-parameter"><span class="std std-ref">Cancelled Parameter</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#constant-typo-looks-like-a-variable"><span class="std std-ref">Constant Typo Looks Like A Variable</span></a></p></li>
@@ -929,7 +924,8 @@
 <li><p><a class="reference internal" href="Rules.html#float-conversion-as-index"><span class="std std-ref">Float Conversion As Index</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#cannot-call-trait-method-directly"><span class="std std-ref">Cannot Call Trait Method Directly</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#overwritten-foreach-var"><span class="std std-ref">Overwritten Foreach Var</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#variable-is-a-local-constant"><span class="std std-ref">Variable Is A Local Constant</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#recycled-variables"><span class="std std-ref">Recycled Variables</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#check-division-by-zero"><span class="std std-ref">Check Division By Zero</span></a></p></li>
 </ul>
 <div class="section" id="specs">
 <h4><span class="section-number">2.3.1.1. </span>Specs<a class="headerlink" href="#specs" title="Permalink to this headline">¶</a></h4>
@@ -962,7 +958,7 @@
 <li><p><a class="reference internal" href="Rules.html#php-arrays-index"><span class="std std-ref">PHP Arrays Index</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#classes-names"><span class="std std-ref">Classes Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#constant-definition"><span class="std std-ref">Constant Definition</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id610"><span class="std std-ref">Magic Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id609"><span class="std std-ref">Magic Methods</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#old-style-constructor"><span class="std std-ref">Old Style Constructor</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#static-methods"><span class="std std-ref">Static Methods</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#static-properties"><span class="std std-ref">Static Properties</span></a></p></li>
@@ -1402,7 +1398,7 @@
 <li><p><a class="reference internal" href="Rules.html#php-arrays-index"><span class="std std-ref">PHP Arrays Index</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#classes-names"><span class="std std-ref">Classes Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#constant-definition"><span class="std std-ref">Constant Definition</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id610"><span class="std std-ref">Magic Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id609"><span class="std std-ref">Magic Methods</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#forgotten-visibility"><span class="std std-ref">Forgotten Visibility</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#non-static-methods-called-in-a-static"><span class="std std-ref">Non Static Methods Called In A Static</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#old-style-constructor"><span class="std std-ref">Old Style Constructor</span></a></p></li>
@@ -2275,7 +2271,7 @@
 <div class="section" id="classreview">
 <span id="ruleset-classreview"></span><h3><span class="section-number">2.3.6. </span>ClassReview<a class="headerlink" href="#classreview" title="Permalink to this headline">¶</a></h3>
 <p>This ruleset focuses on classes construction issues, and their related structures : traits, interfaces, methods, properties, constants.</p>
-<p>Total : 56 analysis</p>
+<p>Total : 59 analysis</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="Rules.html#final-class-usage"><span class="std std-ref">Final Class Usage</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#final-methods-usage"><span class="std std-ref">Final Methods Usage</span></a></p></li>
@@ -2288,6 +2284,7 @@
 <li><p><a class="reference internal" href="Rules.html#could-be-static"><span class="std std-ref">Could Be Static</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-self-referencing-constant"><span class="std std-ref">No Self Referencing Constant</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#property-could-be-private-property"><span class="std std-ref">Property Could Be Private Property</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#class-should-be-final-by-ocramius"><span class="std std-ref">Class Should Be Final By Ocramius</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#could-be-protected-property"><span class="std std-ref">Could Be Protected Property</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#raised-access-level"><span class="std std-ref">Raised Access Level</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#could-be-private-class-constant"><span class="std std-ref">Could Be Private Class Constant</span></a></p></li>
@@ -2329,10 +2326,12 @@
 <li><p><a class="reference internal" href="Rules.html#cancel-common-method"><span class="std std-ref">Cancel Common Method</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#modified-typed-parameter"><span class="std std-ref">Modified Typed Parameter</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#useless-typehint"><span class="std std-ref">Useless Typehint</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#could-be-stringable"><span class="std std-ref">Could Be Stringable</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#final-private-methods"><span class="std std-ref">Final Private Methods</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#missing-isset-method"><span class="std std-ref">Missing __isset() Method</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-static-variable-in-a-method"><span class="std std-ref">No Static Variable In A Method</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#inherited-property-type-must-match"><span class="std std-ref">Inherited Property Type Must Match</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#abstract-class-constants"><span class="std std-ref">Abstract Class Constants</span></a></p></li>
 </ul>
 <div class="section" id="id15">
 <h4><span class="section-number">2.3.6.1. </span>Specs<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
@@ -2401,7 +2400,7 @@
 <li><p><a class="reference internal" href="Rules.html#ellipsis-usage"><span class="std std-ref">Ellipsis Usage</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#exponent-usage"><span class="std std-ref">Exponent Usage</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#dereferencing-string-and-arrays"><span class="std std-ref">Dereferencing String And Arrays</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id5153"><span class="std std-ref">::class</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id5151"><span class="std std-ref">::class</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#foreach-with-list"><span class="std std-ref">Foreach With list()</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#use-const-and-functions"><span class="std std-ref">Use Const And Functions</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#constant-scalar-expressions"><span class="std std-ref">Constant Scalar Expressions</span></a></p></li>
@@ -2506,7 +2505,7 @@
 <li><p><a class="reference internal" href="Rules.html#ellipsis-usage"><span class="std std-ref">Ellipsis Usage</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#exponent-usage"><span class="std std-ref">Exponent Usage</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#dereferencing-string-and-arrays"><span class="std std-ref">Dereferencing String And Arrays</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id5153"><span class="std std-ref">::class</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id5151"><span class="std std-ref">::class</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#foreach-with-list"><span class="std std-ref">Foreach With list()</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#use-const-and-functions"><span class="std std-ref">Use Const And Functions</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#constant-scalar-expressions"><span class="std std-ref">Constant Scalar Expressions</span></a></p></li>
@@ -3505,12 +3504,14 @@
 <div class="section" id="lintbutwontexec">
 <span id="ruleset-lintbutwontexec"></span><h3><span class="section-number">2.3.24. </span>LintButWontExec<a class="headerlink" href="#lintbutwontexec" title="Permalink to this headline">¶</a></h3>
 <p>This ruleset focuses on PHP code that lint (php -l), but that will not run. As such, this ruleset tries to go further than PHP, by connecting files, just like during execution.</p>
-<p>Total : 36 analysis</p>
+<p>Total : 38 analysis</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="Rules.html#final-class-usage"><span class="std std-ref">Final Class Usage</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#final-methods-usage"><span class="std std-ref">Final Methods Usage</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#this-belongs-to-classes-or-traits"><span class="std std-ref">$this Belongs To Classes Or Traits</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#classes-mutually-extending-each-other"><span class="std std-ref">Classes Mutually Extending Each Other</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#must-return-methods"><span class="std std-ref">Must Return Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#undefined-interfaces"><span class="std std-ref">Undefined Interfaces</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#concrete-visibility"><span class="std std-ref">Concrete Visibility</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-self-referencing-constant"><span class="std std-ref">No Self Referencing Constant</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#using-this-outside-a-class"><span class="std std-ref">Using $this Outside A Class</span></a></p></li>
@@ -3746,7 +3747,7 @@
 <li><p><a class="reference internal" href="Rules.html#could-use-short-assignation"><span class="std std-ref">Could Use Short Assignation</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#should-typecast"><span class="std std-ref">Should Typecast</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-choice"><span class="std std-ref">No Choice</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#never-used-parameter"><span class="std std-ref">Never Used Parameter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#never-called-parameter"><span class="std std-ref">Never Called Parameter</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#closure-could-be-a-callback"><span class="std std-ref">Closure Could Be A Callback</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#is-a-with-string"><span class="std std-ref">Is_A() With String</span></a></p></li>
 </ul>
@@ -3777,7 +3778,7 @@
 <p>Total : 44 analysis</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="Rules.html#eval-usage"><span class="std std-ref">Eval() Usage</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id6961"><span class="std std-ref">Phpinfo</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id6960"><span class="std std-ref">Phpinfo</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#var-dump-usage"><span class="std std-ref">var_dump()… Usage</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#hardcoded-passwords"><span class="std std-ref">Hardcoded Passwords</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#direct-injection"><span class="std std-ref">Direct Injection</span></a></p></li>
@@ -3845,12 +3846,15 @@
 <div class="section" id="semantics">
 <span id="ruleset-semantics"></span><h3><span class="section-number">2.3.30. </span>Semantics<a class="headerlink" href="#semantics" title="Permalink to this headline">¶</a></h3>
 <p>This ruleset focuses on human interpretation of the code. It reviews special values of literals, and named structures.</p>
-<p>Total : 13 analysis</p>
+<p>Total : 16 analysis</p>
 <ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#constants-with-strange-names"><span class="std std-ref">Constants With Strange Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#variables-with-one-letter-names"><span class="std std-ref">Variables With One Letter Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#one-letter-functions"><span class="std std-ref">One Letter Functions</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#property-variable-confusion"><span class="std std-ref">Property Variable Confusion</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#php-keywords-as-names"><span class="std std-ref">PHP Keywords As Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#class-function-confusion"><span class="std std-ref">Class Function Confusion</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#strange-name-for-variables"><span class="std std-ref">Strange Name For Variables</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#similar-integers"><span class="std std-ref">Similar Integers</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#duplicate-literal"><span class="std std-ref">Duplicate Literal</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#parameter-hiding"><span class="std std-ref">Parameter Hiding</span></a></p></li>
@@ -3922,7 +3926,7 @@
 <li><p><a class="reference internal" href="Rules.html#use-list-with-foreach"><span class="std std-ref">Use List With Foreach</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#slice-arrays-first"><span class="std std-ref">Slice Arrays First</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#parent-first"><span class="std std-ref">Parent First</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#never-used-parameter"><span class="std std-ref">Never Used Parameter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#never-called-parameter"><span class="std std-ref">Never Called Parameter</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#should-use-array-filter"><span class="std std-ref">Should Use array_filter()</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#reuse-variable"><span class="std std-ref">Reuse Variable</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#should-use-math"><span class="std std-ref">Should Use Math</span></a></p></li>
@@ -4112,7 +4116,7 @@
 <div class="section" id="all">
 <span id="ruleset-all"></span><h3><span class="section-number">2.3.34. </span>All<a class="headerlink" href="#all" title="Permalink to this headline">¶</a></h3>
 <p>All is a dummy ruleset, which includes all the rules. It is mostly used internally.</p>
-<p>Total : 1416 analysis</p>
+<p>Total : 1420 analysis</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="Rules.html#adding-zero"><span class="std std-ref">Adding Zero</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#ambiguous-array-index"><span class="std std-ref">Ambiguous Array Index</span></a></p></li>
@@ -4124,7 +4128,7 @@
 <li><p><a class="reference internal" href="Rules.html#classes-names"><span class="std std-ref">Classes Names</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#constant-definition"><span class="std std-ref">Constant Definition</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#empty-classes"><span class="std std-ref">Empty Classes</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id610"><span class="std std-ref">Magic Methods</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id609"><span class="std std-ref">Magic Methods</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#forgotten-visibility"><span class="std std-ref">Forgotten Visibility</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#non-static-methods-called-in-a-static"><span class="std std-ref">Non Static Methods Called In A Static</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#old-style-constructor"><span class="std std-ref">Old Style Constructor</span></a></p></li>
@@ -4244,7 +4248,7 @@
 <li><p><a class="reference internal" href="Rules.html#operator"><span class="std std-ref">&#64; Operator</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#not-not"><span class="std std-ref">Not Not</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#include-once-usage"><span class="std std-ref">include_once() Usage</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id6961"><span class="std std-ref">Phpinfo</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id6960"><span class="std std-ref">Phpinfo</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#no-plus-one"><span class="std std-ref">No Plus One</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#using-short-tags"><span class="std std-ref">Using Short Tags</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#strpos-like-comparison"><span class="std std-ref">Strpos()-like Comparison</span></a></p></li>
@@ -4413,7 +4417,7 @@
 <li><p><a class="reference internal" href="Rules.html#try-with-finally"><span class="std std-ref">Try With Finally</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#use-password-hash"><span class="std std-ref">Use password_hash()</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#dereferencing-string-and-arrays"><span class="std std-ref">Dereferencing String And Arrays</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#id5153"><span class="std std-ref">::class</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#id5151"><span class="std std-ref">::class</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#foreach-with-list"><span class="std std-ref">Foreach With list()</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#empty-with-expression"><span class="std std-ref">Empty With Expression</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#list-may-omit-variables"><span class="std std-ref">list() May Omit Variables</span></a></p></li>
@@ -5009,7 +5013,7 @@
 <li><p><a class="reference internal" href="Rules.html#assigned-in-one-branch"><span class="std std-ref">Assigned In One Branch</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#use-named-boolean-in-argument-definition"><span class="std std-ref">Use Named Boolean In Argument Definition</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#same-variable-foreach"><span class="std std-ref">Same Variable Foreach</span></a></p></li>
-<li><p><a class="reference internal" href="Rules.html#never-used-parameter"><span class="std std-ref">Never Used Parameter</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#never-called-parameter"><span class="std std-ref">Never Called Parameter</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#ext-igbinary"><span class="std std-ref">ext/igbinary</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#should-use-array-filter"><span class="std std-ref">Should Use array_filter()</span></a></p></li>
 <li><p><a class="reference internal" href="Rules.html#not-a-scalar-type"><span class="std std-ref">Not A Scalar Type</span></a></p></li>
@@ -5530,6 +5534,10 @@
 <li><p><a class="reference internal" href="Rules.html#variable-is-a-local-constant"><span class="std std-ref">Variable Is A Local Constant</span></a></p></li>
 <li><p><span class="xref std std-ref">classes-couldbeiterable</span></p></li>
 <li><p><a class="reference internal" href="Rules.html#intersection-typehint"><span class="std std-ref">Intersection Typehint</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#abstract-class-constants"><span class="std std-ref">Abstract Class Constants</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#recycled-variables"><span class="std std-ref">Recycled Variables</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#check-division-by-zero"><span class="std std-ref">Check Division By Zero</span></a></p></li>
+<li><p><a class="reference internal" href="Rules.html#getter-and-setter"><span class="std std-ref">Getter And Setter</span></a></p></li>
 </ul>
 <div class="section" id="id106">
 <h4><span class="section-number">2.3.34.1. </span>Specs<a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h4>

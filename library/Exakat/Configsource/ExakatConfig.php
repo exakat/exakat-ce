@@ -156,9 +156,7 @@ class ExakatConfig extends Config {
 
         // Calculate the stubs recursivement if it is a folder
         // all path are absolute, may be placed anywhere
-        if (!isset($this->config['stubs'])) {
-            $this->config['stubs'] = array();
-        } else {
+        if (isset($this->config['stubs'])) {
             $stubs = array(array());
             $this->config['stubs'] = makeArray($this->config['stubs']);
             foreach($this->config['stubs'] as $stub) {
@@ -191,6 +189,8 @@ class ExakatConfig extends Config {
                 }
             }
             $this->config['stubs'] = array_unique(array_merge(...array_values($stubs)));
+        } else {
+            $this->config['stubs'] = array();
         }
 
         return str_replace(getcwd(), '.', $configFile);
