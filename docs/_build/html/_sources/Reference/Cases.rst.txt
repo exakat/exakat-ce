@@ -2853,10 +2853,10 @@ This code actually loads the file, join it, then split it again. file() would be
     $markerdata = explode( "\n", implode( '', file( $filename ) ) );
 
 
-.. _case-never-used-parameter:
+.. _case-never-called-parameter:
 
-Never Used Parameter
-####################
+Never Called Parameter
+######################
 
 .. _case-piwigo-functions-neverusedparameter:
 
@@ -2864,7 +2864,7 @@ Piwigo
 ++++++
 
 
-:ref:`never-used-parameter`, in include/functions_html.inc.php:329. 
+:ref:`never-called-parameter`, in include/functions_html.inc.php:329. 
 
 $alternate_url is never explicitely passed to bad_request() : this doesn't show in this extract. It could be dropped from this code.
 

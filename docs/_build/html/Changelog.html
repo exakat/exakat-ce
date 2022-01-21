@@ -203,7 +203,62 @@
   <div class="section" id="release-note">
 <h1>Release Note<a class="headerlink" href="#release-note" title="Permalink to this headline">¶</a></h1>
 <p>Here is the release note of exakat.</p>
-<p><strong>Version 2.3.3 (Wei Zheng, 2021-12-16)</strong></p>
+<p><strong>Version 2.3.4 (Yuchi Gong, 2022-01-19)</strong></p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Cobbler</dt><dd><ul>
+<li><p>New cobbler : remove unused use expression</p></li>
+<li><p>Added 4 directives to each rules : namespaces, ignore_dirs, include_dirs and file_extensions. They filter out some of the results.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Report</dt><dd><ul>
+<li><p>Composer : upgrade the list of core PHP extensions</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Analysis</dt><dd><ul>
+<li><p>New analysis : Mark simple getters/setters in classes</p></li>
+<li><p>New analysis : Report unchecked divisions (int and operators)</p></li>
+<li><p>New analysis : report possible abstract constants in classes (which should be defined in a parent)</p></li>
+<li><p>New analysis : report recycled variables</p></li>
+<li><p>Refactored analysis : Upgraded ‘Object references’ with union and intersectional types</p></li>
+<li><p>Refactored analysis : Removed edges cases in ‘Don’t collect void’</p></li>
+<li><p>Refactored analysis : Extension detection now takes into account enums</p></li>
+<li><p>Refactored analysis : Upgraded AlwaysFalse with better typehinting inference</p></li>
+<li><p>Refactored analysis : indentation levels missed several results while reporting</p></li>
+<li><p>Refactored analysis : interfaces, traits and constants were missing for use expression resolution</p></li>
+<li><p>Refactored analysis : Undefined Interfaces now exclude better PHP or ext’s interfaces</p></li>
+<li><p>Refactored analysis : Never Used Parameter confused Void and first argument</p></li>
+<li><p>Refactored analysis : Self were reported as outside a class when in foreach()</p></li>
+<li><p>Refactored analysis : Clone with non-arrays now checks PHP native functions too</p></li>
+<li><p>Refactored analysis : Excluded powers from calculations in IsZero</p></li>
+<li><p>Refactored analysis : Fixed discrepancy between ‘ and ” handling of </p></li>
+<li><p>Extended tests : match without default</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Tokenizer</dt><dd><ul>
+<li><p>Fixed a bug where static keyword is processed as a simple nsname</p></li>
+<li><p>Fixed a bug where typehints were not marked as isPhp, isExt or isStub</p></li>
+<li><p>Fixed an edge case with array functions inside match() syntax</p></li>
+<li><p>Fixed an edge case with Closures and reference-use variable</p></li>
+<li><p>Fixed an edge case with static inside ternary</p></li>
+<li><p>Fixed yield expression scope</p></li>
+<li><p>Added Table for PHP 8.2 compilations checks</p></li>
+<li><p>Removed extra void with use expression for traits</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Version 2.3.3 (Xu Maogong, 2022-01-05)</strong></p>
 <ul class="simple">
 <li><dl class="simple">
 <dt>Cobbler</dt><dd><ul>

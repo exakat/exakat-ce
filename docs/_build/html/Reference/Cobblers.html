@@ -317,6 +317,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#remove-the-attribute-specs">4.2.25.3. Specs</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-unused-use">4.2.26. Remove Unused Use</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-unused-use-before">4.2.26.1. Before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-unused-use-after">4.2.26.2. After</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-unused-use-suggested-analysis">4.2.26.3. Suggested Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-unused-use-specs">4.2.26.4. Specs</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -2035,6 +2042,61 @@ rename parameters $a into $b (currently, no $a available)</p>
 <tbody>
 <tr class="row-odd"><td><p>Short Name</p></td>
 <td><p>Attributes/RemoveAttribute</p></td>
+</tr>
+<tr class="row-even"><td><p>Exakat version</p></td>
+<td><p>2.3.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Available in</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="remove-unused-use">
+<span id="namespaces-removeuse"></span><span id="id170"></span><h3><span class="section-number">4.2.26. </span>Remove Unused Use<a class="headerlink" href="#remove-unused-use" title="Permalink to this headline">¶</a></h3>
+<p>Removes the unused use expression from the top of the file. Groupuse are not processed yet.</p>
+<div class="section" id="remove-unused-use-before">
+<span id="id171"></span><h4><span class="section-number">4.2.26.1. </span>Before<a class="headerlink" href="#remove-unused-use-before" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">use</span> <span class="nx">a\b</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">c\d</span><span class="p">;</span>
+
+<span class="k">new</span> <span class="nx">b</span><span class="p">();</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-unused-use-after">
+<span id="id172"></span><h4><span class="section-number">4.2.26.2. </span>After<a class="headerlink" href="#remove-unused-use-after" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">use</span> <span class="nx">a\b</span><span class="p">;</span>
+
+<span class="k">new</span> <span class="nx">b</span><span class="p">();</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-unused-use-suggested-analysis">
+<span id="id173"></span><h4><span class="section-number">4.2.26.3. </span>Suggested Analysis<a class="headerlink" href="#remove-unused-use-suggested-analysis" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="Rules.html#unused-use"><span class="std std-ref">Unused Use</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="remove-unused-use-specs">
+<span id="id174"></span><h4><span class="section-number">4.2.26.4. </span>Specs<a class="headerlink" href="#remove-unused-use-specs" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 58%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Short Name</p></td>
+<td><p>Namespaces/RemoveUse</p></td>
 </tr>
 <tr class="row-even"><td><p>Exakat version</p></td>
 <td><p>2.3.0</p></td>

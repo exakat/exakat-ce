@@ -416,10 +416,10 @@ This code actually loads the file, join it, then split it again. file() would be
     $markerdata = explode( "\n", implode( '', file( $filename ) ) );
 
 
-.. _case-class,-interface-or-trait-with-identical-names:
+.. _case-class,-interface,-enum-or-trait-with-identical-names:
 
-Class, Interface Or Trait With Identical Names
-##############################################
+Class, Interface, Enum Or Trait With Identical Names
+####################################################
 
 .. _case-shopware-classes-citsamename:
 
@@ -427,7 +427,7 @@ shopware
 ++++++++
 
 
-:ref:`class,-interface-or-trait-with-identical-names`, in engine/Shopware/Components/Form/Interfaces/Element.php:30. 
+:ref:`class,-interface,-enum-or-trait-with-identical-names`, in engine/Shopware/Components/Form/Interfaces/Element.php:30. 
 
 Most Element classes extends ModelEntity, which is an abstract class. There is also an interface, called Element, for forms. And, last, one of the class Element extends JsonSerializable, which is a PHP native interface. Namespaces are definitely crucial to understand which Element is which. 
 
@@ -446,7 +446,7 @@ NextCloud
 +++++++++
 
 
-:ref:`class,-interface-or-trait-with-identical-names`, in lib/private/Files/Storage/Storage.php:33. 
+:ref:`class,-interface,-enum-or-trait-with-identical-names`, in lib/private/Files/Storage/Storage.php:33. 
 
 Interface Storage extends another Storage class. Here, the fully qualified name is used, so we can understand which storage is which at read time : a 'use' alias would make this line more confusing.
 

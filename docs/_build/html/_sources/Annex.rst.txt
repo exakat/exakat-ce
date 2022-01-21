@@ -147,7 +147,6 @@ List of external links mentionned in this documentation.
 * `Classes abstraction <https://www.php.net/abstract>`_
 * `Classes Abstraction <https://www.php.net/abstract>`_
 * `Closure class <https://www.php.net/closure>`_
-* `Closure::bind <https://www.php.net/manual/en/closure.bind.php>`_
 * `Cmark <https://github.com/commonmark/cmark>`_
 * `Codeigniter <https://codeigniter.com/>`_
 * `COM and .Net (Windows) <https://www.php.net/manual/en/book.com.php>`_
@@ -168,7 +167,6 @@ List of external links mentionned in this documentation.
 * `Covariant Returns and Contravariant Parameters <https://wiki.php.net/rfc/covariant-returns-and-contravariant-parameters>`_
 * `crc32() <https://www.php.net/crc32>`_
 * `Cross-Site Scripting (XSS) <https://phpsecurity.readthedocs.io/en/latest/Cross-Site-Scripting-(XSS).html>`_
-* `crypt <http://www.php.net/crypt>`_
 * `Cryptography Extensions <https://www.php.net/manual/en/refs.crypto.php>`_
 * `CSPRNG <https://www.php.net/manual/en/book.csprng.php>`_
 * `Ctype funtions <https://www.php.net/manual/en/ref.ctype.php>`_
@@ -264,7 +262,6 @@ List of external links mentionned in this documentation.
 * `ext/varnish <https://www.php.net/manual/en/book.varnish.php>`_
 * `ext/zookeeper <https://www.php.net/zookeeper>`_
 * `Extension Apache <https://www.php.net/manual/en/book.apache.php>`_
-* `extension FANN <https://www.php.net/manual/en/book.fann.php>`_
 * `extension mcrypt <http://www.php.net/manual/en/book.mcrypt.php>`_
 * `extract <https://www.php.net/extract>`_
 * `Ez <https://ez.no/>`_
@@ -348,7 +345,6 @@ List of external links mentionned in this documentation.
 * `in_array() <https://www.php.net/in_array>`_
 * `include <https://www.php.net/manual/en/function.include.php>`_
 * `include_once <https://www.php.net/manual/en/function.include-once.php>`_
-* `Incrementing/Decrementing Operators <https://www.php.net/manual/en/language.operators.increment.php>`_
 * `Info Predefined Constants <https://www.php.net/manual/en/info.constants.php>`_
 * `Insecure Transportation Security Protocol Supported (TLS 1.0) <https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/insecure-transportation-security-protocol-supported-tls-10/>`_
 * `Installing Exakat to monitor several projects <https://www.exakat.io/installing-exakat-to-monitor-several-projects/>`_
@@ -425,7 +421,6 @@ List of external links mentionned in this documentation.
 * `mysqli <https://www.php.net/manual/en/book.mysqli.php>`_
 * `Named Arguments <https://wiki.php.net/rfc/named_params>`_
 * `Ncurses Terminal Screen Control <https://www.php.net/manual/en/book.ncurses.php>`_
-* `Negative architecture, and assumptions about code <https://matthiasnoback.nl/2018/08/negative-architecture-and-assumptions-about-code/>`_
 * `Nested Ternaries are Great <https://medium.com/javascript-scene/nested-ternaries-are-great-361bddd0f340>`_
 * `Net SNMP <http://www.net-snmp.org/>`_
 * `New Classes and Interfaces <https://www.php.net/manual/en/migration70.classes.php>`_
@@ -442,7 +437,6 @@ List of external links mentionned in this documentation.
 * `Object cloning <https://www.php.net/manual/en/language.oop5.cloning.php>`_
 * `Object Inheritance <https://www.php.net/manual/en/language.oop5.inheritance.php>`_
 * `Object Interfaces <https://www.php.net/manual/en/language.oop5.interfaces.php>`_
-* `Object interfaces <https://www.php.net/manual/en/language.oop5.interfaces.php>`_
 * `Objects and references <https://www.php.net/manual/en/language.oop5.references.php>`_
 * `ODBC (Unified) <http://www.php.net/manual/en/book.uodbc.php>`_
 * `OPcache functions <http://www.php.net/manual/en/book.opcache.php>`_
@@ -483,7 +477,6 @@ List of external links mentionned in this documentation.
 * `PHP 7.0 Backward incompatible changes <https://www.php.net/manual/en/migration70.incompatible.php>`_
 * `PHP 7.0 Removed Functions <https://www.php.net/manual/en/migration70.incompatible.php#migration70.incompatible.removed-functions>`_
 * `PHP 7.1 no longer converts string to arrays the first time a value is assigned with square bracket notation <https://www.drupal.org/project/adaptivetheme/issues/2832900>`_
-* `PHP 7.2's "switch" optimisations <https://derickrethans.nl/php7.2-switch.html>`_
 * `PHP 7.2's switch optimisations <https://derickrethans.nl/php7.2-switch.html>`_
 * `PHP 7.3 Removed Functions <https://www.php.net/manual/en/migration73.incompatible.php#migration70.incompatible.removed-functions>`_
 * `PHP 7.3 UPGRADE NOTES <https://github.com/php/php-src/blob/3b6e1ee4ee05678b5d717cd926a35ffdc1335929/UPGRADING#L66-L81>`_
@@ -512,7 +505,6 @@ List of external links mentionned in this documentation.
 * `PHP RFC: Deprecations for PHP 8.1 <https://wiki.php.net/rfc/deprecations_php_8_1>`_
 * `PHP RFC: First-class callable syntax <https://wiki.php.net/rfc/first_class_callable_syntax>`_
 * `PHP RFC: get_debug_type <https://wiki.php.net/rfc/get_debug_type>`_
-* `PHP RFC: is_countable <https://wiki.php.net/rfc/is-countable>`_
 * `PHP RFC: noreturn type <https://wiki.php.net/rfc/noreturn_type>`_
 * `PHP RFC: Nullsafe operator <https://wiki.php.net/rfc/nullsafe_operator>`_
 * `PHP RFC: Scalar Type Hints <https://wiki.php.net/rfc/scalar_type_hints>`_
@@ -609,7 +601,6 @@ List of external links mentionned in this documentation.
 * `strpos not working correctly <https://bugs.php.net/bug.php?id=52198>`_
 * `strtr <http://www.php.net/strtr>`_
 * `Structuring PHP Exceptions <https://www.alainschlesser.com/structuring-php-exceptions/>`_
-* `Structuring PHP Exceptions session <https://phpconference.com/blog/structuring-php-exceptions/>`_
 * `Subpatterns <https://www.php.net/manual/en/regexp.reference.subpatterns.php>`_
 * `substr <http://www.php.net/substr>`_
 * `Suhosin.org <https://suhosin.org/>`_
@@ -692,7 +683,6 @@ List of external links mentionned in this documentation.
 * `When empty is not empty <https://freek.dev/1057-when-empty-is-not-empty>`_
 * `When to declare classes final <http://ocramius.github.io/blog/when-to-declare-classes-final/>`_
 * `Why 777 Folder Permissions are a Security Risk <https://www.spiralscripts.co.uk/Blog/why-777-folder-permissions-are-a-security-risk.html>`_
-* `Why does PHP 5.2+ disallow abstract static class methods? <https://stackoverflow.com/questions/999066/why-does-php-5-2-disallow-abstract-static-class-methods>`_
 * `Why is subclassing too much bad (and hence why should we use prototypes to do away with it)? <https://softwareengineering.stackexchange.com/questions/137687/why-is-subclassing-too-much-bad-and-hence-why-should-we-use-prototypes-to-do-aw>`_
 * `Why, php? WHY??? <https://gist.github.com/everzet/4215537>`_
 * `wikidiff2 <https://www.mediawiki.org/wiki/Extension:Wikidiff2>`_

@@ -152,7 +152,6 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Classes/CouldBeAbstractClass";
    analyzer[] = "Classes/CouldBeFinal";
    analyzer[] = "Classes/CouldBeStatic";
-   analyzer[] = "Classes/CouldBeStringable";
    analyzer[] = "Classes/CyclicReferences";
    analyzer[] = "Classes/DependantAbstractClass";
    analyzer[] = "Classes/DifferentArgumentCounts";
@@ -160,7 +159,6 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Classes/DontSendThisInConstructor";
    analyzer[] = "Classes/DontUnsetProperties";
    analyzer[] = "Classes/EmptyClass";
-   analyzer[] = "Classes/FinalByOcramius";
    analyzer[] = "Classes/HiddenNullable";
    analyzer[] = "Classes/ImplementIsForInterface";
    analyzer[] = "Classes/ImplementedMethodsArePublic";
@@ -229,7 +227,6 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Classes/WrongTypedPropertyInit";
    analyzer[] = "Constants/BadConstantnames";
    analyzer[] = "Constants/ConstRecommended";
-   analyzer[] = "Constants/ConstantStrangeNames";
    analyzer[] = "Constants/CreatedOutsideItsNamespace";
    analyzer[] = "Constants/InvalidName";
    analyzer[] = "Constants/MultipleConstantDefinition";
@@ -354,7 +351,6 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Php/OnlyVariableForReference";
    analyzer[] = "Php/PathinfoReturns";
    analyzer[] = "Php/Php81NewFunctions";
-   analyzer[] = "Php/ReservedNames";
    analyzer[] = "Php/ScalarAreNotArrays";
    analyzer[] = "Php/ShortOpenTagRequired";
    analyzer[] = "Php/ShouldUseCoalesce";
@@ -388,6 +384,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Structures/CastingTernary";
    analyzer[] = "Structures/CatchShadowsVariable";
    analyzer[] = "Structures/CheckAllTypes";
+   analyzer[] = "Structures/CheckDivision";
    analyzer[] = "Structures/CheckJson";
    analyzer[] = "Structures/CoalesceAndConcat";
    analyzer[] = "Structures/CommonAlternatives";
@@ -553,10 +550,9 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Typehints/MissingReturntype";
    analyzer[] = "Variables/AssignedTwiceOrMore";
    analyzer[] = "Variables/ConstantTypo";
-   analyzer[] = "Variables/IsLocalConstant";
    analyzer[] = "Variables/LostReferences";
    analyzer[] = "Variables/OverwrittenLiterals";
-   analyzer[] = "Variables/StrangeName";
+   analyzer[] = "Variables/RecycledVariables";
    analyzer[] = "Variables/UndefinedConstantName";
    analyzer[] = "Variables/UndefinedVariable";
    analyzer[] = "Variables/VariableNonascii";
@@ -602,7 +598,6 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Classes/CouldBeAbstractClass'
      - 'Classes/CouldBeFinal'
      - 'Classes/CouldBeStatic'
-     - 'Classes/CouldBeStringable'
      - 'Classes/CyclicReferences'
      - 'Classes/DependantAbstractClass'
      - 'Classes/DifferentArgumentCounts'
@@ -610,7 +605,6 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Classes/DontSendThisInConstructor'
      - 'Classes/DontUnsetProperties'
      - 'Classes/EmptyClass'
-     - 'Classes/FinalByOcramius'
      - 'Classes/HiddenNullable'
      - 'Classes/ImplementIsForInterface'
      - 'Classes/ImplementedMethodsArePublic'
@@ -679,7 +673,6 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Classes/WrongTypedPropertyInit'
      - 'Constants/BadConstantnames'
      - 'Constants/ConstRecommended'
-     - 'Constants/ConstantStrangeNames'
      - 'Constants/CreatedOutsideItsNamespace'
      - 'Constants/InvalidName'
      - 'Constants/MultipleConstantDefinition'
@@ -804,7 +797,6 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Php/OnlyVariableForReference'
      - 'Php/PathinfoReturns'
      - 'Php/Php81NewFunctions'
-     - 'Php/ReservedNames'
      - 'Php/ScalarAreNotArrays'
      - 'Php/ShortOpenTagRequired'
      - 'Php/ShouldUseCoalesce'
@@ -838,6 +830,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Structures/CastingTernary'
      - 'Structures/CatchShadowsVariable'
      - 'Structures/CheckAllTypes'
+     - 'Structures/CheckDivision'
      - 'Structures/CheckJson'
      - 'Structures/CoalesceAndConcat'
      - 'Structures/CommonAlternatives'
@@ -1003,10 +996,9 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Typehints/MissingReturntype'
      - 'Variables/AssignedTwiceOrMore'
      - 'Variables/ConstantTypo'
-     - 'Variables/IsLocalConstant'
      - 'Variables/LostReferences'
      - 'Variables/OverwrittenLiterals'
-     - 'Variables/StrangeName'
+     - 'Variables/RecycledVariables'
      - 'Variables/UndefinedConstantName'
      - 'Variables/UndefinedVariable'
      - 'Variables/VariableNonascii'
@@ -3607,6 +3599,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
 ::
 
  [ClassReview]
+   analyzer[] = "Classes/AbstractConstants";
    analyzer[] = "Classes/AvoidOptionArrays";
    analyzer[] = "Classes/CancelCommonMethod";
    analyzer[] = "Classes/ConstantClass";
@@ -3621,10 +3614,12 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Classes/CouldBeProtectedMethod";
    analyzer[] = "Classes/CouldBeProtectedProperty";
    analyzer[] = "Classes/CouldBeStatic";
+   analyzer[] = "Classes/CouldBeStringable";
    analyzer[] = "Classes/CyclicReferences";
    analyzer[] = "Classes/DependantAbstractClass";
    analyzer[] = "Classes/DifferentArgumentCounts";
    analyzer[] = "Classes/DisconnectedClasses";
+   analyzer[] = "Classes/FinalByOcramius";
    analyzer[] = "Classes/FinalPrivate";
    analyzer[] = "Classes/Finalclass";
    analyzer[] = "Classes/Finalmethod";
@@ -3676,6 +3671,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
 
   rulesets:
     'ClassReview':
+     - 'Classes/AbstractConstants'
      - 'Classes/AvoidOptionArrays'
      - 'Classes/CancelCommonMethod'
      - 'Classes/ConstantClass'
@@ -3690,10 +3686,12 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Classes/CouldBeProtectedMethod'
      - 'Classes/CouldBeProtectedProperty'
      - 'Classes/CouldBeStatic'
+     - 'Classes/CouldBeStringable'
      - 'Classes/CyclicReferences'
      - 'Classes/DependantAbstractClass'
      - 'Classes/DifferentArgumentCounts'
      - 'Classes/DisconnectedClasses'
+     - 'Classes/FinalByOcramius'
      - 'Classes/FinalPrivate'
      - 'Classes/Finalclass'
      - 'Classes/Finalmethod'
@@ -5663,6 +5661,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Classes/NoPSSOutsideClass";
    analyzer[] = "Classes/NoSelfReferencingConstant";
    analyzer[] = "Classes/RaisedAccessLevel";
+   analyzer[] = "Classes/ThisIsForClasses";
    analyzer[] = "Classes/UsingThisOutsideAClass";
    analyzer[] = "Classes/WrongTypedPropertyInit";
    analyzer[] = "Exceptions/CantThrow";
@@ -5677,6 +5676,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Interfaces/ConcreteVisibility";
    analyzer[] = "Interfaces/IsNotImplemented";
    analyzer[] = "Interfaces/RepeatedInterface";
+   analyzer[] = "Interfaces/UndefinedInterfaces";
    analyzer[] = "Php/FalseToArray";
    analyzer[] = "Php/JsonSerializeReturnType";
    analyzer[] = "Php/OnlyVariableForReference";
@@ -5712,6 +5712,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Classes/NoPSSOutsideClass'
      - 'Classes/NoSelfReferencingConstant'
      - 'Classes/RaisedAccessLevel'
+     - 'Classes/ThisIsForClasses'
      - 'Classes/UsingThisOutsideAClass'
      - 'Classes/WrongTypedPropertyInit'
      - 'Exceptions/CantThrow'
@@ -5726,6 +5727,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Interfaces/ConcreteVisibility'
      - 'Interfaces/IsNotImplemented'
      - 'Interfaces/RepeatedInterface'
+     - 'Interfaces/UndefinedInterfaces'
      - 'Php/FalseToArray'
      - 'Php/JsonSerializeReturnType'
      - 'Php/OnlyVariableForReference'
@@ -6210,6 +6212,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
 
  [Semantics]
    analyzer[] = "Arrays/WeirdIndex";
+   analyzer[] = "Constants/ConstantStrangeNames";
    analyzer[] = "Functions/FnArgumentVariableConfusion";
    analyzer[] = "Functions/MismatchParameterAndType";
    analyzer[] = "Functions/OneLetterFunctions";
@@ -6218,9 +6221,11 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Functions/SemanticTyping";
    analyzer[] = "Functions/WrongTypehintedName";
    analyzer[] = "Php/ClassFunctionConfusion";
+   analyzer[] = "Php/ReservedNames";
    analyzer[] = "Structures/PropertyVariableConfusion";
    analyzer[] = "Type/DuplicateLiteral";
    analyzer[] = "Type/SimilarIntegers";
+   analyzer[] = "Variables/StrangeName";
    analyzer[] = "Variables/VariableOneLetter";
 
 
@@ -6236,6 +6241,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
   rulesets:
     'Semantics':
      - 'Arrays/WeirdIndex'
+     - 'Constants/ConstantStrangeNames'
      - 'Functions/FnArgumentVariableConfusion'
      - 'Functions/MismatchParameterAndType'
      - 'Functions/OneLetterFunctions'
@@ -6244,9 +6250,11 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Functions/SemanticTyping'
      - 'Functions/WrongTypehintedName'
      - 'Php/ClassFunctionConfusion'
+     - 'Php/ReservedNames'
      - 'Structures/PropertyVariableConfusion'
      - 'Type/DuplicateLiteral'
      - 'Type/SimilarIntegers'
+     - 'Variables/StrangeName'
      - 'Variables/VariableOneLetter'
 
 
@@ -6705,6 +6713,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Attributes/MissingAttributeAttribute";
    analyzer[] = "Attributes/ModifyImmutable";
    analyzer[] = "Attributes/NestedAttributes";
+   analyzer[] = "Classes/AbstractConstants";
    analyzer[] = "Classes/AbstractOrImplements";
    analyzer[] = "Classes/AbstractStatic";
    analyzer[] = "Classes/Abstractclass";
@@ -7369,6 +7378,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Patterns/CourrierAntiPattern";
    analyzer[] = "Patterns/DependencyInjection";
    analyzer[] = "Patterns/Factory";
+   analyzer[] = "Patterns/GetterSetter";
    analyzer[] = "Performances/ArrayKeyExistsSpeedup";
    analyzer[] = "Performances/ArrayMergeInLoops";
    analyzer[] = "Performances/Autoappend";
@@ -7723,6 +7733,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Structures/CastingTernary";
    analyzer[] = "Structures/CatchShadowsVariable";
    analyzer[] = "Structures/CheckAllTypes";
+   analyzer[] = "Structures/CheckDivision";
    analyzer[] = "Structures/CheckJson";
    analyzer[] = "Structures/CoalesceAndConcat";
    analyzer[] = "Structures/CommonAlternatives";
@@ -8072,6 +8083,7 @@ INI configuration for built-in rulesets. Copy them in config/rulesets.ini, and e
    analyzer[] = "Variables/Php5IndirectExpression";
    analyzer[] = "Variables/Php7IndirectExpression";
    analyzer[] = "Variables/RealVariables";
+   analyzer[] = "Variables/RecycledVariables";
    analyzer[] = "Variables/References";
    analyzer[] = "Variables/SelfTransform";
    analyzer[] = "Variables/StaticVariables";
@@ -8142,6 +8154,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Attributes/MissingAttributeAttribute'
      - 'Attributes/ModifyImmutable'
      - 'Attributes/NestedAttributes'
+     - 'Classes/AbstractConstants'
      - 'Classes/AbstractOrImplements'
      - 'Classes/AbstractStatic'
      - 'Classes/Abstractclass'
@@ -8806,6 +8819,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Patterns/CourrierAntiPattern'
      - 'Patterns/DependencyInjection'
      - 'Patterns/Factory'
+     - 'Patterns/GetterSetter'
      - 'Performances/ArrayKeyExistsSpeedup'
      - 'Performances/ArrayMergeInLoops'
      - 'Performances/Autoappend'
@@ -9160,6 +9174,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Structures/CastingTernary'
      - 'Structures/CatchShadowsVariable'
      - 'Structures/CheckAllTypes'
+     - 'Structures/CheckDivision'
      - 'Structures/CheckJson'
      - 'Structures/CoalesceAndConcat'
      - 'Structures/CommonAlternatives'
@@ -9509,6 +9524,7 @@ YAML configuration for built-in rulesets. Copy them in your code, with the name 
      - 'Variables/Php5IndirectExpression'
      - 'Variables/Php7IndirectExpression'
      - 'Variables/RealVariables'
+     - 'Variables/RecycledVariables'
      - 'Variables/References'
      - 'Variables/SelfTransform'
      - 'Variables/StaticVariables'

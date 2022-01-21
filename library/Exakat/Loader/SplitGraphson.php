@@ -475,9 +475,16 @@ GREMLIN;
         if (isset($object->properties['noDelimiter']) && !mb_check_encoding((string) $object->properties['noDelimiter'][0]->value, 'UTF-8')) {
             $object->properties['noDelimiter'][0]->value = utf8_encode($object->properties['noDelimiter'][0]->value);
         }
+        if (isset($object->properties['delimiter']) && !mb_check_encoding((string) $object->properties['delimiter'][0]->value, 'UTF-8')) {
+            $object->properties['delimiter'][0]->value = utf8_encode($object->properties['delimiter'][0]->value);
+        }
         if (isset($object->properties['globalvar']) && !mb_check_encoding((string) $object->properties['globalvar'][0]->value, 'UTF-8')) {
             $object->properties['globalvar'][0]->value = utf8_encode($object->properties['globalvar'][0]->value);
         }
+        if (isset($object->properties['ws']) && !mb_check_encoding((string) $object->properties['ws'][0]->value, 'UTF-8')) {
+            $object->properties['ws'][0]->value = utf8_encode($object->properties['ws'][0]->value);
+        }
+
         return json_encode($object);
     }
 

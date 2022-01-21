@@ -6,7 +6,46 @@ Release Note
 
 Here is the release note of exakat. 
 
-**Version 2.3.3 (Wei Zheng, 2021-12-16)**
+**Version 2.3.4 (Yuchi Gong, 2022-01-19)**
+
+
++ Cobbler
+    + New cobbler : remove unused use expression
+    + Added 4 directives to each rules : namespaces, ignore_dirs, include_dirs and file_extensions. They filter out some of the results.
+
++ Report
+    + Composer : upgrade the list of core PHP extensions
+
++ Analysis
+    + New analysis : Mark simple getters/setters in classes
+    + New analysis : Report unchecked divisions (int and operators)
+    + New analysis : report possible abstract constants in classes (which should be defined in a parent)
+    + New analysis : report recycled variables
+    + Refactored analysis : Upgraded 'Object references' with union and intersectional types
+    + Refactored analysis : Removed edges cases in 'Don't collect void'
+    + Refactored analysis : Extension detection now takes into account enums 
+    + Refactored analysis : Upgraded AlwaysFalse with better typehinting inference
+    + Refactored analysis : indentation levels missed several results while reporting
+    + Refactored analysis : interfaces, traits and constants were missing for use expression resolution
+    + Refactored analysis : Undefined Interfaces now exclude better PHP or ext's interfaces
+    + Refactored analysis : Never Used Parameter confused Void and first argument
+    + Refactored analysis : Self were reported as outside a class when in foreach()
+    + Refactored analysis : Clone with non-arrays now checks PHP native functions too
+    + Refactored analysis : Excluded powers from calculations in IsZero
+    + Refactored analysis : Fixed discrepancy between ' and " handling of \
+    + Extended tests : match without default
+
++ Tokenizer
+    + Fixed a bug where static keyword is processed as a simple nsname
+    + Fixed a bug where typehints were not marked as isPhp, isExt or isStub
+    + Fixed an edge case with array functions inside match() syntax
+    + Fixed an edge case with Closures and reference-use variable
+    + Fixed an edge case with static inside ternary
+    + Fixed yield expression scope
+    + Added Table for PHP 8.2 compilations checks
+    + Removed extra void with use expression for traits
+
+**Version 2.3.3 (Xu Maogong, 2022-01-05)**
 
 
 + Cobbler

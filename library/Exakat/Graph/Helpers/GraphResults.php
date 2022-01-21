@@ -151,7 +151,8 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         return isset($this->data[$offset]);
     }
 
-    public function offsetGet($offset): mixed {
+    #[\ReturnTypeWillChange]
+    public function offsetGet($offset) {
         return $this->data[$offset];
     }
 
@@ -171,11 +172,13 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         }
     }
 
-    public function current(): mixed {
+    #[\ReturnTypeWillChange]
+    public function current() {
         return current($this->data);
     }
 
-    public function key(): mixed {
+    #[\ReturnTypeWillChange]
+    public function key() {
         if ($this->type === self::ARRAY) {
             return key($this->data);
         }

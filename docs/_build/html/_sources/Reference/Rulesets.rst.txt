@@ -6,7 +6,7 @@ Rulesets
 Introduction
 ------------------------
 
-Exakat provides unique 1428 rules to detect BUGS, CODE SMELLS, SECURITY OR QUALITY ISSUES in your PHP code.
+Exakat provides unique 1432 rules to detect BUGS, CODE SMELLS, SECURITY OR QUALITY ISSUES in your PHP code.
 
 For more smoothly usage, the ruleset concept allow you to run a set of rules based on a decidated focus. Beawre that a Ruleset run all the associated rules and any needed dependencies.
 
@@ -112,7 +112,7 @@ Analyze
 
 This ruleset centralizes a large number of classic trap and pitfalls when writing PHP.
 
-Total : 437 analysis
+Total : 433 analysis
 
 * :ref:`adding-zero`
 * :ref:`ambiguous-array-index`
@@ -122,7 +122,6 @@ Total : 437 analysis
 * :ref:`non-static-methods-called-in-a-static`
 * :ref:`old-style-constructor`
 * :ref:`static-methods-called-from-object`
-* :ref:`constants-with-strange-names`
 * :ref:`empty-function`
 * :ref:`redeclared-php-functions`
 * :ref:`methods-without-return`
@@ -207,7 +206,6 @@ Total : 437 analysis
 * :ref:`lone-blocks`
 * :ref:`$this-is-not-for-static-methods`
 * :ref:`global-usage`
-* :ref:`php-keywords-as-names`
 * :ref:`logical-should-use-symbolic-operators`
 * :ref:`could-use-self`
 * :ref:`catch-overwrite-variable`
@@ -341,7 +339,6 @@ Total : 437 analysis
 * :ref:`avoid-using-stdclass`
 * :ref:`too-many-local-variables`
 * :ref:`illegal-name-for-method`
-* :ref:`class-should-be-final-by-ocramius`
 * :ref:`long-arguments`
 * :ref:`assigned-twice`
 * :ref:`no-boolean-as-default`
@@ -352,7 +349,6 @@ Total : 437 analysis
 * :ref:`used-once-property`
 * :ref:`property-used-in-one-method-only`
 * :ref:`no-need-for-else`
-* :ref:`strange-name-for-variables`
 * :ref:`strange-name-for-constants`
 * :ref:`too-many-finds`
 * :ref:`should-use-setcookie()`
@@ -399,7 +395,7 @@ Total : 437 analysis
 * :ref:`invalid-regex`
 * :ref:`use-named-boolean-in-argument-definition`
 * :ref:`same-variable-foreach`
-* :ref:`never-used-parameter`
+* :ref:`never-called-parameter`
 * :ref:`identical-on-both-sides`
 * :ref:`identical-consecutive-expression`
 * :ref:`no-reference-for-ternary`
@@ -524,7 +520,6 @@ Total : 437 analysis
 * :ref:`modified-typed-parameter`
 * :ref:`assumptions`
 * :ref:`unsupported-types-with-operators`
-* :ref:`could-be-stringable`
 * :ref:`wrong-attribute-configuration`
 * :ref:`cancelled-parameter`
 * :ref:`constant-typo-looks-like-a-variable`
@@ -550,7 +545,8 @@ Total : 437 analysis
 * :ref:`float-conversion-as-index`
 * :ref:`cannot-call-trait-method-directly`
 * :ref:`overwritten-foreach-var`
-* :ref:`variable-is-a-local-constant`
+* :ref:`recycled-variables`
+* :ref:`check-division-by-zero`
 
 
 
@@ -1879,7 +1875,7 @@ ClassReview
 
 This ruleset focuses on classes construction issues, and their related structures : traits, interfaces, methods, properties, constants.
 
-Total : 56 analysis
+Total : 59 analysis
 
 * :ref:`final-class-usage`
 * :ref:`final-methods-usage`
@@ -1892,6 +1888,7 @@ Total : 56 analysis
 * :ref:`could-be-static`
 * :ref:`no-self-referencing-constant`
 * :ref:`property-could-be-private-property`
+* :ref:`class-should-be-final-by-ocramius`
 * :ref:`could-be-protected-property`
 * :ref:`raised-access-level`
 * :ref:`could-be-private-class-constant`
@@ -1933,10 +1930,12 @@ Total : 56 analysis
 * :ref:`cancel-common-method`
 * :ref:`modified-typed-parameter`
 * :ref:`useless-typehint`
+* :ref:`could-be-stringable`
 * :ref:`final-private-methods`
 * :ref:`missing-\_\_isset()-method`
 * :ref:`no-static-variable-in-a-method`
 * :ref:`inherited-property-type-must-match`
+* :ref:`abstract-class-constants`
 
 
 
@@ -3048,12 +3047,14 @@ LintButWontExec
 
 This ruleset focuses on PHP code that lint (php -l), but that will not run. As such, this ruleset tries to go further than PHP, by connecting files, just like during execution.
 
-Total : 36 analysis
+Total : 38 analysis
 
 * :ref:`final-class-usage`
 * :ref:`final-methods-usage`
+* :ref:`$this-belongs-to-classes-or-traits`
 * :ref:`classes-mutually-extending-each-other`
 * :ref:`must-return-methods`
+* :ref:`undefined-interfaces`
 * :ref:`concrete-visibility`
 * :ref:`no-self-referencing-constant`
 * :ref:`using-$this-outside-a-class`
@@ -3274,7 +3275,7 @@ Total : 14 analysis
 * :ref:`could-use-short-assignation`
 * :ref:`should-typecast`
 * :ref:`no-choice`
-* :ref:`never-used-parameter`
+* :ref:`never-called-parameter`
 * :ref:`closure-could-be-a-callback`
 * :ref:`is\_a()-with-string`
 
@@ -3365,12 +3366,15 @@ Semantics
 
 This ruleset focuses on human interpretation of the code. It reviews special values of literals, and named structures.
 
-Total : 13 analysis
+Total : 16 analysis
 
+* :ref:`constants-with-strange-names`
 * :ref:`variables-with-one-letter-names`
 * :ref:`one-letter-functions`
 * :ref:`property-variable-confusion`
+* :ref:`php-keywords-as-names`
 * :ref:`class-function-confusion`
+* :ref:`strange-name-for-variables`
 * :ref:`similar-integers`
 * :ref:`duplicate-literal`
 * :ref:`parameter-hiding`
@@ -3439,7 +3443,7 @@ Total : 102 analysis
 * :ref:`use-list-with-foreach`
 * :ref:`slice-arrays-first`
 * :ref:`parent-first`
-* :ref:`never-used-parameter`
+* :ref:`never-called-parameter`
 * :ref:`should-use-array\_filter()`
 * :ref:`reuse-variable`
 * :ref:`should-use-math`
@@ -3619,7 +3623,7 @@ All
 
 All is a dummy ruleset, which includes all the rules. It is mostly used internally.
 
-Total : 1416 analysis
+Total : 1420 analysis
 
 * :ref:`adding-zero`
 * :ref:`ambiguous-array-index`
@@ -4516,7 +4520,7 @@ Total : 1416 analysis
 * :ref:`assigned-in-one-branch`
 * :ref:`use-named-boolean-in-argument-definition`
 * :ref:`same-variable-foreach`
-* :ref:`never-used-parameter`
+* :ref:`never-called-parameter`
 * :ref:`ext-igbinary`
 * :ref:`should-use-array\_filter()`
 * :ref:`not-a-scalar-type`
@@ -5037,6 +5041,10 @@ Total : 1416 analysis
 * :ref:`variable-is-a-local-constant`
 * :ref:`classes-couldbeiterable`
 * :ref:`intersection-typehint`
+* :ref:`abstract-class-constants`
+* :ref:`recycled-variables`
+* :ref:`check-division-by-zero`
+* :ref:`getter-and-setter`
 
 
 

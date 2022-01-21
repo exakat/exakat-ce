@@ -28,7 +28,7 @@ class IsRead extends Plugin {
     private $variables = array('Variable', 'Variableobject', 'Variablearray',
                                'Member', 'Staticproperty',
                                'Phpvariable', 'This',
-                               'Array', );
+                               'Array', 'Parameter', );
 
     public function run(Atom $atom, array $extras): void {
         switch ($atom->atom) {
@@ -294,12 +294,11 @@ class IsRead extends Plugin {
                 break;
 
             case 'Closure' :
-                if (isset($extras['RETURNTYPE'])) {
-                    return;
-                }
-                foreach($extras as $extra) {
-                    if (in_array($extra->atom, $this->variables, STRICT_COMPARISON)) {
-                        $extra->isRead = true;
+                if (isset($extras['USE'])) {
+                    foreach($extras['USE'] as $extra) {
+                        if (in_array($extra->atom, $this->variables, STRICT_COMPARISON)) {
+                            $extra->isRead = true;
+                        }
                     }
                 }
                 break;
