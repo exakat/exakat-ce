@@ -28,7 +28,7 @@ use Exakat\Analyzer\Analyzer;
 class StrposCompare extends Analyzer {
     public function analyze(): void {
         $operator = $this->loadIni('php_may_return_boolean_or_zero.ini', 'functions');
-        $fullnspaths = makeFullnspath($operator);
+        $fullnspaths = makeFullNsPath($operator);
 
         // if (.. == strpos(..)) {}
         $this->atomFunctionIs($fullnspaths)

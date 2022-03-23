@@ -26,6 +26,8 @@ namespace Exakat\Query\DSL;
 use Exakat\Analyzer\Analyzer;
 
 class GoToAllParentsTraits extends DSL {
+    public const MAX_LOOPING = 6;
+
     public function run(): Command {
         if (func_num_args() === 1) {
             list($self) = func_get_args();
@@ -33,7 +35,7 @@ class GoToAllParentsTraits extends DSL {
             $self = Analyzer::EXCLUDE_SELF;
         }
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
+        $MAX_LOOPING = self::MAX_LOOPING;
         if ($self === Analyzer::EXCLUDE_SELF) {
             $command = new Command(<<<GREMLIN
 as("gotoallparentstraits").repeat( 
@@ -44,6 +46,7 @@ as("gotoallparentstraits").repeat(
 )
 .emit( )
 .times($MAX_LOOPING)
+.dedup()
 .hasLabel("Class", "Classanonymous", "Trait")
 GREMLIN
 );

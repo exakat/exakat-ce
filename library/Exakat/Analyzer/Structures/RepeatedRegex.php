@@ -26,25 +26,33 @@ use Exakat\Analyzer\Analyzer;
 
 class RepeatedRegex extends Analyzer {
     public function analyze(): void {
-        // pcre_last_error is too much here
-        $functions = $this->loadIni('pcre.ini', 'functions');
-        $functionsList = '"\\\\' . implode('", "\\\\', $functions) . '"';
+        $functionsList = array('\preg_match',
+                               '\preg_filter',
+                               '\preg_grep',
+                               '\preg_replace',
+                               '\preg_match_all',
+                               '\preg_split',
+                               '\preg_replace_callback_array',
+                               '\preg_replace_callback',
+                              );
 
-        $repeatedRegex = $this->query(<<<GREMLIN
-g.V().hasLabel("Functioncall").has("fullnspath", within($functionsList))
-     .out("ARGUMENT")
-     .hasLabel("String").not(where(__.out("CONCAT")))
-     .groupCount("m").by("code").cap("m").next().findAll{ a,b -> b > 1}.keySet()
+        $this->atomFunctionIs($functionsList)
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs('String')
+             ->hasNoOut('CONCAT')
+             ->raw(<<<'GREMLIN'
+groupCount("m").by("code").cap("m").next().findAll{ a,b -> b > 1}.keySet()
 GREMLIN
-)->toArray();
+);
+        $repeatedRegex = $this->rawQuery()->toArray();
 
         if (empty($repeatedRegex)) {
             return;
         }
 
         // regex
-        $this->atomFunctionIs(array('\\preg_match'))
-             ->outIs('ARGUMENT')
+        $this->atomFunctionIs($functionsList)
+             ->outWithRank('ARGUMENT', 0)
              ->atomIs('String')
              ->hasNoOut('CONCAT')
              ->codeIs($repeatedRegex, self::NO_TRANSLATE)

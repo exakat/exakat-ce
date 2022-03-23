@@ -56,17 +56,17 @@ class InterfaceUsage extends Analyzer {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
              ->outIs('TYPEHINT')
+             ->has('line')
              ->atomIs(self::STATIC_NAMES)
              ->tokenIsNot(array('T_ARRAY', 'T_CALLABLE'))
-             ->codeIsNot(array('bool', 'int', 'float', 'string', 'array', 'object', 'callable', 'iterable', 'resource'), self::TRANSLATE, self::CASE_INSENSITIVE)
              ->fullnspathIs($interfaces);
         $this->prepareQuery();
 
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
+             ->has('line')
              ->atomIs(self::STATIC_NAMES)
              ->tokenIsNot(array('T_ARRAY', 'T_CALLABLE'))
-             ->codeIsNot(array('bool', 'int', 'float', 'string', 'array', 'object', 'callable', 'iterable', 'resource'), self::TRANSLATE, self::CASE_INSENSITIVE)
              ->fullnspathIs($interfaces);
         $this->prepareQuery();
 

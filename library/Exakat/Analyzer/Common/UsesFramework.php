@@ -25,13 +25,50 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class UsesFramework extends Analyzer {
+    protected $constants  = array();
+    protected $functions  = array();
     protected $classes    = array();
     protected $interfaces = array();
     protected $traits     = array();
     protected $namespaces = array();
+    protected $enums      = array();
 
     public function analyze(): void {
         $analyzerId = null;
+
+        if (!empty($this->constants[0])) {
+            $constants    = makeFullNsPath($this->constants, \FNP_CONSTANT);
+
+            if (!empty($constants)) {
+                $constantUsage = new ConstantUsage();
+                $constantUsage->setAnalyzer(get_class($this));
+                $constantUsage->setConstants($constants);
+                $analyzerId = $constantUsage->init($analyzerId);
+                $constantUsage->run();
+
+                $this->rowCount        += $constantUsage->getRowCount();
+                $this->processedCount  += $constantUsage->getProcessedCount();
+                $this->queryCount      += $constantUsage->getQueryCount();
+                $this->rawQueryCount   += $constantUsage->getRawQueryCount();
+            }
+        }
+
+        if (!empty($this->functions[0])) {
+            $functions    = makeFullNsPath($this->functions);
+
+            if (!empty($functions)) {
+                $functionsUsage = new FunctionUsage();
+                $functionsUsage->setAnalyzer(get_class($this));
+                $functionsUsage->setFunctions($functions);
+                $analyzerId = $functionsUsage->init($analyzerId);
+                $functionsUsage->run();
+
+                $this->rowCount        += $functionsUsage->getRowCount();
+                $this->processedCount  += $functionsUsage->getProcessedCount();
+                $this->queryCount      += $functionsUsage->getQueryCount();
+                $this->rawQueryCount   += $functionsUsage->getRawQueryCount();
+            }
+        }
 
         if (!empty($this->classes[0])) {
             $classes    = makeFullNsPath($this->classes);
@@ -98,6 +135,23 @@ class UsesFramework extends Analyzer {
                 $this->processedCount  += $namespacesUsage->getProcessedCount();
                 $this->queryCount      += $namespacesUsage->getQueryCount();
                 $this->rawQueryCount   += $namespacesUsage->getRawQueryCount();
+            }
+        }
+
+        if (!empty($this->enums[0])) {
+            $enums     = makeFullNsPath($this->enums);
+
+            if (!empty($enums)) {
+                $enumUsage = new EnumUsage();
+                $enumUsage->setAnalyzer(get_class($this));
+                $enumUsage->setEnums($enums);
+                $analyzerId = $enumUsage->init($analyzerId);
+                $enumUsage->run();
+
+                $this->rowCount        += $enumUsage->getRowCount();
+                $this->processedCount  += $enumUsage->getProcessedCount();
+                $this->queryCount      += $enumUsage->getQueryCount();
+                $this->rawQueryCount   += $enumUsage->getRawQueryCount();
             }
         }
     }

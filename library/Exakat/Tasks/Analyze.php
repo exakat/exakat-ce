@@ -24,6 +24,7 @@ namespace Exakat\Tasks;
 
 use Exakat\Analyzer\Analyzer;
 use Exakat\Tasks\Helpers\Lock;
+use Exakat\Helpers\Timer;
 use Exakat\Exceptions\NeedsAnalyzerThema;
 use Exakat\Exceptions\NoSuchAnalyzer;
 use Exakat\Exceptions\NoSuchProject;
@@ -203,7 +204,7 @@ class Analyze extends Tasks {
     }
 
     private function analyze(Analyzer $analyzer, string $analyzerClass): int {
-        $begin = microtime(true);
+        $timer = new Timer();
 
         $lock = new Lock($this->config->tmp_dir, $analyzerClass);
         if (!$lock->check()) {
@@ -244,26 +245,26 @@ class Analyze extends Tasks {
             try {
                 $analyzer->run();
             } catch(DSLException $e) {
-                $end = microtime(true);
+                $timer->end();
                 display( "$analyzerClass : DSL building exception\n");
                 display($e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
-                $this->log->log("$analyzerClass\t" . ($end - $begin) . "\terror : " . $e->getMessage());
+                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\terror : " . $e->getMessage());
                 $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
                 $this->checkAnalyzed();
 
             } catch(QueryException $e) {
-                $end = microtime(true);
+                $timer->end();
                 display("$analyzerClass : Query running exception\n");
                 display($e->getMessage());
-                $this->log->log("$analyzerClass\t" . ($end - $begin) . "\terror : " . $e->getMessage());
+                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\terror : " . $e->getMessage());
                 $counts = $this->gremlin->query('g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer->getInBaseName() . '").property("count", __.out("ANALYZED").count()).values("count")')->toInt();
                 $this->datastore->addRow('analyzed', array($analyzerClass => $counts ) );
                 $this->checkAnalyzed();
 
             } catch(Exception $e) {
-                $end = microtime(true);
+                $timer->end();
                 display( "$analyzerClass : generic exception \n");
-                $this->log->log("$analyzerClass\t" . ($end - $begin) . "\texception : " . get_class($e) . "\terror : " . $e->getMessage());
+                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\texception : " . get_class($e) . "\terror : " . $e->getMessage());
                 if (strpos($e->getMessage(), 'The server exceeded one of the timeout settings ') === false) {
                     display($e->getMessage());
                     $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
@@ -282,8 +283,8 @@ class Analyze extends Tasks {
             $rawQueries    = $analyzer->getRawQueryCount();
 
             display( "$analyzerClass run ($total_results / $processed)\n");
-            $end = microtime(true);
-            $this->log->log("$analyzerClass\t" . ($end - $begin) . "\t$total_results\t$processed\t$queries\t$rawQueries");
+            $timer->end();
+            $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\t$total_results\t$processed\t$queries\t$rawQueries");
             // storing the number of row found in Hash table (datastore)
             $this->datastore->addRow('analyzed', array($analyzerClass => $total_results ) );
 

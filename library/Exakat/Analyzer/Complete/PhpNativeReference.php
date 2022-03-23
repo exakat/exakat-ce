@@ -29,7 +29,7 @@ class PhpNativeReference extends Complete {
 
         $references = array();
         foreach($functions as $function) {
-            array_collect_by($references, makeFullnspath($function['function']), $function['position']);
+            array_collect_by($references, makeFullNsPath($function['function']), $function['position']);
         }
 
         //sort($a);

@@ -66,6 +66,7 @@ class DSLFactory {
                                           'Analysis',
                                           'Noresult',
                                           'Void',
+                                          'Identifier',
                                           );
             $this->availableLinks = array('DEFINITION',
                                           'ANALYZED',

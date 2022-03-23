@@ -313,3 +313,6 @@ contravariant
 yii
 stdclass
 sanitization
+cryptographic
+readonly
+YAML

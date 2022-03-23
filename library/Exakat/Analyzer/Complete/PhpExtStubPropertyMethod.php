@@ -46,14 +46,14 @@ class PhpExtStubPropertyMethod extends Analyzer {
             if (!empty($ini['methods'][0])) {
                 foreach($ini['methods'] as $fullMethod) {
                     list($class, $method) = explode('::', $fullMethod, 2);
-                    array_collect_by($methods, mb_strtolower($method), makeFullnspath($class));
+                    array_collect_by($methods, mb_strtolower($method), makeFullNsPath($class));
                 }
             }
 
             if (!empty($ini['properties'][0])) {
                 foreach($ini['properties'] as $fullProperty) {
                     list($class, $property) = explode('::', $fullProperty, 2);
-                    array_collect_by($properties, ltrim($property, '$'), makeFullnspath($class));
+                    array_collect_by($properties, ltrim($property, '$'), makeFullNsPath($class));
                 }
             }
         }

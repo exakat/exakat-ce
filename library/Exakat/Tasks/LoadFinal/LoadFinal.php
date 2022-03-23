@@ -25,6 +25,7 @@ namespace Exakat\Tasks\LoadFinal;
 use Exakat\Query\Query;
 use Exakat\Exceptions\GremlinException;
 use Exakat\Log;
+use Exakat\Helpers\Timer;
 
 class LoadFinal {
     protected $gremlin    = null;
@@ -35,6 +36,7 @@ class LoadFinal {
     protected $PHPfunctions = array();
 
     protected $log        = null;
+    protected Timer $timer;
 
     public function __construct() {
         $this->gremlin    = exakat('graphdb');
@@ -44,6 +46,7 @@ class LoadFinal {
 
         $this->log = new Log(strtolower(substr(static::class, strrpos(self::class, '\\') + 1)),
                              "{$this->config->projects_root}/projects/{$this->config->project}");
+        $this->timer = new Timer();
     }
 
     protected function newQuery(string $title): Query {
@@ -103,7 +106,7 @@ GREMLIN;
     }
 
     private function logTime(string $step): void {
-        static $log, $begin, $end, $start;
+        static $log;
 
         if ($log === null) {
             $log = fopen("{$this->config->log_dir}/loadfinal.timing.csv", 'w+');
@@ -112,14 +115,10 @@ GREMLIN;
             }
         }
 
-        $end = microtime(true);
-        if ($begin === null) {
-            $begin = $end;
-            $start = $end;
-        }
+        $this->timer->end();
 
-        fwrite($log, $step . "\t" . ($end - $begin) . "\t" . ($end - $start) . "\n");
-        $begin = $end;
+        fwrite($log, $step . "\t" . $this->timer->duration() . "\n");
+        $this->timer = new Timer();
     }
 
     private function removeInterfaceToClassExtends(): void {

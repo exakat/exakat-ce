@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class TraitUsage extends Analyzer {
-    protected $traits = array();
+    protected array $traits = array();
 
     public function setTraits($traits) {
         $this->traits = $traits;

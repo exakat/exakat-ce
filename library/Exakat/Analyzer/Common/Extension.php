@@ -160,7 +160,6 @@ class Extension extends Analyzer {
             return ;
         }
 
-
         $this->processFunctions($functions);
         $this->processClasses($classes);
         $this->processConstants($constants);
@@ -199,111 +198,104 @@ class Extension extends Analyzer {
     }
 
     private function processClasses(array $classes): void {
-        if (empty($classes)) {
+        $usedClasses = array_values(array_intersect(self::getCalledClasses(), $classes));
+        if (empty($usedClasses)) {
             return;
         }
 
-        $usedClasses = array_values(array_intersect(self::getCalledClasses(), $classes));
-        if (!empty($usedClasses)) {
-            $this->atomIs('New')
-                 ->outIs('NEW')
-                 ->hasNoIn('DEFINITION')
-                 ->fullnspathIs($usedClasses);
-            $this->prepareQuery();
+        $this->atomIs('New')
+             ->outIs('NEW')
+             ->hasNoIn('DEFINITION')
+             ->fullnspathIs($usedClasses);
+        $this->prepareQuery();
 
-            $this->atomIs(array('Staticconstant', 'Staticmethodcall', 'Staticproperty'))
-                 ->outIs('CLASS')
-                 ->hasNoIn('DEFINITION')
-                 ->fullnspathIs($usedClasses);
-            $this->prepareQuery();
+        $this->atomIs(array('Staticconstant', 'Staticmethodcall', 'Staticproperty'))
+             ->outIs('CLASS')
+             ->hasNoIn('DEFINITION')
+             ->fullnspathIs($usedClasses);
+        $this->prepareQuery();
 
-            $this->atomIs(self::FUNCTIONS_ALL)
-                 ->outIs('ARGUMENT')
-                 ->outIs('TYPEHINT')
-                 ->hasNoIn('DEFINITION')
-                 ->fullnspathIs($usedClasses);
-            $this->prepareQuery();
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('ARGUMENT')
+             ->outIs('TYPEHINT')
+             ->has('line')
+             ->hasNoIn('DEFINITION')
+             ->fullnspathIs($usedClasses);
+        $this->prepareQuery();
 
-            $this->atomIs(self::FUNCTIONS_ALL)
-                 ->outIs('RETURNTYPE')
-                 ->fullnspathIs($usedClasses);
-            $this->prepareQuery();
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('RETURNTYPE')
+             ->has('line')
+             ->fullnspathIs($usedClasses);
+        $this->prepareQuery();
 
-            $this->atomIs('Catch')
-                 ->outIs('CLASS')
-                 ->hasNoIn('DEFINITION')
-                 ->fullnspathIs($usedClasses);
-            $this->prepareQuery();
+        $this->atomIs('Catch')
+             ->outIs('CLASS')
+             ->hasNoIn('DEFINITION')
+             ->fullnspathIs($usedClasses);
+        $this->prepareQuery();
 
-            $this->atomIs('Instanceof')
-                 ->outIs('CLASS')
-                 ->hasNoIn('DEFINITION')
-                 ->fullnspathIs($usedClasses);
-            $this->prepareQuery();
-        }
+        $this->atomIs('Instanceof')
+             ->outIs('CLASS')
+             ->hasNoIn('DEFINITION')
+             ->fullnspathIs($usedClasses);
+        $this->prepareQuery();
     }
 
     private function processInterfaces(array $interfaces): void {
-        if (empty($interfaces)) {
+        $usedInterfaces = array_values(array_intersect(self::getCalledinterfaces(), $interfaces));
+        if (empty($usedInterfaces)) {
             return;
         }
 
-        $usedInterfaces = array_values(array_intersect(self::getCalledinterfaces(), $interfaces));
         $this->analyzerIs('Interfaces/InterfaceUsage')
              ->fullnspathIs($usedInterfaces);
         $this->prepareQuery();
     }
 
     private function processEnums(array $enums): void {
-        if (empty($enums)) {
+        $usedEnums = array_values(array_intersect(self::getCalledEnums(), $enums));
+        if (empty($usedEnums)) {
             return;
         }
 
         $this->analyzerIs('Enums/EnumUsage')
-             ->fullnspathIs($enums);
+             ->fullnspathIs($usedEnums);
         $this->prepareQuery();
     }
 
     private function processTraits(array $traits): void {
-        if (empty($traits)) {
+        $usedTraits = array_values(array_intersect(self::getCalledTraits(), $traits));
+        if (empty($usedTraits)) {
             return;
         }
 
-        $usedTraits = array_values(array_intersect(self::getCalledTraits(), $traits));
         $this->analyzerIs('Traits/TraitUsage')
              ->fullnspathIs($usedTraits);
         $this->prepareQuery();
     }
 
     private function processNamespaces(array $namespaces): void {
-        if (empty($namespaces)) {
+        $usedNamespaces = array_values(array_intersect($this->getCalledNamespaces(), $namespaces));
+        if (empty($usedNamespaces)) {
             return;
         }
 
-        $usedNamespaces = array_intersect($this->getCalledNamespaces(), $namespaces);
-        if (!empty($usedNamespaces)) {
-            $usedNamespaces = array_values($usedNamespaces);
-            $this->analyzerIs('Namespaces/NamespaceUsage')
-                 ->fullnspathIs($usedNamespaces);
-            $this->prepareQuery();
-        }
+        $this->analyzerIs('Namespaces/NamespaceUsage')
+             ->fullnspathIs($usedNamespaces);
+        $this->prepareQuery();
     }
 
     private function processDirectives(array $directives): void {
-        if (empty($directives)) {
+        $usedDirectives = array_values(array_intersect(self::getCalledDirectives(), $directives));
+        if (empty($usedDirectives)) {
             return;
         }
 
-        $usedDirectives = array_intersect(self::getCalledDirectives(), $directives);
-
-        if (!empty($usedDirectives)) {
-            $usedDirectives = array_values($usedDirectives);
-
-            $this->analyzerIs('Php/DirectivesUsage')
-                 ->outWithRank('ARGUMENT', 0)
-                 ->noDelimiterIs($usedDirectives, self::CASE_SENSITIVE);
-            $this->prepareQuery();
-        }
+        $this->analyzerIs('Php/DirectivesUsage')
+             ->outWithRank('ARGUMENT', 0)
+             ->noDelimiterIs($usedDirectives, self::CASE_SENSITIVE);
+        $this->prepareQuery();
     }
 
     private function processClassConstants(array $classconstants): void {
@@ -314,7 +306,7 @@ class Extension extends Analyzer {
         $classesConstantsHash = array();
         foreach((array) $classconstants as $c) {
             list($class, $constant) = explode('::', $c, 2);
-            array_collect_by($classesConstantsHash, makefullnspath($class), $constant);
+            array_collect_by($classesConstantsHash, makeFullNsPath($class), $constant);
         }
 
         $this->atomIs('Staticconstant')
@@ -340,7 +332,7 @@ class Extension extends Analyzer {
         $propertiesHash = array();
         foreach(array_filter($properties) as $p) {
             list($class, $property) = explode('::', $p, 2);
-            array_collect_by($propertiesHash, makefullnspath($class), ltrim($property, '$'));
+            array_collect_by($propertiesHash, makeFullNsPath($class), ltrim($property, '$'));
         }
 
         $this->atomIs('Member')
@@ -370,7 +362,7 @@ class Extension extends Analyzer {
         $propertiesHash = array();
         foreach(array_filter($staticproperties) as $p) {
             list($class, $property) = explode('::', $p, 2);
-            array_collect_by($propertiesHash, makefullnspath($class), ltrim($property, '$'));
+            array_collect_by($propertiesHash, makeFullNsPath($class), ltrim($property, '$'));
         }
 
         $this->atomIs('Staticproperty')
@@ -395,7 +387,7 @@ class Extension extends Analyzer {
         $methodsHash = array();
         foreach(array_filter($methods) as $m) {
             list($class, $method) = explode('::', $m, 2);
-            array_collect_by($methodsHash, makefullnspath($class), mb_strtolower($method));
+            array_collect_by($methodsHash, makeFullNsPath($class), mb_strtolower($method));
         }
 
         $this->atomIs('Methodcall')
@@ -424,7 +416,7 @@ class Extension extends Analyzer {
         $staticmethodsHash = array();
         foreach(array_filter($staticmethods) as $m) {
             list($class, $method) = explode('::', $m, 2);
-            array_collect_by($staticmethodsHash, makefullnspath($class), mb_strtolower($method));
+            array_collect_by($staticmethodsHash, makeFullNsPath($class), mb_strtolower($method));
         }
 
         $this->atomIs('Staticmethodcall')
@@ -449,7 +441,7 @@ class Extension extends Analyzer {
         $enumCasesHash = array();
         foreach((array) $enumcases as $c) {
             list($class, $constant) = explode('::', $c, 2);
-            array_collect_by($enumCasesHash, makefullnspath($class), $constant);
+            array_collect_by($enumCasesHash, makeFullNsPath($class), $constant);
         }
 
         $this->atomIs('Staticconstant')

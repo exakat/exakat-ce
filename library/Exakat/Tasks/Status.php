@@ -37,19 +37,14 @@ class Status extends Tasks {
             $status = array();
 
             if (file_exists("{$this->config->tmp_dir}/Project.json")) {
-                if (file_exists("{$this->config->tmp_dir}/Project.json")) {
-                    $json = file_get_contents("{$this->config->tmp_dir}/Project.json");
-                    if (empty($json)) {
-                        $projectStatus = '';
-                        $projectStep = '';
-                    } else {
-                        $json = json_decode($json);
-                        $projectStatus = $json->project;
-                        $projectStep = $json->step;
-                    }
-                } else {
+                $json = file_get_contents("{$this->config->tmp_dir}/Project.json");
+                if (empty($json)) {
                     $projectStatus = '';
                     $projectStep = '';
+                } else {
+                    $json = json_decode($json);
+                    $projectStatus = $json->project;
+                    $projectStep = $json->step;
                 }
 
                 $status = array('Running'  => 'Project',

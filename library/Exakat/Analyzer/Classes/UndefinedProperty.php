@@ -31,6 +31,7 @@ class UndefinedProperty extends Analyzer {
                      'Classes/HasMagicProperty',
                      'Complete/SetClassRemoteDefinitionWithTypehint',
                      'Complete/SetClassRemoteDefinitionWithLocalNew',
+                     'Complete/SetClassPropertyDefinitionWithTypehint',
                      'Complete/VariableTypehint',
                      'Complete/IsPhpStructure',
                      'Complete/IsStubStructure',

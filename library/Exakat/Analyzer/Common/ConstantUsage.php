@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class ConstantUsage extends Analyzer {
-    protected $constants = array();
+    protected array $constants = array();
 
     public function analyze(): void {
         $constants =  makeFullNsPath($this->constants, \FNP_CONSTANT);
@@ -36,7 +36,7 @@ class ConstantUsage extends Analyzer {
         $this->prepareQuery();
     }
 
-    public function setConstants(array $constants) {
+    public function setConstants(array $constants): void {
         $this->constants = $constants;
     }
 }

@@ -31,6 +31,7 @@ use Exakat\Exceptions\NoDump;
 use Exakat\Exceptions\NoDumpYet;
 use Exakat\Reports\Reports as Reports;
 use Exakat\Tasks\Helpers\ReportConfig;
+use Exakat\Helpers\Timer;
 use Exakat\Dump\Dump;
 
 class Report extends Tasks {
@@ -100,7 +101,7 @@ class Report extends Tasks {
     }
 
     private function format(Reports $report, ReportConfig $reportConfig) {
-        $begin = microtime(true);
+        $timer = new Timer();
 
         if ($reportConfig->getFile() === Reports::STDOUT) {
             display("Building report for project {$this->config->project_name} to stdout, with report " . $reportConfig->getFormat() . "\n");
@@ -119,8 +120,10 @@ class Report extends Tasks {
         }
         display('Reported ' . $report->getCount() . ' messages in ' . $reportConfig->getFormat());
 
+        $timer->end();
+
         $end = microtime(true);
-        display('Processing time : ' . number_format($end - $begin, 2) . 's');
+        display('Processing time : ' . number_format($timer->duration(), 2) . 's');
 
         $this->datastore->addRow('hash', array($reportConfig->getFormat() => $reportConfig->getFile() ));
         display('Done');

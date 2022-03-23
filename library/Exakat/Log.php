@@ -22,10 +22,12 @@
 
 namespace Exakat;
 
+use Exakat\Helpers\Timer;
+
 class Log {
     private $name  = null;
     private $log   = null;
-    private $begin = 0;
+    private $timer = null;
     private $first = null;
 
     public function __construct(string $name = '', string $dir = '.') {
@@ -50,15 +52,17 @@ class Log {
             $this->log = null;
         }
 
-        $this->begin = microtime(true);
+        $this->timer = new Timer();
     }
 
     public function __destruct() {
         if ($this->log === null) {
             return;
         }
+        
+        $this->timer->end();
 
-        $this->log('Duration : ' . number_format(1000 * (microtime(true) - $this->begin), 2, '.', ''));
+        $this->log('Duration : ' . number_format($this->timer->duration(Timer::MS), 2));
         $this->log('Memory : ' . memory_get_usage(true));
         $this->log('Memory peak : ' . memory_get_peak_usage(true));
         $this->log("{$this->name} closed on " . date('r'));

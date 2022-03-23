@@ -389,7 +389,7 @@ class Phpexec {
             try {
                 $crc = random_int(0, PHP_INT_MAX);
             } catch (\Throwable $t) {
-                $crc = (int) microtime(true);
+                $crc = (int) microtime(\TIME_AS_NUMBER);
             }
 
             $php = <<<PHP

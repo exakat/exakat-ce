@@ -34,18 +34,21 @@ class ConstantUsage extends Analyzer {
     public function analyze(): void {
         // Nsname that is not used somewhere else
         $this->atomIs('Nsname')
+             ->has('line')
              ->hasNoIn(array('NEW', 'USE', 'NAME', 'EXTENDS', 'IMPLEMENTS', 'CLASS', 'CONST', 'TYPEHINT', 'RETURNTYPE',
                              'FUNCTION', 'GROUPUSE'));
         $this->prepareQuery();
 
         // Identifier that is not used somewhere else
         $this->atomIs('Identifier')
+             ->has('line')
              ->hasNoIn(array('NEW', 'USE', 'NAME', 'CONSTANT', 'MEMBER', 'TYPEHINT', 'INSTEADOF', 'METHOD', 'TYPEHINT', 'RETURNTYPE',
                              'CLASS', 'EXTENDS', 'IMPLEMENTS', 'CLASS', 'AS', 'VARIABLE', 'FUNCTION', 'CONST', 'GROUPUSE'));
         $this->prepareQuery();
 
         // special case for Boolean and Null
-        $this->atomIs(array('Boolean', 'Null'));
+        $this->atomIs(array('Boolean', 'Null'))
+                     ->has('line');
         $this->prepareQuery();
 
         // defined('constant') : then the string is a constant

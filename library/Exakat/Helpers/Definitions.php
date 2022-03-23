@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -37,13 +37,10 @@ class Definitions {
     public const PROPERTIES        = 'properties';
     public const METHODS           = 'methods';
 
-    private $path    = '';
     private $ini     = array();
     private $isValid = true;
 
     public function __construct(Config $config, string $path) {
-        $this->path = $path;
-
         if (file_exists($config->dir_root . '/data/' . $path . '.ini')) {
             $ini = parse_ini_file($config->dir_root . '/data/' . $path . '.ini');
 
@@ -59,7 +56,7 @@ class Definitions {
             }
             $this->ini = $ini;
         } else {
-            print "No such definitions for '$path'\n";
+            display( "No such definitions for '$path'\n");
             $this->isValid = false;
         }
     }

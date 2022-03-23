@@ -67,6 +67,9 @@ class Constant extends Plugin {
             case 'Identifier' :
             case 'Staticclass' :
             case 'Name' :
+            case 'Self' :
+            case 'Static' :
+            case 'Parent' :
                 $atom->constant = true;
                 break;
 

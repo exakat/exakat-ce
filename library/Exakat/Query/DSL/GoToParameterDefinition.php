@@ -30,15 +30,16 @@ has("rank")
 .choose(
     has("rankName"), 
 
+        // use named parameter to find definition
         __.sideEffect{ranked = it.get().value("rankName");}
-        .repeat( __.in() ).until(hasLabel("Functioncall", "Newcall", "Methodcall", "Staticmethodcall"))
+        .in('ARGUMENT').optional(__.in("METHOD")).hasLabel("Functioncall", "Newcall", "Methodcall", "Staticmethodcall")
         .in("DEFINITION")
         .out("ARGUMENT")
         .where(__.out("NAME").filter{ it.get().value("fullcode") == ranked; }),
 
         // default behavior, rank + variadic
         __.sideEffect{ranked = it.get().value("rank");}
-                     .repeat( __.in() ).until(hasLabel("Functioncall", "Newcall", "Methodcall", "Staticmethodcall"))
+                     .in('ARGUMENT').optional(__.in("METHOD")).hasLabel("Functioncall", "Newcall", "Methodcall", "Staticmethodcall")
                      .in("DEFINITION")
                      .out("ARGUMENT")
                      .filter{ (it.get().value("rank") == ranked) || ("variadic" in it.get().keys() && it.get().value("rank") <= ranked); }

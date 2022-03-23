@@ -27,7 +27,11 @@ use Exakat\Analyzer\Analyzer;
 
 class DefinedProperty extends Analyzer {
     public function dependsOn(): array {
-        return array('Complete/OverwrittenProperties',
+        return array('Complete/VariableTypehint',
+                     'Complete/IsStubStructure',
+                     'Complete/IsExtStructure',
+                     'Complete/IsPhpStructure',
+                     'Complete/OverwrittenProperties',
                     );
     }
 
@@ -38,6 +42,11 @@ class DefinedProperty extends Analyzer {
              ->inIs('DEFINITION')
              ->atomIs('Propertydefinition')
              ->back('first');
+        $this->prepareQuery();
+
+        // defined in local class (private included)
+        $this->atomIs(array('Member', 'Staticproperty'))
+             ->isAnyOf(array('isPhp', 'isExt', 'isStub'), true);
         $this->prepareQuery();
 
         // defined in parent class

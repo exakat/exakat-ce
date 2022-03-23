@@ -26,16 +26,38 @@ use Exakat\Analyzer\Analyzer;
 
 class NextMonthTrap extends Analyzer {
     public function analyze(): void {
+        // strtotime('+ 1 month')
         $this->atomFunctionIs('\strtotime')
              ->outWithRank('ARGUMENT', 0)
-             ->atomIs('String')
-             ->regexIs('fullcode', '(\\\\+|-|\\\\\$)[0-9a-zA-Z_]+ month')
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->regexIs('fullcode', '(\\\\+|-|\\\\\$)[0-9a-zA-Z_ ]+month')
              ->back('first');
         $this->prepareQuery();
 
+        // strtotime('+ 1 month')
         $this->atomFunctionIs('\strtotime')
              ->outWithRank('ARGUMENT', 0)
-             ->atomIs('String')
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->regexIs('noDelimiter', '(?i)(?<!of )next month')
+             ->back('first');
+        $this->prepareQuery();
+
+        // new Datetime('+ 1 month')
+        $this->atomIs('New')
+             ->outIs('NEW')
+             ->fullnspathIs(array('\\datetime', '\\datetimeimmutable'))
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->regexIs('fullcode', '(\\\\+|-|\\\\\$)[0-9a-zA-Z_ ]+month')
+             ->back('first');
+        $this->prepareQuery();
+
+        // strtotime('+ 1 month')
+        $this->atomIs('New')
+             ->outIs('NEW')
+             ->fullnspathIs(array('\\datetime', '\\datetimeimmutable'))
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
              ->regexIs('noDelimiter', '(?i)(?<!of )next month')
              ->back('first');
         $this->prepareQuery();
