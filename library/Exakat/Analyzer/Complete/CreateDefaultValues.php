@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -29,8 +29,8 @@ class CreateDefaultValues extends Complete {
         return array( 'Complete/OverwrittenProperties',
                     );
     }
-    public function analyze(): void {
 
+    public function analyze(): void {
         // Link initial values for containers
         $this->atomIs(array('Variabledefinition',
                             'Virtualproperty',
@@ -133,6 +133,16 @@ class CreateDefaultValues extends Complete {
              ->atomIsNot('Void')
              ->addEFrom('DEFAULT', 'first');
         $this->prepareQuery();
+
+        // for global values
+        $this->atomIs(array('Virtualglobal'), self::WITHOUT_CONSTANTS)
+             ->outIs('DEFINITION')
+             ->inIs('DEFINITION')
+             ->atomIs('Variabledefinition')
+             ->outIs('DEFAULT')
+             ->addEFrom('DEFAULT', 'first');
+        $this->prepareQuery();
+
     }
 }
 

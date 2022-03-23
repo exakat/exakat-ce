@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,7 +26,6 @@ use Exakat\Phpexec;
 use Exakat\Project;
 use Exakat\Config as Configuration;
 use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\Yaml\Exception\ParseException;
 
 class DotExakatYamlConfig extends Config {
     public const YAML_FILE = '.exakat.yml';
@@ -63,7 +62,7 @@ class DotExakatYamlConfig extends Config {
 
         try {
             $tmp_config = Yaml::parseFile($this->dotExakatYaml);
-        } catch (ParseException $exception) {
+        } catch (ParseError $exception) {
             print 'Error while parsing ' . basename($this->dotExakatYaml) . '. Configuration ignored.' . PHP_EOL;
 
             return self::NOT_LOADED;
@@ -97,7 +96,6 @@ class DotExakatYamlConfig extends Config {
 
         // check and default values
         $defaults = array( 'other_php_versions' => $other_php_versions,
-                           'phpversion'         => substr(PHP_VERSION, 0, 3),
                            'file_extensions'    => array('php', 'php3', 'inc', 'tpl', 'phtml', 'tmpl', 'phps', 'ctp', 'module'),
                            'project_rulesets'   => 'CompatibilityPHP53,CompatibilityPHP54,CompatibilityPHP55,CompatibilityPHP56,CompatibilityPHP70,CompatibilityPHP71,CompatibilityPHP72,CompatibilityPHP73,CompatibilityPHP74,Dead code,Security,Analyze,Preferences,Appinfo,Appcontent',
                            'project_reports'    => array('Text'),
@@ -214,6 +212,8 @@ class DotExakatYamlConfig extends Config {
             }
         }
 
+        $this->config['phpversion'] = substr(PHP_VERSION, 0, 3);
+
         if (!empty($tmp_config)) {
             display('Ignoring ' . count($tmp_config) . ' unkown directives : ' . implode(', ', array_keys($tmp_config)));
         }
@@ -272,9 +272,9 @@ class DotExakatYamlConfig extends Config {
         } else {
             $include_dirs = 'include_dirs[] = "' . implode("\";\ninclude_dirs[] = \"", $this->config['include_dirs']) . "\";\n";
         }
-        
+
         if (isset($this->config['file_extensions'])) {
-            $file_extensions  = implode(',', $this->config['file_extensions'] ?? []);
+            $file_extensions  = implode(',', $this->config['file_extensions'] ?? array());
         } else {
             $file_extensions  = $defaultConfig->get('file_extensions');
         }

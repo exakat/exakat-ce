@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ use Exakat\Analyzer\Analyzer;
 class ShouldUseExplodeArgs extends Analyzer {
     public function analyze(): void {
         // $c = explode('a', $string); array_pop($c)
-        $this->atomFunctionis('\\explode')
+        $this->atomFunctionIs('\\explode')
              ->NoChildWithRank('ARGUMENT', 2)
              ->inIs('RIGHT')
              ->atomIs('Assignation')
@@ -46,7 +46,7 @@ class ShouldUseExplodeArgs extends Analyzer {
         $this->prepareQuery();
 
         // $c = explode('a', $string); array_slice($c, 0, -3)
-        $this->atomFunctionis('\\explode')
+        $this->atomFunctionIs('\\explode')
              ->NoChildWithRank('ARGUMENT', 2)
              ->inIs('RIGHT')
              ->atomIs('Assignation')
@@ -67,7 +67,7 @@ class ShouldUseExplodeArgs extends Analyzer {
         $this->prepareQuery();
 
         // list($a, $b, ) = explode('a', $string);
-        $this->atomFunctionis('\\explode')
+        $this->atomFunctionIs('\\explode')
              ->NoChildWithRank('ARGUMENT', 2)
              ->inIs('RIGHT')
              ->atomIs('Assignation')

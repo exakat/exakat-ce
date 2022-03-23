@@ -127,6 +127,7 @@ CREATE TABLE arguments (id INTEGER PRIMARY KEY AUTOINCREMENT,
                         variadic INTEGER,
                         init STRING,
                         expression INTEGER,
+                        hasDefault INTEGER,
                         line INTEGER,
                         typehint_type STRING
                      )
@@ -150,6 +151,8 @@ CREATE TABLE properties (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                            visibility STRING,
                            var INTEGER,
                            static INTEGER,
+                           readonly INTEGER,
+                           hasDefault INTEGER,
                            value STRING,
                            expression INTEGER,
                            line INTEGER,
@@ -459,16 +462,17 @@ SELECT cit.type || ' ' || cit.name AS theClass,
        arguments.line,
        cit.file
 FROM cit
-JOIN methods 
+LEFT JOIN methods 
     ON methods.citId = cit.id
-JOIN typehints 
+LEFT JOIN typehints 
     ON methods.id = typehints.object
-JOIN arguments 
+LEFT JOIN arguments 
     ON methods.id = arguments.methodId AND
        arguments.citId != 0
-JOIN namespaces 
+LEFT JOIN namespaces 
     ON cit.namespaceId = namespaces.id
-WHERE cit.type in ("class", "trait", "interface")
+WHERE cit.type in ("class", "trait", "interface", "enum")
+GROUP BY methods.id
 ORDER BY fullnspath
 SQL
         );
@@ -514,6 +518,25 @@ JOIN namespaces
     ON cit.namespaceId = namespaces.id
 
     ORDER BY cit.name, classconstants.constant, value
+
+SQL
+        );
+
+        return new Results($res);
+    }
+
+    public function fetchTableConstants(): Results {
+        $res = $this->sqlite->query(<<<'SQL'
+SELECT constants.constant AS constant, 
+       value, 
+       namespaces.namespace AS namespace,
+       constant
+
+FROM constants 
+JOIN namespaces 
+    ON constants.namespaceId = namespaces.id
+
+    ORDER BY namespaces.namespace, constants.constant, value
 
 SQL
         );
@@ -977,6 +1000,74 @@ SQL;
         return new Results($result);
     }
 
+    public function getClassCounts(): Results {
+        $query = <<<'SQL'
+SELECT
+   cit.name AS cit,
+   cit.id AS id,
+   cit.extends AS extends,
+   ns.namespace AS namespace,
+   count(distinct m.id) AS methods,
+   count(distinct p.id) AS properties,
+   count(distinct c.id) AS constants
+   
+FROM
+   cit 
+   LEFT JOIN
+      cit_implements AS ttu 
+      ON ttu.implementing = cit.id AND
+         ttu.type = 'use'
+   JOIN namespaces ns
+        ON cit.namespaceId = ns.id
+   LEFT JOIN
+      methods AS m 
+      ON cit.id = m.citId
+   LEFT JOIN
+      properties AS p 
+      ON cit.id = p.citId
+   LEFT JOIN
+      classConstants AS c
+      ON cit.id = c.citId
+WHERE
+   cit.type = 'class' 
+GROUP BY cit.id
+
+SQL;
+        $result = $this->sqlite->query($query);
+
+        return new Results($result);
+    }
+
+    public function getFilesWithResults(array $list = array()): Results {
+        $listSQL = makeList($list);
+
+        $query = <<<SQL
+SELECT
+    DISTINCT file
+FROM
+   results 
+WHERE analyzer IN ($listSQL)
+SQL;
+        $result = $this->sqlite->query($query);
+
+        return new Results($result);
+    }
+
+    public function getExtendedDependencies(): Results {
+        $query = <<<'SQL'
+SELECT extending,  namespaces.namespace || cit.name AS origin
+    FROM dependenciesExtensions
+    LEFT JOIN cit
+    LEFT JOIN namespaces 
+        on cit.namespaceId = namespaces.id 
+    WHERE LOWER(namespaces.namespace || cit.name ) = origin
+
+SQL;
+        $result = $this->sqlite->query($query);
+        return new Results($result);
+    }
 }
+
+
 
 ?>

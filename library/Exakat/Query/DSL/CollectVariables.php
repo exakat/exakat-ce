@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -44,13 +44,12 @@ class CollectVariables extends DSL {
         assert(in_array($type, array('fullcode', 'code')), 'collectVariable type should be code or fullcode');
         $this->assertVariable($variable, self::VARIABLE_WRITE);
 
-        $CONTAINERS = makeList(array('Variable', 'Variableobject', 'Variablearray', 'Phpvariable', 'Member', 'Staticproperty', 'Array', 'This', ));
-        $LINKS_DOWN = self::$linksDown;
+        $containers = array('Variable', 'Variableobject', 'Variablearray', 'Phpvariable', 'Member', 'Staticproperty', 'Array', 'This', );
 
         return new Command(<<<GREMLIN
 sideEffect{ $variable = []; }.where(
-    __.repeat( __.out($LINKS_DOWN)).emit()
-      .hasLabel($CONTAINERS)
+    __.repeat( __.outE().hasLabel(within(***)).inV() ).emit()
+      .hasLabel(within(***))
       .sideEffect{ 
           $variable.add(it.get().value("$type")); 
       }
@@ -58,7 +57,10 @@ sideEffect{ $variable = []; }.where(
 )
 
 GREMLIN
-);
+, array(self::$LINKS,
+        $containers
+        )
+  );
     }
 }
 ?>

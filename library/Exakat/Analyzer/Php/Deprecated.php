@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,14 +23,32 @@
 
 namespace Exakat\Analyzer\Php;
 
-use Exakat\Analyzer\Common\Extension;
+use Exakat\Analyzer\Analyzer;
 
-class Deprecated extends Extension {
+class Deprecated extends Analyzer {
 
     public function analyze(): void {
-        $this->source = 'deprecated.ini';
+        $ini = (object) $this->loadIni('deprecated.ini');
 
-        parent::analyze();
+        $ini->functions = array_filter($ini->functions);
+        $functions = makeFullNsPath($ini->functions);
+
+        // direct call to an old global function
+        $this->atomFunctionIs($functions);
+        $this->prepareQuery();
+
+        // fallback call to an old global function
+        $this->atomIs('Functioncall')
+             ->hasNoIn('DEFINITION')
+             ->has('fullnspath')
+             ->raw(<<<'GREMLIN'
+filter{
+    name = '\\' + it.get().value('fullnspath').tokenize('\\').last();
+    name in ***
+}
+GREMLIN
+, $functions);
+        $this->prepareQuery();
     }
 }
 

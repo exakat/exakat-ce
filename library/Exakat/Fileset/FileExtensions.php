@@ -30,7 +30,7 @@ class FileExtensions extends Fileset {
         // todo : checks this
         $this->extensions = $extensions;
     }
-    
+
     public function setFiles(array $files) {
         foreach($files as $file) {
             $ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -41,11 +41,11 @@ class FileExtensions extends Fileset {
             }
         }
     }
-    
-    public function filterFile(string $file) : bool {
+
+    public function filterFile(array $result): bool {
         $this->files = array();
-        $this->setFiles(array($file));
-        
+        $this->setFiles(array($result['file']));
+
         return !empty($this->files);
     }
 }

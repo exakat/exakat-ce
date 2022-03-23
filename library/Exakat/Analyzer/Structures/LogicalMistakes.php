@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -86,6 +86,13 @@ class LogicalMistakes extends Analyzer {
              ->atomIs(self::CONTAINERS)
              ->savePropertyAs('fullcode', 'var')
              ->inIs(array('LEFT', 'RIGHT'))
+
+             // check that the second part is NOT another containers
+             ->outIs(array('LEFT', 'RIGHT'))
+             ->atomIsNot(self::CONTAINERS)
+             ->savePropertyAs('fullcode', 'literal')
+             ->inIs(array('LEFT', 'RIGHT'))
+
              ->inIsIE('CODE')
              ->inIs('LEFT')
 
@@ -93,9 +100,17 @@ class LogicalMistakes extends Analyzer {
              ->outIsIE('CODE')
              ->atomIs('Comparison')
              ->codeIs(array('==', '==='))
+
+             ->outIs(array('LEFT', 'RIGHT'))
+             ->atomIsNot(self::CONTAINERS)
+             ->notSamePropertyAs('fullcode', 'literal')
+             ->inIs(array('LEFT', 'RIGHT'))
+
              ->outIs(array('LEFT', 'RIGHT'))
              ->atomIs(self::CONTAINERS)
              ->samePropertyAs('fullcode', 'var')
+
+
              ->back('first');
         $this->prepareQuery();
 

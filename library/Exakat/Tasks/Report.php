@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -79,17 +79,23 @@ class Report extends Tasks {
             throw new NoDumpYet($this->config->project);
         }
 
+        $this->log->log(var_export($this->config->project_reports, true));
         foreach($this->config->project_reports as $format) {
+            $this->log->log('Building report ' . $format);
+            $b = hrtime(true);
             $reportConfig = new ReportConfig($format, $this->config);
             $reportClass = $reportConfig->getFormatClass();
             if (!class_exists($reportClass)) {
                 display('No such format as ' . $reportConfig->getFormat() . '. Omitting.');
+                $this->log->log('No such format as ' . $reportConfig->getFormat());
                 continue;
             }
 
             $report = new $reportClass($reportConfig->getConfig());
 
             $this->format($report, $reportConfig);
+            $e = hrtime(true);
+            $this->log->log('Report time : ' . number_format(($e -$b) / 1000000, 2) . ' ms');
         }
     }
 

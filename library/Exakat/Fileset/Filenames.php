@@ -27,10 +27,10 @@ class Filenames extends Fileset {
     private array $names   = array();
 
     public function __construct(string $dataDir) {
-        $names = @parse_ini_file($dataDir . "/data/ignore_files.ini") ?? array();
+        $names = @parse_ini_file($dataDir . '/data/ignore_files.ini') ?? array();
         $this->names = array_flip($names['files']);
     }
-    
+
     public function setFiles(array $files) {
         foreach($files as $file) {
             $f = basename($file);

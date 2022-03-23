@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,22 +26,24 @@ namespace Exakat\Query\DSL;
 
 class CollectOut extends DSL {
     public function run(): Command {
-        if (func_num_args() === 2) {
+        if (func_num_args() === 3) {
+            list($variable, $out, $property) = func_get_args();
+        } elseif (func_num_args() === 2) {
             list($variable, $out) = func_get_args();
+            $property = 'fullcode';
         } else {
-            assert(false, __METHOD__. " requires 2 arguments, ".func_num_args(). " passed.");
+            assert(false, __METHOD__ . ' requires 2 or 3 arguments, ' . func_num_args() . ' passed.');
         }
 
         $this->assertVariable($variable, self::VARIABLE_WRITE);
         $this->assertLink($out);
-
-        $MAX_LOOPING = self::$MAX_LOOPING;
+        $this->assertProperty($property);
 
         return new Command(<<<GREMLIN
 where( 
     __.sideEffect{ $variable = []; }
       .out("$out")
-      .sideEffect{ $variable.add(it.get().value("fullcode")) ; }
+      .sideEffect{ $variable.add(it.get().value("$property")) ; }
       .fold() 
 ) 
 

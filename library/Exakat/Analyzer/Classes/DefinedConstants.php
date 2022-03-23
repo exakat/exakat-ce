@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,10 +27,11 @@ use Exakat\Analyzer\Analyzer;
 
 class DefinedConstants extends Analyzer {
     public function dependsOn(): array {
-        return array('Complete/MakeClassConstantDefinition',
+        return array('Complete/IsStubStructure',
+                     'Complete/IsPhpStructure',
+                     'Complete/MakeClassConstantDefinition',
                      'Complete/OverwrittenConstants',
                      'Classes/IsExtClass',
-                     'Composer/IsComposerNsname',
                     );
     }
 
@@ -45,13 +46,20 @@ class DefinedConstants extends Analyzer {
         // constants defined in a class of an extension
         $this->atomIs('Staticconstant')
              ->outIs('CLASS')
-             ->analyzerIs('Classes/IsExtClass')
+             ->is('isPhp', true)
              ->back('first');
         $this->prepareQuery();
 
-        // constants defined in a class of an vendor library
         $this->atomIs('Staticconstant')
-             ->analyzerIs('Composer/IsComposerNsname');
+             ->outIs('CLASS')
+             ->is('isStub', true)
+             ->back('first');
+        $this->prepareQuery();
+
+        $this->atomIs('Staticconstant')
+             ->outIs('CLASS')
+             ->is('isExt', true)
+             ->back('first');
         $this->prepareQuery();
     }
 }

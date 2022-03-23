@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -144,18 +144,18 @@ class Boolval extends Plugin {
 
             case 'Multiplication' :
                 if ($atom->code === '*') {
-                    $atom->boolean = (bool) ((int) $extras['LEFT']->boolean * (int) $extras['RIGHT']->boolean);
+                    $atom->boolean = (bool) ((int) $extras['LEFT']->intval * (int) $extras['RIGHT']->intval);
                 } elseif ($atom->code === '/') {
-                    if ((int) $extras['RIGHT']->boolean === 0) {
+                    if ((int) $extras['RIGHT']->intval === 0) {
                         $atom->boolean = false;
                     } else {
-                        $atom->boolean = (bool) ((int) $extras['LEFT']->boolean / (int) $extras['RIGHT']->boolean);
+                        $atom->boolean = (bool) ((int) $extras['LEFT']->intval / (int) $extras['RIGHT']->intval);
                     }
                 } elseif ($atom->code === '%') {
-                    if ((int) $extras['RIGHT']->boolean === 0) {
+                    if ((int) $extras['RIGHT']->intval === 0) {
                         $atom->boolean = false;
                     } else {
-                        $atom->boolean = (bool) ((int) $extras['LEFT']->boolean % (int) $extras['RIGHT']->boolean);
+                        $atom->boolean = (bool) ((int) $extras['LEFT']->intval % (int) $extras['RIGHT']->intval);
                     }
                 }
                 break;
@@ -176,7 +176,8 @@ class Boolval extends Plugin {
                 }
                 break;
 
-            case 'Logical' :
+
+            case 'Bitwise' :
                 if ($atom->code === '|') {
                     if (is_string($extras['LEFT']->boolean) && is_string($extras['RIGHT']->boolean)) {
                         $atom->boolean = (bool) ($extras['LEFT']->boolean | $extras['RIGHT']->boolean);
@@ -195,14 +196,20 @@ class Boolval extends Plugin {
                     } else {
                         $atom->boolean = (bool) ($extras['LEFT']->boolean ^ (int) $extras['RIGHT']->boolean);
                     }
-                } elseif ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
+                }
+                break;
+
+            case 'Spaceship' :
+                    $atom->boolean = (bool) ($extras['LEFT']->boolean <=> $extras['RIGHT']->boolean);
+                    break;
+
+            case 'Logical' :
+                if ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
                     $atom->boolean = $extras['LEFT']->boolean && $extras['RIGHT']->boolean;
                 } elseif ($atom->code === '||' || mb_strtolower($atom->code) === 'or') {
                     $atom->boolean = $extras['LEFT']->boolean && $extras['RIGHT']->boolean;
                 } elseif (mb_strtolower($atom->code) === 'xor') {
                     $atom->boolean = ($extras['LEFT']->boolean xor $extras['RIGHT']->boolean);
-                } elseif ($atom->code === '<=>') {
-                    $atom->boolean = (bool) ($extras['LEFT']->boolean <=> $extras['RIGHT']->boolean);
                 }
                 break;
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -231,7 +231,7 @@ class WrongNumberOfArguments extends Analyzer {
         }
 
         $this->atomIs('New')
-             ->outIs('NEW') 
+             ->outIs('NEW')
              ->savePropertyAs('fullnspath', 'fnp')
              ->hasNoVariadicArgument()
              ->isLessHash('count', $argsMins, 'fnp')
@@ -239,7 +239,7 @@ class WrongNumberOfArguments extends Analyzer {
         $this->prepareQuery();
 
         $this->atomIs('New')
-             ->outIs('NEW') 
+             ->outIs('NEW')
              ->savePropertyAs('fullnspath', 'fnp')
              ->hasNoVariadicArgument()
              ->isMoreHash('count', $argsMaxs, 'fnp')
@@ -251,10 +251,10 @@ class WrongNumberOfArguments extends Analyzer {
         $argsMins = array();
         $argsMaxs = array();
         foreach($methods as $method) {
-            $argsMins[makefullnspath($method['class']).'::'.mb_strtolower($method['name'])] = $method['args_min'];
+            $argsMins[makefullnspath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_min'];
 
             if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makefullnspath($method['class']).'::'.mb_strtolower($method['name'])] = $method['args_max'];
+                $argsMaxs[makefullnspath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_max'];
             }
         }
 

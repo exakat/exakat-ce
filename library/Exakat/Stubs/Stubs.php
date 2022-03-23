@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,28 +23,55 @@
 namespace Exakat\Stubs;
 
 class Stubs {
-    private $stubs       = array();
+    private array  $stubs       = array();
     private string $stubsDir    = '';
 
-    public function __construct(string $stubsDir) {
+    public function __construct(string $stubsDir   = '',
+                                array $stubsFiles = array()) {
         $this->stubsDir = $stubsDir;
 
-        $files = glob($stubsDir . '/*.json');
-        foreach($files as $file) {
-            $this->stubs[] = new StubJson($file);
+        if (empty($stubsDir)) {
+            $files = array();
+        } else {
+            $files = glob($stubsDir . '*');
+        }
+
+        $all = array_merge($files, $stubsFiles);
+        foreach($all as $file) {
+            if ($file[0] !== '/') {
+                $file = $stubsDir . '/' . $file;
+            }
+
+            if (is_dir($file)) {
+                continue;
+            }
+            if (!file_exists($file)) {
+                continue;
+            }
+
+            if (substr($file, -5) === '.json' ) {
+                $this->stubs[] = new StubJson($file);
+            } elseif (substr($file, -5) === '.pdff' ) {
+                $this->stubs[] = new PdffReader($file);
+            }
+            // @todo : Format manuel?
         }
     }
 
     public function __call(string $name, array $args): array {
+        assert(method_exists(StubsInterface::class, $name), "No such method as $name in stubs");
+
+        if (empty($this->stubs)) {
+            return array();
+        }
         // Check on $name values
-        $return = array(array());
-        /*
-        assert(method_exists($this->stubs[0], $name), "No such method as $name for Definition file");
-        
+        $return = array();
+
         foreach($this->stubs as $stub) {
+            assert(method_exists($stub, $name), "No such method as $name for Definition file");
             $return[] = $stub->$name();
         }
-        */
+
         return array_merge(...$return);
     }
 }

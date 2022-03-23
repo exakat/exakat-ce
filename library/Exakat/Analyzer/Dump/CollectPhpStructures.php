@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,8 +36,7 @@ CREATE TABLE phpStructures (id INTEGER PRIMARY KEY AUTOINCREMENT,
 SQL;
 
     public function dependsOn(): array {
-        return array('Functions/IsExtFunction',
-                     'Constants/IsExtConstant',
+        return array('Constants/IsExtConstant',
                      'Interfaces/IsExtInterface',
                      'Traits/IsExtTrait',
                      'Classes/IsExtClass',
@@ -45,16 +44,29 @@ SQL;
     }
 
     public function analyze(): void {
-        $this->collectPhpStructures2(array('Functioncall'),                    'Functions/IsExtFunction',   'function');
-        $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Constants/IsExtConstant',   'constant');
-        $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Interfaces/IsExtInterface', 'interface');
-        $this->collectPhpStructures2(array('Identifier', 'Nsname'),            'Traits/IsExtTrait',         'trait');
-        $this->collectPhpStructures2(array('Newcall', 'Identifier', 'Nsname', 'Newcallname'), 'Classes/IsExtClass',        'class');
+        $this->collectPhpFunctioncall(                                                                                 'function');
+        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Constants/IsExtConstant',   'constant');
+        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Interfaces/IsExtInterface', 'interface');
+        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Traits/IsExtTrait',         'trait');
+        $this->collectPhpStructuresWithAnalyzer(array('Newcall', 'Identifier', 'Nsname', 'Newcallname'), 'Classes/IsExtClass',        'class');
     }
 
-    private function collectPhpStructures2(array $label, string $analyzer, string $type): void {
+    private function collectPhpStructuresWithAnalyzer(array $label, string $analyzer, string $type): void {
         $this->atomIs($label)
              ->analyzerIs($analyzer)
+             ->raw('groupCount("m").by("fullnspath").cap("m").map{ x = []; for(key in it.get().keySet()) { x.add(["type":"' . $type . '", "name":key, "count":it.get().getAt(key)]);}; x }[0]');
+        $this->prepareQuery();
+    }
+
+    private function collectPhpFunctioncall(string $type): void {
+        $this->atomIs('Functioncall')
+             ->raw(<<<'GREMLIN'
+or(
+    __.has('isPhp', true),
+    __.has('isExt', true)
+)
+GREMLIN
+)
              ->raw('groupCount("m").by("fullnspath").cap("m").map{ x = []; for(key in it.get().keySet()) { x.add(["type":"' . $type . '", "name":key, "count":it.get().getAt(key)]);}; x }[0]');
         $this->prepareQuery();
     }

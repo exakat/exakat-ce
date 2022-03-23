@@ -35,14 +35,14 @@ class IncludeDirs extends Fileset {
             }
         }
     }
-    
+
     public function setFiles(array $files) {
         foreach($files as $file) {
             $found = false;
             foreach($this->ignoreDirs as $ignore) {
                 $found |= fnmatch($ignore, $file);
-            } 
-            
+            }
+
             if ($found) {
                 $this->ignored[$file] = "ignore_dirs file ($file)";
             } else {

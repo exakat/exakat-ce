@@ -44,7 +44,7 @@ class IgnoreDirs extends Fileset {
             }
         }
     }
-    
+
     public function setFiles(array $files) {
         foreach($files as $file) {
             $found = false;
@@ -53,17 +53,17 @@ class IgnoreDirs extends Fileset {
                     $found = true;
                     break 1;
                 }
-            } 
-            
+            }
+
             if ($found) {
                 foreach($this->includeDirs as $include) {
                     if (fnmatch($include, $file)) {
                         $found = false;
                         break 1;
                     }
-                } 
+                }
             }
-            
+
             if ($found) {
                 $this->ignored[$file] = "ignore_dirs file ($file)";
             } else {
@@ -71,12 +71,12 @@ class IgnoreDirs extends Fileset {
             }
         }
     }
-    
-    public function filterFile(array $result) : bool {
+
+    public function filterFile(array $result): bool {
         $file = $result['file'];
         $this->files = array();
         $this->setFiles(array($file));
-        
+
         return !empty($this->files);
     }
 }

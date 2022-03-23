@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -48,6 +48,17 @@ class UndefinedConstants extends Analyzer {
                      ->outIs('CONCAT')
                      ->atomIs(array('Variable', 'Member'))
              )
+
+             ->not(
+                $this->side()
+                     ->atomIs('String')
+                     ->hasIn('ARGUMENT')
+                     ->is('rank', 0)
+                     ->inIs('ARGUMENT')
+                     ->atomIs('Functioncall')
+                     ->fullnspathIs('\\defined')
+             )
+
              ->isNot('isPhp', true)
              ->isNot('isExt', true)
              ->isNot('isStub', true)

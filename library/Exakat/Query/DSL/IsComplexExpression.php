@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Analyzer\Analyzer;
 
 class IsComplexExpression extends DSL {
     public function run(): Command {
@@ -32,19 +33,18 @@ class IsComplexExpression extends DSL {
             $threshold = 30;
         }
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
         $linksDown = self::$linksDown;
 
         $gremlin = <<<GREMLIN
 not( where( __.has("constant", true ) ) )
 .where(
-  __.emit().repeat( __.not(hasLabel("Closure", "Classanonymous") ).out({$linksDown})).times($MAX_LOOPING)
-    .not(hasLabel("Closure", "Classanonymous") )
-    .count().is(gt({$threshold})) 
+  __.emit().repeat( __.not(hasLabel(within(***)) ).out({$linksDown})).times(***.intValue())
+    .not(hasLabel(within(***)) )
+    .count().is(gt(***)) 
 )
 
 GREMLIN;
-        return new Command($gremlin);
+        return new Command($gremlin, array(Analyzer::ANONYMOUS, self::$MAX_LOOPING, Analyzer::ANONYMOUS, $threshold));
     }
 }
 ?>

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -57,9 +57,6 @@ class CommandLine extends Config {
                                  '-collect'    => 'collect',
                                  '-load-dump'  => 'load_dump', // for Dump
                                  '--load-dump' => 'load_dump', // for Dump
-
-                                 '-load-dump'  => 'load_dump', // for clean : Reports
-                                 '--load-dump' => 'load_dump', // for clean : dump/datastore
 
                                  '-stop'       => 'stop',
                                  '-ping'       => 'ping',
@@ -215,13 +212,14 @@ class CommandLine extends Config {
                             // -C a => Ignore
                             continue 3;
                         }
-                        $name = substr($args[$id + 1], 0, $pos);
+                        $name  = substr($args[$id + 1], 0, $pos);
+                        $name  = trim($name, '[]');
                         $value = substr($args[$id + 1], $pos + 1);
 
                         if (isset($this->config['directives'][$name])) {
-                            $this->config['directives'][$name] = array($value);
-                        } else {
                             $this->config['directives'][$name][] = $value;
+                        } else {
+                            $this->config['directives'][$name] = array($value);
                         }
                         break;
 

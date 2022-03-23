@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -154,13 +154,13 @@ class ExakatConfig extends Config {
             $this->config['rules_version_min'] = '';
         }
 
+        $currentDir = getcwd();
         // Calculate the stubs recursivement if it is a folder
         // all path are absolute, may be placed anywhere
         if (isset($this->config['stubs'])) {
             $stubs = array(array());
             $this->config['stubs'] = makeArray($this->config['stubs']);
             foreach($this->config['stubs'] as $stub) {
-                $d = getcwd();
                 $path = realpath($stub);
 
                 if ($path === false) {
@@ -183,7 +183,7 @@ class ExakatConfig extends Config {
                     chdir($path);
                     $allFiles = rglob('.');
                     $allFiles = array_map(function (string $path) use ($stub): string { return $stub . ltrim($path, '.'); }, $allFiles);
-                    chdir($d);
+                    chdir($currentDir);
 
                     $stubs[$stub] = $allFiles;
                 }
@@ -193,8 +193,19 @@ class ExakatConfig extends Config {
             $this->config['stubs'] = array();
         }
 
-        return str_replace(getcwd(), '.', $configFile);
+        return str_replace($currentDir, '.', $configFile);
     }
+
+    public function __get(string $name) {
+        if (isset($this->config[$name])) {
+            return $this->config[$name];
+        } else {
+            return null;
+        }
+
+        return $return;
+    }
+
 }
 
 ?>

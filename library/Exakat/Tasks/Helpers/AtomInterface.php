@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -79,13 +79,13 @@ abstract class AtomInterface {
     public $position     = 0;
     public Whitespace $ws ;
 
-    public abstract function toArray(): array;
+    abstract public function toArray(): array;
 
-    public abstract function toGraphsonLine(int &$id): stdClass;
+    abstract public function toGraphsonLine(int &$id): stdClass;
 
-    public abstract function boolProperties(): array;
+    abstract public function boolProperties(): array;
 
-    public abstract function isA(array $atoms): bool;
+    abstract public function isA(array $atoms): bool;
 }
 
 ?>

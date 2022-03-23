@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -149,10 +149,12 @@ class WrongReturnedType extends Analyzer {
         // Don't process void : it is checked at lint time
         $this->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/IsGenerator')
-             ->outIs('RETURNTYPE')
-             ->atomIs('Scalartypehint')
-             ->savePropertyAs('fullnspath', 'fqn')
-             ->back('first')
+             ->not(
+                $this->side()
+                     ->outIs('RETURNTYPE')
+                     ->atomIs(array('Identifier', 'Nsname', 'Void'))
+             )
+             ->collectTypehints('types')
              ->outIs('RETURNED')
              ->hasIn('RETURN')
              ->as('results')
@@ -162,7 +164,7 @@ class WrongReturnedType extends Analyzer {
                 $this->side()
                      ->atomIs(array('Identifier', 'Nsname'), self::WITH_CONSTANTS)
              )
-             ->checkTypeWithAtom('fqn')
+             ->checkTypeWithAtom('types')
              ->back('results')
              ->inIs('RETURN')
              ->analyzerIsNot('self');

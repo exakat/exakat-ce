@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -106,7 +106,7 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               )
               // No check on Atom == Class, as it may not exists
               ->goToAllParents(self::INCLUDE_SELF)
-              ->notsamePropertyAs('fullnspath', 'fnp')
+              ->notSamePropertyAs('fullnspath', 'fnp')
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)

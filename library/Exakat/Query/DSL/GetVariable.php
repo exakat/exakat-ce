@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -48,9 +48,9 @@ class GetVariable extends DSL {
                 $gremlin[] = "\"{$name[$id]}\" :  $v";
             }
             return new Command('map{ [' . implode(',' . PHP_EOL, $gremlin) . '] }');
-        } else {
-            assert(false, 'Wrong format for ' . __METHOD__ . '. Either string/value or array()/array()');
         }
+
+        assert(false, 'Wrong format for ' . __METHOD__ . '. Either string/value or array()/array()');
     }
 }
 ?>

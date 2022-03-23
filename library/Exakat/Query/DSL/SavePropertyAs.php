@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -33,7 +33,9 @@ class SavePropertyAs extends DSL {
             list($name) = func_get_args();
         } else {
             list($property, $name) = func_get_args();
-            $this->assertProperty($property);
+            if ($property !== 'whole') {
+                $this->assertProperty($property);
+            }
         }
 
         $this->assertVariable($name, self::VARIABLE_WRITE);

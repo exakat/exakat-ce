@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -87,11 +87,11 @@ class Update extends Tasks {
 
         // clean all previous sql caches
         $files = glob("{$this->config->project_dir}/.exakat/dump-*.php");
-        display("Removing ".count($files)." dump-*.php files\n");
+        display('Removing ' . count($files) . " dump-*.php files\n");
         foreach($files as $file) {
-            unlink($files);
+            unlink($file);
         }
- 
+
         $this->update($this->config);
     }
 

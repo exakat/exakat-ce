@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 /*
  * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
@@ -25,32 +25,35 @@ namespace Exakat\Analyzer\Complete;
 use Exakat\Analyzer\Analyzer;
 
 class VariableTypehint extends Analyzer {
-    public function analyze() : void {
+    public function analyze(): void {
         // extends to global variables
-        
+
         // adding integer typehint
         $this->atomIs('Variabledefinition')
-
              ->hasNoOut('TYPEHINT')
-             // only one default 
+             // only one default
              ->filter(
                 $this->side()
-                     ->raw('sideEffect{ s = [:];}.out("DEFAULT").sideEffect{ s[it.get().label()] = 1;}.fold().filter{ s.size() == 1; }')
+                     ->outIs('DEFAULT')
+                     ->raw('count().is(eq(1))')
              )
 
              ->outIs('DEFAULT')
-             ->atomIs(array('Integer', 'Null', 'String', 'Arrayliteral', 'Boolean', 'Float'), self::WITH_CONSTANTS)
+             ->atomIs(array('Integer', 'Null', 'String', 'Magicconstant', 'Heredoc', 'Arrayliteral', 'Boolean', 'Float'), self::WITH_CONSTANTS)
              ->savePropertyAs('label', 'atomValue')
              ->back('first')
-             ->raw(<<<GREMLIN
+             ->initVariable('fnp', "''")
+             ->raw(<<<'GREMLIN'
         sideEffect{ 
             fnp = "DEFAULT VALUE";
             switch(atomValue) {
-                case 'Integer'      : fnp = "\\\\int";        break;
-                case 'Null'         : fnp = "\\\\null";       break;
-                case 'String'       : fnp = "\\\\string";     break;
-                case 'Arrayliteral' : fnp = "\\\\array";      break;
-                case 'Boolean'      : fnp = "\\\\bool";       break;
+                case 'Integer'       : fnp = "\\int";        break;
+                case 'Null'          : fnp = "\\null";       break;
+                case 'String'        : fnp = "\\string";     break;
+                case 'Heredoc'       : fnp = "\\string";     break;
+                case 'Magicconstant' : fnp = "\\string";     break;
+                case 'Arrayliteral'  : fnp = "\\array";      break;
+                case 'Boolean'       : fnp = "\\bool";       break;
                 default : 
                     fnp = "DEFAULT TYPE";break;
             }
@@ -68,10 +71,29 @@ GREMLIN
              ->back('first');
         $this->prepareQuery();
 
+        // adding returned type
+        $this->atomIs('Variabledefinition')
+             ->hasNoOut('TYPEHINT')
+             // only one default
+             ->filter(
+                $this->side()
+                     ->outIs('DEFAULT')
+                     ->raw('count().is(eq(1))')
+             )
+
+             ->outIs('DEFAULT')
+             ->atomIs(array('Functioncall', 'Methodcall', 'Staticmethodcall'), self::WITH_CONSTANTS)
+             ->inIs('DEFINITION')
+             ->outIs('RETURNTYPE')
+             ->duplicateNode()
+             ->addEFrom('TYPEHINT', 'first')
+             ->back('first');
+        $this->prepareQuery();
+
         // adding new x() with class definition
         $this->atomIs('Variabledefinition')
              ->hasNoOut('TYPEHINT')
-             // only one default 
+             // only one default
              // could be upgraded to multiple identical new
              ->filter(
                 $this->side()
@@ -83,16 +105,26 @@ GREMLIN
              ->atomIs(array('New'), self::WITH_CONSTANTS)
              ->outIs('NEW')
              ->inIs('DEFINITION')
-             ->as("theClass")
-             ->savePropertyAs('fullnspath', 'fnp')
+             ->as('theClass')
+             ->has('fullnspath')
+             ->savePropertyAs('whole', 'definition')
              ->back('first')
-             ->addAtom('Scalartypehint', array(
-                'fullcode'   => 'fnp',
-                'fullnspath' => 'fnp',
+             ->addAtom('Identifier', array(
                 'ws'         => '{"closing":" "}',
                 'rank'       => 0,
                 'line'       => 0,
              ))
+             ->raw(<<<'GREMLIN'
+sideEffect{
+    it.get().property("fullcode",   definition.value("fullnspath"));
+    it.get().property("fullnspath", definition.value("fullnspath"));
+
+    if (definition.property("isPhp").any())  { it.get().property("isPhp", true); }
+    if (definition.property("isExt").any())  { it.get().property("isExt", true); }
+    if (definition.property("isStub").any()) { it.get().property("isStub", true); }
+}
+GREMLIN
+)
              ->as('typehint')
              ->addEFrom('TYPEHINT', 'first')
              ->back('typehint')
@@ -103,7 +135,7 @@ GREMLIN
         // adding new stdclass()
         $this->atomIs('Variabledefinition')
              ->hasNoOut('TYPEHINT')
-             // only one default 
+             // only one default
              // could be upgraded to multiple identical new
              ->filter(
                 $this->side()
@@ -115,15 +147,25 @@ GREMLIN
              ->atomIs(array('New'), self::WITH_CONSTANTS)
              ->outIs('NEW')
              ->hasNoIn('DEFINITION')
-             ->savePropertyAs('fullnspath', 'fnp')
+             ->has('fullnspath')
+             ->savePropertyAs('whole', 'definition')
              ->back('first')
              ->addAtom('Identifier', array(
-                'fullcode'   => 'fnp',
-                'fullnspath' => 'fnp',
                 'ws'         => '{"closing":" "}',
                 'rank'       => 0,
                 'line'       => 0,
              ))
+             ->raw(<<<'GREMLIN'
+sideEffect{
+    it.get().property("fullcode",   definition.value("fullnspath"));
+    it.get().property("fullnspath", definition.value("fullnspath"));
+
+    if (definition.property("isPhp").any()) { it.get().property("isPhp", true); }
+    if (definition.property("isExt").any()) { it.get().property("isExt", true); }
+    if (definition.property("isStub").any()) { it.get().property("isStub", true); }
+}
+GREMLIN
+)
              ->addEFrom('TYPEHINT', 'first')
              ->back('first');
         $this->prepareQuery();
@@ -131,7 +173,7 @@ GREMLIN
         // adding new stdclass()
         $this->atomIs('Variabledefinition')
              ->hasNoOut('TYPEHINT')
-             // only one default 
+             // only one default
              // could be upgraded to multiple identical new
              ->filter(
                 $this->side()
@@ -144,16 +186,26 @@ GREMLIN
              ->inIs('DEFINITION')
              // Method, functions, etc.
              ->outIs('RETURNTYPE')
-             ->inIs('DEFINITION')             
-             ->savePropertyAs('fullnspath', 'fnp')
+             ->inIs('DEFINITION')
+             ->has('fullnspath')
+             ->savePropertyAs('whole', 'definition')
              ->back('first')
              ->addAtom('Identifier', array(
-                'fullcode'   => 'fnp',
-                'fullnspath' => 'fnp',
                 'ws'         => '{"closing":" "}',
                 'rank'       => 0,
                 'line'       => 0,
              ))
+             ->raw(<<<'GREMLIN'
+sideEffect{
+    it.get().property("fullcode",   definition.value("fullnspath"));
+    it.get().property("fullnspath", definition.value("fullnspath"));
+
+    if (definition.property("isPhp").any()) { it.get().property("isPhp", true); }
+    if (definition.property("isExt").any()) { it.get().property("isExt", true); }
+    if (definition.property("isStub").any()) { it.get().property("isStub", true); }
+}
+GREMLIN
+)
              ->addEFrom('TYPEHINT', 'first')
              ->back('first');
         $this->prepareQuery();

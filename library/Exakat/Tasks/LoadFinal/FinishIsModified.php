@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -88,93 +88,6 @@ class FinishIsModified extends LoadFinal {
 
         $count = $countNew + $countFunction;
         display("Created $count isModified values");
-
-        // Managing Appends and its descendants
-        // TODO : this should be a loop
-        $query = $this->newQuery('isModified with append $a[]');
-        $query->atomIs('Arrayappend', Analyzer::WITHOUT_CONSTANTS)
-              ->outIs('APPEND')
-              ->atomIs($variables, Analyzer::WITHOUT_CONSTANTS)
-              ->setProperty('isModified', true)
-              ->returnCount();
-        $query->prepareRawQuery();
-        if ($query->canSkip()) {
-            $countAppend0 = 0;
-        } else {
-            $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
-            $countAppend0 = $result->toInt();
-        }
-
-        $query = $this->newQuery('isModified with append $a[1][]');
-        $query->atomIs('Arrayappend', Analyzer::WITHOUT_CONSTANTS)
-              ->outIs('APPEND')
-              ->outIs('VARIABLE')
-              ->atomIs($variables, Analyzer::WITHOUT_CONSTANTS)
-              ->setProperty('isModified', true)
-              ->returnCount();
-        $query->prepareRawQuery();
-        if ($query->canSkip()) {
-            $countAppend1 = 0;
-        } else {
-            $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
-            $countAppend1 = $result->toInt();
-        }
-
-        $query = $this->newQuery('isModified with append $a[1][2][]');
-        $query->atomIs('Arrayappend', Analyzer::WITHOUT_CONSTANTS)
-              ->outIs('APPEND')
-              ->outIs('VARIABLE')
-              ->outIs('VARIABLE')
-              ->atomIs($variables, Analyzer::WITHOUT_CONSTANTS)
-              ->setProperty('isModified', true)
-              ->returnCount();
-        $query->prepareRawQuery();
-        if ($query->canSkip()) {
-            $countAppend2 = 0;
-        } else {
-            $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
-            $countAppend2 = $result->toInt();
-        }
-
-        $count = $countAppend0 + $countAppend1 + $countAppend2;
-        display("Created $count isModified values with array append");
-
-        // Managing Unset()
-        $query = $this->newQuery('isModified with unset function');
-        $query->atomIs('Unset', Analyzer::WITHOUT_CONSTANTS)
-              ->outIs('ARGUMENT')
-              ->atomIs('Array', Analyzer::WITHOUT_CONSTANTS)
-              ->outIs('VARIABLE')
-              ->atomIs($variables, Analyzer::WITHOUT_CONSTANTS)
-              ->setProperty('isModified', true)
-              ->returnCount();
-        $query->prepareRawQuery();
-        if ($query->canSkip()) {
-            $countFunction = 0;
-        } else {
-            $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
-            $countFunction = $result->toInt();
-        }
-
-        $query = $this->newQuery('isModified with unset operator');
-        $query->atomIs('Cast', Analyzer::WITHOUT_CONSTANTS)
-              ->tokenIs('T_UNSET_CAST')
-              ->outIs('CAST')
-              ->atomIs('Array', Analyzer::WITHOUT_CONSTANTS)
-              ->outIs('VARIABLE')
-              ->atomIs($variables, Analyzer::WITHOUT_CONSTANTS)
-              ->setProperty('isModified', true)
-              ->returnCount();
-        $query->prepareRawQuery();
-        if ($query->canSkip()) {
-            $countOperator = 0;
-        } else {
-            $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
-            $countOperator = $result->toInt();
-        }
-
-        $count = $countFunction + $countOperator;
-        display("Created $count isModified values with unset");
 
         $query = $this->newQuery('isModified with list() or foreach()');
         $query->atomIs('Keyvalue', Analyzer::WITHOUT_CONSTANTS)

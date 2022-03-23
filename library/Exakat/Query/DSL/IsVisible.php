@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -53,7 +53,7 @@ class IsVisible extends DSL {
         if ($by === self::VISIBLE_ABOVE) {
             // The incoming variable is located above the current one
             // This is covariant :
-            return new Command(<<<GREMLIN
+            $return = new Command(<<<GREMLIN
 filter{ 
     if (it.get().properties("visibility").any()) { 
         if ($variable == "private") {
@@ -76,7 +76,7 @@ GREMLIN
         } elseif ($by === self::VISIBLE_BELOW) {
             // The incoming variable is located below the current one
             // This is contravariant : it only accepts lesser visibilities
-            return new Command(<<<GREMLIN
+            $return = new Command(<<<GREMLIN
 filter{ 
     if (it.get().properties("visibility").any()) { 
         if ($variable == "private") {
@@ -97,6 +97,8 @@ filter{
 GREMLIN
             );
         }
+
+        return $return;
     }
 }
 ?>

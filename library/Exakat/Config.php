@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -220,6 +220,11 @@ class Config extends Configsource {
             $this->options['project'] = $project;
         }
 
+        if ( $this->commandLineConfig->get('project')->isDefault() && 
+            !$this->dotExakatConfig->get('project')->isDefault()) {
+            $this->options['project'] = $this->dotExakatConfig->get('project');
+        }
+        
 //        $this->options['project'] = $this->options['project']->isDefault() ? $this->dotExakatYamlConfig->get('project') : $this->options['project'];
 //        $this->options['project'] = $this->options['project']->isDefault() ? $this->dotExakatConfig->get('project') : $this->options['project'];
 
@@ -262,9 +267,10 @@ class Config extends Configsource {
             $this->checkSelf();
         }
 
-        $this->config['stubs'] = array_unique(array_merge($this->projectConfig->toArray()['stubs']        ?? array(),
-                                                          $this->exakatConfig->toArray()['stubs']         ?? array(),
-                                                          $this->dotExakatConfig->toArray()['stubs']      ?? array()
+        $this->options['stubs'] = array_unique(array_merge($this->projectConfig->toArray()['stubs']                     ?? array(),
+                                                          $this->exakatConfig->toArray()['stubs']                       ?? array(),
+                                                          $this->dotExakatConfig->toArray()['stubs']                    ?? array(),
+                                                          $this->commandLineConfig->toArray()['directives']['stubs']    ?? array(),
                                             ));
 
         // autoload dev
@@ -288,10 +294,9 @@ class Config extends Configsource {
 
         $this->finishConfigs();
 
-        $this->projectConfig         = null;
+        // All other values are actually unset here, except projectConfig.
         $this->commandLineConfig     = null;
         $this->defaultConfig         = null;
-        $this->exakatConfig          = null;
         $this->dotExakatConfig       = null;
         $this->envConfig             = null;
 
@@ -352,11 +357,16 @@ TEXT;
         } elseif ($name === 'rulesets') {
             $return = $this->rulesets;
         } elseif ($name === 'themas') {
+            // @todo throw warning
             $return = $this->rulesets;
         } elseif (isset($this->options[$name])) {
             $return = $this->options[$name];
         } elseif ($name === 'screen_cols') {
             $return = $this->screen_cols;
+        } elseif ($name === 'projectConfig') {
+            $return = $this->projectConfig;
+        } elseif ($name === 'exakatConfig') {
+            $return = $this->exakatConfig;
         } else {
             $return = null;
         }

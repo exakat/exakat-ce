@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -87,7 +87,7 @@ class Intval extends Plugin {
                 if (empty($extras)) {
                     $atom->intval   = (int) trimOnce($atom->code);
                 } else {
-                    $atom->intval   = array_sum(array_column($extras, 'intval'));
+                    $atom->intval   = (int) array_sum(array_column($extras, 'intval'));
                 }
                 break;
 
@@ -162,21 +162,27 @@ class Intval extends Plugin {
                 }
                 break;
 
-            case 'Logical' :
+            case 'Bitwise' :
                 if ($atom->code === '|') {
                     $atom->intval = $extras['LEFT']->intval | $extras['RIGHT']->intval;
                 } elseif ($atom->code === '&') {
                     $atom->intval = $extras['LEFT']->intval & $extras['RIGHT']->intval;
                 } elseif ($atom->code === '^') {
                     $atom->intval = $extras['LEFT']->intval ^ $extras['RIGHT']->intval;
-                } elseif ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
+                }
+                break;
+
+            case 'Spaceship' :
+                $atom->intval = $extras['LEFT']->intval <=> $extras['RIGHT']->intval;
+                break;
+
+            case 'Logical' :
+                if ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
                     $atom->intval = $extras['LEFT']->intval && $extras['RIGHT']->intval;
                 } elseif ($atom->code === '||' || mb_strtolower($atom->code) === 'or') {
                     $atom->intval = $extras['LEFT']->intval && $extras['RIGHT']->intval;
                 } elseif (mb_strtolower($atom->code) === 'xor') {
                     $atom->intval = ($extras['LEFT']->intval xor $extras['RIGHT']->intval);
-                } elseif ($atom->code === '<=>') {
-                    $atom->intval = $extras['LEFT']->intval <=> $extras['RIGHT']->intval;
                 }
                 break;
 

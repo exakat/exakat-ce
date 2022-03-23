@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ GREMLIN
               ->outIs('NAME')
               ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
-              ->addEto('DEFINITION', 'first');
+              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // Link to the actual method
@@ -59,7 +59,7 @@ GREMLIN
 
              ->inIs('NAME')
              ->atomIs('Functioncall')
-             ->addEfrom('DEFINITION', 'method');
+             ->addEFrom('DEFINITION', 'method');
         $this->prepareQuery();
 
     }

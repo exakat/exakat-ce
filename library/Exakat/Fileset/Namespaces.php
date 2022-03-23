@@ -35,22 +35,22 @@ class Namespaces extends Fileset {
             }
         }
     }
-    
+
     public function setFiles(array $files) {
         // No feature here, as namespaces can only be filtered after load
-        
+
         // Nothing to do, just pass the files to the next
         $this->files = $files;
         $this->ignoredFiles = array();
     }
-    
-    public function filterFile(array $result) : bool {
+
+    public function filterFile(array $result): bool {
         $namespace = $result['namespace'];
         $found = false;
         foreach($this->namespaces as $n) {
             if (fnmatch($n, $namespace, FNM_NOESCAPE)) {
                 return true;
-            } 
+            }
         }
 
         return false;

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ use Exakat\Project;
 use Exakat\Vcs\Vcs;
 
 class ProjectConfig extends Config {
-    private   string  $projects_root = '.';
+    private string  $projects_root = '.';
     protected Project $project;
 
     protected $config = array('phpversion'          => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
@@ -37,6 +37,7 @@ class ProjectConfig extends Config {
                               'project_description' => '',
                               'project_branch'      => '',
                               'project_tag'         => '',
+                              'project_rulesets'    => array(),
 // No default value,
 //                              'project_rulesets'    => array(),
                               'file_extensions'     => array('php',
@@ -324,6 +325,7 @@ project_vcs         = "{$this->config['project_vcs']}";
 project_description = "{$this->config['project_description']}";
 project_branch      = "{$this->config['project_branch']}";
 project_tag         = "{$this->config['project_tag']}";
+project_rulesets[]  = "";
 
 $custom_configs
 
@@ -334,6 +336,14 @@ INI;
 
     private static function makeIniArray(string $name, array $array): string {
         return $name . '[] = "' . implode("\";\n{$name}[] = \"", $array) . "\";\n";
+    }
+
+    public function __get(string $name) {
+        if (isset($this->config[$name])) {
+            return $this->config[$name];
+        } else {
+            return null;
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,43 +27,51 @@ use Exakat\Analyzer\Analyzer;
 
 class IsExtInterface extends Analyzer {
     public function analyze(): void {
-        $exts = $this->rulesets->listAllAnalyzer('Extensions');
-
-        $interfaces = array($this->loadIni('php_interfaces.ini', 'interfaces'));
-        foreach($exts as $ext) {
-            $inifile = str_replace('Extensions\Ext', '', $ext);
-            $ini = $this->load($inifile, 'interfaces');
-
-            if (!empty($ini[0])) {
-                $interfaces[] = $ini;
-            }
-        }
-
-        $interfaces = array_merge(...$interfaces);
+        $interfaces = array_merge(exakat('phpCore')->getInterfaceList(),
+                                  exakat('phpExtensions')->getInterfaceList(),
+                                 );
         if (empty($interfaces)) {
             return;
         }
 
         $interfaces = makeFullNsPath($interfaces);
 
+        // implements or extends
         $this->atomIs(self::CLASSES_ALL)
              ->outIs(array('IMPLEMENTS', 'EXTENDS'))
+             ->is('isExt', true)
+             ->fullnspathIs($interfaces);
+        $this->prepareQuery();
+
+        $this->atomIs(self::CLASSES_ALL)
+             ->outIs(array('IMPLEMENTS', 'EXTENDS'))
+             ->is('isPhp', true)
+             ->fullnspathIs($interfaces);
+        $this->prepareQuery();
+
+        // instanceof
+        $this->atomIs('Instanceof')
+             ->outIs('CLASS')
+             ->is('isExt', true)
              ->fullnspathIs($interfaces);
         $this->prepareQuery();
 
         $this->atomIs('Instanceof')
              ->outIs('CLASS')
+             ->is('isPhp', true)
              ->fullnspathIs($interfaces);
         $this->prepareQuery();
 
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
-             ->outIs('TYPEHINT')
+        // Typehints
+        $this->atomIs(self::TYPEHINTABLE)
+             ->outIs(self::TYPE_LINKS)
+             ->is('isExt', true)
              ->fullnspathIs($interfaces);
         $this->prepareQuery();
 
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('RETURNTYPE')
+        $this->atomIs(self::TYPEHINTABLE)
+             ->outIs(self::TYPE_LINKS)
+             ->is('isPhp', true)
              ->fullnspathIs($interfaces);
         $this->prepareQuery();
     }

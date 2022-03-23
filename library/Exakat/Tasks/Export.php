@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -35,13 +35,10 @@ class Export extends Tasks {
     public const NO_NEXT = -1;
 
     private $sequenceFor     = false;
-    private $insideInterface = false;
-    private $dictionary      = null;
     private $php             = null;
 
     public function run(): void {
         $gremlinVersion = $this->gremlin->serverInfo()[0];
-        $this->dictionary = exakat('dictionary');
         $this->php = exakat('php');
 
         if (version_compare($gremlinVersion, '3.4.0') >= 0) {
@@ -83,7 +80,11 @@ class Export extends Tasks {
             array_collect_by($E[$id], $e['inV'], $e['label']);
         }
 
-        if (in_array('Dot', $this->config->project_reports)) {
+        if (in_array('Vis', $this->config->project_reports)) {
+            $renderer = ExportFormat::getInstance('Vis', $V, $E);
+            $text = $renderer->render($root);
+            $extension = $renderer->getExtension();
+        } elseif (in_array('Dot', $this->config->project_reports)) {
             $renderer = ExportFormat::getInstance('Dot', $V, $E);
             $text = $renderer->render($root);
             $extension = $renderer->getExtension();
@@ -169,6 +170,8 @@ class Export extends Tasks {
                 $filename = array_pop($filenames);
                 if (in_array('Dot', $this->config->project_reports)) {
                     $fp = fopen($filename . '.dot', 'w+');
+                } elseif (in_array('Vis', $this->config->project_reports)) {
+                    $fp = fopen($filename . '.html', 'w+');
                 } elseif (in_array('Php', $this->config->project_reports)) {
                     $fp = fopen($filename . '.php', 'w+');
                 } else {

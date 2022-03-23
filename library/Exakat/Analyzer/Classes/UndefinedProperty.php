@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -32,37 +32,34 @@ class UndefinedProperty extends Analyzer {
                      'Complete/SetClassRemoteDefinitionWithTypehint',
                      'Complete/SetClassRemoteDefinitionWithLocalNew',
                      'Complete/VariableTypehint',
+                     'Complete/IsPhpStructure',
+                     'Complete/IsStubStructure',
+                     'Classes/ExtendsStdclass',
                     );
     }
 
     public function analyze(): void {
-//        $includedProperties = $this->readPdff();
-        $includedProperties = array();
-        
-        // only for calls internal to the class. External calls still needs some work
-        // static properties without a definition
-        $this->atomIs(array('Member', 'Staticproperty'))
+        // Check proeprties with local definition
+        $this->atomIs(self::PROPERTIES)
 
-            // do not have __get/__set set up (trait or parents or else) 
+            // do not have __get/__set set up (trait or parents or else)
             ->not(
                 $this->side()
                      ->goToClass()
                      ->analyzerIs('Classes/HasMagicProperty')
             )
 
-            // Do not extends stdclass 
+            // Do not extends stdclass
             ->not(
                 $this->side()
                      ->goToClass()
-                     ->goToAllParents(self::INCLUDE_SELF)
-                     ->outIs('EXTENDS')
-                     ->is('fullnspath', array('\\stdclass'))
+                     ->analyzerIs('Classes/ExtendsStdclass')
             )
 
             // Do not use  #[allowdynamicproperties ]
             ->hasNotAttribute('\\allowdynamicproperties')
 
-             // not a property in a parent class in the code 
+             // not a property in a parent class in the code
              ->inIs('DEFINITION')
              ->atomIs('Virtualproperty')
              ->not(
@@ -74,30 +71,39 @@ class UndefinedProperty extends Analyzer {
              )
 
              // Not a property in a included component
-             ->back('first')
-             ->not(
-                $this->side()
-                     ->outIs('MEMBER')
-                     ->savePropertyAs('fullcode', 'name')
-                     ->goToClass()
-                     ->goToAllParents(self::INCLUDE_SELF) 
-                     ->outIs('EXTENDS')
-                     ->savePropertyAs('fullnspath', 'fnp')
+             ->back('first');
+        $this->prepareQuery();
 
-                     ->raw(<<<GREMLIN
-    filter{ 
-        property = fnp + '::\$' + name; 
-        property in ***;
-    }
-GREMLIN
-, $includedProperties
-)
+        // Check on properties with external definition
+        // relies on isPHP, isStub, isExt
+        $this->atomIs(self::PROPERTIES)
+             ->analyzerIsNot('self')
+             ->hasNoIn('DEFINITION') // No definition found
+
+             ->isNot('isPhp', true)
+             ->isNot('isExt', true)
+             ->isNot('isStub', true)
+
+             ->not( // No dynamic elements
+                $this->side()
+                     ->atomIs('Member')
+                     ->outIs('MEMBER')
+                     ->tokenIsNot('T_STRING')
              )
+             ->not( // No dynamic elements
+                $this->side()
+                     ->atomIs('Staticproperty')
+                     ->outIs('MEMBER')
+                     ->tokenIsNot('T_VARIABLE')
+             )
+
+             // Not a property in a included component
              ->back('first');
         $this->prepareQuery();
 
         // case of public access
-        $this->atomIs(array('Member', 'Staticproperty'))
+        $this->atomIs(self::PROPERTIES)
+             ->analyzerIsNot('self')
              ->hasNoIn('DEFINITION')
              ->outIs(array('OBJECT', 'CLASS'))
              ->inIs('DEFINITION')
@@ -106,84 +112,6 @@ GREMLIN
              ->inIs('DEFINITION')
              ->back('first');
         $this->prepareQuery();
-             
-
-    }
-
-    private function readPdff() : array {
-        $return = array();
-
-        $a = json_decode(file_get_contents($this->config->dir_root.'/php.pdff'));
-        $return[] = $this->readPdffFile($a);
-
-        $list = array('wordpress', 'bbpress', 'buddypress', 'woocommerce', 'acf');
-        foreach($list as $l) {
-            $a = json_decode(file_get_contents('/Users/famille/Desktop/analyzeG3/projects/'.$l.'/pdff'));
-            $return[] = $this->readPdffFile($a);
-        }
-        
-        return array_merge(...$return);
-    }
-    
-    private function readPdffFile($pdff) : array {
-        $return = array();
-        $classes = ($pdff->versions->{'*'} ?? $pdff->versions->{'8.1.0'})->{'\\'}->classes;
-        foreach($classes as $class) {
-            $fnp = '\\'.strtolower($class->name);
-            $return[] = $this->getProperties($class, $fnp);
-            
-            $extends = trim($class->extends, '\\');
-            while (!empty($extends) && isset($pdff->versions->{'*'}->{'\\'}->classes->{$extends}))  {
-                $return[] = $this->getProperties($pdff->versions->{'*'}->{'\\'}->classes->{$extends}, $fnp);
-                
-                $extends = trim($pdff->versions->{'*'}->{'\\'}->classes->{$extends}->extends, '\\');
-            }
-        }
-        
-        $return = array_merge(...$return);
-
-        return $return;
-    }
-    
-    private function getProperties($class, $fnp) : array {
-        $return = [];
-            foreach($class->properties as $property) {
-                $return[] = "$fnp::$property->name";
-            }
-            
-        return $return;
-    }
-
-    private function merges($pdff1, $pdff2) {
-        $return = new \stdClass;
-        foreach($pdff1 as $key => $value) {
-            if (isset($pdff2->{$key})) {
-                switch($key) {
-                    case 'versions':
-                        $return->{$key} = new \Stdclass;
-                        $return->{$key}->{'*'} = new \Stdclass;
-                        
-                        foreach($pdff1->versions->{'*'} as $ns => $namespace) {
-                            $pdff1->versions->{'*'}->{$ns} = $this->merges($pdff1->{$key}->{'*'}->{$ns}, $pdff2->{$key}->{'*'}->{$ns});
-                        }
-                        break;
-                    
-                    default:
-                        print "No recursion for key $key\n";
-                }
-            } else {
-                $return->{$key} = $value;
-            }
-        }
-
-        foreach($pdff2 as $key => $value) {
-            print "KEy 2 : $key\n";
-            if (!isset($pdff1->{$key})) {
-                $return->{$key} = $value;
-            }
-        }
-        
-        return $return;
     }
 }
 

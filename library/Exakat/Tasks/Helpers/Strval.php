@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -152,7 +152,7 @@ class Strval extends Plugin {
                 }
                 break;
 
-            case 'Logical' :
+            case 'Bitwise' :
                 if ($atom->code === '|') {
                     if (is_string($extras['LEFT']->noDelimiter) && is_string($extras['RIGHT']->noDelimiter)) {
                         $atom->noDelimiter = $extras['LEFT']->noDelimiter | $extras['RIGHT']->noDelimiter;
@@ -171,7 +171,15 @@ class Strval extends Plugin {
                     } else {
                         $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter ^ (int) $extras['RIGHT']->noDelimiter);
                     }
-                } elseif ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
+                }
+                break;
+
+            case 'Spaceship' :
+                $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter <=> (int) $extras['RIGHT']->noDelimiter);
+                break;
+
+            case 'Logical' :
+                if ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
                     $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter && (int) $extras['RIGHT']->noDelimiter;
                 } elseif ($atom->code === '||' || mb_strtolower($atom->code) === 'or') {
                     $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter && (int) $extras['RIGHT']->noDelimiter;
