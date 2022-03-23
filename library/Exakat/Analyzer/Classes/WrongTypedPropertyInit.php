@@ -87,20 +87,44 @@ class WrongTypedPropertyInit extends Analyzer {
         // class x { false|int a $a = 'string';}
         $this->atomIs('Propertydefinition')
              ->inIs('PPP')
-             ->is('typehint', 'or')
+             ->as('ppp')
+             ->is('typehint', array('or', 'and'))
              ->not(
                  $this->side()
                       ->outIs('TYPEHINT')
                       ->atomIs('Void')
              )
 
-             ->outIs('PPP')
+             ->back('first') // This avoids ending on another property definition when in multiple PPP definition
              ->outIs('DEFAULT')
-             ->atomIs(array('Integer', 'Float', 'Null', 'Boolean', 'Arrayliteral'), self::WITH_CONSTANTS)
+             ->atomIs(array('Integer', 'Float', 'Null', 'Boolean', 'Arrayliteral', 'String', 'New', 'Functioncall'), self::WITH_CONSTANTS)
              ->savePropertyAs('label', 'type')
-             ->back('first')
+             // For New values
+             ->optional(
+                $this->side()
+                     ->atomIs('New')
+                     ->outIs('NEW')
+                     ->savePropertyAs('fullnspath', 'fqn')
+             )
+             // For false values
+             ->optional(
+                $this->side()
+                     ->atomIs('Boolean')
+                     ->savePropertyAs('fullnspath', 'fqn2')
+             )
+             // For returntypes
+             ->optional(
+                $this->side()
+                     ->atomIs('Functioncall')
+                     ->inIs('DEFINITION')
+                     ->outIs('RETURNTYPE') // This wil only works with single return types
+                     ->savePropertyAs('fullnspath', 'fqn3')
+             )
+             ->back('ppp')
 
-             ->notCompatibleWithType('type');
+             ->notCompatibleWithType('type')
+             ->back('first');
+
         $this->prepareQuery();
     }
 }

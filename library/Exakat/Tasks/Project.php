@@ -24,6 +24,7 @@ namespace Exakat\Tasks;
 
 use Exakat\Analyzer\Rulesets;
 use Exakat\Exakat;
+use Exakat\Helpers\Timer;
 use Exakat\Exceptions\MissingGremlin;
 use Exakat\Exceptions\InvalidProjectName;
 use Exakat\Exceptions\NoCodeInProject;
@@ -46,6 +47,7 @@ class Project extends Tasks {
 
     protected $reports       = array();
     protected $reportConfigs = array();
+    private Timer $timer;
 
     public function __construct(bool $subTask = self::IS_NOT_SUBTASK) {
         parent::__construct($subTask);
@@ -53,6 +55,8 @@ class Project extends Tasks {
         if (empty($this->reports)) {
             $this->reports = makeArray($this->config->project_reports);
         }
+
+        $this->timer = new Timer();
     }
 
     public function run(): void {
@@ -265,20 +269,16 @@ class Project extends Tasks {
     }
 
     private function logTime(string $step): void {
-        static $log, $begin, $end, $start;
+        static $log;
 
         if ($log === null) {
             $log = fopen("{$this->config->log_dir}/project.timing.csv", 'w+');
         }
 
-        $end = microtime(true);
-        if ($begin === null) {
-            $begin = $end;
-            $start = $end;
-        }
+        $this->timer->end();
 
-        fwrite($log, $step . "\t" . ($end - $begin) . "\t" . ($end - $start) . PHP_EOL);
-        $begin = $end;
+        fwrite($log, $step . "\t" . $this->timer->duration() . PHP_EOL);
+        $this->timer = new Timer();
     }
 
     private function analyzeOne(array $analyzers, int $audit_start, bool $verbose): void {

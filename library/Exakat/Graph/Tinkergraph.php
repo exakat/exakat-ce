@@ -26,6 +26,7 @@ use Exakat\Graph\Helpers\GraphResults;
 use Exakat\Exceptions\GremlinException;
 use Exakat\Exceptions\UnknownGremlinVersion;
 use Brightzone\GremlinDriver\Connection;
+use Exakat\Helpers\Timer;
 
 class Tinkergraph extends Graph {
     public const CHECKED = true;
@@ -99,7 +100,6 @@ class Tinkergraph extends Graph {
             $this->checkConfiguration();
         }
 
-        $b = microtime(true);
         $params['#jsr223.groovy.engine.keep.globals'] = 'phantom';
         foreach ($params as $name => $value) {
             $this->db->message->bindValue($name, $value);
@@ -185,14 +185,14 @@ class Tinkergraph extends Graph {
         $this->init();
         sleep(1);
 
-        $b = microtime(true);
+        $timer = new Timer();
         $round = -1;
         do {
             $res = $this->checkConnection();
             ++$round;
             usleep(100000 * $round);
         } while (!$res && $round < 20);
-        $e = microtime(true);
+        $timer->end();
 
         display("Restarted in $round rounds\n");
 
@@ -204,7 +204,7 @@ class Tinkergraph extends Graph {
             $pid = 'Not yet';
         }
 
-        display('started [' . $pid . '] in ' . number_format(($e - $b) * 1000, 2) . ' ms' );
+        display('started [' . $pid . '] in ' . number_format($timer->duration(Timer::MS), 2) . ' ms' );
     }
 
     public function stop(): void {

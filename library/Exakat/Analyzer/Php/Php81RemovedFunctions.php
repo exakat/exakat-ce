@@ -44,7 +44,7 @@ class Php81RemovedFunctions extends Analyzer {
                            'mhash_keygen_s2k',
                            );
 
-        $this->atomFunctionIs(makeFullnspath($functions))
+        $this->atomFunctionIs(makeFullNsPath($functions))
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'fnp')
              ->back('first')

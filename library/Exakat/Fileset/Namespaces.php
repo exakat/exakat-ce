@@ -29,9 +29,9 @@ class Namespaces extends Fileset {
     public function __construct(array $namespaces) {
         foreach(array_filter($namespaces) as $namespace) {
             if ($namespace[0] === '\\') {
-                $this->namespaces[] = "$namespace*";
+                $this->namespaces[] = mb_strtolower("$namespace*");
             } else {
-                $this->namespaces[] = "*$namespace*";
+                $this->namespaces[] = mb_strtolower("*$namespace*");
             }
         }
     }
@@ -46,7 +46,7 @@ class Namespaces extends Fileset {
 
     public function filterFile(array $result): bool {
         $namespace = $result['namespace'];
-        $found = false;
+
         foreach($this->namespaces as $n) {
             if (fnmatch($n, $namespace, FNM_NOESCAPE)) {
                 return true;

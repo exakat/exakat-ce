@@ -27,7 +27,7 @@ class Calls {
 
     private $definitions = array();
     private $calls       = array();
-    private $globals     = array();
+//    private $globals     = array();
 
     public function __construct(\Sqlite3 $sqlite) {
         $this->callsSqlite = $sqlite;
@@ -50,14 +50,6 @@ CREATE TABLE IF NOT EXISTS definitions (
     globalpath STRING,
     atom STRING,
     id INTEGER
-)
-SQL;
-        $this->callsSqlite->query($definitions);
-
-        $definitions = <<<'SQL'
-CREATE TABLE IF NOT EXISTS globals (
-    origin INTEGER,
-    destination INTEGER
 )
 SQL;
         $this->callsSqlite->query($definitions);
@@ -96,10 +88,6 @@ SQL;
             }
             $this->globals = array();
         }
-    }
-
-    public function addGlobal(int $origin, int $destination): void {
-        $this->globals[] = "('{$origin}','{$destination}')";
     }
 
     public function addCall(string $type, string $fullnspath, AtomInterface $call): void {

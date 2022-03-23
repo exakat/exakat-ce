@@ -71,6 +71,7 @@ class UndefinedInterfaces extends Analyzer {
              ->noClassDefinition()
              ->noInterfaceDefinition()
              ->noUseDefinition()
+             ->has('line')
              ->isNotIgnored()
              ->isNot('isPhp', true)
              ->isNot('isExt', true)

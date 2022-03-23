@@ -33,6 +33,7 @@ use Exakat\GraphElements;
 use Exakat\Log;
 use Exakat\Query\Query;
 use Exakat\Dump\Dump as DumpDb;
+use Exakat\Helpers\Timer;
 
 class Dump extends Tasks {
     public const CONCURENCE = self::DUMP;
@@ -157,14 +158,17 @@ class Dump extends Tasks {
                     unset($rulesets[$id]);
                 }
             }
+
+            if (empty($rulesets)) {
+                throw new NoSuchAnalyzer($rulesets, $this->rulesets);
+            }
+
             display('Processing ' . count($rulesets) . ' analyzer' . (count($rulesets) > 1 ? 's' : '') . ' : ' . implode(', ', $rulesets));
 
             if(count($rulesets) > 1) {
                 $this->processResultsList($rulesets, $counts);
                 $this->expandRulesets();
                 $this->collectHashAnalyzer();
-            } elseif (empty($rulesets)) {
-                throw new NoSuchAnalyzer($rulesets, $this->rulesets);
             } else {
                 $analyzer = array_pop($rulesets);
                 if (isset($counts[$analyzer])) {
@@ -232,7 +236,12 @@ class Dump extends Tasks {
         $ignore_dirs       = array();
         $ignore_namespaces = array();
         $filters           = array();
-        $analyzers = array_filter($analyzers, function (string $s): bool { return substr($s, 0, 9) !== 'Complete/' && substr($s, 0, 5) !== 'Dump/'; });
+        $analyzers = array_filter($analyzers, function (string $s): bool {
+            return substr($s, 0, 9) !== 'Complete/' &&
+                   (substr($s, 0, 5) !== 'Dump/'     ||
+                    $s === 'Dump/CouldBeAConstant')
+                   ;
+        });
         // Remove analysis that are not exported via dump
         foreach($analyzers as $id => $analyzer) {
             $a = $this->rulesets->getInstance($analyzer);
@@ -299,7 +308,14 @@ GREMLIN
             ->getVariable(array('fullcode_', 'file', 'ligne', 'theNamespace', 'theClass', 'theFunction', 'analyzer'),
                           array('fullcode',  'file', 'line' , 'namespace',    'class',    'function',    'analyzer'));
             $query->prepareRawQuery();
-            $res = $this->gremlin->query($query->getQuery(), $query->getArguments())->toArray();
+            try {
+                $res = $this->gremlin->query($query->getQuery(), $query->getArguments())->toArray();
+            } catch (\Throwable $e) {
+                $rows = explode(PHP_EOL, $e->getMessage());
+                $this->log->log('error while dumping data' . PHP_EOL . $rows[0]);
+
+                continue;
+            }
 
             $toDump = array();
             foreach($res as $result) {
@@ -450,7 +466,7 @@ GREMLIN
 .where(__.out("IMPLEMENTS").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ implementList.push( it.get().value("fullnspath"));}.fold() )
 .where(__.out("USE").hasLabel("Usetrait").out("USE").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
 .where(__.out("USE").hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
-.where(__.out("METHOD", "MAGICMETHOD", "USE", "PPP", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
+.where(__.out("METHOD", "MAGICMETHOD", "USE", "PPP", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where(__.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV() ).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 GREMLIN
              )->selectMap(array(
@@ -544,7 +560,7 @@ GREMLIN
 
               ->raw(<<<GREMLIN
  where(__.out("EXTENDS").sideEffect{ extendList.add(it.get().value("fullnspath")); }.fold() )
-.where( __.out("METHOD", "MAGICMETHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
+.where( __.out("METHOD", "MAGICMETHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 GREMLIN
               )
@@ -615,7 +631,7 @@ GREMLIN
 
               ->raw(<<<GREMLIN
  where(__.out("EXTENDS").sideEffect{ extendList.add(it.get().value("fullnspath")); }.fold() )
-.where( __.out("METHOD", "MAGICMETHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
+.where( __.out("METHOD", "MAGICMETHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 .where(__.out("TYPEHINT").sideEffect{ type = it.get().value("fullcode"); }.fold() )
 GREMLIN
@@ -695,7 +711,7 @@ GREMLIN
               ->raw(<<<GREMLIN
  where(__.out("USE").hasLabel("Usetrait").out("USE").sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
 .where(__.out("USE").hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
-.where( __.out("METHOD", "MAGICMETHOD", "CONST", "USE", "PPP").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).sideEffect{ lines.add(it.get().value("line")); }.fold())
+.where( __.out("METHOD", "MAGICMETHOD", "CONST", "USE", "PPP").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 GREMLIN
 )           ->selectMap(array(
@@ -885,12 +901,12 @@ GREMLIN
             __.sideEffect{ alias = false; }
           )
          .as("method")
-         .in("METHOD", "MAGICMETHOD").hasLabel("Class", "Interface", "Trait").sideEffect{classe = it.get().value("fullnspath"); classline =  it.get().value("line"); }
+         .in("METHOD", "MAGICMETHOD").hasLabel("Class", "Interface", "Trait").has("line").sideEffect{classe = it.get().value("fullnspath"); classline =  it.get().value("line"); }
          .select("method")
          .where( __.sideEffect{ lines = [it.get().value("line")];}
                    .out("BLOCK").out("EXPRESSION")
                    .emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING)
-                   .sideEffect{ lines.add(it.get().value("line")); }
+                   .has("line").sideEffect{ lines.add(it.get().value("line")); }
                    .fold()
           )
           .where( __.out('RETURNTYPE').not(hasLabel('Void')).sideEffect{ returntype.add(it.get().value("fullcode"));  
@@ -1545,8 +1561,8 @@ GREMLIN
 
               ->raw(<<<GREMLIN
  where( 
-    __.out("BLOCK").sideEffect{ lines.add(it.get().value("line")); }
-      .out("EXPRESSION").emit().repeat( __.out({$this->linksDown})).times($MAX_LOOPING)
+    __.out("BLOCK").has("line").sideEffect{ lines.add(it.get().value("line")); }
+      .out("EXPRESSION").emit().repeat( __.out({$this->linksDown})).times($MAX_LOOPING).has("line")
       .sideEffect{ lines.add(it.get().value("line")); }
       .fold()
  )
@@ -2035,19 +2051,20 @@ GREMLIN
     }
 
     public function collect(): void {
-        $begin = microtime(\TIME_AS_NUMBER);
+        $timer = new Timer();
         $this->collectFiles();
 
         $this->collectStructures();
-        $end = microtime(\TIME_AS_NUMBER);
-        $this->log->log( 'Collected Structures: ' . number_format(1000 * ($end - $begin), 2) . "ms\n");
+
+        $timer->end();
+        $this->log->log( 'Collected Structures: ' . number_format($timer->duration(Timer::MS), 2) . "ms\n");
 
         // Dev only
         if ($this->config->is_phar === Config::IS_NOT_PHAR) {
-            $begin = microtime(\TIME_AS_NUMBER);
+            $timer = new Timer();
             $this->collectMissingDefinitions();
-            $end = microtime(\TIME_AS_NUMBER);
-            $this->log->log( 'Collected Missing definitions : ' . number_format(1000 * ($end - $begin), 2) . "ms\n");
+            $timer->end();
+            $this->log->log( 'Collected Missing definitions : ' . number_format($timer->duration(Timer::MS), 2) . "ms\n");
         }
     }
 

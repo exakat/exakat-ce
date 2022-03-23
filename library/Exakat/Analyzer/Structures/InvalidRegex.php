@@ -31,7 +31,7 @@ class InvalidRegex extends Analyzer {
     }
 
     public function analyze(): void {
-        $functionList = makeFullnspath(UnknownPregOption::$functions);
+        $functionList = makeFullNsPath(UnknownPregOption::$functions);
 
         $this->atomFunctionIs($functionList)
              ->outWithRank('ARGUMENT', 0)

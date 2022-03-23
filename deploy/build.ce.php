@@ -10,13 +10,6 @@ define('ROOT_DIR', getcwd());
 
 shell_exec('composer update --no-dev');
 
-$php = file_get_contents('library/Exakat/Exakat.php');
-$build = preg_match('/    const BUILD = (\d+);/', $php, $r);
-$neo_build = ++$r[1];
-
-$php = preg_replace('/    const BUILD = (\d+);/', '    const BUILD = '.$neo_build.';', $php);
-file_put_contents('library/Exakat/Exakat.php', $php);
-
 $begin = hrtime(true);
 // create with alias "project.phar"
 $phar = new Phar(PHAR_NAME, 0, PHAR_NAME);
@@ -32,12 +25,14 @@ $directories = array('/library/Exakat/Autoload',
                      '/library/Exakat/Dump', 
                      '/library/Exakat/Exceptions', 
                      '/library/Exakat/Graph', 
+                     '/library/Exakat/Fileset', 
                      '/library/Exakat/Loader', 
                      '/library/Exakat/Vcs', 
                      '/library/Exakat/Stubs', 
                      '/library/Exakat/Log', 
                      '/library/Exakat/Query', 
                      '/library/Exakat/Tasks', 
+                     '/library/Exakat/Helpers', 
                      '/library/Exakat/Reports/Helpers', 
                      '/library/Exakat/Reports/Data', 
 
@@ -45,6 +40,7 @@ $directories = array('/library/Exakat/Autoload',
                      '/human',
                      '/server',
                      '/vendor',
+                     '/media/devfaceted',
                      );
 
 $rulesets = array(
@@ -308,6 +304,8 @@ $analyzers = array(
 'Functions/CallbackNeedsReturn',
 'Functions/DynamicCode',
 'Variables/SelfTransform',
+'Variables/Blind',
+'Classes/ExtendsStdclass',
 );
 
 $missing = 0;
@@ -325,9 +323,11 @@ if ($missing > 0) {
 }
 
 $reports = array('None',
-#'Perfile',
+'Perfile',
+'Text',
 'Sarif',
 'Reports',
+'Phpcompilation',
 'Diplomat',
 'Emissary',
 );
@@ -357,6 +357,9 @@ $fichiers = array('exakat',
                   'library/Exakat/Analyzer/RulesetsIgnore.php', 
                   'library/Exakat/Analyzer/RulesetsInterface.php', 
                   'library/Exakat/Analyzer/RulesetsMain.php', 
+                  
+                  'library/Exakat/Reports/Diplomat.yaml',
+                  'library/Exakat/Reports/Emissary.yaml',
                  );
 
 foreach($directories as $directory) {
@@ -371,45 +374,13 @@ foreach($fichiers as $fichier) {
     $phar->addFile(ROOT_DIR . '/' . $fichier, $fichier);
 }
 
-copy(ROOT_DIR . '/data/analyzers.sqlite', '/tmp/analyzers.sqlite');
-$sqlite = new Sqlite3('/tmp/analyzers.sqlite', SQLITE3_OPEN_READWRITE);
-
-# Remove analyzers that are not published
-$sqlite->query('DELETE FROM analyzers WHERE (folder || "/" || name) NOT IN ("'.join('", "', $analyzers).'")');
-
-# Remove links that are non existents
-$sqlite->query(<<<SQL
-DELETE FROM analyzers_categories WHERE id_analyzer IN (
-    SELECT analyzers_categories.id_analyzer FROM analyzers_categories left 
-    JOIN analyzers 
-        ON analyzers_categories.id_analyzer = analyzers.id 
-        WHERE analyzers.id is null
-    );
-SQL
-);
-
-# Remove analyzers that are not published
-$sqlite->query('DELETE FROM categories WHERE name NOT IN ("'.join('", "', $rulesets).'")');
-
-# Remove links that are non existents
-$sqlite->query(<<<SQL
-DELETE FROM analyzers_categories WHERE id_categories IN (
-    SELECT analyzers_categories.id_categories 
-    FROM analyzers_categories 
-    LEFT JOIN categories 
-        ON analyzers_categories.id_categories = categories.id 
-        WHERE categories.id IS NULL
-    );
-SQL
-);
-
+$sqlite = new Sqlite3('./data/analyzers.sqlite', SQLITE3_OPEN_READWRITE);
 $res = $sqlite->query('select count(*) from analyzers');
 print $res->fetchArray()[0]. " lines in the table analyze\n";
 unset($res);
 
 $sqlite->query('VACUUM');
-$phar->addFile('/tmp/analyzers.sqlite', '/data/analyzers.sqlite');
-unlink('/tmp/analyzers.sqlite');
+$phar->addFile('./data/analyzers.sqlite', '/data/analyzers.sqlite');
 
 $defaultStub = $phar->createDefaultStub('exakat', 'exakat');
 $stub = "#!/usr/bin/env php \n$defaultStub";

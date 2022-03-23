@@ -38,7 +38,7 @@ class CouldBeFloat extends CouldBeType {
         $this->checkPropertyRelayedDefault($floatAtoms);
 
         // property relayed typehint
-        $this->checkPropertyRelayedtypehint(array('Scalartypehint'), $floatFnp);
+        $this->checkPropertyRelayedTypehint(array('Scalartypehint'), $floatFnp);
 
         // property relayed typehint
         $this->checkPropertyWithCalls(array('Scalartypehint'), $floatFnp);
@@ -63,7 +63,7 @@ class CouldBeFloat extends CouldBeType {
 
         $this->checkReturnedDefault($floatAtoms);
 
-        $this->checkReturnedtypehint(array('Scalartypehint'), $floatFnp);
+        $this->checkReturnedTypehint(array('Scalartypehint'), $floatFnp);
 
         // class a implements b { function () : float {} }
         $this->checkOverwrittenReturnType($floatFnp);

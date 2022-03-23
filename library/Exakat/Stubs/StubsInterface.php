@@ -40,4 +40,11 @@ interface StubsInterface {
     public function getPropertyList(): array;
     public function getMethodList(): array;
     public function getInterfaceMethodsNameAndCount(): array;
+    public function getFinalClasses(): array;
+    public function getFinalClassConstants(): array;
+    public function getFunctionNamesList(): array;
+    public function getClassMethodNamesList(): array;
+    public function getNamespaceList(): array;
+    public function getConstructorsArgsInterval(): array;
+    public function getMethodsArgsInterval(): array;
 }

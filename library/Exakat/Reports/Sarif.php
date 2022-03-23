@@ -50,7 +50,7 @@ class Sarif extends Reports {
     public function _generate(array $analyzerList): string {
         $driver = new ToolComponent('Exakat');
         $driver->setInformationUri('https://www.exakat.io/');
-        $driver->setFullName('Exakat 2.3.0');
+        $driver->setFullName('Exakat ' . Exakat::VERSION);
         $driver->setSemanticVersion(Exakat::VERSION);
         $driver->setVersion(Exakat::VERSION);
 
@@ -104,7 +104,7 @@ class Sarif extends Reports {
 
             $location = new Location();
             $artifactLocation = new ArtifactLocation();
-            $artifactLocation->setUri($row['file']);
+            $artifactLocation->setUri(ltrim($row['file'], '/'));
             $physicalLocation = new PhysicalLocation($artifactLocation);
             $region = new Region();
             $region->setStartLine($row['line']);

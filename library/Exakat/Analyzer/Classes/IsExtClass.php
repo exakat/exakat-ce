@@ -34,16 +34,10 @@ class IsExtClass extends Analyzer {
 
     public function analyze(): void {
         // function foo() : \Generator {}
-        $this->analyzerIs('Classes/ClassUsage')
-             ->hasNoIn('DEFINITION')
-             ->is('isExt', true);
-        $this->prepareQuery();
-
         // function foo() : \Generator {}
         $this->analyzerIs('Classes/ClassUsage')
              ->hasNoIn('DEFINITION')
-             ->is('isPhp', true)
-             ->analyzerIsNot('self');
+             ->isAnyOf(array('isExt', 'isPhp'), true);
         $this->prepareQuery();
     }
 }

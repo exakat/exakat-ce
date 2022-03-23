@@ -22,6 +22,7 @@
 
 namespace Exakat\Tasks;
 
+use Exakat\Helpers\Timer;
 use Exakat\GraphElements;
 use Exakat\Graph\Graph;
 use Exakat\Project;
@@ -798,7 +799,7 @@ class Load extends Tasks {
     }
 
     private function processFile(string $filename, string $path, bool $compileCheck = self::COMPILE_CHECK): int {
-        $begin = microtime(\TIME_AS_NUMBER);
+        $timer = new Timer();
         $fullpath = $path . $filename;
 
         $this->filename = $filename;
@@ -953,15 +954,16 @@ class Load extends Tasks {
             $this->stats['loc'] += $line;
         }
 
-        $end = microtime(\TIME_AS_NUMBER);
-        $load = ($end - $begin) * 1000;
+        $timer->end();
+        $load = $timer->duration(Timer::MS);
 
         $atoms = count($this->atoms);
         $links = count($this->links);
-        $begin = microtime(\TIME_AS_NUMBER);
+
+        $timer = new Timer();
         $this->saveFiles();
-        $end = microtime(\TIME_AS_NUMBER);
-        $save = ($end - $begin) * 1000;
+        $timer->end();
+        $save = $timer->duration(Timer::MS);
 
         $this->log->log("$filename\t$load\t$save\t$log[token_initial]\t$atoms\t$links");
 
@@ -1592,6 +1594,7 @@ class Load extends Tasks {
             $rank = 0;
             $uses = array();
             do {
+                $this->checkPhpDoc();
                 $this->moveToNext(); // Skip ( or ,
 
                 if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS), 0)) {
@@ -2097,7 +2100,7 @@ class Load extends Tasks {
             $extends = '';
             $class->ws->toextends = '';
         }
-        $this->checkPhpdoc($class->ws);
+        $this->checkPhpdoc();
 
         $implements = $this->processImplements($class);
 
@@ -3862,8 +3865,6 @@ class Load extends Tasks {
 
                 if ($element->atom === 'Globaldefinition') {
                     $this->makeGlobal($element);
-
-                    $this->calls->addGlobal($this->theGlobals[$element->code]->id, $element->id);
                 }
 
                 if ($this->nextIs(array($this->phptokens::T_EQUAL))) {
@@ -3991,7 +3992,6 @@ class Load extends Tasks {
             $bracket->globalvar = '$' . $index->noDelimiter;
 
             $this->makeGlobal($index);
-            $this->calls->addGlobal($this->theGlobals[$bracket->globalvar]->id, $bracket->id);
         }
 
         $bracket->fullcode  = $variable->fullcode . $opening . $index->fullcode . $closing ;
@@ -5269,7 +5269,6 @@ class Load extends Tasks {
 
         if ($atomName === 'Phpvariable' && in_array($atom->code, array('$GLOBALS', '$_SERVER', '$_REQUEST', '$_POST', '$_GET', '$_FILES', '$_ENV', '$_COOKIE', '$_SESSION'), \STRICT_COMPARISON)) {
             $this->makeGlobal($atom);
-            $this->calls->addGlobal($this->theGlobals[$atom->code]->id, $atom->id);
         } elseif (!in_array($atomName, array('Parametername', 'Parameter', 'Staticpropertyname', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'This'), \STRICT_COMPARISON) &&
             $this->nextIs(array($this->phptokens::T_VARIABLE), 0)) {
             if ($this->currentVariables->exists($atom->code)) {
@@ -5285,7 +5284,6 @@ class Load extends Tasks {
 
                 if (!$this->contexts->isContext(Context::CONTEXT_FUNCTION)) {
                     $this->makeGlobal($definition);
-                    $this->calls->addGlobal($this->theGlobals[$definition->code]->id, $definition->id);
                 }
             }
         }
@@ -6272,9 +6270,9 @@ class Load extends Tasks {
     private function processCurlyExpression(): AtomInterface {
         $current = $this->id;
         $this->moveToNext();
-        while (!$this->nextIs(array($this->phptokens::T_CLOSE_CURLY))) {
+        do {
             $code = $this->processNext();
-        }
+        } while (!$this->nextIs(array($this->phptokens::T_CLOSE_CURLY)));
         $this->popExpression();
 
         $block = $this->addAtom('Block', $this->id);
@@ -6879,9 +6877,9 @@ class Load extends Tasks {
         $current = $this->id;
         // Simply skipping the ...
         $finals = $this->precedence->get($this->phptokens::T_ELLIPSIS);
-        while (!$this->nextIs($finals)) {
+        do {
             $operand = $this->processNext();
-        }
+        } while (!$this->nextIs($finals));
 
         $this->popExpression();
         $operand->fullcode     = '...' . $operand->fullcode;
@@ -7021,9 +7019,9 @@ class Load extends Tasks {
         $this->addLink($instanceof, $left, 'VARIABLE');
 
         $finals = $this->precedence->get($this->tokens[$this->id][0]);
-        while (!$this->nextIs($finals)) {
+        do {
             $right = $this->processNext();
-        }
+        } while (!$this->nextIs($finals));
         $this->popExpression();
 
         $this->addLink($instanceof, $right, 'CLASS');

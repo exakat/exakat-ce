@@ -28,9 +28,16 @@ use Exakat\Vcs\Vcs;
 use Exakat\Exceptions\NeedsAnalyzerThema;
 use Exakat\Exceptions\NoCodeInProject;
 use Exakat\Exceptions\ProjectNeeded;
+use Exakat\Helpers\Timer;
 
 class Cobble extends Tasks {
     public const CONCURENCE = self::ANYTIME;
+    
+    private Timer $timer;
+    
+    public __construct() {
+        $this->timer = new Timer();
+    }
 
     public function run(): void {
         if ($this->config->project->isDefault()) {
@@ -50,6 +57,7 @@ class Cobble extends Tasks {
 
             return;
         }
+
 
         $vcs = new $vcs($this->config->project, $this->config->code_dir);
         if (!empty($this->config->branch) && $vcs->hasBranch($this->config->branch)) {
@@ -88,10 +96,11 @@ class Cobble extends Tasks {
 
         $this->logTime('Cobbling');
         foreach($this->config->program as $program) {
+            $this->logTime('Cobbling ' . $program);
             $cobbler = Cobbler::getInstance($program, $this->config);
 
             if (!$this->config->noDependencies && !empty($cobbler->dependsOn())) {
-                display("Analysis\n");
+                display('Analysis : ' . implode(', ', $cobbler->dependsOn()) . "\n");
                 $configThema = $this->config->duplicate(array(
                     'norefresh' => true,
                     'program' => $cobbler->dependsOn(),
@@ -101,6 +110,8 @@ class Cobble extends Tasks {
                 $analyze = new Analyze(self::IS_SUBTASK);
                 $analyze->setConfig($configThema);
                 $analyze->run();
+            } else {
+                print "Pas de dependances\n";
             }
 
             display("Cobbling\n");
@@ -136,7 +147,7 @@ class Cobble extends Tasks {
             $args[] = $this->config->dirname;
         } elseif (!empty($this->config->filename)) {
             $args[] = '-f';
-            $args[] = $this->config->filename[0];
+            $args[] = $this->config->filename[0] . '.out';
         } elseif (!empty($this->config->branch)) {
             $args[] = '--branch';
             $args[] = $this->config->branch;
@@ -157,7 +168,7 @@ class Cobble extends Tasks {
     }
 
     private function logTime(string $step): void {
-        static $log, $begin, $end, $start;
+        static $log;
 
         if ($log === null) {
             $log = fopen("{$this->config->log_dir}/cobbling.timing.csv", 'a');
@@ -167,14 +178,10 @@ class Cobble extends Tasks {
             return;
         }
 
-        $end = microtime(true);
-        if ($begin === null) {
-            $begin = $end;
-            $start = $end;
-        }
+        $this->timer->end();
 
-        fwrite($log, $step . "\t" . ($end - $begin) . "\t" . ($end - $start) . PHP_EOL);
-        $begin = $end;
+        fwrite($log, $step . "\t" . $this->timer->end() . PHP_EOL);
+        $this->timer = new Timer();
     }
 }
 ?>

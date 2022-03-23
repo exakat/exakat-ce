@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class ClassConstantUsage extends Analyzer {
-    protected $classConstants = array();
+    protected array $classConstants = array();
 
     public function analyze(): void {
         $this->atomIs('Staticconstant')

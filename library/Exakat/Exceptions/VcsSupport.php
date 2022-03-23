@@ -26,7 +26,7 @@ namespace Exakat\Exceptions;
 use Exception;
 
 class VcsSupport extends \Exception {
-    public function __construct(string $vcs, string $message = 'doesn\'t support this feature.', int $code = 0, Exception $previous = null) {
+    public function __construct(string $vcs, string $message = 'doesn\'t support this feature.', int $code = 0, ?Exception $previous = null) {
 
         parent::__construct("$vcs $message.\n", $code, $previous);
     }

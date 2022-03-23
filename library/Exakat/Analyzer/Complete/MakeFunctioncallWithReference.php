@@ -40,7 +40,7 @@ class MakeFunctioncallWithReference extends Complete {
         $methods = $this->methods->getFunctionsReferenceArgs();
         $functions = array();
         foreach($methods as $method) {
-            array_collect_by($functions, $method['position'], makeFullnspath($method['function']));
+            array_collect_by($functions, $method['position'], makeFullNsPath($method['function']));
         }
 
         foreach($functions as $position => $calls) {
