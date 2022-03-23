@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -86,12 +86,33 @@ class Analyze extends Tasks {
         } elseif (!empty($this->config->project_rulesets)) {
             $ruleset = $this->config->project_rulesets;
 
+            if ($ruleset[0] === 'Complete') {
+                $all = $this->config->projectConfig ?? $this->config->exakatConfig;
+
+                $ruleset = array();
+                foreach($all->project_rulesets as $rule) {
+
+                    if (empty($this->datastore->getHash(trim($rule, '"')))) {
+                        $ruleset[] = $rule;
+                    }
+                }
+
+                // drop the first one, as it may be already running
+                array_unshift($ruleset);
+                if (empty($ruleset)) {
+                    display('All needed ruleset are done. Aborting.');
+                    die();
+                }
+
+                print 'Completing the following rulesets ' . implode(', ', $ruleset) . PHP_EOL;
+            }
+
             if ((!$analyzersClass = $this->rulesets->getRulesetsAnalyzers($ruleset)) && ($ruleset[0] !== 'None')) {
                 throw new NoSuchRuleset(implode(', ', $ruleset), $this->rulesets->getSuggestionRuleset($ruleset));
             }
 
-            // todo : unidentified rules are omitted at execution time
-            // may be we could spot them here, and fix.
+            // @todo : unidentified rules are omitted at execution time
+            // may be we could spot them here, and fix or report
 
             $this->datastore->addRow('hash', array(implode('-', $this->config->project_rulesets) => count($analyzersClass) ) );
 

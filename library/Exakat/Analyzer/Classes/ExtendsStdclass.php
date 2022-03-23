@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 /*
  * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Analyzer;
 
 class ExtendsStdclass extends Analyzer {
-    public function analyze() : void {
+    public function analyze(): void {
         // class x extends \\stdclass
         $this->atomIs(self::CLASSES_ALL)
              ->extending(array('\\stdclass'))

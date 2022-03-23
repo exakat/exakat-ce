@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -39,7 +39,6 @@ class Extension extends Analyzer {
                      );
     }
 
-
     public function analyze(): void {
         if (empty($this->source)) {
             return;
@@ -47,257 +46,422 @@ class Extension extends Analyzer {
 
         if (substr($this->source, -4) === '.ini') {
             $ini = (object) $this->loadIni($this->source);
+
+            $ini->constants = array_filter($ini->constants ?? array());
+            $constants = makeFullNsPath($ini->constants, \FNP_CONSTANT);
+
+            $ini->functions = array_filter($ini->functions ?? array());
+            $functions = makeFullNsPath($ini->functions);
+
+            $ini->classes = array_filter($ini->classes ?? array());
+            $classes = makeFullNsPath($ini->classes);
+
+            $ini->interfaces = array_filter($ini->interfaces ?? array());
+            $interfaces = makeFullNsPath($ini->interfaces);
+
+            $ini->traits = array_filter($ini->traits ?? array());
+            $traits = makeFullNsPath($ini->traits);
+
+            $ini->enums = array_filter($ini->enums ?? array());
+            $enums = makeFullNsPath($ini->enums);
+
+            $ini->namespaces = array_filter($ini->namespaces ?? array());
+            $namespaces = makeFullNsPath($ini->namespaces);
+
+            $ini->directives = array_filter($ini->directives ?? array());
+            $directives = makeFullNsPath($ini->directives);
+
+            $ini->classconstants = array_filter($ini->classconstants ?? array());
+            $classConstants = makeFullNsPath($ini->classconstants);
+
+            $ini->properties = array_filter($ini->properties ?? array());
+            $properties = makeFullNsPath($ini->properties);
+
+            $ini->staticproperties = array_filter($ini->staticproperties ?? array());
+            $staticProperties = makeFullNsPath($ini->staticproperties);
+
+            $ini->methods = array_filter($ini->methods ?? array());
+            $methods = makeFullNsPath($ini->methods);
+
+            $ini->staticmethods = array_filter($ini->staticmethods ?? array());
+            $staticMethods = makeFullNsPath($ini->staticmethods);
+
+            $directives = array_filter($ini->directives ?? array());
+
+            $enumCases        = array();
+
         } elseif (substr($this->source, -5) === '.json') {
-            $ini = $this->loadJson($this->source);
+            $json = $this->loadJson($this->source);
+
+            $json->constants = array_filter($json->constants ?? array());
+            $constants = makeFullNsPath($json->constants, \FNP_CONSTANT);
+
+            $json->functions = array_filter($json->functions ?? array());
+            $functions = makeFullNsPath($json->functions);
+
+            $json->classes = array_filter($json->classes ?? array());
+            $classes = makeFullNsPath($json->classes);
+
+            $json->interfaces = array_filter($json->interfaces ?? array());
+            $interfaces = makeFullNsPath($json->interfaces);
+
+            $json->traits = array_filter($json->traits ?? array());
+            $traits = makeFullNsPath($json->traits);
+
+            $json->enums = array_filter($json->enums ?? array());
+            $enums = makeFullNsPath($json->enums);
+
+            $json->namespaces = array_filter($json->namespaces ?? array());
+            $namespaces = makeFullNsPath($json->namespaces);
+
+            $json->directives = array_filter($json->directives ?? array());
+            $directives = makeFullNsPath($json->directives);
+
+            $json->classconstants = array_filter($json->classconstants ?? array());
+            $classConstants = makeFullNsPath($json->classconstants);
+
+            $json->properties = array_filter($json->properties ?? array());
+            $properties = makeFullNsPath($json->properties);
+
+            $json->staticproperties = array_filter($json->staticproperties ?? array());
+            $staticProperties = makeFullNsPath($json->staticproperties);
+
+            $json->methods = array_filter($json->methods ?? array());
+            $methods = makeFullNsPath($json->methods);
+
+            $json->staticmethods = array_filter($json->staticmethods ?? array());
+            $staticMethods = makeFullNsPath($json->staticmethods);
+
+            $json->directives = array_filter($json->directives ?? array());
+            $directives = makeFullNsPath($json->directives);
+
+            $enumCases        = array();
+
+        } elseif (substr($this->source, -5) === '.pdff') {
+            $pdff = $this->loadPdff($this->source);
+
+            $functions    = $pdff->getFunctionList();
+            $constants    = $pdff->getConstantList();
+            $classes      = $pdff->getClassList();
+            $interfaces   = $pdff->getInterfaceList();
+            $traits       = $pdff->getTraitList();
+            $enums        = $pdff->getEnumList();
+            $namespaces   = $pdff->getEnumList();
+            $directives   = array();
+
+            $classConstants   = $pdff->getClassConstantList();
+            $properties       = $pdff->getClassPropertyList();
+            $staticProperties = $pdff->getClassStaticPropertyList();
+            $methods          = $pdff->getClassMethodList();
+            $staticMethods    = $pdff->getClassStaticMethodList();
+            $enumCases        = $pdff->getEnumCasesList();
+
         } else {
             return ;
         }
 
-        $ini->functions = array_filter($ini->functions ?? array());
-        if (!empty($ini->functions)) {
-            $functions = makeFullNsPath($ini->functions);
-            $this->atomFunctionIs($functions);
+
+        $this->processFunctions($functions);
+        $this->processClasses($classes);
+        $this->processConstants($constants);
+        $this->processInterfaces($interfaces);
+        $this->processTraits($traits);
+        $this->processEnums($enums);
+        $this->processNamespaces($namespaces);
+        $this->processDirectives($directives);
+
+        $this->processClassConstants($classConstants);
+        $this->processProperties($properties);
+        $this->processStaticProperties($staticProperties);
+        $this->processMethods($methods);
+        $this->processStaticMethods($staticMethods);
+        $this->processEnumCases($enumCases);
+    }
+
+    private function processConstants(array $constants): void {
+        if (empty($constants)) {
+            return;
+        }
+
+        $this->atomIs(self::STATIC_NAMES)
+             ->analyzerIs('Constants/ConstantUsage')
+             ->fullnspathIs($constants);
+        $this->prepareQuery();
+    }
+
+    private function processFunctions(array $functions): void {
+        if (empty($functions)) {
+            return;
+        }
+
+        $this->atomFunctionIs($functions);
+        $this->prepareQuery();
+    }
+
+    private function processClasses(array $classes): void {
+        if (empty($classes)) {
+            return;
+        }
+
+        $usedClasses = array_values(array_intersect(self::getCalledClasses(), $classes));
+        if (!empty($usedClasses)) {
+            $this->atomIs('New')
+                 ->outIs('NEW')
+                 ->hasNoIn('DEFINITION')
+                 ->fullnspathIs($usedClasses);
             $this->prepareQuery();
-        }
 
-        $ini->constants = array_filter($ini->constants ?? array());
-        if (!empty($ini->constants)) {
-            $this->atomIs(self::STATIC_NAMES)
-                 ->analyzerIs('Constants/ConstantUsage')
-                 ->fullnspathIs(makeFullNsPath($ini->constants, \FNP_CONSTANT));
-            $this->prepareQuery();
-        }
-
-        $ini->classes = array_filter($ini->classes ?? array());
-        if (!empty($ini->classes)) {
-            $classes = makeFullNsPath($ini->classes);
-
-            $usedClasses = array_intersect(self::getCalledClasses(), $classes);
-            if (!empty($usedClasses)) {
-                $usedClasses = array_values($usedClasses);
-                $this->atomIs('New')
-                     ->outIs('NEW')
-                     ->hasNoIn('DEFINITION')
-                     ->fullnspathIs($usedClasses);
-                $this->prepareQuery();
-
-                $this->atomIs(array('Staticconstant', 'Staticmethodcall', 'Staticproperty'))
-                     ->outIs('CLASS')
-                     ->hasNoIn('DEFINITION')
-                     ->fullnspathIs($usedClasses);
-                $this->prepareQuery();
-
-                $this->atomIs(self::FUNCTIONS_ALL)
-                     ->outIs('ARGUMENT')
-                     ->outIs('TYPEHINT')
-                     ->hasNoIn('DEFINITION')
-                     ->fullnspathIs($usedClasses);
-                $this->prepareQuery();
-
-                $this->atomIs(self::FUNCTIONS_ALL)
-                     ->outIs('RETURNTYPE')
-                     ->fullnspathIs($usedClasses);
-                $this->prepareQuery();
-
-                $this->atomIs('Catch')
-                     ->outIs('CLASS')
-                     ->hasNoIn('DEFINITION')
-                     ->fullnspathIs($usedClasses);
-                $this->prepareQuery();
-
-                $this->atomIs('Instanceof')
-                     ->outIs('CLASS')
-                     ->hasNoIn('DEFINITION')
-                     ->fullnspathIs($usedClasses);
-                $this->prepareQuery();
-            }
-        }
-
-        $ini->interfaces = array_filter($ini->interfaces ?? array());
-        if (!empty($ini->interfaces)) {
-            $interfaces = makeFullNsPath($ini->interfaces);
-
-            $usedInterfaces = array_intersect(self::getCalledinterfaces(), $interfaces);
-
-            if (!empty($usedInterfaces)) {
-                $usedInterfaces = array_values($usedInterfaces);
-                $this->analyzerIs('Interfaces/InterfaceUsage')
-                     ->fullnspathIs($usedInterfaces);
-                $this->prepareQuery();
-            }
-        }
-
-        $ini->enums = array_filter($ini->enums ?? array());
-        if (!empty($ini->enums)) {
-            $enums = makeFullNsPath($ini->enums);
-
-            $usedEnums = array_intersect(self::getCalledEnums(), $enums);
-
-            if (!empty($usedEnums)) {
-                $usedEnums = array_values($usedEnums);
-                $this->analyzerIs('Enums/EnumUsage')
-                     ->fullnspathIs($usedEnums);
-                $this->prepareQuery();
-            }
-        }
-
-        $ini->traits = array_filter($ini->traits ?? array());
-        if (!empty($ini->traits)) {
-            $traits = makeFullNsPath($ini->traits);
-
-            $usedTraits = array_intersect(self::getCalledtraits(), $traits);
-
-            if (!empty($usedTraits)) {
-                $usedTraits = array_values($usedTraits);
-                $this->analyzerIs('Traits/TraitUsage')
-                     ->fullnspathIs($usedTraits);
-                $this->prepareQuery();
-            }
-        }
-
-        $ini->namespaces = array_filter($ini->namespaces ?? array());
-        if (!empty($ini->namespaces)) {
-            $namespaces = makeFullNsPath($ini->namespaces);
-
-            $usedNamespaces = array_intersect($this->getCalledNamespaces(), $namespaces);
-
-            if (!empty($usedNamespaces)) {
-                $usedNamespaces = array_values($usedNamespaces);
-                $this->analyzerIs('Namespaces/NamespaceUsage')
-                     ->fullnspathIs($usedNamespaces);
-                $this->prepareQuery();
-            }
-        }
-
-        $ini->directives = array_filter($ini->directives ?? array());
-        if (!empty($ini->directives)) {
-            $usedDirectives = array_intersect(self::getCalledDirectives(), $ini->directives);
-
-            if (!empty($usedDirectives)) {
-                $usedDirectives = array_values($usedDirectives);
-                $this->analyzerIs('Php/DirectivesUsage')
-                     ->outWithRank('ARGUMENT', 0)
-                     ->noDelimiterIs($usedDirectives, self::CASE_SENSITIVE);
-                $this->prepareQuery();
-            }
-        }
-
-        $ini->classconstants = array_filter($ini->classconstants ?? array());
-        if (!empty($ini->classconstants)) {
-            $classesconstants = array();
-            foreach((array) $ini->classconstants as $c) {
-                list($class, $constant) = explode('::', $c);
-                array_collect_by($classesconstants, makefullnspath($class), $constant);
-            }
-
-            $this->atomIs('Staticconstant')
+            $this->atomIs(array('Staticconstant', 'Staticmethodcall', 'Staticproperty'))
                  ->outIs('CLASS')
-                 ->fullnspathIs(array_keys($classesconstants))
-                 ->savePropertyAs('fullnspath', 'fqn')
-                 ->back('first')
-
-                 ->outIs('CONSTANT')
-                 ->isHash('fullcode', $classesconstants, 'fqn', self::CASE_SENSITIVE)
-                 ->back('first');
+                 ->hasNoIn('DEFINITION')
+                 ->fullnspathIs($usedClasses);
             $this->prepareQuery();
-        }
 
-        // Methods, with typehints (parameters and properties)
-        // TODO : Methods with returntypes, local new.
-        $ini->methods = array_filter($ini->methods ?? array());
-        if (!empty($ini->methods)) {
-            $methods = array();
-            foreach(array_filter((array) $ini->methods) as $m) {
-                list($class, $method) = explode('::', $m);
-                array_collect_by($methods, makefullnspath($class), mb_strtolower($method));
-            }
-
-            $this->atomIs('Methodcall')
-                 ->outIs('OBJECT')
-                 // find Typehint for argument or property
-                 ->inIs('DEFINITION')
-                 ->inIsIE('NAME')
+            $this->atomIs(self::FUNCTIONS_ALL)
+                 ->outIs('ARGUMENT')
                  ->outIs('TYPEHINT')
-                 ->fullnspathIs(array_keys($methods))
-                 ->savePropertyAs('fullnspath', 'fqn')
-                 ->back('first')
+                 ->hasNoIn('DEFINITION')
+                 ->fullnspathIs($usedClasses);
+            $this->prepareQuery();
 
-                 ->outIs('METHOD')
-                 ->outIs('NAME')
-                 ->tokenIs('T_STRING')
-                 ->isHash('fullcode', $methods, 'fqn', self::CASE_INSENSITIVE)
-                 ->back('first');
+            $this->atomIs(self::FUNCTIONS_ALL)
+                 ->outIs('RETURNTYPE')
+                 ->fullnspathIs($usedClasses);
+            $this->prepareQuery();
+
+            $this->atomIs('Catch')
+                 ->outIs('CLASS')
+                 ->hasNoIn('DEFINITION')
+                 ->fullnspathIs($usedClasses);
+            $this->prepareQuery();
+
+            $this->atomIs('Instanceof')
+                 ->outIs('CLASS')
+                 ->hasNoIn('DEFINITION')
+                 ->fullnspathIs($usedClasses);
             $this->prepareQuery();
         }
+    }
 
-        $ini->staticMethods = array_filter($ini->staticMethods ?? array());
-        if (!empty($ini->staticMethods)) {
-            $methods = array();
-            foreach(array_filter((array) $ini->staticMethods) as $m) {
-                list($class, $method) = explode('::', $m);
-                array_collect_by($methods, makefullnspath($class), mb_strtolower($method));
-            }
+    private function processInterfaces(array $interfaces): void {
+        if (empty($interfaces)) {
+            return;
+        }
 
-            $this->atomIs('Staticmethodcall')
-                 ->outIs('CLASS')
-                 ->fullnspathIs(array_keys($methods))
-                 ->savePropertyAs('fullnspath', 'fqn')
-                 ->back('first')
+        $usedInterfaces = array_values(array_intersect(self::getCalledinterfaces(), $interfaces));
+        $this->analyzerIs('Interfaces/InterfaceUsage')
+             ->fullnspathIs($usedInterfaces);
+        $this->prepareQuery();
+    }
 
-                 ->outIs('METHOD')
-                 ->outIs('NAME')
-                 ->tokenIs('T_STRING')
-                 ->isHash('fullcode', $methods, 'fqn', self::CASE_INSENSITIVE)
-                 ->back('first');
+    private function processEnums(array $enums): void {
+        if (empty($enums)) {
+            return;
+        }
+
+        $this->analyzerIs('Enums/EnumUsage')
+             ->fullnspathIs($enums);
+        $this->prepareQuery();
+    }
+
+    private function processTraits(array $traits): void {
+        if (empty($traits)) {
+            return;
+        }
+
+        $usedTraits = array_values(array_intersect(self::getCalledTraits(), $traits));
+        $this->analyzerIs('Traits/TraitUsage')
+             ->fullnspathIs($usedTraits);
+        $this->prepareQuery();
+    }
+
+    private function processNamespaces(array $namespaces): void {
+        if (empty($namespaces)) {
+            return;
+        }
+
+        $usedNamespaces = array_intersect($this->getCalledNamespaces(), $namespaces);
+        if (!empty($usedNamespaces)) {
+            $usedNamespaces = array_values($usedNamespaces);
+            $this->analyzerIs('Namespaces/NamespaceUsage')
+                 ->fullnspathIs($usedNamespaces);
             $this->prepareQuery();
+        }
+    }
+
+    private function processDirectives(array $directives): void {
+        if (empty($directives)) {
+            return;
+        }
+
+        $usedDirectives = array_intersect(self::getCalledDirectives(), $directives);
+
+        if (!empty($usedDirectives)) {
+            $usedDirectives = array_values($usedDirectives);
+
+            $this->analyzerIs('Php/DirectivesUsage')
+                 ->outWithRank('ARGUMENT', 0)
+                 ->noDelimiterIs($usedDirectives, self::CASE_SENSITIVE);
+            $this->prepareQuery();
+        }
+    }
+
+    private function processClassConstants(array $classconstants): void {
+        if (empty($classconstants)) {
+            return;
+        }
+
+        $classesConstantsHash = array();
+        foreach((array) $classconstants as $c) {
+            list($class, $constant) = explode('::', $c, 2);
+            array_collect_by($classesConstantsHash, makefullnspath($class), $constant);
+        }
+
+        $this->atomIs('Staticconstant')
+             ->outIs('CLASS')
+             ->fullnspathIs(array_keys($classesConstantsHash))
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->back('first')
+
+             ->outIs('CONSTANT')
+             ->isHash('fullcode', $classesConstantsHash, 'fqn', self::CASE_SENSITIVE)
+             ->back('first');
+        $this->prepareQuery();
+    }
+
+    private function processProperties(array $properties): void {
+        if (empty($properties)) {
+            return;
         }
 
         // Properties, with typehints (parameters and properties)
         // TODO : Properties with returntypes, local new.
-        $ini->properties = array_filter($ini->properties ?? array());
-        if (!empty($ini->properties)) {
-            $properties = array();
-            foreach(array_filter((array) $ini->properties) as $p) {
-                list($class, $property) = explode('::', $p);
-                array_collect_by($properties, makefullnspath($class), ltrim($property, '$'));
-            }
 
-            $this->atomIs('Member')
-                 ->outIs('OBJECT')
-                 // find Typehint for argument or property
-                 ->inIs('DEFINITION')
-                 ->inIsIE('NAME')
-                 ->outIs('TYPEHINT')
-                 ->atomIs(self::STATIC_NAMES)
-                 ->fullnspathIs(array_keys($properties))
-                 ->savePropertyAs('fullnspath', 'fqn')
-                 ->back('first')
-
-                 ->outIs('MEMBER')
-                 ->isHash('fullcode', $properties, 'fqn', self::CASE_SENSITIVE)
-                 ->back('first');
-            $this->prepareQuery();
+        $propertiesHash = array();
+        foreach(array_filter($properties) as $p) {
+            list($class, $property) = explode('::', $p, 2);
+            array_collect_by($propertiesHash, makefullnspath($class), ltrim($property, '$'));
         }
 
-        $ini->staticProperties = array_filter($ini->staticProperties ?? array());
-        if (!empty($ini->staticProperties)) {
-            $properties = array();
-            foreach(array_filter((array) $ini->properties) as $p) {
-                list($class, $property) = explode('::', $p);
-                array_collect_by($properties, makefullnspath($class), $property);
-            }
+        $this->atomIs('Member')
+             ->outIs('OBJECT')
+             // find Typehint for argument or property
+             ->inIs('DEFINITION')
+             ->inIsIE('NAME')
+             ->outIs('TYPEHINT')
+             ->atomIs(self::STATIC_NAMES)
+             ->fullnspathIs(array_keys($propertiesHash))
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->back('first')
 
-            $this->atomIs('Staticproperty')
-                 ->outIs('CLASS')
-                 ->fullnspathIs(array_keys($properties))
-                 ->savePropertyAs('fullnspath', 'fqn')
-                 ->back('first')
+             ->outIs('MEMBER')
+             ->isHash('fullcode', $propertiesHash, 'fqn', self::CASE_SENSITIVE)
+             ->back('first');
+        $this->prepareQuery();
+    }
 
-                 ->outIs('MEMBER')
-                 ->isHash('fullcode', $properties, 'fqn', self::CASE_SENSITIVE)
-                 ->back('first');
-            $this->prepareQuery();
+    private function processStaticProperties(array $staticproperties): void {
+        if (empty($staticproperties)) {
+            return;
         }
+
+        // Properties, with typehints (parameters and properties)
+        // TODO : Properties with returntypes, local new.
+        $propertiesHash = array();
+        foreach(array_filter($staticproperties) as $p) {
+            list($class, $property) = explode('::', $p, 2);
+            array_collect_by($propertiesHash, makefullnspath($class), ltrim($property, '$'));
+        }
+
+        $this->atomIs('Staticproperty')
+             ->outIs('CLASS')
+             ->fullnspathIs(array_keys($propertiesHash))
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->back('first')
+
+             ->outIs('MEMBER')
+             ->isHash('fullcode', $propertiesHash, 'fqn', self::CASE_SENSITIVE)
+             ->back('first');
+        $this->prepareQuery();
+    }
+
+    private function processMethods(array $methods): void {
+        if (empty($methods)) {
+            return;
+        }
+
+        // Methods, with typehints (parameters and properties)
+        // TODO : Methods with returntypes, local new.
+        $methodsHash = array();
+        foreach(array_filter($methods) as $m) {
+            list($class, $method) = explode('::', $m, 2);
+            array_collect_by($methodsHash, makefullnspath($class), mb_strtolower($method));
+        }
+
+        $this->atomIs('Methodcall')
+             ->outIs('OBJECT')
+             // find Typehint for argument or property
+             ->inIs('DEFINITION')
+             ->inIsIE('NAME')
+             ->outIs('TYPEHINT')
+             ->fullnspathIs(array_keys($methodsHash))
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->back('first')
+
+             ->outIs('METHOD')
+             ->outIs('NAME')
+             ->tokenIs('T_STRING')
+             ->isHash('fullcode', $methodsHash, 'fqn', self::CASE_INSENSITIVE)
+             ->back('first');
+        $this->prepareQuery();
+    }
+
+    private function processStaticMethods(array $staticmethods): void {
+        if (empty($staticmethods)) {
+            return;
+        }
+
+        $staticmethodsHash = array();
+        foreach(array_filter($staticmethods) as $m) {
+            list($class, $method) = explode('::', $m, 2);
+            array_collect_by($staticmethodsHash, makefullnspath($class), mb_strtolower($method));
+        }
+
+        $this->atomIs('Staticmethodcall')
+             ->outIs('CLASS')
+             ->fullnspathIs(array_keys($staticmethodsHash))
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->back('first')
+
+             ->outIs('METHOD')
+             ->outIs('NAME')
+             ->tokenIs('T_STRING')
+             ->isHash('fullcode', $staticmethodsHash, 'fqn', self::CASE_INSENSITIVE)
+             ->back('first');
+        $this->prepareQuery();
+    }
+
+    private function processEnumCases(array $enumcases): void {
+        if (empty($enumcases)) {
+            return;
+        }
+
+        $enumCasesHash = array();
+        foreach((array) $enumcases as $c) {
+            list($class, $constant) = explode('::', $c, 2);
+            array_collect_by($enumCasesHash, makefullnspath($class), $constant);
+        }
+
+        $this->atomIs('Staticconstant')
+             ->outIs('CLASS')
+             ->fullnspathIs(array_keys($enumCasesHash))
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->back('first')
+
+             ->outIs('CONSTANT')
+             ->isHash('fullcode', $enumCasesHash, 'fqn', self::CASE_SENSITIVE)
+             ->back('first');
+        $this->prepareQuery();
     }
 }
 

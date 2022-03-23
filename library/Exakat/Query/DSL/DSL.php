@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -166,11 +166,11 @@ abstract class DSL {
         }
 
         if (empty(self::$ATOMS)) {
-            self::$ATOMS = array_merge(GraphElements::$ATOMS,GraphElements::$ATOMS_EXAKAT);
+            self::$ATOMS = array_merge(GraphElements::$ATOMS, GraphElements::$ATOMS_EXAKAT);
         }
 
         if (empty(self::$LINKS)) {
-            self::$LINKS = array_merge(GraphElements::$LINKS,GraphElements::$LINKS_EXAKAT);
+            self::$LINKS = array_merge(GraphElements::$LINKS, GraphElements::$LINKS_EXAKAT);
         }
     }
 
@@ -368,18 +368,18 @@ abstract class DSL {
 
         return implode('', $return);
     }
-    
-    protected function assertArguments(int $maxCount, int $actualCount, string $method) : void {
-        assert($actualCount === $maxCount, 
-            'Wrong number of argument for ' . $method . '. '.$maxCount.' is expected, ' . $actualCount . ' provided.');
+
+    protected function assertArguments(int $maxCount, int $actualCount, string $method): void {
+        assert($actualCount === $maxCount,
+            'Wrong number of argument for ' . $method . '. ' . $maxCount . ' is expected, ' . $actualCount . ' provided.');
     }
-    
-    protected function protectValue($value) : string {
+
+    protected function protectValue($value): string {
         if (is_string($value)) {
             if ($this->isVariable($value)) {
                 return $value;
             } else {
-                return '"'.addslashes($value).'"';
+                return '"' . addslashes($value) . '"';
             }
         } elseif (is_int($value)) {
             return (string) $value;
@@ -388,7 +388,7 @@ abstract class DSL {
         } elseif (is_bool($value)) {
             return $value ? 'true' : 'false';
         } else {
-            assert(false, "Could not process value type : ".get_type($value));
+            assert(false, 'Could not process value type : ' . get_type($value));
         }
     }
 }

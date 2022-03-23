@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -44,10 +44,8 @@ class Sarif extends Reports {
     public const FILE_FILENAME  = 'exakat';
 
     private array $analyzers        = array();
-    private array $precisionCache   = array();
     private array $descriptionCache = array();
     private array $severityCache    = array();
-    private array $titleCache       = array();
 
     public function _generate(array $analyzerList): string {
         $driver = new ToolComponent('Exakat');
@@ -58,6 +56,10 @@ class Sarif extends Reports {
 
         $tool = new Tool($driver);
         $run = new Run($tool);
+
+        $precisionCache   = array();
+        $severityCache    = array();
+        $descriptionCache = array();
 
         $analysisResults = $this->dump->fetchAnalysers($analyzerList);
         foreach($analysisResults->toArray() as $row) {
@@ -94,7 +96,7 @@ class Sarif extends Reports {
                 $this->analyzers[$row['analyzer']] = count($this->analyzers);
             }
 
-            $result = new Result(new Message((string) $row['fullcode']));
+            $result = new Result(new Message((string) $row['fullcode'], md5((string) $row['fullcode'])));
             $result->setRuleId($row['analyzer']);
             $result->setRuleIndex($this->analyzers[$row['analyzer']]);
             $result->setLevel($this->severity2level($severityCache[$row['analyzer']]));

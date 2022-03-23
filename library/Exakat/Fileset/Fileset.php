@@ -27,7 +27,7 @@ abstract class Fileset {
     protected $filter;
     protected $files   = array();
     protected $ignored = array();
-    
+
     public function addFilter($filter) {
         if ($this->filter === null) {
             $this->filter = $filter;
@@ -36,8 +36,8 @@ abstract class Fileset {
             $this->filter->addFilter($filter);
         }
     }
-    
-    public function getFiles($files = null) : array {
+
+    public function getFiles($files = null): array {
         if ($this->filter === null) {
             return $this->files;
         } else {
@@ -45,7 +45,7 @@ abstract class Fileset {
         }
     }
 
-    public function getIgnored() : array {
+    public function getIgnored(): array {
         if ($this->filter === null) {
             return $this->ignored;
         } else {

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -73,6 +73,36 @@ class CouldBeArray extends CouldBeType {
 
         // is_string
         $this->checkArgumentValidation(array('\\is_array'), array('Arrayliteral'));
+
+        // argument because used in a specific operation with ...
+        $this->atomIs(array('Parameter', 'Ppp'))
+             ->not(
+                $this->side()
+                     ->outIs('TYPEHINT')
+                     ->atomIs('Scalartypehint')
+                     ->fullnspathIs('\\array')
+             )
+             ->outIs(array('PPP', 'NAME'))
+             ->as('results')
+             ->outIs('DEFINITION')
+             ->hasIn('ARGUMENT') // functioncall or array
+             ->is('variadic', true)
+             ->back('results');
+        $this->prepareQuery();
+
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->not(
+                $this->side()
+                     ->outIs('RETURNTYPE')
+                     ->atomIs('Scalartypehint')
+                     ->fullnspathIs('\\array')
+             )
+             ->outIs('DEFINITION')
+             ->hasIn('ARGUMENT') // functioncall or array
+             ->is('variadic', true)
+             ->back('first');
+        $this->prepareQuery();
+
     }
 }
 

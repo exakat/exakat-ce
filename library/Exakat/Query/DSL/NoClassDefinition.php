@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,10 +30,12 @@ class NoClassDefinition extends DSL {
         if (func_num_args() === 1) {
             list($type) = func_get_args();
         } else {
-            $type = array(Analyzer::CLASSES_ALL);
+            $type = Analyzer::CLASSES_ALL;
         }
 
-        return new Command('not(where(__.in("DEFINITION").hasLabel(within(***)) ) )', makeArray($type) );
+        $list = makeList($type);
+
+        return new Command('not(where(__.in("DEFINITION").hasLabel(within(' . $list . ')) ) )');
     }
 }
 ?>

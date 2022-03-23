@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -43,7 +43,10 @@ coalesce(
     __.hasLabel("Staticproperty").in("DEFINITION").hasLabel("Propertydefinition").in("PPP").hasLabel("Ppp").out("TYPEHINT"),
 
     __.hasLabel("Staticconstant").in("DEFINITION").hasLabel("Constant").out("TYPEHINT"),
-    __.hasLabel("Identifier", "Nsname").in("DEFINITION").hasLabel("Constant").out("TYPEHINT")
+    __.hasLabel("Identifier", "Nsname").in("DEFINITION").hasLabel("Constant").out("TYPEHINT"),
+
+    __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in("DEFINITION").hasLabel("Function", "Method", "Magicmethod", "Arrowfunction", "Closure").out("RETURNTYPE")
+    
 )
 GREMLIN;
 

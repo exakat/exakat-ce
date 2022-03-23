@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -48,7 +48,8 @@ class Perfile extends Reports {
             } else {
                 $title = $titleCache[$row['analyzer']];
             }
-            $perfile[$row['file']][] = sprintf(' % 4s %-40s %-40s', $row['line'], $title, $row['analyzer']);
+            $perfile[$row['file']][] = sprintf(' % 4s %-40s %-40s', $row['line'], $title, $row['fullcode']);
+            $this->count();
         }
 
         $text = '';

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ class Composer extends Vcs {
         parent::__construct($destination, $project_root);
     }
 
-    protected function selfCheck() {
+    protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");
         if (strpos($res, 'Composer') === false) {
             throw new HelperException('Composer');
@@ -50,7 +50,7 @@ class Composer extends Vcs {
 
         mkdir($this->destinationFull, 0755);
         file_put_contents("{$this->destinationFull}/composer.json", $json);
-        $this->shell("cd {$this->destinationFull}; {$this->executable} -q install");
+        $this->shell("cd {$this->destinationFull}; {$this->executable} -q install --ignore-platform-reqs");
     }
 
     public function update() {

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -38,7 +38,9 @@ class AnalyzerIsNot extends DSL {
 
         assert($this->assertAnalyzer($analyzer));
 
-        return new Command('not( where( __.in("ANALYZED").has("analyzer", within(***))) )', array($analyzer));
+        $list = makeList($analyzer);
+
+        return new Command('not( where( __.in("ANALYZED").has("analyzer", ' . $list . ')) )');
     }
 }
 ?>

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,17 +31,19 @@ use Exakat\Reports\Helpers\Docs;
 use Exakat\Stubs\Stubs;
 
 class Container {
-    private $verbose    = 0;
+    private $verbose        = 0;
 
-    private $config     = null;
-    private $graphdb    = null;
-    private $datastore  = null;
-    private $dictionary = null;
-    private $docs       = null;
-    private $methods    = null;
-    private $rulesets   = null;
-    private $php        = null;
-    private $stubs      = null;
+    private $config         = null;
+    private $graphdb        = null;
+    private $datastore      = null;
+    private $dictionary     = null;
+    private $docs           = null;
+    private $methods        = null;
+    private $rulesets       = null;
+    private $php            = null;
+    private $stubs          = null;
+    private $phpCore        = null;
+    private $phpExtensions  = null;
 
     public function init(array $argv = array()): void {
         $this->config = new Config($argv);
@@ -50,7 +52,7 @@ class Container {
     }
 
     public function __get(string $what) {
-        assert(property_exists($this, $what), "No such element in the container : '$what'\n");
+        assert(property_exists($this, $what), "No such property in the container : '$what'\n");
 
         if ($this->$what === null) {
             $this->$what();
@@ -77,7 +79,21 @@ class Container {
     }
 
     private function stubs(): void {
-        $this->stubs = new Stubs($this->config->dir_root . '/stubs/');
+        $this->stubs = new Stubs($this->config->dir_root . '/stubs/',
+                                 $this->config->stubs,
+                                 );
+    }
+
+    private function phpCore(): void {
+        $this->phpCore = new Stubs($this->config->dir_root . '/data/core/',
+                                   $this->config->php_core ?? array(),
+                                   );
+    }
+
+    private function phpExtensions(): void {
+        $this->phpExtensions = new Stubs($this->config->dir_root . '/data/extensions/',
+                                         $this->config->php_extensions ?? array(),
+                                        );
     }
 
     private function docs(): void {

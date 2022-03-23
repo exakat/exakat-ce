@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -38,6 +38,7 @@ class WrongTypedPropertyInit extends Analyzer {
         // class x { a $a; function foo() { $this->a = new b()}}
         $this->atomIs('Propertydefinition')
              ->inIs('PPP')
+             ->is('typehint', 'one')
              ->outIs('TYPEHINT')
              ->atomIsNot('Void')
              ->savePropertyAs('fullnspath', 'fnp')
@@ -62,6 +63,7 @@ class WrongTypedPropertyInit extends Analyzer {
         // class x { a $a; function foo() { $this->a = C::D()}}
         $this->atomIs('Propertydefinition')
              ->inIs('PPP')
+             ->is('typehint', 'one')
              ->outIs('TYPEHINT')
              ->atomIsNot('Void')
              ->savePropertyAs('fullnspath', 'fnp')
@@ -80,6 +82,25 @@ class WrongTypedPropertyInit extends Analyzer {
                      ->samePropertyAs('fullnspath', 'fnp')
              )
              ->back('first');
+        $this->prepareQuery();
+
+        // class x { false|int a $a = 'string';}
+        $this->atomIs('Propertydefinition')
+             ->inIs('PPP')
+             ->is('typehint', 'or')
+             ->not(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
+             )
+
+             ->outIs('PPP')
+             ->outIs('DEFAULT')
+             ->atomIs(array('Integer', 'Float', 'Null', 'Boolean', 'Arrayliteral'), self::WITH_CONSTANTS)
+             ->savePropertyAs('label', 'type')
+             ->back('first')
+
+             ->notCompatibleWithType('type');
         $this->prepareQuery();
     }
 }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,7 +27,6 @@ use Exakat\Config;
 use Exakat\Exceptions\NoCodeInProject;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\ProjectNeeded;
-use Exakat\Vcs\Vcs;
 use Exakat\Fileset\{All, Filenames, FileExtensions, IgnoreDirs};
 
 class Files extends Tasks {
@@ -64,7 +63,7 @@ class Files extends Tasks {
         $set->addFilter(new Filenames($this->config->dir_root));
         $set->addFilter(new FileExtensions($this->config->file_extensions));
         $set->addFilter(new IgnoreDirs($this->config->ignore_dirs, $this->config->include_dirs));
-        
+
         $files = $set->getFiles();
         $ignoredFiles = $set->getIgnored();
         display('Found ' . count($files) . " files.\n");

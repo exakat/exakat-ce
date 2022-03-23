@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ class Tarbz extends Vcs {
     private $executableTar   = 'tar';
     private $executableBzip2 = 'bzip2';
 
-    protected function selfCheck() {
+    protected function selfCheck(): void {
         $res = $this->shell("{$this->executableTar} --version 2>&1");
         if (!preg_match('#\d+\.\d+(\.\d+)?#s', $res)) {
             throw new HelperException('Tar');

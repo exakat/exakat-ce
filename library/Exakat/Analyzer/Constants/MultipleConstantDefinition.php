@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ class MultipleConstantDefinition extends Analyzer {
              ->raw('or( __.out("CASE").count().is(eq(0)),
           __.out("CASE").has("boolean", false))')
              ->outIs('NAME')
-             ->atomis(self::STATIC_NAMES)
+             ->atomIs(self::STATIC_NAMES)
              ->values('noDelimiter');
         $csDefinitions = $this->rawQuery()->toArray();
 
@@ -52,7 +52,7 @@ class MultipleConstantDefinition extends Analyzer {
              ->is('boolean', true)
              ->back('first')
              ->outIs('NAME')
-             ->atomis(self::STATIC_NAMES)
+             ->atomIs(self::STATIC_NAMES)
              ->values('noDelimiter');
         $cisDefinitions = $this->rawQuery()->toArray();
         $cisDefinitions = array_map('strtolower', $cisDefinitions);

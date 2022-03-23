@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -33,39 +33,17 @@ class IsExtClass extends Analyzer {
     }
 
     public function analyze(): void {
-        $exts = $this->rulesets->listAllAnalyzer('Extensions');
-
-        $classes = array($this->loadIni('php_classes.ini', 'classes'));
-        foreach($exts as $ext) {
-            $inifile = str_replace('Extensions\Ext', '', $ext);
-            $ini = $this->load($inifile, 'classes');
-
-            if (!empty($ini[0])) {
-                $classes[] = $ini;
-            }
-        }
-
-        $classes = array_merge(...$classes);
-        $classes = array_filter($classes);
-        if (empty($classes)) {
-            return;
-        }
-
-        $classes = makeFullNsPath($classes);
-
         // function foo() : \Generator {}
         $this->analyzerIs('Classes/ClassUsage')
              ->hasNoIn('DEFINITION')
-             ->is('isExt', true)
-             ->fullnspathIs($classes);
+             ->is('isExt', true);
         $this->prepareQuery();
 
         // function foo() : \Generator {}
         $this->analyzerIs('Classes/ClassUsage')
              ->hasNoIn('DEFINITION')
              ->is('isPhp', true)
-             ->analyzerIsNot('self')
-             ->fullnspathIs($classes);
+             ->analyzerIsNot('self');
         $this->prepareQuery();
     }
 }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -97,7 +97,7 @@ abstract class Php {
                      '`'  => self::T_BACKTICK,
                    );
 
-    // PHP tokens : Here for overloading in by PHP** classes. 
+    // PHP tokens : Here for overloading in by PHP** classes.
     public const T_LNUMBER                                          = -1;
     public const T_DNUMBER                                          = -1;
     public const T_STRING                                           = -1;
@@ -257,12 +257,10 @@ abstract class Php {
         $versions = array('Php82', 'Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
 
         foreach($versions as $version) {
-            $errors = array();
-            foreach($tokens as $k => $v) {
-                if (constant(__NAMESPACE__ . "\\$version::$v") !== $k) {
-                    $errors[$k] = $v;
-                }
-            }
+            $errors = array_filter($tokens,
+                function (string $v, string $k) use ($version): bool {
+                    return (string) constant(__NAMESPACE__ . '\\' . $version . '::' . $v) !== $k; },
+                ARRAY_FILTER_USE_BOTH);
 
             if (empty($errors)) {
                 $className = __NAMESPACE__ . "\\$version";

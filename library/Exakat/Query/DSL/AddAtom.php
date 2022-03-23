@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,19 +23,19 @@
 
 namespace Exakat\Query\DSL;
 
-use Exakat\Query\Query;
-use Exakat\Analyzer\Analyzer;
 
 class AddAtom extends DSL {
     public function run(): Command {
         $this->assertArguments(2, func_num_args(), __METHOD__);
         list($atom, $properties) = func_get_args();
 
-        $return = new Command('addV("'.$atom.'")');
-        
+        $return = new Command('addV("' . $atom . '")');
+
         foreach($properties as $name => $value) {
-            $value = $this->protectValue($value);
-            $sideEffect = new Command('sideEffect{ it.get().property("'.$name.'", '.$value.');}');
+            if (!$this->isVariable((string) $value)) {
+                $value = $this->protectValue($value);
+            }
+            $sideEffect = new Command('sideEffect{ it.get().property("' . $name . '", ' . $value . ');}');
 
             $return->add($sideEffect);
         }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,22 +27,12 @@ use Exakat\Analyzer\Analyzer;
 
 class RedeclaredPhpFunction extends Analyzer {
     public function analyze(): void {
-        // function split() {}
-        $extensions = $this->loadIni('php_distribution_53.ini', 'ext');
-
-        $e = array();
-        foreach($extensions as $ext) {
-            if ($iniFile = $this->load($ext , 'functions')) {
-                $e[] = $iniFile;
-            }
-        }
-        $extensionFunctions = array_merge(...$e);
-        $extensionFunctions = array_values(array_unique($extensionFunctions));
-        $extensionFunctions = makefullnspath($extensionFunctions);
+        $functions = array_merge(exakat('phpCore')->getFunctionList(),
+                                 exakat('phpExtensions')->getFunctionList(),
+                                 );
 
         $this->atomIs('Function')
-             ->regexIs('fullnspath', '^\\\\\\\\[^\\\\\\\\]+\\$')
-             ->fullnspathIs($extensionFunctions);
+             ->fullnspathIs($functions);
         $this->prepareQuery();
     }
 }

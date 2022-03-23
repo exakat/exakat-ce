@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,7 +23,16 @@
 namespace Exakat\Analyzer\Complete;
 
 class SetClassRemoteDefinitionWithGlobal extends Complete {
+    public function dependsOn(): array {
+        return array('Complete/CreateDefaultValues',
+                    );
+    }
+
     public function analyze(): void {
+        // $global->method()
+        // global $global
+        // $global = new Class()
+        // class class { function method() {} }
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
               ->as('method')
               ->hasNoIn('DEFINITION')
@@ -36,12 +45,7 @@ class SetClassRemoteDefinitionWithGlobal extends Complete {
               ->atomIs(array('Globaldefinition', 'Variabledefinition'), self::WITHOUT_CONSTANTS)
               ->inIs('DEFINITION')
               ->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
-              ->outIs('DEFINITION')
-              ->outIs('DEFINITION')
-              ->inIs('LEFT')
-              ->atomIs('Assignation', self::WITHOUT_CONSTANTS) // code is =
-              ->outIs('RIGHT')
-              ->atomIs('New', self::WITHOUT_CONSTANTS)
+              ->outIs('DEFAULT')
               ->outIs('NEW')
               ->inIs('DEFINITION')
               ->atomIs('Class', self::WITHOUT_CONSTANTS)
@@ -65,11 +69,7 @@ class SetClassRemoteDefinitionWithGlobal extends Complete {
               ->atomIs(array('Globaldefinition', 'Variabledefinition'), self::WITHOUT_CONSTANTS)
               ->inIs('DEFINITION')
               ->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
-              ->outIs('DEFINITION')
-              ->outIs('DEFINITION')
-              ->inIs('LEFT')
-              ->atomIs('Assignation', self::WITHOUT_CONSTANTS) // code is =
-              ->outIs('RIGHT')
+              ->outIs('DEFAULT')
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
               ->inIs('DEFINITION')

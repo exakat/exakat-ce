@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ class Diplomat extends Emissary {
     public function __construct() {
         parent::__construct();
 
-        foreach(array('74', '80', '81', '82') as $shortVersion) {
+        foreach(array('74', '80', '81') as $shortVersion) {
             $this->compatibilities[$shortVersion] = "Compatibility PHP $shortVersion[0].$shortVersion[1]";
         }
 
@@ -44,7 +44,7 @@ class Diplomat extends Emissary {
     }
 
     public function dependsOnAnalysis(): array {
-        return array('CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81', 'CompatibilityPHP82',
+        return array('CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81',
                      'Appinfo',
                      'Analyze',
                      );

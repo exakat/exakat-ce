@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -38,6 +38,8 @@ class AtomInsideWithCall extends DSL {
         $linksDown = self::$linksDown;
         $MAX_LOOPING  = self::$MAX_LOOPING;
 
+        $list = makeList($diff);
+
         $gremlin = <<<GREMLIN
 emit( ).repeat( __.out($linksDown)
                   .coalesce( __.hasLabel("Functioncall").in("DEFINITION").out("BLOCK").out("EXPRESSION"), 
@@ -45,9 +47,9 @@ emit( ).repeat( __.out($linksDown)
                   .not(hasLabel("Closure", "Classanonymous", "Function", "Class", "Trait", "Interface")) 
             )
             .times($MAX_LOOPING)
-            .hasLabel(within(***))
+            .hasLabel($list)
 GREMLIN;
-        return new Command($gremlin, array($diff));
+        return new Command($gremlin);
     }
 }
 ?>

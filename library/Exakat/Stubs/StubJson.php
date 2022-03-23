@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ namespace Exakat\Stubs;
 
 use Stdclass;
 
-class StubJson extends Stubs {
+class StubJson extends Stubs implements StubsInterface {
     private $stubFile    = '';
     private $stub        = array();
 
@@ -190,23 +190,28 @@ class StubJson extends Stubs {
         return array_merge(...$return);
     }
 
+    public function getEnumCasesList(): array {
+        return array();
+    }
+
+    public function getClassStaticPropertyList(): array {
+        return array();
+    }
+
+    public function getEnumList(): array {
+        return array();
+    }
+
+    public function getClassStaticMethodList(): array {
+        return array();
+    }
+
+    public function getInterfaceMethodsNameAndCount(): array {
+        return array();
+    }
+
     public function getMethodList(): array {
-        $return = array(array());
-
-        foreach($this->stub->versions as $namespace => $definitions) {
-            foreach((array) ($definitions->classes ?? array()) as $class => $body) {
-                $classMethods = array_keys((array) ($body->methods ?? array()));
-                if (empty($classMethods)) {
-                    continue;
-                }
-                $list = $body->methods;
-                $classMethods = array_filter($classMethods, function (string $method) use ($list): bool { return $list->{$method}->static === false; });
-                $classMethods = array_map(function (string $method) use ($namespace, $class): string { return $namespace . $class . '::' . $method;}, $classMethods);
-                $return[] = $classMethods;
-            }
-        }
-
-        return array_merge(...$return);
+        return array();
     }
 }
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ class IsNullable extends DSL {
         switch(func_num_args()) {
             case 1:
                 list($nullable) = func_get_args();
-                $nullable = in_array($nullable, array(self::EXPLICIT, self::IMPLICIT), \STRICT_COMPARISON) ? $nullable : self::IMPLICT;
+                $nullable = in_array($nullable, array(self::EXPLICIT, self::IMPLICIT), \STRICT_COMPARISON) ? $nullable : self::IMPLICIT;
                 break;
 
             case 0:

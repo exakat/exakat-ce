@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -77,18 +77,6 @@ class CouldBeFloat extends CouldBeType {
              ->atomIs('Assignation')
              ->codeIs(array('+=', '-=', '*=', '**=', '/=', '%=', '<<=', '>>=', '&=', '|=', '^='))
              ->back('first');
-        $this->prepareQuery();
-
-        // argument type : $x[$arg]
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
-             ->as('result')
-             ->analyzerIsNot('self')
-             ->outIs('NAME')
-             ->outIs('DEFINITION')
-             ->inIs('INDEX')
-             ->atomIs(array('Array'))
-             ->back('result');
         $this->prepareQuery();
 
         // argument type : $x[$arg]

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ class SetArrayClassDefinition extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
               ->inIs('NAME')
-              ->addEto('DEFINITION', 'first');
+              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // array(\x, foo)
@@ -72,7 +72,7 @@ class SetArrayClassDefinition extends Complete {
              ->outIs('NAME')
              ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
              ->inIs('NAME')
-             ->addEto('DEFINITION', 'first');
+             ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // array($this, foo)
@@ -93,7 +93,7 @@ class SetArrayClassDefinition extends Complete {
              ->outIs('NAME')
              ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
              ->inIs('NAME')
-             ->addEto('DEFINITION', 'first');
+             ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // Link to the actual method
@@ -106,7 +106,7 @@ class SetArrayClassDefinition extends Complete {
 
              ->inIs('NAME')
              ->atomIs('Functioncall')
-             ->addEfrom('DEFINITION', 'method');
+             ->addEFrom('DEFINITION', 'method');
         $this->prepareQuery();
     }
 }

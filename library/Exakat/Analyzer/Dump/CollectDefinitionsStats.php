@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,10 +30,11 @@ class CollectDefinitionsStats extends AnalyzerArrayHashResults {
 
         $types = array('Staticconstant'   => 'staticconstants',
                        'Staticmethodcall' => 'staticmethodcalls',
-                       'Staticproperty'   => 'staticproperty',
+                       'Staticproperty'   => 'staticproperties',
 
                        'Methodcall'       => 'methodcalls',
                        'Member'           => 'members',
+                       'Staticclass'      => 'staticclasses',
                         );
 
         $this->atomIs(array_keys($types))
@@ -55,6 +56,33 @@ GREMLIN
         // Possibly empty when none of the above are used.
         $resDefined = $this->rawQuery()->toArray()[0] ?? array();
 
+        $this->atomIs(array_keys($types))
+             ->raw(<<<'GREMLIN'
+has("isPhp", true).groupCount("m").by(label).cap("m")
+
+GREMLIN
+);
+        // Possibly empty when none of the above are used.
+        $resPhp = $this->rawQuery()->toArray()[0] ?? array();
+
+        $this->atomIs(array_keys($types))
+             ->raw(<<<'GREMLIN'
+has("isStub", true).groupCount("m").by(label).cap("m")
+
+GREMLIN
+);
+        // Possibly empty when none of the above are used.
+        $resStub = $this->rawQuery()->toArray()[0] ?? array();
+
+        $this->atomIs(array_keys($types))
+             ->raw(<<<'GREMLIN'
+has("isExt", true).groupCount("m").by(label).cap("m")
+
+GREMLIN
+);
+        // Possibly empty when none of the above are used.
+        $resExt = $this->rawQuery()->toArray()[0] ?? array();
+
         foreach($types as $label => $name) {
             $this->analyzerValues[] = array($name,
                                             $resAll[$label] ?? 0,
@@ -62,6 +90,18 @@ GREMLIN
 
             $this->analyzerValues[] = array($name . ' defined',
                                             $resDefined[$label] ?? 0,
+                                            );
+
+            $this->analyzerValues[] = array($name . ' php',
+                                            $resPhp[$label] ?? 0,
+                                            );
+
+            $this->analyzerValues[] = array($name . ' stub',
+                                            $resStub[$label] ?? 0,
+                                            );
+
+            $this->analyzerValues[] = array($name . ' ext',
+                                            $resExt[$label] ?? 0,
                                             );
         }
 

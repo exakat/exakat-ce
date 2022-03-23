@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 
 namespace Exakat\Tasks\Helpers;
 
-use Exakat\Helpers\Definitions;
 
 class IsExt extends Plugin {
     public $name = 'isExt';
@@ -40,85 +39,26 @@ class IsExt extends Plugin {
     public function __construct() {
         parent::__construct();
 
-        $config = exakat('config');
-        $rulesets = exakat('rulesets');
+        $ext = exakat('phpExtensions');
+        $this->extConstants = $ext->getConstantList();
+        $this->extConstants = makeFullnspath($this->extConstants, \FNP_CONSTANT);
 
-        $exts = $rulesets->listAllAnalyzer('Extensions');
+        $this->extFunctions = $ext->getFunctionList();
+        $this->extFunctions = makeFullnspath($this->extFunctions);
 
-        $constants = array(array());
-        $classes   = array(array());
-        $functions = array(array());
+        $this->extClasses = $ext->getClassList();
+        $this->extClasses = makeFullnspath($this->extClasses);
 
-        foreach($config->php_extensions ?? array() as $inifile) {
-            if ($inifile === 'Extensions/Extstandard') {
-                continue;
-            }
-            $definitions = new Definitions($config, $inifile);
+        $this->extInterfaces = $ext->getInterfaceList();
+        $this->extInterfaces = makeFullnspath($this->extInterfaces);
 
-            if (!$definitions->isValid()) {
-                continue;
-            }
+        $this->extTraits = $ext->getTraitList();
+        $this->extTraits = makeFullnspath($this->extTraits);
 
-            if (!empty($definitions->get(Definitions::CONSTANTS))) {
-                $constants[] = makeFullnspath($definitions->get(Definitions::CONSTANTS), \FNP_CONSTANT);
-            }
-
-            // Called class, handling CIT
-            if (!empty($definitions->get(Definitions::CLASSES))) {
-                $classes[] = makeFullnspath($definitions->get(Definitions::CLASSES), \FNP_NOT_CONSTANT);
-            }
-            if (!empty($definitions->get(Definitions::TRAITS))) {
-                $classes[] = makeFullnspath($definitions->get(Definitions::TRAITS), \FNP_NOT_CONSTANT);
-            }
-            if (!empty($definitions->get(Definitions::INTERFACES))) {
-                $classes[] = makeFullnspath($definitions->get(Definitions::INTERFACES), \FNP_NOT_CONSTANT);
-            }
-
-            if (!empty($definitions->get(Definitions::FUNCTIONS))) {
-                $functions[] = makeFullnspath($definitions->get(Definitions::FUNCTIONS), \FNP_NOT_CONSTANT);
-            }
-
-            if (!empty($definitions->get(Definitions::METHODS))) {
-                foreach(array_filter($definitions->get(Definitions::METHODS)) as $fullMethod) {
-                    list($class, $method) = explode('::', $fullMethod, 2);
-                    array_collect_by($this->extMethods, makeFullnspath($class),  mb_strtolower($method));
-                }
-            }
-
-            if (!empty($definitions->get(Definitions::PROPERTIES))) {
-                foreach(array_filter($definitions->get(Definitions::PROPERTIES)) as $fullProperty) {
-                    list($class, $property) = explode('::', $fullProperty, 2);
-                    array_collect_by($this->extProperties, makeFullnspath($class), ltrim($property, '$'));
-                }
-            }
-
-            if (!empty($definitions->get(Definitions::STATIC_METHODS))) {
-                foreach(array_filter($definitions->get(Definitions::STATIC_METHODS)) as $fullMethod) {
-                    list($class, $method) = explode('::', $fullMethod, 2);
-                    array_collect_by($this->extClassMethods, makeFullnspath($class),  mb_strtolower($method));
-                }
-            }
-
-            if (!empty($definitions->get(Definitions::STATIC_PROPERTIES))) {
-                foreach(array_filter($definitions->get(Definitions::STATIC_PROPERTIES)) as $fullProperty) {
-                    list($class, $property) = explode('::', $fullProperty, 2);
-                    array_collect_by($this->extClassProperties, makeFullnspath($class), $property);
-                }
-            }
-
-            if (!empty($definitions->get(Definitions::STATIC_CONSTANTS))) {
-                foreach(array_filter($definitions->get(Definitions::STATIC_CONSTANTS)) as $fullConstant) {
-                    list($class, $constant) = explode('::', $fullConstant, 2);
-                    array_collect_by($this->extClassConstants, makeFullnspath($class), $constant);
-                }
-            }
-        }
-
-        // Not doint $o->p and $o->m() ATM : needs $o's type.
-
-        $this->extConstants = array_merge(...$constants);
-        $this->extFunctions = array_merge(...$functions);
-        $this->extClasses   = array_filter(array_merge(...$classes));
+        $this->extClassConstants = array_merge($ext->getClassConstantList(),
+                                               $ext->getEnumCasesList());
+        $this->extProperties     = $ext->getClassPropertyList();
+        $this->extMethods        = $ext->getClassMethodList();
     }
 
     public function run(Atom $atom, array $extras): void {
@@ -219,9 +159,11 @@ class IsExt extends Plugin {
                 break;
 
             case 'Class' :
-                foreach($extras['ATTRIBUTE'] as $extra) {
-                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->extClasses, \STRICT_COMPARISON)) {
-                        $extra->isPhp = true;
+                if (isset($extras['ATTRIBUTE'])) {
+                    foreach($extras['ATTRIBUTE'] as $extra) {
+                        if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->extClasses, \STRICT_COMPARISON)) {
+                            $extra->isExt = true;
+                        }
                     }
                 }
                 // Fallthrough is OK
@@ -282,8 +224,14 @@ class IsExt extends Plugin {
                 $this->checkTypes($extras['RETURNTYPE'] ?? array());
                 break;
 
-            case 'Newcall' :
+
             case 'Newcallname' :
+                if (in_array($atom->fullnspath, $this->extClasses, \STRICT_COMPARISON)) {
+                    $atom->isPhp = true;
+                }
+                break;
+
+            case 'Newcall' :
                 if (empty($path)) {
                     break;
                 }
@@ -333,12 +281,12 @@ class IsExt extends Plugin {
                 // Nothing
         }
     }
-    
-    private function checkTypes(array $extras) : void {
+
+    private function checkTypes(array $extras): void {
         foreach($extras as $extra) {
             $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
             $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
-    
+
             if (in_array(makeFullnspath($path), $this->extClasses, \STRICT_COMPARISON)) {
                 $extra->isExt = true;
             }

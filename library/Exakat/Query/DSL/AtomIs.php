@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -47,22 +47,22 @@ class AtomIs extends DSL {
             $gremlin = <<<GREMLIN
 union( __.identity(), 
        __.repeat(
-            __.timeLimit($TIME_LIMIT).hasLabel(within(["Variable", "Variablearray", "Variableobject", "Phpvariable", "Ternary", "Coalesce", "Parenthesis"]))
+            __.timeLimit($TIME_LIMIT).hasLabel("Variable", "Variablearray", "Variableobject", "Phpvariable", "Ternary", "Coalesce", "Parenthesis")
               .union( 
                  // literal local value
-                  __.hasLabel(within(["Variable", "Variablearray", "Variableobject", "Phpvariable"])).in("DEFINITION").hasLabel("Variabledefinition").out("DEFAULT"),
+                  __.hasLabel("Variable", "Variablearray", "Variableobject", "Phpvariable").in("DEFINITION").hasLabel("Variabledefinition").out("DEFAULT"),
 
                  // literal value, passed as an argument (Method, closure, function)
-                  __.hasLabel(within(["Variable", "Phpvariable"])).in("DEFINITION").in("NAME").hasLabel('Parameter').as("p1").in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
+                  __.hasLabel("Variable", "Phpvariable").in("DEFINITION").in("NAME").hasLabel('Parameter').as("p1").in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
 
                  // literal value, passed as an argument
-                  __.hasLabel(within(["Ternary"])).out("THEN", "ELSE").not(hasLabel('Void')),
+                  __.hasLabel("Ternary").out("THEN", "ELSE").not(hasLabel('Void')),
 
                 // \$a ?? 'b'
-                  __.hasLabel(within(["Coalesce"])).out("LEFT", "RIGHT"),
+                  __.hasLabel("Coalesce").out("LEFT", "RIGHT"),
 
                 // (\$a)
-                  __.hasLabel(within(["Parenthesis"])).out("CODE")
+                  __.hasLabel("Parenthesis").out("CODE")
                 )
             ).times($MAX_SEARCHING).emit()
     )
@@ -74,27 +74,27 @@ GREMLIN;
             $gremlin = <<<GREMLIN
 union( __.identity(), 
        __.repeat(
-            __.timeLimit($TIME_LIMIT).hasLabel(within(["Identifier", "Nsname", "Staticconstant", "Variable" , "Ternary", "Coalesce", "Parenthesis", "Functioncall", "Methodcall", "Staticmethodcall"]))
-            .union( __.hasLabel(within(["Identifier", "Nsname", "Staticconstant"])).in("DEFINITION").out("VALUE"),
+            __.timeLimit($TIME_LIMIT).hasLabel("Identifier", "Nsname", "Staticconstant", "Variable" , "Ternary", "Coalesce", "Parenthesis", "Functioncall", "Methodcall", "Staticmethodcall")
+            .union( __.hasLabel("Identifier", "Nsname", "Staticconstant").in("DEFINITION").out("VALUE"),
             
                       // local variable
-                      __.hasLabel(within(["Variable"])).not(__.in("LEFT").hasLabel("Assignation")).in("DEFINITION").hasLabel('Variabledefinition').has("isConst").optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT"),
+                      __.hasLabel("Variable").not(__.in("LEFT").hasLabel("Assignation")).in("DEFINITION").hasLabel('Variabledefinition').has("isConst").optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT"),
                       
                       // literal value, passed as an argument (Method, closure, function)
-                      __.hasLabel(within(["Variable"])).in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").out("DEFAULT"),
+                      __.hasLabel("Variable").in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").out("DEFAULT"),
             
-                      __.hasLabel(within(["Variable"])).in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").as("p1").timeLimit($TIME_LIMIT).in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
+                      __.hasLabel("Variable").in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").as("p1").timeLimit($TIME_LIMIT).in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
             
                       // literal value, passed as an argument
-                      __.hasLabel(within(["Ternary"])).not(__.out("THEN").hasLabel("Void")).out("THEN", "ELSE"),
+                      __.hasLabel("Ternary").not(__.out("THEN").hasLabel("Void")).out("THEN", "ELSE"),
 
-                      __.hasLabel(within(["Ternary"])).where(__.out("THEN").hasLabel("Void")).out("CONDITION", "ELSE"),
+                      __.hasLabel("Ternary").where(__.out("THEN").hasLabel("Void")).out("CONDITION", "ELSE"),
             
-                      __.hasLabel(within(["Coalesce"])).out("LEFT", "RIGHT"),
+                      __.hasLabel("Coalesce").out("LEFT", "RIGHT"),
             
-                      __.hasLabel(within(["Parenthesis"])).out("CODE"),
+                      __.hasLabel("Parenthesis").out("CODE"),
             
-                      __.hasLabel(within(["Functioncall", "Methodcall", "Staticmethodcall"])).in('DEFINITION').out('RETURNED')
+                      __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in('DEFINITION').out('RETURNED')
                       )
             ).times($MAX_SEARCHING).emit()
 )
@@ -103,7 +103,8 @@ GREMLIN;
             return new Command($gremlin, array($atoms));
         } else {
             // WITHOUT_CONSTANTS or non-constant atoms
-            return new Command('hasLabel(within(***))', array($diff));
+            $list = makeList($diff);
+            return new Command('hasLabel(' . $list . ')');
         }
     }
 }

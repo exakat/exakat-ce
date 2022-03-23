@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,6 +26,11 @@ namespace Exakat\Analyzer\Interfaces;
 use Exakat\Analyzer\Analyzer;
 
 class UndefinedInterfaces extends Analyzer {
+    public function dependsOn(): array {
+        return array('Complete/VariableTypehint',
+                    );
+    }
+
     public function analyze(): void {
         // interface used in a class
         $this->atomIs(self::CLASSES_ALL)
@@ -58,8 +63,9 @@ class UndefinedInterfaces extends Analyzer {
              ->isNot('isStub', true);
         $this->prepareQuery();
 
+        // types, (typeints or returntype)
         $this->atomIs(self::CONSTANTS_ALL)
-             ->hasIn(array('TYPEHINT', 'RETURNTYPE'))
+             ->hasIn(self::TYPE_LINKS)
              ->atomIsNot(array('Self', 'Parent'))
              ->has('fullnspath')
              ->noClassDefinition()

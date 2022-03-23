@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -143,7 +143,8 @@ LEFT JOIN definitions
 LEFT JOIN definitions definitions2
     ON definitions2.type       = calls.type       AND
        definitions2.fullnspath = calls.globalpath 
-WHERE (definitions.id IS NOT NULL OR definitions2.id IS NOT NULL)
+WHERE (definitions.id IS NOT NULL OR definitions2.id IS NOT NULL) AND
+        CASE WHEN definitions.id IS NULL THEN definitions2.id ELSE definitions.id END != calls.id
 GROUP BY definition
 SQL;
         $res = $this->sqlite3->query($definitionSQL);

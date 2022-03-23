@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -33,39 +33,64 @@ class CheckTypeWithAtom extends DSL {
 
         $gremlin = <<<GREMLIN
 filter{
-    if ($var == "\\\\int") {
+    if (!($var instanceof ArrayList)) {
+        $var = [$var];
+    }
+    
+    response = true;
+    
+    for(type in $var)
+    if (type == "\\\\int") {
+        response = response &
         !((it.get().label() in ["Integer", "Addition", "Multiplication", "Bitshift", "Power"]) ||
            (it.get().label() == "Cast" &&  it.get().value("token") == "T_INT_CAST"));
-    } else if ($var == "\\\\string") {
+
+    } else if (type == "\\\\string") {
+        response = response && 
         !((it.get().label() in ["String", "Heredoc", "Concatenation"]) ||
            (it.get().label() == "Cast" &&  it.get().value("token") == "T_STRING_CAST"));
-    } else if ($var == "\\\\array") {
+
+    } else if (type == "\\\\array") {
+        response = response && 
         !((it.get().label() in ["Arrayliteral"]) ||
            (it.get().label() == "Cast" &&  it.get().value("token") == "T_ARRAY_CAST"));
-    } else if ($var == "\\\\float") {
+
+    } else if (type == "\\\\float") {
+        response = response && 
         !((it.get().label() in ["Float", "Integer"]) ||
            (it.get().label() == "Cast" &&  it.get().value("token") in ["T_DOUBLE_CAST", "T_INT_CAST"]));
-    } else if ($var == "\\\\bool") {
+
+    } else if (type == "\\\\bool") {
+        response = response && 
         !((it.get().label() in ["Boolean", "Comparison"]) ||
            (it.get().label() == "Cast" &&  it.get().value("token") == "T_BOOL_CAST"));
-    } else if ($var == "\\\\object") {
+
+    } else if (type == "\\\\object") {
+        response = response && 
         !((it.get().label() in ["Variable", "New", "Clone"]) ||
            (it.get().label() == "Cast" &&  it.get().value("token") == "T_OBJECT_CAST"));
-    } else if ($var == "\\\\void") {
+
+    } else if (type == "\\\\void") {
+        response = response && 
         !(it.get().label() in ["Void"]);
-    } else if ($var == "\\\\callable") {
+
+    } else if (type == "\\\\callable") {
+        response = response && 
         !(it.get().label() in ["Closure", "Arrowfunction"]);
-    } else if ($var == "\\\\iterable") {
+
+    } else if (type == "\\\\iterable") {
         if (it.get().label() in ["Arrayliteral"]) {
-            false;
+            response = response && false;
         } else if("fullnspath" in it.get().properties() && it.get().value("fullnspath") in ["\\\\arrayobject", "\\\\iterator"]) {
-            false;
+            response = response && false;
         } else {
-            true;
+            response = response && true;
         }
     } else {
-        true;
+        response = response && true;
     }
+    
+    response;
 }
 GREMLIN;
         return new Command($gremlin);

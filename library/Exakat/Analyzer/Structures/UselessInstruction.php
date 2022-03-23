@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,13 +36,14 @@ class UselessInstruction extends Analyzer {
         // Structures that should be put somewhere, and never left alone
         $this->atomIs('Sequence')
              ->hasNoIn('FINAL')
+             ->hasNoParent('Match', array('CODE', 'EXPRESSION', 'CASES'))
              ->outIs('EXPRESSION')
              ->analyzerIsNot('Classes/IsaMagicProperty')
              ->atomIs(array('Array', 'Addition', 'Multiplication', 'Member', 'Staticproperty', 'Boolean',
                             'Magicconstant', 'Staticconstant', 'Integer', 'Float', 'Sign', 'Nsname',
                             'Identifier', 'String', 'Instanceof', 'Bitshift', 'Comparison', 'Null', 'Logical', 'Bitoperation',
-                            'Heredoc', 'Power', 'Coalesce', 'Ternary', 'Variable', 'Arrayliteral', 'New'))
-             ->noAtomInside(array('Functioncall', 'Staticmethodcall', 'Methodcall', 'Assignation', 'Defineconstant', ));
+                            'Heredoc', 'Power', 'Coalesce', 'Ternary', 'Variable', 'Arrayliteral', 'New', 'Match', 'Spaceship'))
+             ->noAtomInside(array('Functioncall', 'Staticmethodcall', 'Methodcall', 'Assignation', 'Defineconstant'));
         $this->prepareQuery();
 
         // foreach($i = 0; $i < 10, $j < 20; $i++)

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,9 +28,8 @@ class IsPhp extends Plugin {
     private $phpFunctions        = array();
     private $phpConstants        = array();
     private $phpClasses          = array();
-    private $phpMethods          = array();
     private $phpInterfaces       = array();
-    private $phpIEnums           = array();
+    private $phpEnums            = array();
     private $phpClassConstants   = array();
     private $phpClassMethods     = array();
     private $phpClassProperties  = array();
@@ -39,28 +38,26 @@ class IsPhp extends Plugin {
     public function __construct() {
         parent::__construct();
 
-        $config = exakat('config');
-        $this->phpFunctions = parse_ini_file($config->dir_root . '/data/php_functions.ini')['functions'] ?? array();
-        $this->phpFunctions = makeFullnspath($this->phpFunctions);
-
-        $this->phpConstants = parse_ini_file($config->dir_root . '/data/php_constants.ini')['constants'] ?? array();
+        $php = exakat('phpCore');
+        $this->phpConstants = $php->getConstantList();
         $this->phpConstants = makeFullnspath($this->phpConstants, \FNP_CONSTANT);
 
-        $this->phpClasses = parse_ini_file($config->dir_root . '/data/php_classes.ini')['classes'] ?? array();
+        $this->phpFunctions = $php->getFunctionList();
+        $this->phpFunctions = makeFullnspath($this->phpFunctions);
+
+        $this->phpClasses = $php->getClassList();
         $this->phpClasses = makeFullnspath($this->phpClasses);
 
-        $this->phpInterfaces = parse_ini_file($config->dir_root . '/data/php_interfaces.ini')['interfaces'] ?? array();
+        $this->phpInterfaces = $php->getInterfaceList();
         $this->phpInterfaces = makeFullnspath($this->phpInterfaces);
 
-        $this->phpTraits = parse_ini_file($config->dir_root . '/data/php_traits.ini')['traits'] ?? array();
+        $this->phpTraits = $php->getTraitList();
         $this->phpTraits = makeFullnspath($this->phpTraits);
 
-        $this->phpEnums = parse_ini_file($config->dir_root . '/data/php_enums.ini')['enums'] ?? array();
-        $this->phpEnums = makeFullnspath($this->phpEnums);
-
-        $this->phpClassConstants  = array(); //array('\ziparchive' => array('CREATE'),);
-        $this->phpClassMethods    = array(); //array('\test' => array('method'),);
-        $this->phpClassProperties = array(); //array('\test' => array('$property'),);
+        $this->phpClassConstants = array_merge($php->getClassConstantList(),
+                                               $php->getEnumCasesList());
+        $this->phpProperties     = $php->getClassPropertyList();
+        $this->phpMethods        = $php->getClassMethodList();
     }
 
     public function run(Atom $atom, array $extras): void {
@@ -114,6 +111,10 @@ class IsPhp extends Plugin {
                 if (in_array($extras['CONSTANT']->code ?? self::NOT_PROVIDED, $this->phpClassConstants[$path] ?? array(), \STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
+
+                if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->phpClassConstants ?? array(), \STRICT_COMPARISON)) {
+                    $atom->isPhp = true;
+                }
                 break;
 
             case 'Functioncall' :
@@ -163,9 +164,11 @@ class IsPhp extends Plugin {
                 break;
 
             case 'Class' :
-                foreach($extras['ATTRIBUTE'] as $extra) {
-                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->phpClasses, \STRICT_COMPARISON)) {
-                        $extra->isPhp = true;
+                if (isset($extras['ATTRIBUTE'])) {
+                    foreach($extras['ATTRIBUTE'] as $extra) {
+                        if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->phpClasses, \STRICT_COMPARISON)) {
+                            $extra->isPhp = true;
+                        }
                     }
                 }
                 // Fallthrough is OK
@@ -241,6 +244,12 @@ class IsPhp extends Plugin {
                 }
                 break;
 
+            case 'Newcallname' :
+                if (in_array($atom->fullnspath, $this->phpClasses, \STRICT_COMPARISON)) {
+                    $atom->isPhp = true;
+                }
+                break;
+
             case 'Newcall' :
                 if (empty($path)) {
                     break;
@@ -260,12 +269,12 @@ class IsPhp extends Plugin {
 
                 if ($atom->use === 'const') {
                     if (in_array($path, $this->phpConstants, \STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false                ) { 
+                        strpos($atom->fullcode, '\\', 1) === false                ) {
                         $atom->isPhp = true;
                     }
                 } elseif ($atom->use === 'function') {
                     if (in_array($path, $this->phpFunctions, \STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false                ) { 
+                        strpos($atom->fullcode, '\\', 1) === false                ) {
                         $atom->isPhp = true;
                     }
                 } elseif ($atom->use === 'class') {
@@ -274,7 +283,7 @@ class IsPhp extends Plugin {
                                        $this->phpTraits,
                                        );
                     if (in_array($path, $cit, \STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false                ) { 
+                        strpos($atom->fullcode, '\\', 1) === false                ) {
                         $atom->isPhp = true;
                     }
                 } else {
@@ -302,12 +311,24 @@ class IsPhp extends Plugin {
         }
     }
 
-    private function checkType(array $extras) : void {
+    private function checkType(array $extras): void {
         foreach($extras as $extra) {
             $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
             $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
-    
+
             if (in_array(makeFullnspath($path), $this->phpClasses, \STRICT_COMPARISON)) {
+                $extra->isPhp = true;
+            }
+
+            if (in_array(makeFullnspath($path), $this->phpInterfaces, \STRICT_COMPARISON)) {
+                $extra->isPhp = true;
+            }
+
+            if (in_array($extra->fullnspath, $this->phpClasses, \STRICT_COMPARISON)) {
+                $extra->isPhp = true;
+            }
+
+            if (in_array($extra->fullnspath, $this->phpInterfaces, \STRICT_COMPARISON)) {
                 $extra->isPhp = true;
             }
         }

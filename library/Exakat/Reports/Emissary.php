@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy ‚Äì Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -143,7 +143,7 @@ class Emissary extends Reports {
     }
 
     private function initBasePage(): void {
-        $baseHTML = file_get_contents("{$this->config->dir_root}/media/devfaceted/data/base.html");
+        $baseHTML = file_get_contents("{$this->config->dir_root}/media/devfaceted/data/base.html") ?? '';
 
         $baseHTML = $this->injectBloc($baseHTML, 'EXAKAT_VERSION', Exakat::VERSION);
         $baseHTML = $this->injectBloc($baseHTML, 'EXAKAT_BUILD', (string) Exakat::BUILD);
@@ -553,7 +553,7 @@ HTML;
 
         $namespaces = $this->dump->fetchTable('namespaces')->toHash('id', 'namespace');
 
-        // il faut constuire les différentes possibilitées avant de construire le tableau,
+        // il faut constuire les diff√©rentes possibilit√©es avant de construire le tableau,
         // afin de suivre les extends, et tous les rassembler.
 
         $res = $this->dump->fetchTable('cit');
@@ -608,10 +608,8 @@ HTML;
                 foreach($child as $id => $kid) {
                     if (isset($children[$kid])) {
                         $cleaned[] = $children[$kid];
-                        $cleaned[] = array($kid);
-                    } else {
-                        $cleaned[] = array($kid);
                     }
+                    $cleaned[] = array($kid);
                 }
                 $children2[$key] = array_values(array_unique(array_merge(...$cleaned)));
             }
@@ -794,7 +792,7 @@ HTML;
         );
 
         foreach ($res->toArray() as $value) {
-            if (in_array($value['key'], $omit)) { continue; }
+            if (in_array($value['key'], $omit, \STRICT_COMPARISON)) { continue; }
             $data[$value['key']] = $value['value'];
 
             $html []= '<div class="clearfix">
@@ -876,7 +874,7 @@ HTML;
 
         // fichier
         $totalFile = $this->dump->fetchHash('files')->toString();
-        $totalFileAnalysed = $this->getTotalAnalysedFile();
+        $totalFileAnalysed = count($this->getFilesWithResults());
         $totalFileSansError = $totalFile - $totalFileAnalysed;
         if ((int) $totalFile === 0) {
             $percentFile = 100;
@@ -962,7 +960,7 @@ HTML;
             $data[] = array('label' => $key, 'value' => array_sum($counts));
         }
 
-        // ordonné DESC par valeur
+        // ordonn√© DESC par valeur
         uasort($data, function (array $a, array $b): int {
             return $b['value'] <=> $a['value'];
         });
@@ -1016,6 +1014,12 @@ HTML;
 
         return array('html'   => $html,
                      'script' => $dataScript);
+    }
+
+    protected function getFilesWithResults(): array {
+        $list = $this->rulesets->getRulesetsAnalyzers(array('Analyze'));
+
+        return $this->dump->getFilesWithResults($list)->toArray();
     }
 
     protected function getTotalAnalysedFile(): int {
@@ -1414,7 +1418,7 @@ JAVASCRIPTCODE;
 
     public function getIssuesFacetedDb(array $ruleset): array {
         $results = $this->dump->fetchAnalysers($ruleset);
-        $results->filter(function (array $x): bool { return !in_array($x['fullcode'], array('Not Compatible With PHP Version', 'Not Compatible With PHP Configuration')); });
+        $results->filter(function (array $x): bool { return !in_array($x['fullcode'], array('Not Compatible With PHP Version', 'Not Compatible With PHP Configuration'), \STRICT_COMPARISON); });
 
         $TTFColors = array('Instant'  => '#5f492d',
                            'Quick'    => '#e8d568',
@@ -1615,133 +1619,9 @@ JAVASCRIPTCODE;
         $scores = array_fill_keys(array_values($versions), 0);
         $versions = array_reverse($versions);
 
-        $analyzers = array(
-                            'Php/UseMatch'                          => '8.0+',
-                            'Php/SignatureTrailingComma'            => '8.0+',
-                            'Php/Php80OnlyTypeHints'                => '8.0+',
-                            'Php/Php80UnionTypehint'                => '8.0+',
-                            'Php/Php80VariableSyntax'               => '8.0+',
-                            'Php/ThrowWasAnExpression'              => '8.0+',
-                            'Php/Php80NewFunctions'                 => '8.0-',
-                            'Php/Php80RemovedFunctions'             => '8.0-',
-                            'Php/Php80RemovedConstant'              => '8.0-',
+        $analyzers = (array) json_decode(file_get_contents($this->config->dir_root . '/data/compatibility.json'));
 
-                            'Structures/toStringThrowsException'    => '7.4-',
-                            'Php/NestedTernaryWithoutParenthesis'   => '7.4-',
-                            'Php/TypedPropertyUsage'                => '7.4-',
-                            'Php/UseCovariance'                     => '7.4-',
-                            'Php/UseContravariance'                 => '7.4-',
-                            'Php/Php74NewDirective'                 => '7.4-',
-                            'Php/SpreadOperatorForArray'            => '7.4+',
-                            'Php/UnpackingInsideArrays'             => '7.4+',
-                            'Structures/CurlVersionNow'             => '7.4+',
-                            'Php/Php74RemovedFunctions'             => '7.4+',
-                            'Php/Php74Deprecation'                  => '7.4+',
-                            'Php/Php74ReservedKeyword'              => '7.4+',
-                            'Functions/UseArrowFunctions'           => '7.4+',
-                            'Php/IntegerSeparatorUsage'             => '7.4+',
-                            'Php/NoMoreCurlyArrays'                 => '7.4+',
-                            'Php/CoalesceEqual'                     => '7.4+',
-                            'Php/ConcatAndAddition'                 => '7.4+',
-
-                            'Php/Php73NewFunctions'                 => '7.3-',
-                            'Php/ListWithReference'                 => '7.3+',
-                            'Constants/CaseInsensitiveConstants'    => '7.3+',
-                            'Php/FlexibleHeredoc'                   => '7.3+',
-                            'Php/PHP73LastEmptyArgument'            => '7.3+',
-
-                            'Php/Php72Deprecation'                  => '7.2-',
-                            'Php/Php72NewClasses'                   => '7.2-',
-                            'Php/Php72NewConstants'                 => '7.2-',
-                            'Php/Php72NewFunctions'                 => '7.2-',
-                            'Php/Php72ObjectKeyword'                => '7.2-',
-                            'Php/Php72RemovedFunctions'             => '7.2-',
-                            'Classes/CantInheritAbstractMethod'     => '7.2+',
-                            'Classes/ChildRemoveTypehint'           => '7.2+',
-                            'Php/GroupUseTrailingComma'             => '7.2+',
-
-                            'Php/Php71NewClasses'                   => '7.1-',
-                            'Php/Php71NewFunctions'                 => '7.1-',
-                            'Type/OctalInString'                    => '7.1-',
-                            'Classes/ConstVisibilityUsage'          => '7.1+',
-                            'Php/ListShortSyntax'                   => '7.1+',
-                            'Php/ListWithKeys'                      => '7.1+',
-                            'Php/Php71RemovedDirective'             => '7.1+',
-                            'Php/UseNullableType'                   => '7.1+',
-
-                            'Classes/AbstractStatic'                => '7.0-',
-                            'Classes/NullOnNew'                     => '7.0-',
-                            'Classes/UsingThisOutsideAClass'        => '7.0-',
-                            'Extensions/Extapc'                     => '7.0-',
-                            'Extensions/Extereg'                    => '7.0-',
-                            'Extensions/Extmysql'                   => '7.0-',
-                            'Functions/MultipleSameArguments'       => '7.0-',
-                            'Php/EmptyList'                         => '7.0-',
-                            'Php/ForeachDontChangePointer'          => '7.0-',
-                            'Php/GlobalWithoutSimpleVariable'       => '7.0-',
-                            'Php/NoListWithString'                  => '7.0-',
-                            'Php/Php70NewClasses'                   => '7.0-',
-                            'Php/Php70NewFunctions'                 => '7.0-',
-                            'Php/Php70NewInterfaces'                => '7.0-',
-                            'Php/Php70RemovedFunctions'             => '7.0-',
-                            'Php/ReservedKeywords7'                 => '7.0-',
-                            'Structures/BreakOutsideLoop'           => '7.0-',
-                            'Structures/SwitchWithMultipleDefault'  => '7.0-',
-                            'Type/MalformedOctal'                   => '7.0-',
-                            'Structures/pregOptionE'                => '7.0-',
-                            'Classes/Anonymous'                     => '7.0+',
-                            'Extensions/Extast'                     => '7.0+',
-                            'Extensions/Extzbarcode'                => '7.0+',
-                            'Php/Coalesce'                          => '7.0+',
-                            'Php/DeclareStrictType'                 => '7.0+',
-                            'Php/DefineWithArray'                   => '7.0+',
-                            'Php/NoStringWithAppend'                => '7.0+',
-                            'Php/Php70RemovedDirective'             => '7.0+',
-                            'Php/Php7RelaxedKeyword'                => '7.0+',
-                            'Php/ReturnTypehintUsage'               => '7.0+',
-                            'Php/ScalarTypehintUsage'               => '7.0+',
-                            'Php/UnicodeEscapeSyntax'               => '7.0+',
-                            'Php/UseSessionStartOptions'            => '7.0+',
-                            'Php/YieldFromUsage'                    => '7.0+',
-                            'Security/UnserializeSecondArg'         => '7.0+',
-                            'Structures/IssetWithConstant'          => '7.0+',
-                            'Php/ParenthesisAsParameter'            => '7.0+',
-
-                            'Php/Php56NewFunctions'                 => '5.6-',
-                            'Structures/CryptWithoutSalt'           => '5.6-',
-                            'Namespaces/UseFunctionsConstants'      => '5.6+',
-                            'Php/ConstantScalarExpression'          => '5.6+',
-                            'Php/debugInfoUsage'                    => '5.6+',
-                            'Php/EllipsisUsage'                     => '5.6+',
-                            'Php/ExponentUsage'                     => '5.6+',
-                            'Structures/ConstantScalarExpression'   => '5.6+',
-
-                            'Php/Php55NewFunctions'                 => '5.5-',
-                            'Php/Php55RemovedFunctions'             => '5.5-',
-                            'Php/CantUseReturnValueInWriteContext'  => '5.5+',
-                            'Php/ConstWithArray'                    => '5.5+',
-                            'Php/Password55'                        => '5.5+',
-                            'Php/StaticclassUsage'                  => '5.5+',
-                            'Structures/ForeachWithList'            => '5.5+',
-                            'Structures/EmptyWithExpression'        => '5.5+',
-                            'Structures/TryFinally'                 => '5.5+',
-
-                            'Php/ClosureThisSupport'                => '5.4-',
-                            'Php/HashAlgos54'                       => '5.4-',
-                            'Php/Php54RemovedFunctions'             => '5.4-',
-                            'Structures/Break0'                     => '5.4-',
-                            'Structures/BreakNonInteger'            => '5.4-',
-                            'Structures/CalltimePassByReference'    => '5.4-',
-                            'Php/MethodCallOnNew'                   => '5.4+',
-                            'Type/Binary'                           => '5.4+',
-
-                            'Php/Php54NewFunctions'                 => '5.3-',
-                            'Structures/DereferencingAS'            => '5.3-',
-                          );
-
-//        $colors = array('7900E5', 'BB00E1', 'DD00BF', 'D9007B', 'D50039', 'D20700', 'CE4400', 'CA8000', 'C6B900', '95C200', '59BF00', );
-//        $colors = array('7900E5', 'DD00BF', 'D50039', 'CE4400', 'C6B900', '59BF00');
-        $colors = array('59BF00', '59BF00', '59BF00', 'BEC500', 'CB6C00', 'D20700', 'D80064', 'DE00D7', '7900E5', '7900E5', '7900E5', );
+        $colors = array('59BF00', '59BF00', '59BF00', 'BEC500', 'CB6C00', 'D20700', 'D80064', 'DE00D7', '7900E5', '7900E5', '7900E5', '7900E5', );
         // This must be the same lenght than the list of versions
 
         $results = $this->dump->fetchAnalysersCounts(array_keys($analyzers));
@@ -1790,7 +1670,7 @@ JAVASCRIPTCODE;
         $table []= '<tr><td>&nbsp;</td><td>Compilation</td><td>' . implode('</td><td>', $incompilable) . "</td></tr>\n";
         $data = array_merge($data, $data2);
         foreach($data as $name => $row) {
-            if (!class_exists("\Exakat\Analyzer\$name")) {
+            if (!class_exists("\Exakat\Analyzer\\" . str_replace('/', '\\', $name))) {
                 continue;
             }
 
@@ -3474,7 +3354,7 @@ HTML
                                                '\\iterable',
                                                '\\bool',
                                                '\\float',
-                                              ))) {
+                                              ), \STRICT_COMPARISON)) {
                 $data[$value['key']] = $value['value'];
                 continue;
             }
@@ -3660,7 +3540,7 @@ JAVASCRIPT;
 
     private function generateFileDependencies(Section $section): void {
         $res = $this->dump->fetchTable('filesDependencies');
-        $res->filter(function (array $x): bool { return ($x['included'] !== $x['including']) && in_array($x['type'], array('IMPLEMENTS', 'EXTENDS', 'INCLUDE', 'NEW'));});
+        $res->filter(function (array $x): bool { return ($x['included'] !== $x['including']) && in_array($x['type'], array('IMPLEMENTS', 'EXTENDS', 'INCLUDE', 'NEW'), \STRICT_COMPARISON);});
 
         $nodes = array();
         foreach($res->toArray() as $row) {
@@ -4174,7 +4054,7 @@ HTML;
             $theMethod = $row['fullnspath'];
             $visibilities = array($row['typehint'], $row['init']);
 
-            $argument = '<tr><td>&nbsp;</td><td>&nbsp;</td><td>' . PHPSyntax($row['argument']) . '</td><td class="exakat_short_text">' .
+            $argument = '<tr><td>&nbsp;</td><td>&nbsp;</td><td>' . PHPSyntax($row['argument'] ?? '') . '</td><td class="exakat_short_text">' .
                                     implode('</td><td>', $visibilities)
                                  . '</td></tr>' . PHP_EOL;
 
@@ -4186,10 +4066,10 @@ HTML;
         foreach($res->toArray() as $row) {
             $visibilities = array($row['returntype'], '&nbsp;');
 
-            $method = '<tr><td>&nbsp;</td><td>' . PHPSyntax($row['method']) . '</td><td>&nbsp;</td><td class="exakat_short_text">' .
+            $method = '<tr><td>&nbsp;</td><td>' . PHPSyntax($row['method'] ?? '') . '</td><td>&nbsp;</td><td class="exakat_short_text">' .
                                     implode('</td><td>', $visibilities)
                                  . '</td></tr>' . PHP_EOL;
-            $method .= implode(PHP_EOL, $arguments[$row['fullnspath'] . '::' . mb_strtolower($row['method'])] ?? array());
+            $method .= implode(PHP_EOL, $arguments[$row['fullnspath'] . '::' . mb_strtolower($row['method'] ?? '')] ?? array());
 
             array_collect_by($return, $row['fullnspath'] . ':' . $row['theClass'], $method);
         }

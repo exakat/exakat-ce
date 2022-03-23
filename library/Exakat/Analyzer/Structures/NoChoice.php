@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,7 +25,18 @@ use Exakat\Analyzer\Analyzer;
 
 class NoChoice extends Analyzer {
     public function analyze(): void {
-        $skipExpression = array('Closure', 'Arrowfunction', 'Switch', 'For', 'Foreach', 'While', 'Dowhile', 'Yield', 'Yieldfrom');
+        $skipExpression = array('Closure',
+                                'Arrowfunction',
+                                'Switch',
+                                'Match',
+                                'For',
+                                'Foreach',
+                                'While',
+                                'Dowhile',
+                                'Yield',
+                                'Yieldfrom',
+                                'Ifthen',
+                                );
 
         // $a == 2 ? doThis() : doThis();
         $this->atomIs('Ternary')
@@ -82,7 +93,39 @@ class NoChoice extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-    }
+        // $a == 2 ?: false;
+        $this->atomIs('Ternary')
+             ->filter(
+                $this->side()
+                     ->outIs('THEN')
+                     ->atomIs('Void')
+                     ->count()
+                     ->isEqual(1)
+              )
+             ->outIs('ELSE')
+             ->atomIs('Boolean', self::WITH_CONSTANTS)
+             ->fullnspathIs('\\false')
+             ->back('first');
+        $this->prepareQuery();
+
+        // $a == 2 ?? null;
+        $this->atomIs('Coalesce')
+             ->outIs('RIGHT')
+             ->atomIs('Null', self::WITH_CONSTANTS)
+             ->back('first');
+        $this->prepareQuery();
+
+        // doThis() ?? doThis();
+        $this->atomIs('Coalesce')
+             ->outIs('LEFT')
+             ->atomIs(self::CONTAINERS)
+             ->savePropertyAs('fullcode', 'cdt')
+             ->inIs('LEFT')
+             ->outIs('RIGHT')
+             ->atomIs(self::CONTAINERS)
+             ->samePropertyAs('fullcode', 'cdt', self::CASE_SENSITIVE)
+             ->back('first');
+        $this->prepareQuery();    }
 }
 
 ?>

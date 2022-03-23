@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -64,25 +64,25 @@ class PropagateConstants extends Complete {
     }
 
     private function readConstantValue() {
-            display('propagating Constant value in Const');
-            // fix path for constants with Const
-            // noDelimiter is set at the same moment as boolean and intval. Any of them is the same
-            $this->atomIs(array('Constant', 'Defineconstant'))
+        display('propagating Constant value in Const');
+        // fix path for constants with Const
+        // noDelimiter is set at the same moment as boolean and intval. Any of them is the same
+        $this->atomIs(array('Constant', 'Defineconstant'))
+         ->outIs('VALUE')
+         ->atomIs(array('String', 'Heredoc', 'Integer', 'Null', 'Boolean', 'Float'))
+         ->setProperty('propagated', true)
+         ->count();
+        $res = $this->rawQuery();
+
+        $this->atomIs(array('Constant', 'Defineconstant'))
              ->outIs('VALUE')
-             ->atomIs(array('String', 'Heredoc', 'Integer', 'Null', 'Boolean', 'Float'))
-             ->setProperty('propagated', true)
-             ->count();
-            $res = $this->rawQuery();
+             ->is('propagated', true)
+             ->savePropertyAs('x')
+             ->back('first')
 
-            $this->atomIs(array('Constant', 'Defineconstant'))
-                 ->outIs('VALUE')
-                 ->is('propagated', true)
-                 ->savePropertyAs('x')
-                 ->back('first')
-
-                 ->outIs('NAME')
-                 ->hasNo('propagated')
-                 ->raw(<<<'GREMLIN'
+             ->outIs('NAME')
+             ->hasNo('propagated')
+             ->raw(<<<'GREMLIN'
  sideEffect{ 
         if ("noDelimiter" in x.keys()) {
             it.get().property("noDelimiter", x.value("noDelimiter").toString()); 
@@ -137,7 +137,7 @@ sideEffect{
 }
 GREMLIN
 )
-            ->count();
+             ->count();
             $res = $this->rawQuery();
 
             display( $res->toInt() . " constants propagated\n");
@@ -424,20 +424,20 @@ sideEffect{
         i = (x[0] != 0) ^ (x[1] != 0);
       } else if (it.get().value("token") == 'T_AND' ||
                  it.get().value("token") == 'T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG') {
-        i = x[0] & x[1];
+        i = x[0].toLong() & x[1].toLong();
       } else if (it.get().value("token") == 'T_XOR') {
-        i = x[0] ^ x[1];
+        i = x[0].toLong() ^ x[1].toLong();
       } else if (it.get().value("token") == 'T_OR') {
-        i = x[0] | x[1];
+        i = x[0].toLong() | x[1].toLong();
       } else if (it.get().value("token") == 'T_SPACESHIP') {
           i = x[0] <=> x[1];
       } else {
         Missing_logical_case_in_constant_propagation();
       }
 
-    it.get().property("intval", i ? 0 : 1); 
+    it.get().property("intval", i ? 1 : 0); 
     it.get().property("boolean", i != 0);
-    it.get().property("noDelimiter", i.toString()); 
+    it.get().property("noDelimiter", i ? '1' : '0'); 
     it.get().property("propagated", true); 
 
 }
@@ -495,6 +495,11 @@ GREMLIN
                      ->outIs('NOT')
                      ->hasNo('intval')
              )
+             ->not(
+                $this->side()
+                     ->outIs('NOT')
+                     ->hasNo('noDelimiter')
+             )
              ->raw('where( __.out("NOT").sideEffect{ x = it.get() }.fold() )')
              ->raw(<<<'GREMLIN'
 sideEffect{ 
@@ -504,7 +509,7 @@ sideEffect{
       i = ~x.value("intval");
     }
 
-    it.get().property("intval", i); 
+    it.get().property("intval", i ? 1 : 0); 
     if (it.get().property("boolean") != null) {
         it.get().property("boolean", !x.value("boolean"));
     }

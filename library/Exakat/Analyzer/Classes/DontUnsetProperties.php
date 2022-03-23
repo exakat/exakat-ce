@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -29,14 +29,14 @@ class DontUnsetProperties extends Analyzer {
     public function analyze(): void {
         $this->atomIs('Unset')
              ->outIs('ARGUMENT')
-             ->atomIs(array('Member', 'Staticproperty'))
+             ->atomIs(self::PROPERTIES)
              ->back('first');
         $this->prepareQuery();
 
         $this->atomIs('Cast')
              ->tokenIs('T_UNSET_CAST')
              ->outIs('CAST')
-             ->atomIs(array('Member', 'Staticproperty'))
+             ->atomIs(self::PROPERTIES)
              ->back('first');
         $this->prepareQuery();
     }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -408,64 +408,74 @@ class PropagateCalls extends Complete {
     }
 
     private function propagateGlobals(): int {
-        $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
-              ->hasNoIn('DEFINITION')
-              ->outIs('METHOD')
-              ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('lccode', 'name')
-              ->inIs('METHOD')
-              ->outIs('OBJECT')
-              ->inIs('DEFINITION')
-              ->atomIs(array('Globaldefinition', 'Variabledefinition'), self::WITHOUT_CONSTANTS)
-              ->inIs('DEFINITION')
-              ->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
+        $this->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
               ->outIs('DEFINITION')
-              ->outIs('DEFINITION')
-              ->inIs('LEFT')
-              ->atomIs('Assignation', self::WITHOUT_CONSTANTS) // code is =
-              ->outIs('RIGHT')
+              ->inIs('DEFINITION')
+              ->atomIs('Variabledefinition')
+              ->outIs('DEFAULT')
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
               ->inIs('DEFINITION')
               ->atomIs('Class', self::WITHOUT_CONSTANTS)
+              ->as('theClass')
+
+              ->back('first')
+              ->outIs('DEFINITION')
+              ->inIs('DEFINITION')
+              ->atomIs('Variabledefinition')
+              ->outIs('DEFINITION')
+              ->inIs('OBJECT')
+              ->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
+              ->as('theMethod')
+              ->outIs('METHOD')
+              ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('lccode', 'name')
+
+              ->back('theClass')
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs('METHOD')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
               ->as('origin')
-              ->dedup(array('first', 'origin'))
-              ->addETo('DEFINITION', 'first')
+              ->dedup(array('theMethod', 'origin'))
+              ->addETo('DEFINITION', 'theMethod')
               ->count();
         $c1 = $this->rawQuery()->toInt();
 
-        $this->atomIs('Member', self::WITHOUT_CONSTANTS)
-              ->hasNoIn('DEFINITION')
-              ->outIs('MEMBER')
-              ->atomIs('Name', self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('code', 'name')
-              ->inIs('MEMBER')
-              ->outIs('OBJECT')
-              ->inIs('DEFINITION')
-              ->atomIs(array('Globaldefinition', 'Variabledefinition'), self::WITHOUT_CONSTANTS)
-              ->inIs('DEFINITION')
-              ->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
+        $this->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
               ->outIs('DEFINITION')
-              ->outIs('DEFINITION')
-              ->inIs('LEFT')
-              ->atomIs('Assignation', self::WITHOUT_CONSTANTS) // code is =
-              ->outIs('RIGHT')
+              ->inIs('DEFINITION')
+              ->atomIs('Variabledefinition')
+              ->outIs('DEFAULT')
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
               ->inIs('DEFINITION')
               ->atomIs('Class', self::WITHOUT_CONSTANTS)
+              ->as('theClass')
+
+              ->back('first')
+              ->outIs('DEFINITION')
+              ->inIs('DEFINITION')
+              ->atomIs('Variabledefinition')
+              ->outIs('DEFINITION')
+              ->inIs('OBJECT')
+              ->atomIs('Member', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
+              ->as('theProperty')
+              ->outIs('MEMBER')
+              ->atomIs('Name', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('code', 'name')
+
+              ->back('theClass')
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
               ->as('origin')
               ->dedup(array('first', 'origin'))
-              ->addETo('DEFINITION', 'first')
+              ->addETo('DEFINITION', 'theProperty')
               ->count();
         $c2 = $this->rawQuery()->toInt();
 
@@ -473,6 +483,8 @@ class PropagateCalls extends Complete {
     }
 
     private function propagateTypehint(): int {
+        // class a { function m (); }
+        // function foo( A $a) { $a->m(); }
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
               ->hasNoIn('DEFINITION')
               ->outIs('METHOD')

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,8 +25,8 @@ namespace Exakat;
 use Exakat\Configsource\Commandline;
 
 class Exakat {
-    public const VERSION = '2.3.5';
-         public const BUILD = 1280;
+    public const VERSION = '2.3.8';
+      public const BUILD = 1308;
 
     private $config  = null;
 
@@ -136,23 +136,8 @@ class Exakat {
                 $task->run();
                 break;
 
-            case 'findextlib' :
-                $task = new Tasks\FindExternalLibraries();
-                $task->run();
-                break;
-
             case 'dump' :
                 $task = new Tasks\Dump();
-                $task->run();
-                break;
-
-            case 'jobqueue' :
-                $task = new Tasks\Jobqueue();
-                $task->run();
-                break;
-
-            case 'queue' :
-                $task = new Tasks\Queue();
                 $task->run();
                 break;
 
@@ -218,7 +203,7 @@ class Exakat {
 |________|[__]`\_]\'-;__/[__|  \_]\'-;__/\__/  
                                                
 
-Exakat (Community Edition) : @ 2014-2021 Damien Seguy - Exakat SAS <contact(at)exakat.io>. 
+Exakat : @ 2014-2022 Damien Seguy - Exakat SAS <contact(at)exakat.io>. 
 Version : ", $version, ' - Build ', $build, ' - ', $date, "\n";
 
                 break;

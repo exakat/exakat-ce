@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,11 +26,17 @@ use Exakat\Cobbler\Cobbler;
 use Exakat\Config;
 use Exakat\Vcs\Vcs;
 use Exakat\Exceptions\NeedsAnalyzerThema;
+use Exakat\Exceptions\NoCodeInProject;
+use Exakat\Exceptions\ProjectNeeded;
 
 class Cobble extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
+        if ($this->config->project->isDefault()) {
+            throw new ProjectNeeded();
+        }
+
         $res = $this->gremlin->query('g.V().hasLabel("Project").valueMap(true)');
 
         if (isset($res[0]['code']) && $res[0]['code'][0] !== (string) $this->config->project) {
@@ -69,6 +75,11 @@ class Cobble extends Tasks {
             unset($analyze);
             $this->addSnitch(array('step'    => 'Load',
                                    'project' => $this->config->project));
+        }
+
+        $loc = $this->datastore->getHash('loc');
+        if (intval($loc) === 0) {
+            throw new NoCodeInProject($this->config->project);
         }
 
         if (empty($this->config->program)) {
@@ -150,6 +161,10 @@ class Cobble extends Tasks {
 
         if ($log === null) {
             $log = fopen("{$this->config->log_dir}/cobbling.timing.csv", 'a');
+        }
+        if ($log === false) {
+            // can't log so just skip it.
+            return;
         }
 
         $end = microtime(true);

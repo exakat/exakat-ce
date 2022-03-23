@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -50,7 +50,7 @@ class ClassUsage extends Analyzer {
 
         // Typehint (return and argument), catch, instanceof, classes
         $this->atomIs(array('Identifier', 'Nsname'))
-             ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'IMPLEMENTS', 'CLASS'))
+             ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'CLASS')) // NOT IMPLEMENT
              ->fullnspathIs($classes)
              ->analyzerIsNot('self');
         $this->prepareQuery();

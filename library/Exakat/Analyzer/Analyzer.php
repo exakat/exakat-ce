@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -35,6 +35,7 @@ use Exakat\Graph\Helpers\GraphResults;
 use Exakat\Query\DSL\Command;
 use Exakat\Phpexec;
 use Exakat\Fileset\{IgnoreDirs, FileExtensions, Namespaces};
+use Exakat\Stubs\PdffReader;
 
 abstract class Analyzer {
     // Query types
@@ -59,7 +60,7 @@ abstract class Analyzer {
     protected $processedCount = 0; // Number of initial values
     protected $queryCount     = 0; // Number of ran queries
     protected $rawQueryCount  = 0; // Number of ran queries
-    
+
     private $filters = array(); // list of filters for files and namespaces
 
     private $queries          = array();
@@ -78,6 +79,7 @@ abstract class Analyzer {
     private static $calledNamespaces      = null;
     private static $calledDirectives      = null;
 
+    private static $pdffCache = array();
     private static $jsonCache = array();
     private static $iniCache  = array();
 
@@ -147,6 +149,7 @@ abstract class Analyzer {
     public const VARIABLES_SCALAR = array('Variable', 'Variableobject', 'Variablearray', 'Globaldefinition', 'Staticdefinition', 'Phpvariable', 'Parametername');
     public const VARIABLES_ALL    = array('Variable', 'Variableobject', 'Variablearray', 'Globaldefinition', 'Staticdefinition', 'Propertydefinition', 'Phpvariable', 'Parametername');
     public const ARGUMENTS        = array('Ppp', 'Parameter');
+    public const PROPERTIES       = array('Member', 'Staticproperty');
 
     public const LITERALS         = array('Integer', 'Float', 'Null', 'Boolean', 'String', 'Heredoc');
     public const SCALARS          = array('Integer', 'Float', 'Null', 'Boolean', 'String', 'Heredoc', 'Arrayliteral');
@@ -159,6 +162,7 @@ abstract class Analyzer {
 
     public const FUNCTIONS_NAMED  = array('Function', 'Method', 'Magicmethod');
     public const FUNCTIONS        = array('Function', 'Closure', 'Arrowfunction');
+    public const FUNCTIONS_ANONYMOUS = array('Closure', 'Arrowfunction');
     public const FUNCTIONS_METHOD = array('Method', 'Magicmethod');
 
     public const CIT              = array('Class', 'Classanonymous', 'Interface', 'Trait', 'Enum');
@@ -186,6 +190,11 @@ abstract class Analyzer {
     public const EXPRESSION_ATOMS = array('Addition', 'Multiplication', 'Power', 'Ternary', 'Not', 'Parenthesis', 'Functioncall' );
     public const TYPE_ATOMS       = array('Integer', 'String', 'Arrayliteral', 'Float', 'Boolean', 'Null', 'Closure', 'Concatenation', 'Magicconstant', 'Heredoc', 'Power' , 'Staticclass', 'Comparison', 'Not', 'Addition', 'Multiplication', 'Bitshift', 'Bitoperation', 'Logical');
     public const BREAKS           = array('Goto', 'Return', 'Break', 'Continue');
+    public const ANONYMOUS        = array('Closure', 'Arrowfunction', 'Classanonymous');
+
+    public const TYPEHINTABLE     = array('Parameter', 'Ppp', 'Function', 'Closure', 'Method', 'Magicmethod', 'Arrowfunction');
+    public const TYPE_LINKS       = array('TYPEHINT', 'RETURNTYPE');
+
 
     public const INCLUDE_SELF = false;
     public const EXCLUDE_SELF = true;
@@ -225,9 +234,9 @@ abstract class Analyzer {
         if (strpos($this->analyzer, '\\Common\\') === false) {
             $parameters        = $docs->getDocs($this->shortAnalyzer)['parameter'];
             $this->exakatSince = $docs->getDocs($this->shortAnalyzer)['exakatSince'];
-            
+
             if (isset($this->config->{$this->analyzerQuoted}['ignore_dirs']) ) {
-                $this->filters[] = new IgnoreDirs(makeArray($this->config->{$this->analyzerQuoted}['ignore_dirs'] ?? array() ), 
+                $this->filters[] = new IgnoreDirs(makeArray($this->config->{$this->analyzerQuoted}['ignore_dirs'] ?? array() ),
                                                   makeArray($this->config->{$this->analyzerQuoted}['include_dirs'] ?? array() )
                                                  );
             }
@@ -239,7 +248,7 @@ abstract class Analyzer {
             if (isset($this->config->{$this->analyzerQuoted}['namespaces']) ) {
                 $this->filters[] = new Namespaces(makeArray($this->config->{$this->analyzerQuoted}['namespaces'] ?? array() ));
             }
-            
+
             foreach($parameters as $parameter) {
                 assert(isset($this->{$parameter['name']}), "Missing definition for library/Exakat/Analyzer/$this->analyzerQuoted.php :\nprotected \$$parameter[name] = '" . ($parameter['default'] ?? '') . "';\n");
 
@@ -324,8 +333,8 @@ abstract class Analyzer {
     public function getExakatSince(): string {
         return $this->exakatSince;
     }
-    
-    public function getFilters() : array {
+
+    public function getFilters(): array {
         return $this->filters;
     }
 
@@ -565,7 +574,7 @@ GREMLIN;
         return array();
     }
 
-    public function query(string $queryString, array $arguments = array()) : GraphResults {
+    public function query(string $queryString, array $arguments = array()): GraphResults {
         try {
             $result = $this->gremlin->query($queryString, $arguments);
         } catch (GremlinException $e) {
@@ -677,7 +686,7 @@ GREMLIN;
         return $this->gremlin->query($query);
     }
 
-    public function rawQuery() : GraphResults {
+    public function rawQuery(): GraphResults {
         $this->query->prepareRawQuery();
         if ($this->query->canSkip()) {
             $result = new GraphResults();
@@ -800,6 +809,30 @@ GREMLIN;
         return self::$jsonCache[$fullpath];
     }
 
+    protected function loadPdff(string $file): PdffReader {
+        $fullpath = "{$this->config->dir_root}/data/core/$file";
+
+        if (!isset(self::$pdffCache[$fullpath])) {
+            if (file_exists($fullpath)) {
+                self::$pdffCache[$fullpath] = new PdffReader($fullpath);
+            } else {
+                $fullpath = "{$this->config->dir_root}/data/extensions/$file";
+
+                if (file_exists($fullpath)) {
+                    self::$pdffCache[$fullpath] = new PdffReader($fullpath);
+                } else {
+                    assert(file_exists($fullpath), "No such PDFF file as $file\n");
+                }
+            }
+
+            self::$pdffCache[$fullpath] = new PdffReader($fullpath);
+        }
+
+        return self::$pdffCache[$fullpath];
+    }
+
+
+
     protected function load(string $file, $property = null) {
         $inifile = "{$this->config->dir_root}/data/$file.ini";
         if (file_exists($inifile)) {
@@ -847,8 +880,9 @@ GREMLIN;
         } catch (UnknownDsl $e) {
             $this->query->StopQuery();
             $rank = $this->queryId + 1;
+            assert(false, "Found an unknown DSL '$name', in {$this->shortAnalyzer}#{$rank}. Aborting query\n");
             display("Found an unknown DSL '$name', in {$this->shortAnalyzer}#{$rank}. Aborting query\n");
-            // This needs to be logged!
+            // @todo : This needs to be logged!
         }
 
         return $this;

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
 //        var_dump($data);
 //        print "\nExtracted from JSON------\n";
 
-// A garder. Aucun rŽsultat.
+// A garder. Aucun rÃ©sultat.
         if ($data === null) {
             $this->type = self::EMPTY;
             $this->data = $data;
@@ -47,7 +47,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             return;
         }
 
-// A garder. liste de rŽsultats
+// A garder. liste de rÃ©sultats
         if (is_array($data)) {
             if (!isset($data[0]) || ($data[0] === null)) {
                 $this->type = self::EMPTY;
@@ -92,7 +92,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             }
         }
         if ($extra !== null) {
-            $result = array_map(function (array $x) use ($extra) : array { return array_merge($x, $extra); }, $result);
+            $result = array_map(function (array $x) use ($extra): array { return array_merge($x, $extra); }, $result);
         }
 
         $this->data = $result;
@@ -108,7 +108,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             $result[] = array('', array_pop($value));
         }
         if ($extra !== null) {
-            $result = array_map($result, function (array $x) use ($extra) : array { return array_merge($x, $extra); });
+            $result = array_map($result, function (array $x) use ($extra): array { return array_merge($x, $extra); });
         }
 
         $this->data = $result;
@@ -123,7 +123,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
     }
 
     public function toString(): string {
-        return (string) $this->data[0];
+        return (string) ($this->data[0] ?? '');
     }
 
     public function toInt(): int {

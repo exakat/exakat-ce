@@ -1,0 +1,27 @@
+        <!-- Main content -->
+        <section class="content" id="dashboard">
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Classes sizes</h3>
+                </div>
+        		    <p class="textLead">Here is a list of classes measurements. It shows the name of the class, with its namespaces, the number of extensions of the class (extends levels), then the number of constants, properties and methods that the actual class offers. The first number is for the local element, and the second number when including all the available hierarchy classes.</p>
+        		    <p class="textLead">A level '1+' denotes that one of the extension of the class is not defined in the code, and its counts were not included in the calculations. Only the known classes' counts are used.</p>
+        		    <table class="table table-striped">
+        		    	<tr>
+        		    	    <th>Class name</th>
+        		    	    <th>Namespace</th>
+        		    	    <th>Hierarchy</th>
+        		    	    <th>Constants</th>
+        		    	    <th>Properties</th>
+        		    	    <th>Methods</th>
+        		    	    </tr>
+                         {{CLASSES}}
+        		    </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
