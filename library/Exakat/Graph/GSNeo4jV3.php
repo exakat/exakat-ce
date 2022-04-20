@@ -26,6 +26,7 @@ use Exakat\Graph\Helpers\GraphResults;
 use Exakat\Exceptions\GremlinException;
 use Exakat\Exceptions\UnknownGremlinVersion;
 use Brightzone\GremlinDriver\Connection;
+use Exakat\Helpers\Timer;
 
 class GSNeo4jV3 extends Graph {
     public const CHECKED     = true;
@@ -189,7 +190,7 @@ class GSNeo4jV3 extends Graph {
         $this->init();
         sleep(2);
 
-        $b = microtime(true);
+        $timer = new Timer();
         $round = -1;
         $pid = false;
         do {
@@ -199,7 +200,7 @@ class GSNeo4jV3 extends Graph {
                 usleep(100000 * $round);
             }
         } while ( !$connexion && $round < 20);
-        $e = microtime(true);
+        $timer->end();
 
         display("Restarted in $round rounds\n");
 
@@ -211,7 +212,7 @@ class GSNeo4jV3 extends Graph {
             $pid = false;
         }
 
-        $ms = number_format(($e - $b) * 1000, 2);
+        $ms = number_format($timer->duration(Timer::MS), 2);
         $pid = $pid === false ? 'Not yet' : $pid;
         display("started [$pid] in $ms ms");
     }

@@ -22,8 +22,6 @@
 
 namespace Exakat\Autoload;
 
-use Exakat\Exakat;
-use Exakat\Extensions\Extension;
 
 class AutoloadExt implements Autoloader {
     public const LOAD_ALL = null;
@@ -61,38 +59,6 @@ class AutoloadExt implements Autoloader {
 
     public function registerAutoload() {
         spl_autoload_register(array($this, 'autoload'));
-
-        $this->checkExtensions();
-    }
-
-    private function checkExtensions() {
-        foreach(array_keys($this->pharList) as $name) {
-            $className = "\Exakat\Extensions\\$name";
-
-            if (class_exists($className)) {
-                $extension = new $className();
-
-                // Check version requiremements
-                $versionCheck = $extension->dependsOnExakat();
-
-                if ($versionCheck === Extension::VERSION_ALL) {
-                    $this->extensions[$name] = $extension;
-                    $this->checkDependencies();
-
-                    continue;
-                }
-
-                if (version_compare(Exakat::VERSION, $versionCheck) < 0) {
-                    print "$name extension is not compatible with this version of Exakat. It needs $versionCheck or more recent";
-                    unset($this->pharList[$name]);
-
-                    continue;
-                }
-
-                $this->extensions[$name] = $extension;
-                $this->checkDependencies();
-            }
-        }
     }
 
     private function checkDependencies() {

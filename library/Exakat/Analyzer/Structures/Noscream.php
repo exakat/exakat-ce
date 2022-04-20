@@ -109,7 +109,7 @@ class Noscream extends Analyzer {
 
         // @fopen($s, 'r')
         $this->atomIs('Functioncall')
-             ->fullnspathIsNot(makefullnspath($this->authorizedFunctions))
+             ->fullnspathIsNot(makeFullNsPath($this->authorizedFunctions))
              ->is('noscream', true);
         $this->prepareQuery();
     }

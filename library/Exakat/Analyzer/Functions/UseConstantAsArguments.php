@@ -26,11 +26,6 @@ namespace Exakat\Analyzer\Functions;
 use Exakat\Analyzer\Analyzer;
 
 class UseConstantAsArguments extends Analyzer {
-    public function dependsOn(): array {
-        return array('Constants/IsPhpConstant',
-                    );
-    }
-
     public function analyze(): void {
         $functions = $this->loadJson('php_constant_arguments.json');
 
@@ -51,7 +46,7 @@ class UseConstantAsArguments extends Analyzer {
              ->outIs('ARGUMENT')
              ->isHash('rank', $positionsWithConstants, 'fqn')
              ->atomIs(self::CONSTANTS_ALL)
-             ->analyzerIsNot('Constants/IsPhpConstant')
+             ->isNot('isPhp', true)
              ->back('first');
         $this->prepareQuery();
 
@@ -87,7 +82,7 @@ class UseConstantAsArguments extends Analyzer {
                  ->savePropertyAs('fullnspath', 'fqn')
                  ->outWithRank('ARGUMENT', $position)
                  ->atomIs(self::CONSTANTS_ALL)
-                 ->analyzerIsNot('Constants/IsPhpConstant')
+                 ->isNot('isPhp', true)
                  ->back('first');
             $this->prepareQuery();
 
@@ -96,7 +91,7 @@ class UseConstantAsArguments extends Analyzer {
                  ->savePropertyAs('fullnspath', 'fnq')
                  ->outWithRank('ARGUMENT', $position)
                  ->atomIs(self::CONSTANTS_ALL)
-                 ->analyzerIs('Constants/IsPhpConstant')
+                 ->is('isPhp', true)
                  ->isNotHash('fullnspath', $constantsWithPosition, 'fnq')
                  ->back('first');
             $this->prepareQuery();
@@ -120,7 +115,7 @@ class UseConstantAsArguments extends Analyzer {
              ->outIs('ARGUMENT')
              ->isHash('rank', $positionsWithConstants, 'fqn')
              ->atomIs(self::CONSTANTS_ALL)
-             ->analyzerIsNot('Constants/IsPhpConstant')
+             ->isNot('isPhp', true)
              ->back('first');
         $this->prepareQuery();
 
@@ -132,7 +127,7 @@ class UseConstantAsArguments extends Analyzer {
              ->isHash('rank', $positionsWithConstants, 'fqn')
              ->atomIs('Bitoperation')
              ->atomInsideNoDefinition(self::CONSTANTS_ALL)
-             ->analyzerIsNot('Constants/IsPhpConstant')
+             ->isNot('isPhp', true)
              ->back('first');
         $this->prepareQuery();
 
@@ -167,13 +162,14 @@ class UseConstantAsArguments extends Analyzer {
                 $constantsWithPosition[$fqn] = makeFullNsPath($constants, \FNP_CONSTANT);
             }
 
+            // error_reporting(T_SEMICOLON)
             $this->atomFunctionIs(array_keys($constantsWithPosition))
                  ->analyzerIsNot('self')
                  ->savePropertyAs('fullnspath', 'fqn')
                  ->outWithRank('ARGUMENT', $position)
                  ->atomIs(array('Bitoperation', 'Identifier', 'Nsname'))
                  ->atomInsideNoDefinition(self::CONSTANTS_ALL)
-                 ->analyzerIsNot('Constants/IsPhpConstant')
+                 ->isNot('isPhp', true)
                  ->back('first');
             $this->prepareQuery();
 
@@ -183,7 +179,7 @@ class UseConstantAsArguments extends Analyzer {
                  ->outWithRank('ARGUMENT', $position)
                  ->atomIs(array('Bitoperation', 'Identifier', 'Nsname'))
                  ->atomInsideNoDefinition(self::CONSTANTS_ALL)
-                 ->analyzerIs('Constants/IsPhpConstant')
+                 ->is('isPhp', true)
                  ->isNotHash('fullnspath', $constantsWithPosition, 'fqn')
                  ->back('first');
             $this->prepareQuery();
@@ -195,7 +191,7 @@ class UseConstantAsArguments extends Analyzer {
                  ->outWithRank('ARGUMENT', $position)
                  ->atomIs(array('Bitoperation', 'Identifier', 'Nsname'))
                  ->atomInsideNoDefinition(self::CONSTANTS_ALL)
-                 ->analyzerIs('Constants/IsPhpConstant')
+                 ->is('isPhp', true)
                  ->isNotHash('fullnspath', $constantsWithPosition, 'fqn')
                  ->back('first');
             $this->prepareQuery();

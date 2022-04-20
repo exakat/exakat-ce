@@ -36,6 +36,7 @@ use Exakat\Query\DSL\Command;
 use Exakat\Phpexec;
 use Exakat\Fileset\{IgnoreDirs, FileExtensions, Namespaces};
 use Exakat\Stubs\PdffReader;
+use Exakat\Stubs\StubsInterface;
 
 abstract class Analyzer {
     // Query types
@@ -753,6 +754,7 @@ GREMLIN;
     }
 
     protected function loadIni(string $file, string $index = null) {
+        assert(substr($file, -4) === '.ini', "Trying to loadIni on a non INI file : $file");
         $fullpath = "{$this->config->dir_root}/data/$file";
 
         if (isset(self::$iniCache[$fullpath]->$index)) {
@@ -771,7 +773,7 @@ GREMLIN;
                   file_exists("{$this->config->extension_dev}/data/$file")) {
             $ini = (object) parse_ini_file("{$this->config->extension_dev}/data/$file", \INI_PROCESS_SECTIONS);
         } else {
-            assert(false, "No INI for '$file'.");
+
         }
 
         if (!isset(self::$iniCache[$fullpath])) {
@@ -786,6 +788,7 @@ GREMLIN;
     }
 
     protected function loadJson(string $file, string $property = null) {
+        assert(substr($file, -5) === '.json', "Trying to loadIni on a non JSON file : $file");
         $fullpath = "{$this->config->dir_root}/data/$file";
 
         if (!isset(self::$jsonCache[$fullpath])) {
@@ -810,6 +813,7 @@ GREMLIN;
     }
 
     protected function loadPdff(string $file): PdffReader {
+        assert(substr($file, -5) === '.pdff', "Trying to loadPDff on a non PDFF file : $file");
         $fullpath = "{$this->config->dir_root}/data/core/$file";
 
         if (!isset(self::$pdffCache[$fullpath])) {
@@ -821,7 +825,13 @@ GREMLIN;
                 if (file_exists($fullpath)) {
                     self::$pdffCache[$fullpath] = new PdffReader($fullpath);
                 } else {
-                    assert(file_exists($fullpath), "No such PDFF file as $file\n");
+                    $fullpath = "{$this->config->dir_root}/data/vendors/$file";
+
+                    if (file_exists($fullpath)) {
+                        self::$pdffCache[$fullpath] = new PdffReader($fullpath);
+                    } else {
+                        assert(file_exists($fullpath), "No such PDFF file as $file (core, ext, vendors)\n");
+                    }
                 }
             }
 
@@ -917,6 +927,18 @@ dedup().sack{m,v -> ++m["total"]; m;}
 
 GREMLIN
 );
+    }
+
+    protected function readStubs(string $method) {
+        assert(method_exists(StubsInterface::class, $method), "No such method as '$method' to read stubs files\n");
+
+        $stubs      = exakat('stubs');
+        $phpCore    = exakat('phpCore');
+        $extensions = exakat('phpExtensions');
+        return array_merge($phpCore   ->$method(),
+                           $extensions->$method(),
+                           $stubs     ->$method(),
+                           );
     }
 }
 ?>

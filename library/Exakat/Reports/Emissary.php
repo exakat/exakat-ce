@@ -574,8 +574,8 @@ HTML;
         $implements = array();
         foreach($res_implements as $row) {
             array_collect_by($implements, $row['implementing'], $row);
-            array_collect_by($parents, $row['implementing'], (intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements']));
-            array_collect_by($children, (intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements']), $row['implementing']);
+            array_collect_by($parents, $row['implementing'], intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements']);
+            array_collect_by($children, intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements'], $row['implementing']);
         }
 
         /// Collect classes and interfaces that accept a class as typehint : class C extends B {} => C => [C, B]
@@ -2264,15 +2264,16 @@ HTML;
 
         $rows = array();
         foreach($table as $name => $row) {
-            $cells = array();
-            foreach($row as $t2 => $r) {
+            $closure = function (&$r, $t2) use ($name, $usage): void {
                 $content = empty($r) ? '&nbsp;' : implode('(), ', $r) . '()';
                 $background = isset($usage[$name][$t2]) ? ' bgcolor="darkgray"' : '';
 
-                $cells[] = "<td$background>$content</td>";
-            }
-            $cells = implode('', $cells);
-            $rows[] = "<tr><td>$name</td>$cells</tr>\n";
+                $r = "<td$background>$content</td>";
+            };
+            array_walk($row, $closure);
+            $row = implode('', $row);
+
+            $rows[] = "<tr><td>$name</td>$row</tr>\n";
         }
 
         $cells = implode('</td><td>', $traits);
@@ -2718,7 +2719,7 @@ HTML
 
         foreach($classes as $id) {
             list(, $class) = explode(':', $id);
-            $visibilityTable []= '<tr><td colspan="9">class ' . PHPsyntax($class) . '</td></tr>' . PHP_EOL .
+            $visibilityTable []= '<tr><td colspan="9">class ' . PHPSyntax($class) . '</td></tr>' . PHP_EOL .
                                 (isset($constants[$id]) ? implode('', $constants[$id]) : '') .
                                 (isset($properties[$id]) ? implode('', $properties[$id]) : '') .
                                 (isset($methods[$id]) ? implode('', $methods[$id]) : '');
@@ -3745,7 +3746,7 @@ HTML;
     protected function getVCSInfo(): array {
         $info = array();
 
-        $vcsClass = Vcs::getVCS($this->config);
+        $vcsClass = Vcs::getVcs($this->config);
         $vcsName = explode('\\', $vcsClass);
         $vcsName = array_pop($vcsName);
         switch($vcsName) {
@@ -4007,7 +4008,7 @@ HTML;
 
         foreach($classes as $id) {
             list(, $class) = explode(':', $id, 3);
-            $visibilityTable []= '<tr><td colspan="9">' . PHPsyntax($class) . '</td></tr>' . PHP_EOL .
+            $visibilityTable []= '<tr><td colspan="9">' . PHPSyntax($class) . '</td></tr>' . PHP_EOL .
                                 $headers . PHP_EOL .
 //                                (isset($constants[$id])  ? implode('', $constants[$id])  : '') .
 //                                (isset($properties[$id]) ? implode('', $properties[$id]) : '') .

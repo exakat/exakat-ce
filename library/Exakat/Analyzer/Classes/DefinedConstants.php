@@ -40,7 +40,9 @@ class DefinedConstants extends Analyzer {
         // constants defined at the parents level
         // This includes interfaces
         $this->atomIs('Staticconstant')
-             ->hasIn('DEFINITION');
+             ->inIs('DEFINITION')
+             ->atomIs('Constant')
+             ->back('first');
         $this->prepareQuery();
 
         // constants defined in a class of an extension

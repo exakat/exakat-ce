@@ -25,6 +25,7 @@ namespace Exakat\Loader;
 
 use Exakat\Data\Collector;
 use Exakat\Tasks\Helpers\Atom;
+use Exakat\Helpers\Timer;
 use stdClass;
 
 class SplitGraphson extends Loader {
@@ -92,10 +93,11 @@ class SplitGraphson extends Loader {
 
         display("Init finalize\n");
 
+        $totalDuration = new Timer();
+
         $this->saveNodeLinks();
         $this->saveProperties();
 
-        $begin = microtime(true);
         $query = 'g.V().hasLabel("Project").id();';
         $res = $this->graphdb->query($query);
         $project_id = $res->toUuid();
@@ -121,18 +123,84 @@ class SplitGraphson extends Loader {
             $chunk = 0;
         }
 
-        $res = $this->sqlite3->query('SELECT origin, destination FROM globals');
-        while($row = $res->fetchArray(\SQLITE3_NUM)) {
-            $row = array_map(array($this->graphdb, 'fixId'), $row);
-            fputcsv($f, $row);
+        // global variables to global variabldefintiion
+        $query = <<<'GREMLIN'
+g.V().hasLabel("Virtualglobal").as('id').as('code').select('id', 'code').by(id).by('code');
+GREMLIN;
+        $res = $this->graphdb->query($query);
+        $vg = array();
+        foreach($res->toArray() as $atom) {
+            $vg[$atom['code']] = $atom['id'];
+        }
+
+        // global variables to variabldefinition
+        $query = <<<'GREMLIN'
+g.V().hasLabel("File").out("DEFINITION").hasLabel("Variabledefinition").as('id').as('code').select('id', 'code').by(id).by('code');
+GREMLIN;
+       $res = $this->graphdb->query($query);
+       $ids = array();
+       $total = 0;
+       foreach($res->toArray() as $atom) {
+           if (!isset($vg[$atom['code']])) {
+               continue;
+           }
+
+           if (isset($ids[$vg[$atom['code']]])) {
+               $ids[$vg[$atom['code']]][] = array($vg[$atom['code']], $atom['id']);
+           } else {
+               $ids[$vg[$atom['code']]] = array(array($vg[$atom['code']], $atom['id']));
+           }
+           ++$total;
+       }
+
+       // global variables to variabldefinition
+       $query = <<<'GREMLIN'
+g.V().hasLabel("Global").out("GLOBAL").hasLabel("Variabledefinition").as('id').as('code').select('id', 'code').by(id).by('code');
+GREMLIN;
+        $res = $this->graphdb->query($query);
+        foreach($res->toArray() as $atom) {
+            if (!isset($vg[$atom['code']])) {
+                continue;
+            }
+
+            if (isset($ids[$vg[$atom['code']]])) {
+                $ids[$vg[$atom['code']]][] = array($vg[$atom['code']], $atom['id']);
+            } else {
+                $ids[$vg[$atom['code']]] = array(array($vg[$atom['code']], $atom['id']));
+            }
             ++$total;
-            ++$chunk;
         }
-        unset($res);
-        if ($chunk > $this->load_chunk) {
-            $f = $this->saveLinks($f);
-            $chunk = 0;
-        }
+
+        $timer = new Timer();
+        $query = <<<'GREMLIN'
+globalVars.each { y ->
+    g.V(y[0]).addE('DEFINITION').to(g.V(y[1])).iterate();
+}
+GREMLIN;
+        $this->graphdb->query($query, array('globalVars' => array_merge(...$ids) ) );
+        $timer->end();
+
+        $this->log("globals\t$total\t" . $timer->duration());
+
+        // $GLOBALS
+        $query = <<<'GREMLIN'
+g.V().hasLabel("Phpvariable").has("fullcode", "\$GLOBALS").as("a")
+ .V().hasLabel("Virtualglobal").as("b").as("c")
+ .select("a","b").by("code")
+ .where("a", eq("b")).select("c").addE("DEFINITION").to("a").count()
+GREMLIN;
+        $this->graphdb->query($query);
+        $res = $this->graphdb->query($query);
+
+        // global variables to $GLOBALS['x']
+        $query = <<<'GREMLIN'
+g.V().hasLabel("Phpvariable").has("fullcode", "\$GLOBALS").in("VARIABLE").hasLabel("Array").has("globalvar").not(where(__.in("DEFINITION"))).as("a")
+ .V().hasLabel("Virtualglobal").as("b").as("c")
+ .select("a","b").by("globalvar").by("code")
+ .where("a", eq("b")).select("c").addE("DEFINITION").to("a").count()
+GREMLIN;
+        $res = $this->graphdb->query($query);
+        $res->toInt() . " \$GLOBALS['d']\n";
 
         $definitionSQL = <<<'SQL'
 SELECT DISTINCT CASE WHEN definitions.id IS NULL THEN definitions2.id ELSE definitions.id END AS definition, GROUP_CONCAT(DISTINCT calls.id) AS call, count(calls.id) AS id
@@ -174,11 +242,12 @@ SQL;
             $this->saveLinks($f);
             display("loaded $total definitions");
         }
-        $end = microtime(true);
 
         $this->saveTokenCounts();
 
-        display('loaded nodes (duration : ' . number_format( ($end - $begin) * 1000, 2) . ' ms)');
+        $totalDuration->end();
+
+        display('loaded nodes (duration : ' . $totalDuration->duration(Timer::MS) . ' ms)');
 
         $this->cleanCsv();
         display('Cleaning CSV');
@@ -220,7 +289,7 @@ SQL;
     }
 
     private function savePropertiesGremlin(int $id): void {
-        $begin = microtime(true);
+        $timer = new Timer();
         $query = <<<GREMLIN
 new File('{$this->pathProperties}.tmp').eachLine {
     (property, targets) = it.split('-');
@@ -233,9 +302,9 @@ g.V().has('intval', 0).not(has("boolean", true)).property('boolean', false).iter
 
 GREMLIN;
         $this->graphdb->query($query);
-        $end = microtime(true);
+        $timer->end();
 
-        $this->log("properties\t$id\t" . ($end - $begin));
+        $this->log("properties\t$id\t" . $timer->duration());
     }
 
     private function saveLinks($f) {
@@ -246,7 +315,7 @@ GREMLIN;
         fclose($f);
 
         if ($length > 0) {
-            $begin = microtime(true);
+            $timer = new Timer();
             $query = <<<GREMLIN
 new File('$this->pathDef').eachLine {
     (fromVertex, target) = it.split(',')
@@ -258,9 +327,9 @@ new File('$this->pathDef').eachLine {
 
 GREMLIN;
             $this->graphdb->query($query);
-            $end = microtime(true);
+            $timer->end();
 
-            $this->log("links finalize\t" . ($end - $begin));
+            $this->log("links finalize\t" . $timer->duration());
         }
 
         return fopen('php://memory', 'r+');
@@ -403,11 +472,11 @@ GREMLIN;
             return;
         }
 
-        $begin = microtime(true);
+        $timer = new Timer();
         $this->graphdb->query("graph.io(IoCore.graphson()).readGraph(\"$this->path\");");
         unlink($this->path);
-        $end = microtime(true);
-        $this->log("path\t{$this->total}\t$size\t" . ($end - $begin));
+        $timer->end();
+        $this->log("path\t{$this->total}\t$size\t" . $timer->duration());
 
         $this->total = 0;
     }
@@ -444,8 +513,9 @@ GREMLIN;
     }
 
     private function saveLinkGremlin(int $id): void {
-            $begin = microtime(true);
-            $query = <<<GREMLIN
+        $timer = new Timer();
+
+        $query = <<<GREMLIN
 new File('{$this->pathLink}.tmp').eachLine {
     (theLabel, fromVertex, toVertex) = it.split('-');
 
@@ -453,10 +523,10 @@ new File('{$this->pathLink}.tmp').eachLine {
 }
 
 GREMLIN;
-           $this->graphdb->query($query);
-           $end = microtime(true);
+        $this->graphdb->query($query);
+        $timer->end();
 
-           $this->log("links\t$id\t" . ($end - $begin));
+        $this->log("links\t$id\t" . $timer->duration());
     }
 
     private function json_encode(Stdclass $object): string {

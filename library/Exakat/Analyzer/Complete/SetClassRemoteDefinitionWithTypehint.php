@@ -48,8 +48,8 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               )
               ->atomIs(array('Class', 'Classanonymous'))
               // No check on Atom == Class, as it may not exists
-              ->goToAllParents(self::INCLUDE_SELF)
-              ->atomIs(array('Class', 'Classanonymous'))
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
+              ->atomIs(array('Class', 'Classanonymous', 'Trait'))
               ->outIs('METHOD')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)

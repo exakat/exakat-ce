@@ -26,6 +26,8 @@ namespace Exakat\Analyzer\Arrays;
 use Exakat\Analyzer\Analyzer;
 
 class MultipleIdenticalKeys extends Analyzer {
+    protected $arrayMaxSize = 15000;
+
     public function dependsOn(): array {
         return array('Complete/PropagateConstants',
                     );
@@ -34,13 +36,16 @@ class MultipleIdenticalKeys extends Analyzer {
     public function analyze(): void {
         // array('a' => 1, 'b' = 2)
         $this->atomIs('Arrayliteral')
-             ->isMore('count', 1)
-            // first quick check to skip useless check later
+             ->is('constant', true)
+             ->isLess('count', $this->arrayMaxSize)
+
+            // Check that the array is a hash
              ->not(
                 $this->side()
                      ->outIs('ARGUMENT')
                      ->atomIsNot('Keyvalue')
              )
+
              ->filter(
                 $this->side()
                      ->initVariable('counts', '[:]')
@@ -76,6 +81,7 @@ sideEffect{
 GREMLIN
 )
              )
+
              ->back('first');
         $this->prepareQuery();
     }

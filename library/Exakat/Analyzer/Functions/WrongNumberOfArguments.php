@@ -34,7 +34,15 @@ class WrongNumberOfArguments extends Analyzer {
                      'Complete/SetArrayClassDefinition',
                      'Complete/FollowClosureDefinition',
                      'Complete/SetClassMethodRemoteDefinition',
+                     'Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/SetClassRemoteDefinitionWithGlobal',
+                     'Complete/SetClassRemoteDefinitionWithInjection',
+                     'Complete/SetClassRemoteDefinitionWithLocalNew',
+                     'Complete/SetClassRemoteDefinitionWithParenthesis',
+                     'Complete/SetClassRemoteDefinitionWithReturnTypehint',
+                     'Complete/SetClassRemoteDefinitionWithTypehint',
                      'Functions/VariableArguments',
+                     'Complete/VariableTypehint',
                     );
     }
 
@@ -45,19 +53,19 @@ class WrongNumberOfArguments extends Analyzer {
         $argsMaxs = array();
 
         foreach($functions as $function) {
-            $argsMins[makefullnspath($function['name'])] = $function['args_min'];
+            $argsMins[makeFullNsPath($function['name'])] = $function['args_min'];
 
             if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makefullnspath($function['name'])] = $function['args_max'];
+                $argsMaxs[makeFullNsPath($function['name'])] = $function['args_max'];
             }
         }
 
         $stubs = exakat('stubs')->getFunctionsArgsInterval();
         foreach($stubs as $function) {
-            $argsMins[makefullnspath($function['name'])] = $function['args_min'];
+            $argsMins[makeFullNsPath($function['name'])] = $function['args_min'];
 
             if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makefullnspath($function['name'])] = $function['args_max'];
+                $argsMaxs[makeFullNsPath($function['name'])] = $function['args_max'];
             }
         }
 
@@ -223,10 +231,21 @@ class WrongNumberOfArguments extends Analyzer {
         $argsMins = array();
         $argsMaxs = array();
         foreach($news as $new) {
-            $argsMins[makefullnspath($new['class'])] = $new['args_min'];
+            $argsMins[makeFullNsPath($new['class'])] = $new['args_min'];
 
             if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makefullnspath($new['class'])] = $new['args_max'];
+                $argsMaxs[makeFullNsPath($new['class'])] = $new['args_max'];
+            }
+        }
+
+        $stubs = exakat('stubs')->getConstructorsArgsInterval();
+        foreach($stubs as $function) {
+            list($classe, ) = explode('::', $function['name'], 2);
+            $classe = makeFullNsPath($classe);
+            $argsMins[$classe] = $function['args_min'];
+
+            if ($function['args_max'] < \MAX_ARGS) {
+                $argsMaxs[$classe] = $function['args_max'];
             }
         }
 
@@ -251,12 +270,22 @@ class WrongNumberOfArguments extends Analyzer {
         $argsMins = array();
         $argsMaxs = array();
         foreach($methods as $method) {
-            $argsMins[makefullnspath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_min'];
+            $argsMins[makeFullNsPath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_min'];
 
             if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makefullnspath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_max'];
+                $argsMaxs[makeFullNsPath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_max'];
             }
         }
+        $stubs = exakat('stubs')->getMethodsArgsInterval();
+        foreach($stubs as $methods) {
+            $argsMins[makeFullNsPath($methods['name'])] = $methods['args_min'];
+
+            if ($function['args_max'] < \MAX_ARGS) {
+                $argsMaxs[makeFullNsPath($methods['name'])] = $methods['args_max'];
+            }
+        }
+        // tester avec classes, interfaces et traits
+        // tester avec methods statiques
 
         $this->atomIs('Methodcall')
              ->outIs('OBJECT')
@@ -295,6 +324,43 @@ class WrongNumberOfArguments extends Analyzer {
              ->isMoreHash('count', $argsMaxs, 'fnp')
              ->back('first');
         $this->prepareQuery();
+
+        $this->atomIs('Staticmethodcall')
+             ->outIs('CLASS')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->back('first')
+
+             ->outIs('METHOD') // for methods calls, static or not.
+             ->hasNoVariadicArgument()
+
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'name')
+             ->inIs('NAME')
+
+             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+
+             ->isLessHash('count', $argsMins, 'fnp')
+             ->back('first');
+        $this->prepareQuery();
+
+        $this->atomIs('Staticmethodcall')
+             ->outIs('CLASS')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->back('first')
+
+             ->outIs('METHOD') // for methods calls, static or not.
+             ->hasNoVariadicArgument()
+
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'name')
+             ->inIs('NAME')
+
+             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+
+             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->back('first');
+        $this->prepareQuery();
+
     }
 }
 

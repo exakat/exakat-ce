@@ -31,7 +31,6 @@ class CollectLiterals extends AnalyzerTable {
         $types = array('Integer', 'Float', 'String', 'Heredoc', 'Arrayliteral');
 
         foreach($types as $type) {
-            $b = microtime(\TIME_AS_NUMBER);
             $this->analyzerTable = "literal$type";
             $this->analyzerSQLTable = <<<SQL
 CREATE TABLE literal{$type} (  

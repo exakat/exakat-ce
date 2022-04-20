@@ -31,6 +31,8 @@ class Deprecated extends Analyzer {
         $ini = (object) $this->loadIni('deprecated.ini');
 
         $ini->functions = array_filter($ini->functions);
+        $ini->functions = array_unique($ini->functions);
+        $ini->functions = array_values($ini->functions);
         $functions = makeFullNsPath($ini->functions);
 
         // direct call to an old global function
@@ -43,8 +45,10 @@ class Deprecated extends Analyzer {
              ->has('fullnspath')
              ->raw(<<<'GREMLIN'
 filter{
+    it.get().value('fullnspath').tokenize('\\').size() > 1;
+}.filter{
     name = '\\' + it.get().value('fullnspath').tokenize('\\').last();
-    name in ***
+    name in ***;
 }
 GREMLIN
 , $functions);

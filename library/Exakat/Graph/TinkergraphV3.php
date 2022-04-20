@@ -26,6 +26,7 @@ use Exakat\Graph\Helpers\GraphResults;
 use Exakat\Exceptions\GremlinException;
 use Exakat\Exceptions\UnknownGremlinVersion;
 use Brightzone\GremlinDriver\Connection;
+use Exakat\Helpers\Timer;
 
 class TinkergraphV3 extends Graph {
     public const CHECKED     = true;
@@ -46,8 +47,10 @@ class TinkergraphV3 extends Graph {
 
         $gremlinJar = glob("{$this->config->tinkergraphv3_folder}/lib/gremlin-core-*.jar");
         $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
-        // 3.4 only
-        $this->gremlinVersion = substr($gremlinVersion, 13, -6);
+        //gremlin-core-3.4.10.jar
+        $gremlinVersion = substr($gremlinVersion, 13, -4);
+        $stats['gremlin version'] = $gremlinVersion;
+
         if(!in_array($this->gremlinVersion, array('3.4'), STRICT_COMPARISON)) {
             throw new UnknownGremlinVersion($this->gremlinVersion);
         }
@@ -100,7 +103,6 @@ class TinkergraphV3 extends Graph {
             $this->checkConfiguration();
         }
 
-        $b = microtime(true);
         $params['#jsr223.groovy.engine.keep.globals'] = 'phantom';
         foreach ($params as $name => $value) {
             $this->db->message->bindValue($name, $value);
@@ -166,14 +168,14 @@ class TinkergraphV3 extends Graph {
         $this->init();
         sleep(1);
 
-        $b = microtime(true);
+        $timer = new Timer();
         $round = -1;
         do {
             $res = $this->checkConnection();
             ++$round;
             usleep(100000 * $round);
         } while (!$res && $round < 20);
-        $e = microtime(true);
+        $timer->end();
 
         display("Restarted in $round rounds\n");
 
@@ -185,7 +187,7 @@ class TinkergraphV3 extends Graph {
             $pid = 'Not yet';
         }
 
-        display('started [' . $pid . '] in ' . number_format(($e - $b) * 1000, 2) . ' ms' );
+        display('started [' . $pid . '] in ' . number_format($timer->duration(Timer::MS), 2) . ' ms' );
     }
 
     public function stop(): void {

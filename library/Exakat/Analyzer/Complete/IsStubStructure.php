@@ -28,6 +28,11 @@ class IsStubStructure extends Analyzer {
     protected const PROPERTY = 'isStub';
     protected const PDFF     = 'stubs';
 
+    public function dependsOn(): array {
+        return array('Complete/VariableTypehint',
+                    );
+    }
+
     public function analyze(): void {
         $stubs = exakat(static::PDFF);
         $stubClassConstants   = $stubs->getClassConstantList();
@@ -85,8 +90,8 @@ class IsStubStructure extends Analyzer {
         $this->prepareQuery();
 
         ////////////////////////////////////////////////////////////
-        //properties
-        // static properties
+        //properties (normal)
+
         $this->atomIs('Member')
              ->isNot('isStub', true)
              ->isNot('isPhp', true)
@@ -101,7 +106,7 @@ class IsStubStructure extends Analyzer {
              ->outIs('OBJECT')
              ->atomIs(array('Variableobject', 'Member', 'Staticproperty', 'Methodcall', 'Functioncall', 'Staticmethodcall')) // @todo remote or not?
              ->goToTypehint() // @todo :  also covers returntypehint ?
-             ->is(static::PROPERTY, true)
+
              ->savePropertyAs('fullnspath', 'fnp')
              ->raw('filter{ fnp + "::\$" + name in ***; }', $stubProperties)
 
@@ -126,9 +131,8 @@ class IsStubStructure extends Analyzer {
              ->outIs('CLASS')
              ->atomIs(array('Variableobject', 'Member', 'Staticproperty', 'Methodcall', 'Functioncall', 'Staticmethodcall')) // @todo remote or not?
              ->goToTypehint() // @todo :  also covers returntypehint ?
-             ->is(static::PROPERTY, true)
              ->savePropertyAs('fullnspath', 'fnp')
-             ->raw('filter{ fnp + "::\$" + name in ***; }', $stubProperties)
+             ->raw('filter{ fnp + "::\$" + name in ***; }', $stubStaticProperties)
 
              ->back('first')
 // This is not needed

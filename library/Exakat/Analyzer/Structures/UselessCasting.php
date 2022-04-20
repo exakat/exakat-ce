@@ -28,6 +28,7 @@ use Exakat\Data\Methods;
 class UselessCasting extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/PropagateCalls',
+                     'Complete/VariableTypehint',
                     );
     }
 
@@ -79,10 +80,39 @@ class UselessCasting extends Analyzer {
                          ->isMore(1)
                  )
                  ->outIs('RETURNTYPE')
-                 ->is('fullnspath', makeFullnspath($type))
+                 ->is('fullnspath', makeFullNsPath($type))
                  ->back('first');
             $this->prepareQuery();
         }
+
+        // function foo(array $a) { (array) $a; }
+        $this->atomIs('Cast')
+             ->analyzerIsNot('self')
+             ->savePropertyAs('token', 'cast')
+             ->outIs('CAST')
+             ->outIsIE('CODE') // In case there are some parenthesis
+             ->goToTypehint()
+             ->has('fullnspath')
+             ->raw(<<<'GREMLIN'
+filter{ 
+    (cast == "T_ARRAY_CAST"             && it.get().value("fullnspath") == "\\array")  || 
+    (cast == "T_INT_CAST"               && it.get().value("fullnspath") == "\\int")    || 
+    (cast == "T_DOUBLE_CAST"            && it.get().value("fullnspath") == "\\float")  || 
+    (cast == "T_STRING"                 && it.get().value("fullnspath") == "\\object") || 
+    (cast == "T_NAME_FULLY_QUALIFIED"   && it.get().value("fullnspath") == "\\object") || 
+    (cast == "T_NAME_RELATIVE"          && it.get().value("fullnspath") == "\\object") || 
+    (cast == "T_NAME_QUALIFIED"         && it.get().value("fullnspath") == "\\object") || 
+    (cast == "T_BOOL_CAST"              && it.get().value("fullnspath") == "\\bool")   || 
+    (cast == "T_STRING_CAST"            && it.get().value("fullnspath") == "\\string")
+    ; 
+}
+
+GREMLIN
+)
+             ->inIs('TYPEHINT')
+             ->is('typehint', 'one')
+             ->back('first');
+        $this->prepareQuery();
 
         // (bool) ($a > 2)
         $this->atomIs('Cast')

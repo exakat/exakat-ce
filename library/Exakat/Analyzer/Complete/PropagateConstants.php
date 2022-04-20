@@ -29,12 +29,12 @@ class PropagateConstants extends Complete {
         $this->readConstantValue();
 
         $this->pushConstantValues();
-        $count = $this->PropagateConstants();
+        $count = $this->propagate();
 
         $this->setCount($count);
     }
 
-    private function propagateConstants(int $level = 0): int {
+    private function propagate(int $level = 0): int {
         $total = 0;
 
         //Currently handles + - * / % . << >> ** ()
@@ -57,7 +57,7 @@ class PropagateConstants extends Complete {
         $this->pushConstantValues();
 
         if ($total > 0 && $level < 15) {
-            $total += $this->propagateConstants($level + 1);
+            $total += $this->propagate($level + 1);
         }
 
         return $total;

@@ -26,32 +26,34 @@ namespace Exakat\Query\DSL;
 use Exakat\Analyzer\Analyzer;
 
 class GoToAllParents extends DSL {
+    public const MAX_LOOPING = 6;
+
     public function run(): Command {
         $this->assertArguments(1, func_num_args(), __METHOD__);
         list($self) = func_get_args();
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
+        $MAX_LOOPING = self::MAX_LOOPING;
         if ($self === Analyzer::EXCLUDE_SELF) {
-            $command = new Command(<<<GREMLIN
+            $command = new Command(<<<'GREMLIN'
 as("gotoallparents").repeat( __.out("EXTENDS", "IMPLEMENTS")
           .in("DEFINITION")
           .hasLabel("Class", "Classanonymous", "Interface", "Trait")
           .simplePath().from("gotoallparents")
 ).emit( )
- .times($MAX_LOOPING)
+ .times(5)
  .hasLabel("Class", "Classanonymous", "Interface", "Trait")
 GREMLIN
 );
 
         } else {
-            $command = new Command(<<<GREMLIN
+            $command = new Command(<<<'GREMLIN'
 as("gotoallparents").emit( )
 .repeat( __.out("EXTENDS", "IMPLEMENTS")
            .in("DEFINITION")
            .hasLabel("Class", "Classanonymous", "Interface", "Trait")
            .simplePath().from("gotoallparents")
         )
-        .times($MAX_LOOPING)
+        .times(5)
         .hasLabel("Class", "Classanonymous", "Interface", "Trait")
 GREMLIN
 );

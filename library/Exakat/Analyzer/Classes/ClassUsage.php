@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Common\ClassUsage as CommonClassUsage;
 
 class ClassUsage extends CommonClassUsage {
-
     public function analyze(): void {
         // Empty array to handle ALL classes
         $this->classes = array();

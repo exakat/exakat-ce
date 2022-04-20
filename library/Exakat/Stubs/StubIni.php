@@ -82,6 +82,34 @@ class StubIni extends Stubs implements StubsInterface {
     public function getMethodList(): array {
         return $this->stub->methods ?? array();
     }
+
+    public function getFinalClasses(): array {
+        return array();
+    }
+
+    public function getFinalClassConstants(): array {
+        return array();
+    }
+
+    public function getFunctionNamesList(): array {
+        return array();
+    }
+
+    public function getClassMethodNamesList(): array {
+        return array();
+    }
+
+    public function getNamespaceList(): array {
+        return array();
+    }
+
+    public function getConstructorsArgsInterval(): array {
+        return array();
+    }
+
+    public function getMethodsArgsInterval(): array {
+        return array();
+    }
 }
 
 ?>

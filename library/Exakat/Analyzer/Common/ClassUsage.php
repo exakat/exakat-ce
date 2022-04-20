@@ -50,6 +50,7 @@ class ClassUsage extends Analyzer {
 
         // Typehint (return and argument), catch, instanceof, classes
         $this->atomIs(array('Identifier', 'Nsname'))
+             ->has('line')
              ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'CLASS')) // NOT IMPLEMENT
              ->fullnspathIs($classes)
              ->analyzerIsNot('self');

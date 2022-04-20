@@ -130,7 +130,7 @@ class Datastore {
             if (count($cols) !== 2) {
                 throw new WrongNumberOfColsForAHash($table, count($cols));
             }
-        }
+        } 
 
         $colList = makeList($cols, '');
         $values = array();

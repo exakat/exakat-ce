@@ -22,11 +22,11 @@
 
 namespace Exakat;
 
-use Exakat\Configsource\Commandline;
+use Exakat\Configsource\CommandLine;
 
 class Exakat {
-    public const VERSION = '2.3.8';
-      public const BUILD = 1308;
+    public const VERSION = '2.4.0';
+     public const BUILD = 1312;
 
     private $config  = null;
 
@@ -98,11 +98,6 @@ class Exakat {
 
             case 'report' :
                 $task = new Tasks\Report();
-                $task->run();
-                break;
-
-            case 'onefile' :
-                $task = new Tasks\OneFile();
                 $task->run();
                 break;
 

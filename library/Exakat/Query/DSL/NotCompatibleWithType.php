@@ -61,48 +61,67 @@ __.sideEffect{ typehints = []; }
 )
 .filter{
     results = true;
+    typehinttype = it.get().value("typehint");
+
     for(typehint in typehints) {
         switch(typehint) {
             case "\\\\string":
-                results = results && !($types in ["Magicconstant", "Heredoc", "String", "Concatenation", "Staticclass", "Shell"]);
+                result = !($types in ["Magicconstant", "Heredoc", "String", "Concatenation", "Staticclass", "Shell"]);
                 break;
                 
             case "\\\\int":
-                results = results && !($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Postplusplus", "Preplusplus", "Not"]);
+                result = !($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Postplusplus", "Preplusplus", "Not"]);
                 break;
     
             case "\\\\numeric":
-                results = results && !($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Float", "Postplusplus", "Preplusplus"]);
+                result = !($types in ["Integer", "Addition", "Multiplication", "Bitshift", "Logical", "Bitoperation", "Power", "Float", "Postplusplus", "Preplusplus"]);
                 break;
     
             case "\\\\float":
-                results = results && !($types in ["Float", "Addition", "Multiplication", "Bitshift", "Power"]);
+                result = !($types in ["Float", "Addition", "Multiplication", "Bitshift", "Power"]);
                 break;
     
             case "\\\\bool":
-                results = results && !($types in ["Boolean", "Logical", "Not", "Comparison"]);
+                result = !($types in ["Boolean", "Logical", "Not", "Comparison"]);
                 break;
     
             case "\\\\array":
-                results = results && !($types in ["Arrayliteral", "Addition"]);
+                result = !($types in ["Arrayliteral", "Addition"]);
                 break;
     
             case "\\\\mixed":
-                results = false; // anything is mixed, so this is always false
+                result = false; // anything is mixed, so this is always false
                 break;
 
             case "\\\\null":
-                results = results && !($types in ["Null"]);
+                result = !($types in ["Null"]);
                 break;
 
             case "\\\\false":
-                results = results && !($types in ["Boolean"]);
+                result = !($types in ["Boolean"]) || (fqn2 == "\\\\true"); 
                 break;
     
             case "\\\\void":
             case "\\\\resource":
-            default: 
                 false;
+
+            // This is actually the case for all others types, so classes and interfaces
+            // we may also end up with any new PHP native type there. 
+            default:   
+                result = !($types in ["New"]) || (fqn != typehint)
+        }
+        
+        if (typehinttype == "one") {
+            // straight from the comparison
+            results = result;
+        } else if (typehinttype == "or") {
+            // One of them is sufficient 
+            results = results && result;
+        } else if (typehinttype == "and") {
+            // this will not work with intersectional 
+            results = results || result;
+        } else {
+            UnsupportedType();
         }
     }
     

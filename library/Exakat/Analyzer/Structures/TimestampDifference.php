@@ -27,12 +27,46 @@ use Exakat\Analyzer\Analyzer;
 
 class TimestampDifference extends Analyzer {
     public function analyze(): void {
+        // All kinds of addition are allowed here :
+        // microtime() - 1 or microtime() + -3
+
+        // microtime(true) - microtime(true)
         $this->atomIs('Addition')
-             ->codeIs('-')
              ->outIs(array('LEFT', 'RIGHT'))
              ->functioncallIs(array('\\time', '\\microtime'))
              ->back('first');
         $this->prepareQuery();
+
+        // date('U') - $d
+        $this->atomIs('Addition')
+             ->outIs(array('LEFT', 'RIGHT'))
+             ->atomIs('Functioncall', self::WITH_VARIABLES)
+             ->fullnspathIs('\\date')
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs('String', self::WITH_CONSTANTS)
+             ->noDelimiterIs('U')
+             ->back('first');
+        $this->prepareQuery();
+
+        // dateTime->format('U') - $d
+        $this->atomIs('Addition')
+             ->outIs(array('LEFT', 'RIGHT'))
+             ->atomIs('Methodcall', self::WITH_VARIABLES)
+             ->as('method')
+             ->outIs('METHOD')
+             ->codeIs('format', self::TRANSLATE, self::CASE_INSENSITIVE)
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs('String', self::WITH_CONSTANTS)
+             ->noDelimiterIs('U')
+
+             // No check on class yet
+             // it should accepte datetime and datetimeimmutable
+
+             ->back('first');
+        $this->prepareQuery();
+
+        // Note : date('U') is the exact call to date.
+
     }
 }
 
