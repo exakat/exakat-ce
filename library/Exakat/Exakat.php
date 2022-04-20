@@ -26,7 +26,7 @@ use Exakat\Configsource\CommandLine;
 
 class Exakat {
     public const VERSION = '2.4.0';
-     public const BUILD = 1312;
+       public const BUILD = 1314;
 
     private $config  = null;
 
