@@ -35,7 +35,8 @@ class Cobble extends Tasks {
     
     private Timer $timer;
     
-    public __construct() {
+    public function __construct() {
+        parent::__construct();
         $this->timer = new Timer();
     }
 
