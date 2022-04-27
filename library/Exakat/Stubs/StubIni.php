@@ -110,6 +110,26 @@ class StubIni extends Stubs implements StubsInterface {
     public function getMethodsArgsInterval(): array {
         return array();
     }
+
+    public function getEnumList(): array {
+        return array();
+    }
+
+    public function getClassStaticPropertyList(): array {
+        return array();
+    }
+
+    public function getClassStaticMethodList(): array {
+        return array();
+    }
+
+    public function getEnumCasesList(): array {
+        return array();
+    }
+
+    public function getInterfaceMethodsNameAndCount(): array {
+        return array();
+    }
 }
 
 ?>

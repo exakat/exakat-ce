@@ -27,7 +27,6 @@ class Calls {
 
     private $definitions = array();
     private $calls       = array();
-//    private $globals     = array();
 
     public function __construct(\Sqlite3 $sqlite) {
         $this->callsSqlite = $sqlite;

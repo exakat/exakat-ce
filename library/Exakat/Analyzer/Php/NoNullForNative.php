@@ -41,18 +41,18 @@ class NoNullForNative extends Analyzer {
 
     public function analyze(): void {
         $returnNull = $this->methods->getFunctionsByReturnType('null', Methods::LOOSE);
-        $list = $this->methods->getArgsByType('null', Methods::INVERSE);
+        $acceptNull = $this->methods->getArgsByType('null', Methods::INVERSE);
 
         $functions = array();
-        $methods   = array();
+        $allMethods   = array();
 
-        foreach($list as $position => $list) {
+        foreach($acceptNull as $position => $list) {
             foreach($list as $function) {
                  if (strpos($function, '::') === false) {
                      $functions[$position][] = $function;
                  } else {
                      list($class, $method) = explode('::', $function);
-                     $methods[$class][$position][] = $method;
+                     $allMethods[$class][$position][] = $method;
                  }
             }
         }
@@ -68,7 +68,7 @@ class NoNullForNative extends Analyzer {
                  ->back('first');
             $this->prepareQuery();
 
-            // from php methods
+            // from php functions
             $this->atomIs('Functioncall')
                  ->is('isPhp', true)
                  ->fullnspathIs($fnp)
@@ -125,7 +125,7 @@ class NoNullForNative extends Analyzer {
             $this->prepareQuery();
         }
 
-        foreach($methods as $class => $methods) {
+        foreach($allMethods as $class => $methods) {
             foreach($methods as $position => $name) {
                 $this->atomIs('Methodcall')
                      ->outIs('OBJECT')

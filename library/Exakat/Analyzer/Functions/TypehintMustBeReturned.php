@@ -30,13 +30,26 @@ class TypehintMustBeReturned extends Analyzer {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
-             ->fullnspathIsNot('\\void') // Void cannot be with other typehints
+             ->fullnspathIsNot(array('\\void', '\\never')) // Void cannot be with other typehints
              ->back('first')
              ->isNot('abstract', true)
+             // Not an empty block
              ->not(
                 $this->side()
                      ->outIs('BLOCK')
                      ->atomIs('Void')
+             )
+             // Do not throw
+             ->not(
+                $this->side()
+                     ->outIs('BLOCK')
+                     ->atomInsideNoDefinition('Throw')
+             )
+             ->not(
+                $this->side()
+                     ->outIs('BLOCK')
+                     ->atomInsideNoDefinition('Functioncall')
+                     ->fullnspathIs(array('\\assert', '\\trigger_error'))
              )
              ->outIs('RETURNED')
              ->atomIs('Void')
@@ -45,16 +58,29 @@ class TypehintMustBeReturned extends Analyzer {
         $this->prepareQuery();
 
         // function foo() : A { }
+        // This is an extension of PHP checks
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
-             ->fullnspathIsNot('\\void')
+             ->fullnspathIsNot(array('\\void', '\\never'))
              ->back('first')
              ->isNot('abstract', true)
              ->not(
                 $this->side()
                      ->outIs('BLOCK')
                      ->atomIs('Void')
+             )
+             // Do not throw
+             ->not(
+                $this->side()
+                     ->outIs('BLOCK')
+                     ->atomInsideNoDefinition('Throw')
+             )
+             ->not(
+                $this->side()
+                     ->outIs('BLOCK')
+                     ->atomInsideNoDefinition('Functioncall')
+                     ->fullnspathIs(array('\\assert', '\\trigger_error'))
              )
              ->hasNoOut('RETURNED')
              ->back('first');

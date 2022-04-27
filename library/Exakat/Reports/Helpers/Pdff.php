@@ -357,11 +357,9 @@ class PdffTypehint {
 
 class PdffExtends {
     private $target        = '';
-    private $type          = '';
 
-    public function __construct(string $target, string $type) {
+    public function __construct(string $target) {
         $this->target     = $target;
-        $this->type       = $type;
     }
 
     public function toArray(): array {
@@ -380,7 +378,6 @@ class PdffParameter implements PdffHasAttribute, PdffHasTypehint, PdffHasPhpdoc 
     private $variadic     = false;
     private $expression   = false;
     private $reference    = false;
-    private $readonly     = false;
     private $typehinttype = '';
 
     private $typehints    = array();

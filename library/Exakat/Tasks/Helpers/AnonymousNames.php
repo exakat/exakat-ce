@@ -20,35 +20,25 @@
  *
 */
 
+namespace Exakat\Tasks\Helpers;
 
-namespace Exakat\Query\DSL;
+class AnonymousNames {
+    private int $anonymousNames = 0;
 
+    public const A_CLASS          = 'class';
+    public const A_FUNCTION       = 'function';
+    public const A_ARROW_FUNCTION = 'arrowfunction';
 
-class IsReferencedArgument extends DSL {
-    public function run(): Command {
-        switch (func_num_args()) {
-            case 1:
-                list($variable) = func_get_args();
-                break;
+    // No constructor
 
-            case 0:
-                $variable = 'variable';
-                break;
-
-            default:
-                assert(false, 'wrong number of argument for ' . __METHOD__);
+    public function getName(string $type): string {
+        if (!in_array($type, array(self::A_CLASS, self::A_FUNCTION, self::A_ARROW_FUNCTION), \STRICT_COMPARISON)) {
+            throw new LoadError('Classes, Functions and ArrowFunctions are the only anonymous');
         }
 
-        $gremlin = <<<GREMLIN
-not(
-    where(
-        __.repeat( __.in()).until(hasLabel("Function")).out("ARGUMENT").filter{it.get().value("code") == $variable}.has("reference", true)
-    )
-)
-
-GREMLIN;
-
-        return new Command($gremlin);
+        ++$this->anonymousNames;
+        return "$type@$this->anonymousNames";
     }
 }
+
 ?>

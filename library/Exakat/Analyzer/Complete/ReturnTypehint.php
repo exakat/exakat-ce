@@ -108,9 +108,14 @@ GREMLIN
                        array(array('Float'),
                              '\\\\float',
                              'float'),
+                       array(array('Null'),
+                             '\\\\null',
+                             'null'),
+                       array(array('Arrayliteral'),
+                             '\\\\array',
+                             'array'),
         );
 
-        foreach($types as list($sources, $fqn, $fullcode)) {
             // type with integer
             $this->atomIs(self::FUNCTIONS_ALL)
                  ->filter(
@@ -118,31 +123,44 @@ GREMLIN
                          ->outIs('RETURNTYPE')
                          ->atomIs('Void')
                  )
-                 ->filter(
+                 ->not(
                     $this->side()
-                         ->outIs('RETURNTYPE')
-                         ->raw('count().is(eq(1))')
+                         ->outIs('RETURNED')
+                         ->atomIsNot(array_merge(...array_column($types, 0)))
                  )
-                 ->outIs('RETURNED')
-                 ->atomIs($sources)
                  ->back('first')
-                 ->raw(<<<GREMLIN
+                 ->raw(<<<'GREMLIN'
 sideEffect(
-        select("first").out("RETURNTYPE").fold().as("poubelle1").
-        sideEffect( select("poubelle1").unfold().bothE().drop() )
+        select("first").out("RETURNTYPE").fold().as("poubelle1")
     )
+.out('RETURNED')
+.dedup().by(label)
+.as("r")
 .addV('Scalartypehint')
-         .property("fullcode", '$fullcode' )
-         .property("fullnspath", '$fqn' )
          .as("b")
+         .coalesce(
+            select("r").hasLabel('Null')   .select("b").property("fullnspath", '\\null')    .property("fullcode", 'null'),
+            select("r").hasLabel('Integer').select("b").property("fullnspath", '\\int')     .property("fullcode", 'int'),
+            select("r").hasLabel('String') .select("b").property("fullnspath", '\\string')  .property("fullcode", 'string'),
+            select("r").hasLabel('Float')  .select("b").property("fullnspath", '\\float')   .property("fullcode", 'float'),
+            select("r").hasLabel('Boolean').select("b").property("fullnspath", '\\bool')    .property("fullcode", 'bool'),
+            select("r").hasLabel('Arrayliteral').select("b").property("fullnspath", '\\array')    .property("fullcode", 'array'),
+         )
+.sideEffect(
+    select("b").addE("RETURNTYPE").from("first")
+)
 .sideEffect(
     // Link Returntype to Function
-    select("first").addE("RETURNTYPE").to("b")
-)
+    select("first").coalesce(
+        select("first").out("RETURN").count().is(eq(1)).select("first").property("typehinttype", "one"),
+        select("first").property("typehinttype", "or")
+    )
+).
+ sideEffect( select("poubelle1").unfold().bothE().drop() )
+
 GREMLIN
     );
-            $this->prepareQuery();
-        }
+        $this->prepareQuery();
     }
 }
 

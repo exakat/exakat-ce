@@ -28,11 +28,19 @@ use Exakat\Analyzer\Analyzer;
 
 class AtomIs extends DSL {
     public function run(): Command {
-        if (func_num_args() === 2) {
-            list($atoms, $flags) = func_get_args();
-        } else {
-            $atoms = func_get_arg(0);
-            $flags = Analyzer::WITHOUT_CONSTANTS;
+        switch (func_num_args()) {
+            case 2:
+                list($atoms, $flags) = func_get_args();
+                break;
+
+            case 1:
+                list($atoms) = func_get_args();
+                $flags = Analyzer::WITHOUT_CONSTANTS;
+                break;
+
+            default:
+                assert(func_num_args() >= 2, 'Too many arguments for ' . __METHOD__);
+                assert(func_num_args() === 0, 'No arguments for ' . __METHOD__);
         }
 
         assert($this->assertAtom($atoms));
@@ -78,7 +86,7 @@ union( __.identity(),
             .union( __.hasLabel("Identifier", "Nsname", "Staticconstant").in("DEFINITION").out("VALUE"),
             
                       // local variable
-                      __.hasLabel("Variable").not(__.in("LEFT").hasLabel("Assignation")).in("DEFINITION").hasLabel('Variabledefinition').has("isConst").optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT"),
+                      __.hasLabel("Variable").not(__.in("LEFT").hasLabel("Assignation")).in("DEFINITION").hasLabel('Variabledefinition').has("isConst").optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT").not(hasLabel("Functioncall", "Methodcall", "Staticmethodcall")),
                       
                       // literal value, passed as an argument (Method, closure, function)
                       __.hasLabel("Variable").in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").out("DEFAULT"),
@@ -94,7 +102,7 @@ union( __.identity(),
             
                       __.hasLabel("Parenthesis").out("CODE"),
             
-                      __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in('DEFINITION').out('RETURNED')
+                      __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in('DEFINITION').where( __.out("RETURNTYPE").hasLabel("Void")).out('RETURNED').not(hasLabel("Functioncall", "Methodcall", "Staticmethodcall"))
                       )
             ).times($MAX_SEARCHING).emit()
 )

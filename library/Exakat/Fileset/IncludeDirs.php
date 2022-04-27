@@ -39,12 +39,12 @@ class IncludeDirs extends Fileset {
     public function setFiles(array $files) {
         foreach($files as $file) {
             $found = false;
-            foreach($this->ignoreDirs as $ignore) {
+            foreach($this->includeDirs as $ignore) {
                 $found |= fnmatch($ignore, $file);
             }
 
             if ($found) {
-                $this->ignored[$file] = "ignore_dirs file ($file)";
+                $this->ignored[$file] = "include_dir file ($file)";
             } else {
                 $this->files[] = $file;
             }

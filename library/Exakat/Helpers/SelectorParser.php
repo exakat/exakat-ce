@@ -103,7 +103,7 @@ class Node {
     private string $atom = '';
     private array $properties = array();
 
-    public function __construct(string $atom, $inside = '') {
+    public function __construct(string $atom, string $inside = '') {
         $this->atom = $atom;
         $this->inside = $inside;
     }
@@ -125,7 +125,7 @@ class Node {
     }
 
     public function getAtom() {
-        return $this->inside;
+        return $this->atom;
     }
 
     public function getLink(): string {

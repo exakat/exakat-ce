@@ -45,6 +45,8 @@ class Boolval extends Plugin {
             case 'Interface' :
                 return;
 
+            default:
+                // All is OK, we proceed
         }
 
         foreach($extras as $extra) {

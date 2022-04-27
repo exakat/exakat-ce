@@ -153,7 +153,7 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getInterfaceList(): array {
         $return = array(array());
 
-        foreach($this->data->versions as $namespace => $namespaceList) {
+        foreach($this->data->versions as $version => $namespaceList) {
             foreach($namespaceList as $namespace => $namespaceDetails) {
                 $interfaces = array_keys((array) ($namespaceDetails->interfaces ?? array()));
                 $interfaces = array_map(function (string $i) use ($namespace): string { return $namespace . $i;}, $interfaces);
@@ -167,7 +167,7 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getEnumList(): array {
         $return = array(array());
 
-        foreach($this->data->versions as $namespace => $namespaceList) {
+        foreach($this->data->versions as $version => $namespaceList) {
             foreach($namespaceList as $namespace => $namespaceDetails) {
                 $enums = array_keys((array) ($namespaceDetails->enums ?? array()));
                 $enums = array_map(function (string $e) use ($namespace): string { return $namespace . $e;}, $enums);
@@ -181,7 +181,7 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getTraitList(): array {
         $return = array(array());
 
-        foreach($this->data->versions as $namespace => $namespaceList) {
+        foreach($this->data->versions as $version => $namespaceList) {
             foreach($namespaceList as $namespace => $namespaceDetails) {
                 $traits = array_keys((array) ($namespaceDetails->traits ?? array()));
                 $traits = array_map(function (string $t) use ($namespace): string { return $namespace . $t;}, $traits);
@@ -193,8 +193,6 @@ class PdffReader extends Stubs implements StubsInterface {
     }
 
     public function getNamespaceList(): array {
-        $return = array(array());
-
         return array_keys((array) $this->data->versions);
     }
 

@@ -949,7 +949,6 @@ GREMLIN
         $toAttributes  = array();
         $toTypehints   = array();
         $toPhpdoc      = array();
-        $unique        = array();
         foreach($methods as $row) {
             $row['visibility'] = $row['visibility'] === 'none' ? '' : $row['visibility'];
 

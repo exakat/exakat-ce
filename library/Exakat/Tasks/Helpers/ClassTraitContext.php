@@ -20,35 +20,31 @@
  *
 */
 
+namespace Exakat\Tasks\Helpers;
 
-namespace Exakat\Query\DSL;
 
+class ClassTraitContext {
+    public const NO_CLASS_TRAIT_CONTEXT = null;
 
-class IsReferencedArgument extends DSL {
-    public function run(): Command {
-        switch (func_num_args()) {
-            case 1:
-                list($variable) = func_get_args();
-                break;
+    private array          $contexts = array();
+    private ?AtomInterface $last     = self::NO_CLASS_TRAIT_CONTEXT;
 
-            case 0:
-                $variable = 'variable';
-                break;
+    public function __construct() {    }
 
-            default:
-                assert(false, 'wrong number of argument for ' . __METHOD__);
-        }
-
-        $gremlin = <<<GREMLIN
-not(
-    where(
-        __.repeat( __.in()).until(hasLabel("Function")).out("ARGUMENT").filter{it.get().value("code") == $variable}.has("reference", true)
-    )
-)
-
-GREMLIN;
-
-        return new Command($gremlin);
+    public function getCurrent(): ?AtomInterface {
+        return $this->last;
     }
+
+    public function pushContext(?AtomInterface $context): void {
+        $this->contexts[] = $context;
+        $this->last = $context;
+    }
+
+    public function popContext() {
+        array_pop($this->contexts);
+        $this->last = end($this->contexts) ?: self::NO_CLASS_TRAIT_CONTEXT;
+    }
+
 }
+
 ?>

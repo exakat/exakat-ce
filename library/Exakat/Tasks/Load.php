@@ -55,6 +55,8 @@ use Exakat\Tasks\Helpers\Php;
 use Exakat\Tasks\Helpers\Sequences;
 use Exakat\Tasks\Helpers\NestedCollector;
 use Exakat\Tasks\Helpers\ContextVariables;
+use Exakat\Tasks\Helpers\ClassTraitContext;
+use Exakat\Tasks\Helpers\AnonymousNames;
 use ProgressBar\Manager as ProgressBar;
 use Exakat\Loader\Collector;
 use Exakat\Log\Timing as TimingLog;
@@ -127,7 +129,7 @@ class Load extends Tasks {
     private $currentFunction         = array();
     private $currentVariables        = null;
     private $currentReturn           = null;
-    private $currentClassTrait       = array();
+    private ClassTraitContext $currentClassTrait;
     private $currentProperties       = array();
     private $currentPropertiesCalls  = array();
     private $currentMethods          = array();
@@ -240,7 +242,7 @@ class Load extends Tasks {
                           );
 
     private $atomVoid = null;
-    private static $anonymousNames = 'a';
+    private AnonymousNames $anonymousNames;
     protected $log = null;
 
     private $END_OF_EXPRESSION = array(); // that should be a constant
@@ -488,6 +490,9 @@ class Load extends Tasks {
 
         $this->cases = new NestedCollector();
         $this->log = new TimingLog('load.timing.csv');
+
+        $this->anonymousNames = new AnonymousNames();
+        $this->currentClassTrait = new ClassTraitContext();
      }
 
     public function __destruct() {
@@ -749,7 +754,7 @@ class Load extends Tasks {
 
         $this->currentMethod           = array();
         $this->currentFunction         = array();
-        $this->currentClassTrait       = array();
+        $this->currentClassTrait       = new ClassTraitContext();
         $this->currentVariables        = new ContextVariables();
 
         $this->tokens                  = array();
@@ -1011,14 +1016,9 @@ class Load extends Tasks {
         $label->fullcode = $tag->fullcode . ' :';
         $label->ws->opening = $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
 
-        if (empty($this->currentClassTrait)) {
-            $class = '';
-        } else {
-            $class = end($this->currentClassTrait)->fullcode;
-        }
-
         $method = empty($this->currentFunction) ? '' : end($this->currentFunction)->fullnspath;
 
+        $class = $this->currentClassTrait->getCurrent() ?? '';
         $this->calls->addDefinition('goto', "$class::$method..$tag->fullcode", $label);
 
         $this->addToSequence($label);
@@ -1118,7 +1118,7 @@ class Load extends Tasks {
                 $variable = $this->processSingle($atom);
                 $variable->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
 
-                if ($atom === 'This' && ($class = end($this->currentClassTrait))) {
+                if ($atom === 'This' && ($class = $this->currentClassTrait->getCurrent())) {
                     $variable->fullnspath = $class->fullnspath;
                     $this->calls->addCall('class', $class->fullnspath, $variable);
                 }
@@ -1441,14 +1441,14 @@ class Load extends Tasks {
 
         // arrowfunction may be static
         if ($this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
-            $this->currentClassTrait[] = '';
+            $this->currentClassTrait->pushContext(ClassTraitContext::NO_CLASS_TRAIT_CONTEXT);
         }
 
         $block = $this->processExpression($this->END_OF_EXPRESSION);
 
         // arrowfunction may be static
         if ($this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
-            array_pop($this->currentClassTrait);
+            $this->currentClassTrait->popContext();
         }
 
         $this->contexts->exitContext(Context::CONTEXT_FUNCTION);
@@ -1464,7 +1464,7 @@ class Load extends Tasks {
                         '(' . $fn->fullcode . ')' .
                         $returnTypeFullcode .
                         ' => ' . $block->fullcode;
-        $fn->fullnspath = $this->makeAnonymous('arrowfunction');
+        $fn->fullnspath = $this->anonymousNames->getName(AnonymousNames::A_ARROW_FUNCTION);
 
         $this->currentVariables = $previousContextVariables;
 
@@ -1556,14 +1556,14 @@ class Load extends Tasks {
 
             $this->addLink($function, $name, 'NAME');
         } elseif ($function->atom === 'Closure') {
-            $function->fullnspath = $this->makeAnonymous('function');
+            $function->fullnspath = $this->anonymousNames->getName(AnonymousNames::A_FUNCTION);
 
             // closure may be static
             if ($this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
-                $this->currentClassTrait[] = '';
+                $this->currentClassTrait->pushContext(ClassTraitContext::NO_CLASS_TRAIT_CONTEXT);
             }
         } elseif ($function->isA(array('Method', 'Magicmethod'))) {
-            $function->fullnspath = end($this->currentClassTrait)->fullnspath . '::' . mb_strtolower($name->code);
+            $function->fullnspath = $this->currentClassTrait->getCurrent()->fullnspath . '::' . mb_strtolower($name->code);
 
             if (empty($function->visibility)) {
                 $function->visibility = 'none';
@@ -1663,7 +1663,7 @@ class Load extends Tasks {
 
        if ($function->atom === 'Closure' &&
            $this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
-           array_pop($this->currentClassTrait);
+           $this->currentClassTrait->popContext();
        }
 
         $this->contexts->exitContext(Context::CONTEXT_CLASS);
@@ -1695,8 +1695,8 @@ class Load extends Tasks {
 
         } elseif ($function->atom === 'Magicmethod') {
             if (mb_strtolower($this->tokens[$current + 1][1]) === '__construct' &&
-                end($this->currentClassTrait)->atom === 'Classanonymous') {
-                    $this->addLink(end($this->currentClassTrait), $function, 'DEFINITION');
+                $this->currentClassTrait->getCurrent()->atom === 'Classanonymous') {
+                    $this->addLink($this->currentClassTrait->getCurrent(), $function, 'DEFINITION');
             }
             $this->currentMethods[mb_strtolower($function->code)] = $function;
 
@@ -1725,7 +1725,7 @@ class Load extends Tasks {
     private function processTrait(): AtomInterface {
         $current = $this->id;
         $trait = $this->addAtom('Trait', $current);
-        $this->currentClassTrait[] = $trait;
+        $this->currentClassTrait->pushContext($trait);
         $this->makePhpdoc($trait);
         $trait->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
 
@@ -1751,7 +1751,7 @@ class Load extends Tasks {
 
         $this->contexts->exitContext(Context::CONTEXT_CLASS);
 
-        array_pop($this->currentClassTrait);
+        $this->currentClassTrait->popContext();
 
         return $trait;
     }
@@ -1759,7 +1759,7 @@ class Load extends Tasks {
     private function processInterface(): AtomInterface {
         $current = $this->id;
         $interface = $this->addAtom('Interface', $current);
-        $this->currentClassTrait[] = $interface;
+        $this->currentClassTrait->pushContext($interface);
         $this->makePhpdoc($interface);
         $extras = array('EXTENDS'   => array(),
                         );
@@ -1816,7 +1816,7 @@ class Load extends Tasks {
         $this->sequence->ws->separators[] = '';
 
         $this->contexts->exitContext(Context::CONTEXT_CLASS);
-        array_pop($this->currentClassTrait);
+        $this->currentClassTrait->popContext();
 
         return $interface;
     }
@@ -1868,7 +1868,7 @@ class Load extends Tasks {
             $this->checkPhpdoc();
         }
 
-        $currentClass = $this->currentClassTrait[count($this->currentClassTrait) - 1];
+        $currentClass = $this->currentClassTrait->getCurrent();
 
         $diff = array_diff(array_keys($this->currentPropertiesCalls), array_keys($this->currentProperties));
         foreach($diff as $missing) {
@@ -1927,7 +1927,7 @@ class Load extends Tasks {
         $this->addLink($case, $name, 'NAME');
         $this->moveToNext();
 
-        $this->calls->addDefinition('staticconstant',   end($this->currentClassTrait)->fullnspath . '::' . $name->fullcode, $case);
+        $this->calls->addDefinition('staticconstant',   $this->currentClassTrait->getCurrent()->fullnspath . '::' . $name->fullcode, $case);
 
         if ($this->nextIs(array($this->phptokens::T_EQUAL), 0)) {
             $default = $this->processNext();
@@ -1994,13 +1994,11 @@ class Load extends Tasks {
 
         $implements = $this->processImplements($enum);
 
-        $this->currentClassTrait[] = $enum;
+        $this->currentClassTrait->pushContext($enum);
 
         $this->makePhpdoc($enum);
 
         $enum->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
-
-        $this->currentClassTrait[] = $enum;
 
         $this->contexts->nestContext(Context::CONTEXT_CLASS);
         $this->contexts->toggleContext(Context::CONTEXT_CLASS);
@@ -2019,7 +2017,7 @@ class Load extends Tasks {
         $this->contexts->exitContext(Context::CONTEXT_NEW);
         $this->contexts->exitContext(Context::CONTEXT_FUNCTION);
 
-        array_pop($this->currentClassTrait);
+        $this->currentClassTrait->popContext();
 
         $this->currentVariables = $previousContextVariables;
 
@@ -2061,7 +2059,7 @@ class Load extends Tasks {
                 $class = $this->addAtom('Classanonymous', $current);
             }
 
-            $class->fullnspath = $this->makeAnonymous();
+            $class->fullnspath = $this->anonymousNames->getName(AnonymousNames::A_CLASS);
             $this->calls->addDefinition('class', $class->fullnspath, $class);
         }
         $this->makePhpdoc($class);
@@ -2069,7 +2067,7 @@ class Load extends Tasks {
 
         $class->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
 
-        $this->currentClassTrait[] = $class;
+        $this->currentClassTrait->pushContext($class);
 
         $this->contexts->nestContext(Context::CONTEXT_CLASS);
         $this->contexts->toggleContext(Context::CONTEXT_CLASS);
@@ -2131,7 +2129,7 @@ class Load extends Tasks {
         $this->contexts->exitContext(Context::CONTEXT_NEW);
         $this->contexts->exitContext(Context::CONTEXT_FUNCTION);
 
-        array_pop($this->currentClassTrait);
+        $this->currentClassTrait->popContext();
 
         $this->currentVariables = $previousContextVariables;
         return $class;
@@ -2714,7 +2712,7 @@ class Load extends Tasks {
 
                     $this->moveToNext();
 
-                    $this->addLink(end($this->currentClassTrait), $index, 'PPP');
+                    $this->addLink($this->currentClassTrait->getCurrent(), $index, 'PPP');
 
                     $index->rank = ++$rank;
                     $this->popExpression();
@@ -2972,7 +2970,7 @@ class Load extends Tasks {
                 if ($index->atom === 'Variable' &&
                     $index->code === '$this'    &&
                     $index->rank === 0 ) {
-                    $this->calls->addCall('class', end($this->currentClassTrait)->fullnspath, $index);
+                    $this->calls->addCall('class', $this->currentClassTrait->getCurrent()->fullnspath, $index);
                 }
 
                 $fullcode[] = $index->fullcode;
@@ -3180,7 +3178,7 @@ class Load extends Tasks {
             $this->addLink($const, $def, 'CONST');
 
             if ($this->contexts->isContext(Context::CONTEXT_CLASS)) {
-                $this->calls->addDefinition('staticconstant',   end($this->currentClassTrait)->fullnspath . '::' . $name->fullcode, $def);
+                $this->calls->addDefinition('staticconstant',   $this->currentClassTrait->getCurrent()->fullnspath . '::' . $name->fullcode, $def);
             } else {
                 $this->calls->addDefinition('const', $name->fullnspath, $def);
             }
@@ -3906,8 +3904,8 @@ class Load extends Tasks {
                 $element->propertyname = ltrim($element->code, '$');
                 $this->currentProperties[$element->propertyname] = $element;
 
-                if (!empty($this->currentClassTrait)) {
-                    $currentFNP = $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath;
+                if ($this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
+                    $currentFNP = $this->currentClassTrait->getCurrent()->fullnspath;
                     $this->calls->addDefinition('staticproperty', $currentFNP . '::' . $element->code, $element);
                     $this->calls->addDefinition('property', $currentFNP . '::' . ltrim($element->code, '$'), $element);
                 }
@@ -5477,7 +5475,7 @@ class Load extends Tasks {
     }
 
     private function processUse(): AtomInterface {
-        if (empty($this->currentClassTrait)) {
+        if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
             return $this->processUseNamespace();
         } else {
             return $this->processUseTrait();
@@ -5576,7 +5574,6 @@ class Load extends Tasks {
                 $this->moveToNext(); // Skip \
 
                 $useTypeGeneric = $useType;
-                $useTypeAtom = 0;
                 do {
                     $this->moveToNext(); // Skip { or ,
                     // trailing comma
@@ -5589,7 +5586,6 @@ class Load extends Tasks {
                     }
 
                     $useType = $useTypeGeneric;
-                    $useTypeAtom = 0;
                     $totype = '';
                     if ($this->nextIs(array($this->phptokens::T_CONST))) {
                         // use const
@@ -5836,7 +5832,7 @@ class Load extends Tasks {
         $variable = $this->processSingle($atom);
         $this->pushExpression($variable);
 
-        if ($atom === 'This' && ($class = end($this->currentClassTrait))) {
+        if ($atom === 'This' && ($class = $this->currentClassTrait->getCurrent())) {
             $variable->fullnspath = $class->fullnspath;
             $this->calls->addCall('class', $class->fullnspath, $variable);
         }
@@ -6033,25 +6029,25 @@ class Load extends Tasks {
                 $constant->noDelimiter = $this->currentFunction[count($this->currentFunction) - 1]->code;
             }
         } elseif (mb_strtolower($constant->fullcode) === '__class__') {
-            if (empty($this->currentClassTrait)) {
+            if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
                 $constant->noDelimiter = '';
-            } elseif ($this->currentClassTrait[count($this->currentClassTrait) - 1]->atom === 'Class') {
-                $constant->noDelimiter = $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath;
+            } elseif ($this->currentClassTrait->getCurrent()->atom === 'Class') {
+                $constant->noDelimiter = $this->currentClassTrait->getCurrent()->fullnspath;
             } else {
                 $constant->noDelimiter = '';
             }
         } elseif (mb_strtolower($constant->fullcode) === '__trait__') {
-            if (empty($this->currentClassTrait)) {
+            if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
                 $constant->noDelimiter = '';
-            } elseif ($this->currentClassTrait[count($this->currentClassTrait) - 1]->atom === 'Trait') {
-                $constant->noDelimiter = $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath;
+            } elseif ($this->currentClassTrait->getCurrent()->atom === 'Trait') {
+                $constant->noDelimiter = $this->currentClassTrait->getCurrent()->fullnspath;
             } else {
                 $constant->noDelimiter = '';
             }
         } elseif (mb_strtolower($constant->fullcode) === '__line__') {
             $constant->noDelimiter = $this->tokens[$this->id][2];
         } elseif (mb_strtolower($constant->fullcode) === '__method__') {
-            if (empty($this->currentClassTrait)) {
+            if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
                 if (count($this->currentMethod) === 1) {
                     $constant->noDelimiter = '';
                 } else {
@@ -6059,10 +6055,10 @@ class Load extends Tasks {
                 }
             } elseif (count($this->currentMethod) === 1) {
                 $constant->noDelimiter = '';
-            } elseif ($this->currentClassTrait[count($this->currentClassTrait) - 1] instanceof AtomInterface) {
-                $constant->noDelimiter = $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath .
+            } elseif ($this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
+                $constant->noDelimiter = $this->currentClassTrait->getCurrent()->fullnspath .
                                          '::' .
-                                         $this->currentMethod[count($this->currentMethod) - 1]->code;
+                                         $this->currentClassTrait->getCurrent()->code;
             } else {
                 $constant->noDelimiter = '';
             }
@@ -6367,10 +6363,10 @@ class Load extends Tasks {
 
         $this->addLink($goto, $label, 'GOTO');
 
-        if (empty($this->currentClassTrait)) {
+        if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
             $class = '';
         } else {
-            $class = end($this->currentClassTrait)->fullcode;
+            $class = $this->currentClassTrait->getCurrent()->fullcode;
         }
 
         if (empty($this->currentFunction)) {
@@ -6414,7 +6410,7 @@ class Load extends Tasks {
         $operator->fullcode = $this->tokens[$current][1];
         $operator->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
         $newcall = $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$current][0]), 'NEW', ' ');
-        $this->runPlugins($newcall, array());
+//        $this->runPlugins($newcall, array());
 
         $this->contexts->toggleContext(Context::CONTEXT_NEW);
         if ($noSequence === false) {
@@ -6673,11 +6669,10 @@ class Load extends Tasks {
         $this->makePhpdoc($static);
 
         $this->addLink($static, $left, 'CLASS');
-        if ($static->atom  === 'Staticproperty'                                       &&
-            in_array($left->token, array('T_STRING', 'T_STATIC'), \STRICT_COMPARISON) &&
-            !empty($this->currentClassTrait)                                          &&
-            !empty($this->currentClassTrait[count($this->currentClassTrait) - 1])     &&
-            $left->fullnspath === $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath) {
+        if ($static->atom  === 'Staticproperty'                                                  &&
+            in_array($left->token, array('T_STRING', 'T_STATIC'), \STRICT_COMPARISON)            &&
+            $this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT &&
+            $left->fullnspath === $this->currentClassTrait->getCurrent()->fullnspath) {
 
             $name = ltrim($right->code, '$');
             if (!empty($name)) {
@@ -6685,11 +6680,10 @@ class Load extends Tasks {
             }
         }
 
-        if ($static->atom  === 'Staticmethodcall'                                     &&
-            in_array($left->token, array('T_STRING', 'T_STATIC'), \STRICT_COMPARISON) &&
-            !empty($this->currentClassTrait)                                          &&
-            !empty($this->currentClassTrait[count($this->currentClassTrait) - 1])     &&
-            $left->fullnspath === $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath) {
+        if ($static->atom  === 'Staticmethodcall'                                                &&
+            in_array($left->token, array('T_STRING', 'T_STATIC'), \STRICT_COMPARISON)            &&
+            $this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT &&
+            $left->fullnspath === $this->currentClassTrait->getCurrent()->fullnspath) {
                 array_collect_by($this->currentMethodsCalls, mb_strtolower($right->code), $static);
         }
 
@@ -7469,19 +7463,19 @@ class Load extends Tasks {
             $apply->fullnspath = substr($this->namespace, 0, -1) . $fullnspath;
             return;
         } elseif ($name->isA(array('Static', 'Self', 'This'))) {
-            if (empty($this->currentClassTrait) || empty($this->currentClassTrait[count($this->currentClassTrait) - 1])) {
+            if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
                 $apply->fullnspath = self::FULLNSPATH_UNDEFINED;
                 return;
             } else {
-                $apply->fullnspath = $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath;
+                $apply->fullnspath = $this->currentClassTrait->getCurrent()->fullnspath;
                     return;
             }
         } elseif ($name->atom === 'Newcall' && mb_strtolower($name->code) === 'static') {
-            if (empty($this->currentClassTrait)) {
+            if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
                 $apply->fullnspath = self::FULLNSPATH_UNDEFINED;
-                    return;
+                return;
             } else {
-                $apply->fullnspath = $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath;
+                $apply->fullnspath = $this->currentClassTrait->getCurrent()->fullnspath;
                     return;
             }
         } elseif ($name->atom === 'Parent') {
@@ -7541,17 +7535,12 @@ class Load extends Tasks {
 
         } elseif ($name->atom === 'String' && isset($name->noDelimiter)) {
             if (in_array(mb_strtolower($name->noDelimiter), array('self', 'static'), \STRICT_COMPARISON)) {
-                if (empty($this->currentClassTrait)) {
+                if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
                     $apply->fullnspath = self::FULLNSPATH_UNDEFINED;
-                    return;
-                } elseif ($this->currentClassTrait[count($this->currentClassTrait) - 1] instanceof AtomInterface) {
-                    $apply->fullnspath = $this->currentClassTrait[count($this->currentClassTrait) - 1]->fullnspath;
-                    return;
                 } else {
-                    // inside a closure
-                    $apply->fullnspath = self::FULLNSPATH_UNDEFINED;
-                    return;
+                    $apply->fullnspath = $this->currentClassTrait->getCurrent()->fullnspath;
                 }
+                return;
             }
 
             $prefix =  str_replace('\\\\', '\\', mb_strtolower($name->noDelimiter));
@@ -7598,38 +7587,29 @@ class Load extends Tasks {
             // Alias is the 'As' expression.
             $offset = strrpos($alias->fullcode, ' as ');
             if ($useType === 'const') {
-                $alias = substr($alias->fullcode, $offset + 4);
+                $return = substr($alias->fullcode, $offset + 4);
             } else {
-                $alias = mb_strtolower(substr($alias->fullcode, $offset + 4));
+                $return = mb_strtolower(substr($alias->fullcode, $offset + 4));
             }
         } elseif (($offset = strrpos($alias->code, '\\')) !== false) {
             // namespace with \
-            $alias = substr($alias->code, $offset + 1);
+            $return = substr($alias->code, $offset + 1);
         } else {
             // namespace without \
-            $alias = $alias->code;
+            $return = $alias->code;
         }
 
         if ($useType !== 'const') {
-            $alias = mb_strtolower($alias);
+            $return = mb_strtolower($return);
         }
 
-        $this->uses->set($useType, $alias, $use);
+        $this->uses->set($useType, $return, $use);
 
-        return $alias;
+        return $return;
     }
 
     private function logTime(string $step): void {
         $this->log->log($step);
-    }
-
-    private function makeAnonymous(string $type = 'class'): string {
-        if (!in_array($type, array('class', 'function', 'arrowfunction'), \STRICT_COMPARISON)) {
-            throw new LoadError('Classes, Functions and ArrowFunctions are the only anonymous');
-        }
-
-        ++self::$anonymousNames;
-        return "$type@" . self::$anonymousNames;
     }
 
     private function finishWithAlternative(bool $isColon): void {

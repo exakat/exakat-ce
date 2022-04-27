@@ -55,6 +55,10 @@ abstract class Analyzer {
     public const QUERY_RESULTS       = 13;  // store results directly to dump, no ANALYZED
     public const QUERY_HASH_ANALYZER = 14;  // store results directly to hashAnalyzer
 
+    public const LINK_ANALYZED = true;
+    public const PROPERTY_COMPLETE = false;
+
+
     protected $datastore  = null;
 
     protected $rowCount       = 0; // Number of found values
@@ -70,9 +74,6 @@ abstract class Analyzer {
 
     public $config         = null;
 
-    public static $availableAtoms         = array();
-    public static $availableLinks         = array();
-    public static $availableFunctioncalls = array();
     private static $calledClasses         = null;
     private static $calledInterfaces      = null;
     private static $calledTraits          = null;
@@ -310,22 +311,6 @@ abstract class Analyzer {
 
         $this->linksDown = GraphElements::linksAsList();
 
-        if (empty(self::$availableAtoms) && $this->gremlin !== null) {
-            $data = $this->datastore->getCol('TokenCounts', 'token');
-
-            self::$availableAtoms = GraphElements::$ATOMS_VIRTUAL;
-            self::$availableLinks = GraphElements::$LINKS_VIRTUAL;
-
-            foreach($data as $token){
-                if ($token === strtoupper($token)) {
-                    self::$availableLinks[] = $token;
-                } else {
-                    self::$availableAtoms[] = $token;
-                }
-            }
-
-            self::$availableFunctioncalls = $this->datastore->getCol('functioncalls', 'functioncall');
-        }
         $this->methods = exakat('methods');
 
         $this->initNewQuery();
@@ -628,12 +613,12 @@ GREMLIN;
                 break;
 
             case self::QUERY_NO_ANALYZED:
-                $this->storeToGraph(false);
+                $this->storeToGraph(self::PROPERTY_COMPLETE);
                 break;
 
             case self::QUERY_DEFAULT:
             default:
-                $this->storeToGraph(true);
+                $this->storeToGraph(self::LINK_ANALYZED);
                 break;
         }
 
@@ -671,7 +656,7 @@ GREMLIN;
         $this->datastore->addRow('analyzed', array($this->shortAnalyzer => -1 ) );
     }
 
-    private function storeToGraph(bool $analyzed = true): void {
+    private function storeToGraph(bool $analyzed): void {
         if ($this->query->canSkip()) {
             return;
         }
@@ -909,7 +894,7 @@ GREMLIN;
     }
 
     public function tailQuery(bool $analyzed) {
-        if ($analyzed === true) {
+        if ($analyzed === self::LINK_ANALYZED) {
             $analyzed = ".addE(\"ANALYZED\").from(g.V({$this->analyzerId}))";
         } else {
             $analyzed = '.property("complete", "' . $this->shortAnalyzer . '")';

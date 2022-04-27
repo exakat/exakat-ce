@@ -32,9 +32,9 @@ use Exakat\Helpers\Timer;
 
 class Cobble extends Tasks {
     public const CONCURENCE = self::ANYTIME;
-    
+
     private Timer $timer;
-    
+
     public function __construct() {
         parent::__construct();
         $this->timer = new Timer();
@@ -112,7 +112,7 @@ class Cobble extends Tasks {
                 $analyze->setConfig($configThema);
                 $analyze->run();
             } else {
-                print "Pas de dependances\n";
+//                print "Pas de dependances\n";
             }
 
             display("Cobbling\n");

@@ -26,9 +26,10 @@ use Exakat\Config;
 
 abstract class Vcs {
     public const SUPPORTED_VCS = array('git', 'svn', 'cvs', 'bzr', 'hg',
-                                'composer',
-                                'tgz', 'tbz', 'zip', 'rar', 'sevenz',
-                                'none', 'symlink', 'copy');
+                                       'composer',
+                                       'tgz', 'tbz', 'zip', 'rar', 'sevenz',
+                                       'none', 'symlink', 'copy',
+                                       );
 
     protected $destination     = '';
     protected $destinationFull = '';
@@ -56,7 +57,7 @@ abstract class Vcs {
         return strtolower(array_pop($path));
     }
 
-    protected function check() {
+    protected function check(): bool {
         if ($this->checked === true) {
             return true;
         }

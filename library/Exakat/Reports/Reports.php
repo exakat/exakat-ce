@@ -45,6 +45,7 @@ abstract class Reports {
                                           'Migration73', 'Migration74', 'Migration80', 'Migration81', 'Migration82',
                                           'Meters', 'Perrule',
                                           'CompatibilityPHP56', 'CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81',
+                                          'Unused',
                                           //'DailyTodo',
                                           );
 

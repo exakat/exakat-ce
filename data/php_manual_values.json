@@ -15,6 +15,11 @@
         "name": "$matches"
     },
     {
+        "function": "\\preg_match_all",
+        "position": 2,
+        "name": "$r"
+    },
+    {
         "function": "\\fsockopen",
         "position": 2,
         "name": "$errno"
@@ -48,5 +53,25 @@
         "function": "\\parse_str",
         "position": 1,
         "name": "$results"
+    },
+    {
+        "function": "\\strpos",
+        "position": 0,
+        "name": "$haystack"
+    },
+    {
+        "function": "\\strpos",
+        "position": 1,
+        "name": "$needle"
+    },
+    {
+        "function": "\\str_contains",
+        "position": 0,
+        "name": "$haystack"
+    },
+    {
+        "function": "\\str_contains",
+        "position": 1,
+        "name": "$needle"
     }
 ]
