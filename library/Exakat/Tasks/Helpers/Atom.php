@@ -216,9 +216,6 @@ class Atom extends AtomInterface {
                  'isExt',
                  'isStub',
                                ) as $property) {
-            if ($this->$property == true && $this->$property !== true) {
-                print $property . PHP_EOL;
-            }
             if ($this->$property == true) {
                 $return[] = $property;
             }

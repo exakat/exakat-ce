@@ -44,8 +44,6 @@ class Sarif extends Reports {
     public const FILE_FILENAME  = 'exakat';
 
     private array $analyzers        = array();
-    private array $descriptionCache = array();
-    private array $severityCache    = array();
 
     public function _generate(array $analyzerList): string {
         $driver = new ToolComponent('Exakat');

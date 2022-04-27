@@ -30,6 +30,9 @@ use Exakat\Exakat;
 class Status extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
+    public const WITH_JSON    = 1;
+    public const WITHOUT_JSON = 2;
+
     public function run(): void {
         $project = $this->config->project;
 
@@ -141,9 +144,9 @@ class Status extends Tasks {
         $this->display($status, $this->config->json);
     }
 
-    private function display(array $status, bool $json = false) {
+    private function display(array $status, bool $json = self::WITH_JSON) {
         // Json publication
-        if ($json === true) {
+        if ($json === self::WITH_JSON) {
             print json_encode($status);
             return;
         }

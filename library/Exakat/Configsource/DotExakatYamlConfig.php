@@ -26,6 +26,7 @@ use Exakat\Phpexec;
 use Exakat\Project;
 use Exakat\Config as Configuration;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseError;
 
 class DotExakatYamlConfig extends Config {
     public const YAML_FILE = '.exakat.yml';

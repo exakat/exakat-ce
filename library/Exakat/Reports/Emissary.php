@@ -334,7 +334,15 @@ class Emissary extends Reports {
             }
 
             $analyzersDocHTML .= '<p>' . implode(' - ', $badges) . '</p>';
-            $description = $description['description'];
+
+            if (!empty($description['seeAlso'][0])) {
+                $last = count($description['seeAlso']) - 1;
+                $seeAlso[$last] = 'and ' . $description['seeAlso'][$last] . '.';
+                $description = $description['description'] . "\nSee also " . implode(', ', $description['seeAlso']);
+            } else {
+                $description = $description['description'];
+            }
+
             static $regex;
             if (empty($regex)) {
                 $php_native_functions = parse_ini_file("{$this->config->dir_root}/data/php_functions.ini")['functions'];
@@ -2564,6 +2572,7 @@ HTML;
             if (!preg_match('/ extends (\S+)/', $row['fullcode'], $r)) {
                 continue;
             }
+
             $parent = strtolower($r[1]);
             if ($parent[0] !== '\\') {
                 $parent = "\\$parent";
@@ -2573,7 +2582,10 @@ HTML;
                 $list[$parent] = array();
             }
 
-            $list[$parent][] = $row['fullcode'];
+            $class = str_replace(' { /**/ }', '', $row['fullcode']);
+            $class = str_replace('final ', '', $class);
+            $class = PHPSyntax($class);
+            $list[$parent][] = $class;
         }
 
         array_sub_sort($list);

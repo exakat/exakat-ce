@@ -36,6 +36,9 @@ class CollectArguments extends DSL {
                 list($variable) = func_get_args();
                 $property = 'code';
                 break;
+
+            default:
+                assert(false, 'wrong number of argument for ' . __METHOD__);
         }
 
         $this->assertVariable($variable, self::VARIABLE_WRITE);

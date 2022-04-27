@@ -252,12 +252,14 @@ class Project extends Tasks {
         }
 
         $this->logTime('Reports');
-        try {
-            $report = new Report(self::IS_SUBTASK);
+        if (empty($this->config->program)) {
+            try {
+                $report = new Report(self::IS_SUBTASK);
 
-            $report->run();
-        } catch (\Throwable $e) {
-            display( 'Error while building the reports : ' . $e->getMessage() . "\n");
+                $report->run();
+            } catch (\Throwable $e) {
+                display( 'Error while building the reports : ' . $e->getMessage() . "\n");
+            }
         }
         display('Reported project' . PHP_EOL);
 

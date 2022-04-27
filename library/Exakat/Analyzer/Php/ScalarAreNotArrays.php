@@ -29,6 +29,7 @@ class ScalarAreNotArrays extends Analyzer {
         return array('Complete/MakeClassMethodDefinition',
                      'Complete/CreateDefaultValues',
                      'Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/ReturnTypehint',
                     );
     }
 

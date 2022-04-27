@@ -34,7 +34,6 @@ class Export extends Tasks {
 
     public const NO_NEXT = -1;
 
-    private $sequenceFor     = false;
     private $php             = null;
 
     public function run(): void {

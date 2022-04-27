@@ -260,10 +260,8 @@ class Doctor extends Tasks {
                 $id = random_int(0, PHP_INT_MAX);
             } while (file_exists("{$this->config->projects_root}/projects/test$id") && $i < 100);
 
-            $initConfig = $this->config->duplicate(array('project' => new Project('test' . $id)));
-            $init = new Initproject(self::IS_SUBTASK);
-            $init->setConfig($initConfig);
-            $init->run();
+            shell_exec('php exakat init -p test'.$id.'');
+
             rename("{$this->config->projects_root}/projects/test$id", "{$this->config->projects_root}/projects/test");
             unset($init);
             unset($initConfig);

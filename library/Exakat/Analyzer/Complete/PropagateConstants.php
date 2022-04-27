@@ -280,33 +280,35 @@ GREMLIN
              ->not(
                 $this->side()
                      ->outIs(array('LEFT', 'RIGHT'))
-                     ->hasNo('intval')
+                     ->hasNo('noDelimiter')
              )
              // Split LEFT and RIGHT to ensure left is in 0
              ->filter(
                 $this->side()
                      ->outIs('LEFT')
                      ->has('intval')
-                     ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                     ->raw('sideEffect{ x.add( it.get().value("noDelimiter") ) }.fold()')
              )
              ->filter(
                 $this->side()
                      ->outIs('RIGHT')
                      ->has('intval')
-                     ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                     ->raw('sideEffect{ x.add( it.get().value("noDelimiter") ) }.fold()')
              )
 
             ->raw(<<<'GREMLIN'
  filter{ x.size() == 2; }.
 sideEffect{ 
-    try {
-        i = (new BigInteger(x[0])) ** (new BigInteger(x[1]));
-    } catch (Exception e) {
-        // doesn't handle PHP limits at all
+    // Using BigInteger was failing with powwer call : the query was stuck until it dies.
+    i = new BigDecimal(x[0]);
+    i = i.power(x[1].toLong());
+
+    if (i > (new BigInteger(2)).pow(63)) {
         i = 0;
     }
 
     it.get().property("intval", i.toLong()); 
+    // Note : float are not supported, so this will be rounded
     it.get().property("boolean", i.toLong() != 0);
     it.get().property("noDelimiter", i.toString()); 
     it.get().property("propagated", true); 

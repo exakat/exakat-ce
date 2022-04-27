@@ -169,6 +169,7 @@ class IsRead extends Plugin {
             case 'Comparison' :
             case 'Bitshift':
             case 'Power':
+            case 'Spaceship':
                 if (in_array($extras['RIGHT']->atom, $this->variables, STRICT_COMPARISON)) {
                     $extras['RIGHT']->isRead = true;
                 }

@@ -125,7 +125,9 @@ GREMLIN
         // (int) 100
         $this->atomIs('Cast')
              ->tokenIs('T_INT_CAST')
-             ->followParAs('CAST')
+             ->outIsIE('CODE')
+             ->outIs('CAST')
+             ->atomIsNot(array('Coalesce', 'Ternary'))
              ->atomIs('Integer', self::WITH_CONSTANTS)
              ->back('first');
         $this->prepareQuery();

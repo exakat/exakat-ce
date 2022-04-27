@@ -45,6 +45,7 @@ class WrongTypeWithCall extends Analyzer {
              ->back('first')
 
              ->outIs('DEFINITION')
+             ->atomIs(self::FUNCTIONS_CALLS)
              ->as('results')
              ->outIsIE('METHOD')
              ->outWithRank('ARGUMENT', 'ranked')
@@ -73,40 +74,13 @@ class WrongTypeWithCall extends Analyzer {
              ->back('first')
 
              ->outIs('DEFINITION')
+             ->atomIs(self::FUNCTIONS_CALLS)
              ->as('results')
              ->outIsIE('METHOD')
              ->outWithRank('ARGUMENT', 'ranked')
              ->atomIs(array('New',
                             'Clone',
                             ), self::WITH_VARIABLES)
-             ->back('results');
-        $this->prepareQuery();
-
-        // calling a class-typed argument with a scalar
-        // foo(1); function foo(x $s) {}
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
-             ->savePropertyAs('rank', 'ranked')
-             ->isNot('variadic', true)
-             ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot(array('Identifier', 'Nsname', 'Null'))
-             )
-             ->back('first')
-
-             ->outIs('DEFINITION')
-             ->as('results')
-             ->outIsIE('METHOD')
-             ->outWithRank('ARGUMENT', 'ranked')
-             ->atomIs(array('Integer',
-                            'String',
-                            'Arrayliteral',
-                            'Concatenation',
-                            'Addition',
-                            'Power',
-                            'Float',
-                            ), self::WITH_CONSTANTS)
              ->back('results');
         $this->prepareQuery();
 
@@ -126,6 +100,7 @@ class WrongTypeWithCall extends Analyzer {
              ->back('first')
 
              ->outIs('DEFINITION')
+             ->atomIs(self::FUNCTIONS_CALLS)
              ->as('results')
              ->outIsIE('METHOD')
              ->outWithRank('ARGUMENT', 'ranked')
@@ -133,6 +108,35 @@ class WrongTypeWithCall extends Analyzer {
              ->outIs('NEW')
              ->inIs('DEFINITION')
              ->isNotClassCompatible('typehints', 't')
+             ->back('results');
+        $this->prepareQuery();
+
+        // calling a class-typed argument with a scalar
+        // foo(1); function foo(x $s) {}
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('ARGUMENT')
+             ->savePropertyAs('rank', 'ranked')
+             ->isNot('variadic', true)
+             ->not(
+                $this->side()
+                     ->outIs('TYPEHINT')
+                     ->atomIsNot(array('Identifier', 'Nsname', 'Null'))
+             )
+             ->back('first')
+
+             ->outIs('DEFINITION')
+             ->atomIs(self::FUNCTIONS_CALLS)
+             ->as('results')
+             ->outIsIE('METHOD')
+             ->outWithRank('ARGUMENT', 'ranked')
+             ->atomIs(array('Integer',
+                            'String',
+                            'Arrayliteral',
+                            'Concatenation',
+                            'Addition',
+                            'Power',
+                            'Float',
+                            ), self::WITH_CONSTANTS)
              ->back('results');
         $this->prepareQuery();
 
