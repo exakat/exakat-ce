@@ -6,7 +6,7 @@ The Exakat Engine is an automated code reviewing engine for PHP.
 
 ### Quick installation
 
-Copy-paste the following code in your terminal. This was tester on OSX and Linux-debian. 
+Copy-paste the following code in your terminal. This was tested on OSX and Linux-debian. 
 
 ```bash
 mkdir exakat
