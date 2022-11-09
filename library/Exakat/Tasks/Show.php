@@ -29,6 +29,9 @@ class Show extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
+        if ($this->config->project->isDefault()) {
+            throw new ProjectNeeded();
+        }
         $project = $this->config->project;
 
         if (!$project->validate()) {

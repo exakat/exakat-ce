@@ -24,11 +24,11 @@ namespace Exakat\Analyzer\Dump;
 
 
 class Typehintorder extends AnalyzerTable {
-    protected $analyzerName = 'typehintOrder';
+    protected string $analyzerName = 'typehintOrder';
 
-    protected $analyzerTable = 'typehintOrder';
+    protected string $analyzerTable = 'typehintOrder';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE typehintOrder (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                               host STRING,
                               argument STRING,

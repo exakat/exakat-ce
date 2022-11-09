@@ -23,23 +23,12 @@
 namespace Exakat\Configsource;
 
 use Exakat\Project;
+use Exakat\Datastore;
 
 class DatastoreConfig extends Config {
-    private $datastore             = null;
-    protected $ignore_dirs         = array();
-    protected $include_dirs        = array();
-    protected $ignore_rules        = array();
-    protected $project_name        = '';
-    protected $project_url         = '';
-    protected $project_vcs         = '';
-    protected $project_description = '';
-    protected $project_branch      = '';
-    protected $project_tag         = '';
-    protected Project $project;
-    protected $file_extensions     = array();
-    protected $stubs               = array();
+    private Datastore $datastore;
 
-    protected $options = array('phpversion'          => '',
+    protected array $options = array('phpversion'          => '',
                                'project_name'        => '',
                                'project_url'         => '',
                                'project_vcs'         => '',

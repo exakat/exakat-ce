@@ -30,6 +30,10 @@ class Remove extends Tasks {
     public const CONCURENCE = self::NONE;
 
     public function run(): void {
+        if ($this->config->project->isDefault()) {
+            throw new ProjectNeeded();
+        }
+
         $project = $this->config->project;
 
         if (!$project->validate()) {

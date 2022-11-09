@@ -1,0 +1,11 @@
+{"returntype":["\\bzopen",
+    "\\fopen",
+    "\\tmpfile"
+    ],
+"0":["\\bzclose", "\\bzerrno", "\\bzerror", "\\bzerrstr", "\\bzflush", "\\bzread", "\\bzwrite",
+
+"\\feof", "\\fflush", "\\fgetc", "\\fgetcsv", "\\fgets", "\\fgetss", "\\flock", "\\fpassthru", "\\fputs", "\\fwrite", "\\fread", "\\fseek", "\\ftell", "\\fstat", "\\ftruncate", "\\set_file_buffer", "\\rewind", "\\fclose"
+
+],
+"1":[]
+}

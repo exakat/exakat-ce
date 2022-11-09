@@ -23,7 +23,8 @@
 namespace Exakat\Vcs;
 
 class None extends Vcs {
-    public function clone(string $source): void { }
+    public function clone(string $source): void {
+    }
 
     public function getStatus(): array {
         $status = array('vcs'       => 'none',
@@ -44,7 +45,6 @@ class None extends Vcs {
     public function commitFiles(string $string): bool {
         return false;
     }
-
 }
 
 ?>

@@ -27,7 +27,6 @@ use Exception;
 
 class GremlinException extends \Exception {
     public function __construct(string $message = '', string $query = '', Exception $previous = null) {
-
         parent::__construct("Error during Gremlin query : '$message'.\nQuery : $query\n", 1, $previous);
     }
 }

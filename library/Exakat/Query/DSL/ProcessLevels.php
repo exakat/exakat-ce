@@ -47,7 +47,7 @@ where(
       .fold()
 )$filter
 GREMLIN
-);
+        );
 
         return $command;
     }

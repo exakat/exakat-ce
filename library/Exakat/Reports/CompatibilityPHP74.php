@@ -37,7 +37,6 @@ class Compatibilityphp74 extends Perrule {
     public function dependsOnAnalysis(): array {
         return array('CompatibilityPHP74');
     }
-
 }
 
 ?>

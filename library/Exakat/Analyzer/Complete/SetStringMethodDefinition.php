@@ -40,7 +40,7 @@ filter{
     name != true;
 }
 GREMLIN
-)
+              )
               ->inIs('DEFINITION')
               ->outIs(array('METHOD', 'MAGICMETHOD'))
               ->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
@@ -61,7 +61,6 @@ GREMLIN
              ->atomIs('Functioncall')
              ->addEFrom('DEFINITION', 'method');
         $this->prepareQuery();
-
     }
 }
 

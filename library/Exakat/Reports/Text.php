@@ -33,7 +33,7 @@ class Text extends Reports {
         $results = array();
         $titleCache = array();
         $severityCache = array();
-        foreach($analysisResults->toArray() as $row) {
+        foreach ($analysisResults->toArray() as $row) {
             if (!isset($results[$row['file']])) {
                 $file = array('errors'   => 0,
                               'warnings' => 0,
@@ -64,10 +64,10 @@ class Text extends Reports {
         }
 
         $text = '';
-        foreach($results as $file) {
-            foreach($file['messages'] as $line => $column) {
+        foreach ($results as $file) {
+            foreach ($file['messages'] as $line => $column) {
                 $messages = $column[0];
-                foreach($messages as $message) {
+                foreach ($messages as $message) {
                     $text .= $file['filename'] . ':' . $line . "\t" . $message['source'] . "\t" . $message['message'] . "\t" . $message['fullcode'] . "\n";
                     $this->count();
                 }

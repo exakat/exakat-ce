@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Analyzer;
 
 class StaticContainsThis extends Analyzer {
-
     public function analyze(): void {
         // static function foo() { $this->a ;}
         $this->atomIs('Method')

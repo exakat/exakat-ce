@@ -23,7 +23,7 @@
 namespace Exakat\Analyzer\Dump;
 
 class CollectForeachFavorite extends AnalyzerArrayHashResults {
-    protected $analyzerName = 'Foreach Names';
+    protected string $analyzerName = 'Foreach Names';
 
     public function analyze(): void {
         // Foreach, values only
@@ -49,7 +49,7 @@ class CollectForeachFavorite extends AnalyzerArrayHashResults {
         $statsValues['None'] = count($valuesOnly);
 
         $valuesSQL = array();
-        foreach($statsValues as $name => $count) {
+        foreach ($statsValues as $name => $count) {
             $valuesSQL[] = array($name, $count);
         }
 

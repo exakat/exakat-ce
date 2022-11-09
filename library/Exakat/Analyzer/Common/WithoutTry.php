@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class WithoutTry extends Analyzer {
+abstract class WithoutTry extends Analyzer {
     protected $functions = array();
     protected $atoms = array();
 

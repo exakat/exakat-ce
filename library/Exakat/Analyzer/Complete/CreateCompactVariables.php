@@ -23,18 +23,24 @@
 namespace Exakat\Analyzer\Complete;
 
 class CreateCompactVariables extends Complete {
+    public function dependsOn(): array {
+        return array('Variables/IsLocalConstant',
+                    );
+    }
+
     public function analyze(): void {
         // compact('a') : 'a' is one usage of a variable
         $this->atomFunctionIs('\compact')
               ->outIs('ARGUMENT')
-              ->has('noDelimiter')
               ->as('varInString')
+              ->atomIs('String', self::WITH_CONSTANTS)
               ->savePropertyAs('noDelimiter', 'name')
               ->makeVariableName('name')
+
+              ->back('varInString')
               ->goToInstruction(array('Function', 'Closure', 'Method', 'Magicmethod', 'File'))
               ->outIs(array('DEFINITION', 'ARGUMENT', 'USE'))
               ->atomIs(array('Variabledefinition', 'Globaldefinition', 'Staticdefinition', 'Parameter'), self::WITHOUT_CONSTANTS)
-              ->outIsIE('NAME')
               ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
               ->addETo('DEFINITION', 'varInString');
         $this->prepareQuery();

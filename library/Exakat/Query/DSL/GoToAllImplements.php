@@ -33,33 +33,21 @@ class GoToAllImplements extends DSL {
             $self = Analyzer::INCLUDE_SELF;
         }
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
-
+        assert(in_array($self, array(Analyzer::INCLUDE_SELF, Analyzer::EXCLUDE_SELF)), 'Wrong argument for ' . __METHOD__);
         if ($self === Analyzer::EXCLUDE_SELF) {
-            $command = new Command(<<<GREMLIN
- as("gotoallimplements")
-.repeat( __.out("EXTENDS", "IMPLEMENTS")
-          .in("DEFINITION")
-          .hasLabel("Class", "Classanonymous", "Interface")
-          .simplePath().from("gotoallimplements")
-       ).emit( )
-        .times($MAX_LOOPING).hasLabel("Class", "Classanonymous", "Interface")
+            $command = new Command(<<<'GREMLIN'
+out("IMPLEMENTS", "EXTENDS").in("DEFINITION")
 GREMLIN
-);
+            );
             return $command;
         } else {
-            $command = new Command(<<<GREMLIN
- as("gotoallimplements")
-.emit( )
-.repeat( __.out("EXTENDS", "IMPLEMENTS")
-           .in("DEFINITION")
-           .hasLabel("Class", "Classanonymous", "Interface")
-           .simplePath().from("gotoallimplements")
-           )
-           .times($MAX_LOOPING)
-           .hasLabel("Class", "Classanonymous", "Interface")
+            $command = new Command(<<<'GREMLIN'
+union(
+    __.identity(),
+    __.out("IMPLEMENTS", "EXTENDS").in("DEFINITION")
+)
 GREMLIN
-);
+            );
             return $command;
         }
     }

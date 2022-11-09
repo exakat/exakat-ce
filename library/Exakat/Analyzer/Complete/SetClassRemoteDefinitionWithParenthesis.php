@@ -25,20 +25,21 @@ namespace Exakat\Analyzer\Complete;
 class SetClassRemoteDefinitionWithParenthesis extends Complete {
     public function analyze(): void {
         // (new x)->foo()
-        $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
+        // (new x)::foo()
+        $this->atomIs(array('Methodcall', 'Staticmethodcall'), self::WITHOUT_CONSTANTS)
               ->as('method')
               ->hasNoIn('DEFINITION')
               ->outIs('METHOD')
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'name')
               ->back('first')
-              ->outIs('OBJECT')
+              ->outIs(array('OBJECT', 'CLASS'))
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
@@ -53,6 +54,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
         $this->prepareQuery();
 
         // (new x)::foo()
+        // (new x)::$p
         $this->atomIs('Member', self::WITHOUT_CONSTANTS)
               ->as('member')
               ->hasNoIn('DEFINITION')
@@ -60,13 +62,13 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('code', 'name')
               ->back('first')
-              ->outIs('OBJECT')
+              ->outIs(array('OBJECT', 'CLASS'))
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
@@ -79,49 +81,20 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 
-        // (new x)::foo()
-        $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
-              ->as('method')
-              ->hasNoIn('DEFINITION')
-              ->outIs('METHOD')
-              ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('lccode', 'name')
-              ->back('first')
-              ->outIs('CLASS')
-              ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
-              ->outIs('CODE')
-              ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
-              )
-              ->atomIs('New', self::WITHOUT_CONSTANTS)
-              ->outIs('NEW')
-              ->inIs('DEFINITION')  // No check on atoms :
-              ->atomIs('Class', self::WITHOUT_CONSTANTS)
-              ->goToAllParents(self::INCLUDE_SELF)
-              ->outIs(array('METHOD', 'MAGICMETHOD'))
-              ->outIs('NAME')
-              ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
-              ->inIs('NAME')
-              ->addETo('DEFINITION', 'method');
-        $this->prepareQuery();
-
-        // (new x)::foo()
         $this->atomIs('Staticproperty', self::WITHOUT_CONSTANTS)
               ->as('member')
               ->hasNoIn('DEFINITION')
               ->outIs('MEMBER')
-              ->atomIs('Name', self::WITHOUT_CONSTANTS)
+              ->atomIs('Staticpropertyname', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('code', 'name')
               ->back('first')
               ->outIs('CLASS')
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
@@ -130,7 +103,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
-              ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 
@@ -146,9 +119,9 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')

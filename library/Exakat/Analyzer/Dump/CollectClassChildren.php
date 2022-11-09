@@ -24,12 +24,12 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectClassChildren extends AnalyzerHashHashResults {
-    protected $analyzerName = 'Class Children';
+    protected string $analyzerName = 'Class Children';
 
     public function analyze(): void {
         // class a {} class b extends a;
         $this->atomIs('Class')
-             ->raw('groupCount("m").by( __.out("DEFINITION").in("EXTENDS").hasLabel("Class").count() ).cap("m")');
+             ->raw('groupCount("m").by( __.out("DEFINITION").inE().hasLabel("EXTENDS").not(has("extra", true)).outV().hasLabel("Class").count() ).cap("m")');
 
         $this->prepareQuery();
     }

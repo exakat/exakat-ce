@@ -33,37 +33,25 @@ class GoToAllTraits extends DSL {
             $self = Analyzer::INCLUDE_SELF;
         }
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
-
         if ($self === Analyzer::EXCLUDE_SELF) {
-            $command = new Command(<<<GREMLIN
- as("gotoalltraits")
-.repeat( __.out("USE")
+            $command = new Command(<<<'GREMLIN'
+           out("USE")
           .hasLabel("Usetrait")
           .out("USE")
           .in("DEFINITION")
-          //.hasLabel("Trait")
-          .simplePath().from("gotoalltraits")
-      ).emit( )
-      .times($MAX_LOOPING)
-      .hasLabel("Trait")
 GREMLIN
-);
+            );
         } elseif ($self === Analyzer::INCLUDE_SELF) {
-            $command = new Command(<<<GREMLIN
- as("gotoalltraits")
-.emit( )
-.repeat( __.out("USE")
+            $command = new Command(<<<'GREMLIN'
+union( __.identity(),
+           out("USE")
           .hasLabel("Usetrait")
           .out("USE")
           .in("DEFINITION")
-          .hasLabel("Trait")
-          .simplePath().from("gotoalltraits")
         )
-        .times($MAX_LOOPING)
-        .hasLabel("Trait")
+
 GREMLIN
-);
+            );
         } else {
             assert(false, 'No such configuration for ' . self::class . ' : use EXCLUDE_SELF or INCLUDE_SELF');
         }

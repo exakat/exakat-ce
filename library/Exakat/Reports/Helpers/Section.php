@@ -23,15 +23,15 @@
 namespace Exakat\Reports\Helpers;
 
 class Section {
-    private const SAME_AS_FILE = true;
+    private const SAME_AS_FILE = '';
 
-    public $method  = 'NoSuchMethod';
-    public $title   = 'No title';
-    public $menu    = 'No menu title';
-    public $source  = self::SAME_AS_FILE;
-    public $file    = 'empty';
-    public $icon    = 'circle-o';
-    public $ruleset = 'None';
+    public string $method  = 'NoSuchMethod';
+    public string $title   = 'No title';
+    public string $menu    = 'No menu title';
+    public string $source  = self::SAME_AS_FILE;
+    public string $file    = 'empty';
+    public string $icon    = 'circle-o';
+    public array  $ruleset = array('None');
 
     public function __construct(array $section) {
         assert(isset($section['title']),  "Missing 'title' for section");
@@ -46,7 +46,7 @@ class Section {
         $this->method  = $section['method']  ?? $this->method;
 
         if (!isset($section['ruleset'])) {
-            $this->ruleset = 'None';
+            $this->ruleset = array('None');
         } elseif (is_array($section['ruleset'])) {
             $this->ruleset = $section['ruleset'];
         } elseif (is_string($section['ruleset'])) {
@@ -54,11 +54,11 @@ class Section {
         }
     }
 
-    public function __get($name) {
+    public function __get(string $name) {
         display("Access to undefined property $name\n");
     }
 
-    public function __set($name, $value) {
+    public function __set(string $name, mixed $value) {
         display("Write to undefined property $name\n");
     }
 }

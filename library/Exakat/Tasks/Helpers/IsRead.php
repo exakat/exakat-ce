@@ -283,7 +283,7 @@ class IsRead extends Plugin {
             case 'Echo' :
 
             case 'Sequence' :
-                foreach($extras as $extra) {
+                foreach ($extras as $extra) {
                     if (in_array($extra->atom, $this->variables, STRICT_COMPARISON)) {
                         $extra->isRead = true;
                     }
@@ -296,7 +296,7 @@ class IsRead extends Plugin {
 
             case 'Closure' :
                 if (isset($extras['USE'])) {
-                    foreach($extras['USE'] as $extra) {
+                    foreach ($extras['USE'] as $extra) {
                         if (in_array($extra->atom, $this->variables, STRICT_COMPARISON)) {
                             $extra->isRead = true;
                         }
@@ -308,7 +308,7 @@ class IsRead extends Plugin {
             case 'Heredoc' :
             case 'String' :
             case 'Shell' :
-                foreach($extras as $extra) {
+                foreach ($extras as $extra) {
                     if (in_array($extra->atom, $this->variables, STRICT_COMPARISON)) {
                         $extra->isRead = true;
                     }
@@ -319,7 +319,7 @@ class IsRead extends Plugin {
 //            case 'Empty' :isset() doesn't read the variable. Just checks its existence
             default :
 //            print $atom->atom.PHP_EOL;
-        }
+            }
     }
 }
 

@@ -22,17 +22,27 @@
 
 namespace Exakat\Analyzer\Complete;
 
+
 class SetCloneLink extends Complete {
+    public function dependsOn(): array {
+        return array('Complete/VariableTypehint',
+                    );
+    }
+
     public function analyze(): void {
         // class x { function __clone() {}}
         // clone (new x)
+        // $a = new x; clone $a;
         $this->atomIs('Clone', self::WITHOUT_CONSTANTS)
               ->outIs('CLONE')
+              ->atomIs('New', self::WITH_VARIABLES)
+              ->outIs('NEW')
               ->inIs('DEFINITION')
               ->atomIs(array('Class', 'Classanonymous'), self::WITHOUT_CONSTANTS)
               ->outIs('MAGICMETHOD')
               ->outIs('NAME')
               ->codeIs('__clone', self::TRANSLATE, self::CASE_INSENSITIVE)
+              ->inIs('NAME')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
     }

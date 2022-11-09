@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class CallingStaticTraitMethod extends Analyzer {
-    protected $phpVersion = '8.1-';
+    protected string $phpVersion = '8.1-';
 
     public function analyze(): void {
         // trait Test {public static function test() {}}

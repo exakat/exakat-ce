@@ -41,12 +41,12 @@ use Exakat\Vcs\Vcs;
 class Project extends Tasks {
     public const CONCURENCE = self::NONE;
 
-    protected $rulesetsToRun = array('Analyze',
-                                     'Preferences',
-                                    );
+    protected array $rulesetsToRun = array('Analyze',
+                    	                   'Preferences',
+                          		          );
 
-    protected $reports       = array();
-    protected $reportConfigs = array();
+    protected array $reports       = array();
+    protected array $reportConfigs = array();
     private Timer $timer;
 
     public function __construct(bool $subTask = self::IS_NOT_SUBTASK) {
@@ -109,7 +109,7 @@ class Project extends Tasks {
             $info['vcs_type'] = strtolower($vcsClass);
             $info['vcs_url']  = $this->config->project_url;
 
-            $vcs = new $vcsClass($this->config->project, $this->config->code_dir);
+            $vcs = new $vcsClass((string) $this->config->project, $this->config->code_dir);
             if (method_exists($vcs, 'getBranch')) {
                 $info['vcs_branch']      = $vcs->getBranch();
             }
@@ -126,7 +126,7 @@ class Project extends Tasks {
         $rulesetsToRun = array($this->config->project_rulesets);
         $namesToRun    = array();
 
-        foreach($this->reports as $format) {
+        foreach ($this->reports as $format) {
             try {
                 $reportConfig = new ReportConfig($format, $this->config);
             } catch (NoSuchReport $e) {
@@ -156,7 +156,7 @@ class Project extends Tasks {
 
         $diff = array();
         $rulesetsToRunShort = array();
-        foreach($rulesetsToRun as $rule) {
+        foreach ($rulesetsToRun as $rule) {
             $rule = trim($rule, '"');
             if (in_array(strtolower($rule), $availableRulesets, \STRICT_COMPARISON)) {
                 $rulesetsToRunShort[] = $rule;
@@ -200,6 +200,7 @@ class Project extends Tasks {
         $this->addSnitch(array('step'    => 'Clean DB',
                                'project' => $this->config->project));
         $this->gremlin->init();
+        $this->gremlin->empty();
 
         $this->checkTokenLimit();
 
@@ -226,7 +227,7 @@ class Project extends Tasks {
                                                      'project_rulesets'   => array('First'),
                                                      'program'            => '',
                                                      )
-                                                );
+        );
         $firstDump = new Dump(self::IS_SUBTASK);
         $firstDump->setConfig($dumpConfig);
         $firstDump->run();
@@ -247,7 +248,7 @@ class Project extends Tasks {
         $this->logTime('Analyze');
 
         $dump = new Dump(self::IS_SUBTASK);
-        foreach($this->config->rulesets as $name => $analyzers) {
+        foreach ($this->config->rulesets as $name => $analyzers) {
             $dump->checkRulesets($name, $analyzers);
         }
 
@@ -323,13 +324,13 @@ class Project extends Tasks {
             $dump->run();
             unset($dump);
             unset($dumpConfig);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             echo "Error while running the Analyzer {$this->config->project}.\nTrying next analysis.\n";
             file_put_contents("{$this->config->log_dir}/analyze.final.log", $e->getMessage());
         }
     }
 
-    private function analyzeRulesets($rulesets, int $audit_start,bool $verbose): void {
+    private function analyzeRulesets(string|array $rulesets, int $audit_start, bool $verbose): void {
         if (empty($rulesets)) {
             $rulesets = $this->config->project_rulesets;
         }
@@ -343,7 +344,7 @@ class Project extends Tasks {
         global $VERBOSE;
         $oldVerbose = $VERBOSE;
         $VERBOSE = false;
-        foreach($rulesets as $ruleset) {
+        foreach ($rulesets as $ruleset) {
             $this->addSnitch(array('step'    => 'Analyze : ' . $ruleset,
                                    'project' => $this->config->project));
             $rulesetForFile = strtolower(str_replace(' ', '_', trim($ruleset, '"')));
@@ -391,12 +392,12 @@ class Project extends Tasks {
                                                              'load_dump'            => true,
                                                              'verbose'              => false,
                                                              ));
-/*
-                $shell = "nohup php exakat dump -p {$this->config->project} -T $ruleset -load-dump -u >/dev/null & echo $!";
-                $pid = shell_exec($shell);
-                print "New PID : $pid\n";
-                print "Slept for PID : $pid\n";
-*/
+                /*
+                                $shell = "nohup php exakat dump -p {$this->config->project} -T $ruleset -load-dump -u >/dev/null & echo $!";
+                                $pid = shell_exec($shell);
+                                print "New PID : $pid\n";
+                                print "Slept for PID : $pid\n";
+                */
                 $dump = new Dump(self::IS_SUBTASK);
                 $dump->setConfig($dumpConfig);
                 $dump->run();

@@ -29,7 +29,7 @@ class Blind extends Analyzer {
     public function analyze(): void {
         $blinds = array('Variable', 'Staticproperty', 'Member', 'Array');
 
-// foreach($source as $blind)
+        // foreach($source as $blind)
         $this->atomIs('Foreach')
              ->outIs(array('INDEX', 'VALUE'))
              ->atomIs($blinds);

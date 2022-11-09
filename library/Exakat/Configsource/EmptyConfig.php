@@ -25,19 +25,17 @@ namespace Exakat\Configsource;
 use Exakat\Project as Project;
 
 class EmptyConfig extends Config {
-
     public function loadConfig(Project $project): ?string {
         return null;
     }
 
-    public function get(string $index) {
+    public function get(string $index) : mixed {
         if ($index === 'project') {
             return new Project();
         }
 
         return $this->config[$index] ?? null;
     }
-
 }
 
 ?>

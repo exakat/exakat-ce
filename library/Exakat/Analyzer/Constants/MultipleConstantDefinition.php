@@ -79,12 +79,16 @@ class MultipleConstantDefinition extends Analyzer {
 
     private function selfCollisions(array $array): array {
         // two definitions are case sensitive
-        return array_keys(array_filter(array_count_values($array), function (int $x): bool { return $x > 1; }));
+        return array_keys(array_filter(array_count_values($array), function (int $x): bool {
+            return $x > 1;
+        }));
     }
 
     private function CsCisCollisions(array $csDefinitions, array $cisDefinitions): array {
         return array_merge( array_intersect($csDefinitions, $cisDefinitions),
-                            array_intersect($csDefinitions, array_map(function (string $x): string { return strtoupper($x); }, $cisDefinitions) ) );
+            array_intersect($csDefinitions, array_map(function (string $x): string {
+                return strtoupper($x);
+            }, $cisDefinitions) ) );
     }
 
     private function applyToCisDefine(array $array): void {
@@ -142,7 +146,6 @@ class MultipleConstantDefinition extends Analyzer {
              ->codeIs($array);
         $this->prepareQuery();
     }
-
 }
 
 ?>

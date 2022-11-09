@@ -25,12 +25,14 @@ namespace Exakat\Analyzer\Complete;
 class SetArrayClassDefinition extends Complete {
     public function dependsOn(): array {
         return array('Complete/PropagateCalls',
+                     'Complete/VariableTypehint',
                     );
     }
 
     public function analyze(): void {
         // array(\x, foo)
         $this->atomIs('Arrayliteral', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
               ->is('count', 2)
               ->outWithRank('ARGUMENT', 1)
               ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
@@ -87,6 +89,28 @@ class SetArrayClassDefinition extends Complete {
              ->outWithRank('ARGUMENT', 0)
              ->atomIs('This')
              ->goToClass()
+             ->atomIs('Class')
+             ->outIs(array('MAGICMETHOD', 'METHOD'))
+             ->atomIs(array('Method', 'Magicmethod'))
+             ->outIs('NAME')
+             ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
+             ->inIs('NAME')
+             ->addETo('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // array($x, foo)
+        $this->atomIs('Arrayliteral', self::WITHOUT_CONSTANTS)
+             ->hasNoIn('DEFINITION')
+             ->is('count', 2)
+             ->outWithRank('ARGUMENT', 1)
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->has('noDelimiter')
+             ->savePropertyAs('noDelimiter', 'method')
+             ->back('first')
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs(array('Variable', 'Member', 'Staticproperty', 'Identifier', 'Nsname', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+             ->goToTypehint()
+             ->inIs('DEFINITION')
              ->atomIs('Class')
              ->outIs(array('MAGICMETHOD', 'METHOD'))
              ->atomIs(array('Method', 'Magicmethod'))

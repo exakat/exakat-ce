@@ -23,9 +23,10 @@
 
 namespace Exakat\Exceptions;
 
+use Exakat\Analyzer\Rulesets;
 
 class NoSuchAnalyzer extends \RuntimeException {
-    public function __construct($analyzer, $themes) {
+    public function __construct(string $analyzer, Rulesets $themes) {
         $die = "Couldn't find '$analyzer'. Aborting\n";
 
         if (preg_match('#[a-z0-9_]+/[a-z0-9_]+$#i', $analyzer) === 0) {

@@ -42,19 +42,19 @@ not(
 )
 GREMLIN;
 
-/*
-          .not(
-            where( 
-                __.map( 
-                    __.out("EXPRESSION").order().by("rank").tail(1)
-                  )
-                  .hasLabel("Return")
-                  .out("RETURN")
-                  .hasLabel("Void", "Null")
-                )
-            )
+        /*
+                  .not(
+                    where( 
+                        __.map( 
+                            __.out("EXPRESSION").order().by("rank").tail(1)
+                          )
+                          .hasLabel("Return")
+                          .out("RETURN")
+                          .hasLabel("Void", "Null")
+                        )
+                    )
 
-*/
+        */
 
         return new Command($gremlin);
     }

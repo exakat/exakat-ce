@@ -26,15 +26,14 @@ namespace Exakat\Query\DSL;
 
 class FollowValue extends DSL {
     public function run(): Command {
-
         $TIME_LIMIT = self::$TIME_LIMIT;
 
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1:
                 $loopings = (int) func_get_arg(0);
                 break;
 
-           default:
+            default:
                 $loopings = self::$MAX_LOOPING;
                 break;
         }
@@ -45,18 +44,27 @@ repeat(
     __.timeLimit($TIME_LIMIT).union(
         // \$b = \$a; => \$b
         __.in("DEFAULT").out("DEFINITION"),
+
+		// By name
+        // foo(c: \$a) => function (\$c)
+        __.as('a').has("rankName").in("ARGUMENT").in("DEFINITION").out("ARGUMENT").as("b").where("a", eq("b") ).by("rankName").by(out("NAME").values("fullcode")).out("DEFINITION"),
+
+		// By position
         // foo(\$a) => function (\$c)
-        __.as('a').in("ARGUMENT").in("DEFINITION").out("ARGUMENT").as("b").where("a", eq("b") ).by("rank").out("NAME").out("DEFINITION"),
+        __.as('a').not(has("rankName")).in("ARGUMENT").in("DEFINITION").out("ARGUMENT").as("b").where("a", eq("b") ).by("rank").out("DEFINITION"),
+
         // foo(bar(\$a)) => function foo(\$c)
         __.in("RETURNED").out("DEFINITION"),
+
         // global
         __.hasLabel("Variable").in('DEFINITION').as('c').in('DEFINITION').hasLabel('Virtualglobal').out('DEFINITION').out('DEFINITION'),
+
         // property, static or not
         __.hasLabel("Property", "Staticproperty").in('DEFINITION').hasLabel('Propertydefinition').out('DEFINITION')
     )
 ).emit().times($loopings)
 GREMLIN
-);
+        );
     }
 }
 ?>

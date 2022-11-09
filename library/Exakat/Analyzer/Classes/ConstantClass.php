@@ -31,11 +31,11 @@ class ConstantClass extends Analyzer {
         $this->atomIs('Class')
              ->isNot('abstract', true)
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->outIs(array('METHOD', 'MAGICMETHOD', 'PPP'))
-                     )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->outIs(array('METHOD', 'MAGICMETHOD', 'PPP'))
+                      )
              )
              ->hasOut('CONST');
         $this->prepareQuery();
@@ -43,11 +43,11 @@ class ConstantClass extends Analyzer {
         // interface x { const yx = 2;}
         $this->atomIs('Interface')
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->outIs(array('METHOD', 'MAGICMETHOD', 'PPP'))
-                     )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->outIs(array('METHOD', 'MAGICMETHOD', 'PPP'))
+                      )
              )
              ->hasOut('CONST');
         $this->prepareQuery();

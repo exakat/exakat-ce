@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class ConstantDefinition extends Analyzer {
+abstract class ConstantDefinition extends Analyzer {
     protected $constants = array();
 
     public function analyze(): void {

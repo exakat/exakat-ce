@@ -27,7 +27,7 @@ class IncludeDirs extends Fileset {
     private array $includeDirs   = array();
 
     public function __construct(array $includeDirs) {
-        foreach(array_filter($includeDirs) as $include) {
+        foreach (array_filter($includeDirs) as $include) {
             if ($include[0] === '/') {
                 $this->includeDirs[] = "$include*";
             } else {
@@ -37,9 +37,9 @@ class IncludeDirs extends Fileset {
     }
 
     public function setFiles(array $files) {
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $found = false;
-            foreach($this->includeDirs as $ignore) {
+            foreach ($this->includeDirs as $ignore) {
                 $found |= fnmatch($ignore, $file);
             }
 

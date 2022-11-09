@@ -26,13 +26,13 @@ use Exakat\Exceptions\HelperException;
 use Exakat\Exceptions\VcsError;
 
 class Git extends Vcs {
-    private $installed  = false;
-    private $version    = 'unknown';
-    private $executable = 'git';
+    private bool   $installed  = false;
+    private string $gitVersion = 'unknown';
+    private string $executable = 'git';
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");
-        if (strpos($res, 'git') === false) {
+        if (!str_contains($res, 'git')  ) {
             throw new HelperException('git');
         }
 
@@ -69,7 +69,7 @@ class Git extends Vcs {
         $repositoryNormalizedURL = unparse_url($repositoryDetails);
 
         $codePath = dirname($this->destinationFull);
-        $shell = "cd $codePath;{$this->executable} clone -q ";
+        $shell = "cd $codePath; GIT_TERMINAL_PROMPT=0 {$this->executable} clone -q ";
 
         if (!empty($this->branch)) {
             display("Check out with branch '$this->branch'");
@@ -104,7 +104,7 @@ class Git extends Vcs {
         $res = $this->shell("cd {$this->destinationFull}/; {$this->executable} branch | grep \\* 2>&1");
         $branch = substr(trim($res), 2);
 
-        if (strpos($branch, ' detached at ') === false) {
+        if (!str_contains($branch, ' detached at ')  ) {
             $resInitial = $this->shell("cd {$this->destinationFull}/; {$this->executable} show-ref --heads $branch");
         } else {
             $resInitial = $this->shell("cd {$this->destinationFull}/; {$this->executable} checkout --quiet; {$this->executable} pull; {$this->executable} branch | grep '* '");
@@ -114,7 +114,7 @@ class Git extends Vcs {
         $this->shell("cd {$this->destinationFull}/;GIT_TERMINAL_PROMPT=0  {$this->executable} checkout $branch --quiet; {$this->executable} pull --quiet");
 
         $resFinal = $this->shell("cd {$this->destinationFull}/; {$this->executable} show-ref --heads $branch");
-        if (strpos($resFinal, ' ') !== false) {
+        if (str_contains($resFinal, ' ')  ) {
             list($resFinal) = explode(' ', $resFinal, 1);
         }
 
@@ -139,7 +139,7 @@ class Git extends Vcs {
         return $this->branch;
     }
 
-    public function getRevision() {
+    public function getRevision(): string {
         if (!file_exists($this->destinationFull)) {
             return '';
         }
@@ -148,7 +148,7 @@ class Git extends Vcs {
         return trim($res);
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $this->check();
         $stats = array('installed' => $this->installed === true ? 'Yes' : 'No',
                       );
@@ -180,7 +180,7 @@ class Git extends Vcs {
         return $status;
     }
 
-    public function getDiffLines($r1, $r2): array {
+    public function getDiffLines(string $r1, string $r2): array {
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} diff -U0 -r $r1 -r $r2");
 
         $file    = '';
@@ -228,25 +228,27 @@ class Git extends Vcs {
 
     public function getDiffFile(string $next): array {
         // Added and removed ?
-         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} diff --diff-filter=a --name-only $next -- . ");
+        $res = $this->shell("cd {$this->destinationFull}; {$this->executable} diff --diff-filter=a --name-only $next -- . ");
 
         if (empty($res)) {
             return array();
         }
 
         $return = explode("\n", trim($res));
-        $return = array_map(function ($x) { return "/$x"; }, $return);
+        $return = array_map(function (string $x): string {
+            return "/$x";
+        }, $return);
 
-         return $return;
+        return $return;
     }
 
-    public function checkOut($next) {
+    public function checkOut(string $next): array {
         //--diff-filter=[(A|C|D|M|R|T|U|X|B)…​[*]]
         // Some situations are not supported yet.
         // We keep Added, Modified. Deleted are ignored, as non-treatable.
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} diff --diff-filter=d --name-only $next -- . ");
 
-        // No chane, may be, but we still need to update the code
+        // No name, may be, but we still need to update the code
         $this->shell("cd {$this->destinationFull}; {$this->executable} checkout $next");
 
         if (empty($res)) {
@@ -254,18 +256,20 @@ class Git extends Vcs {
         }
 
         $return = explode("\n", trim($res));
-        $return = array_map(function ($x) { return "/$x"; }, $return);
+        $return = array_map(function (string $x): string {
+            return "/$x";
+        }, $return);
 
         return $return;
     }
 
     public function getLastCommitDate(): int {
-         return (int) strtotime(trim($this->shell("cd {$this->destinationFull}; {$this->executable} log -1 --format=%cd")));
+        return (int) strtotime(trim($this->shell("cd {$this->destinationFull}; {$this->executable} log -1 --format=%cd")));
     }
 
     public function hasBranch(string $branch = ''): bool {
         $branch = escapeshellarg($branch);
-        $res = $this->shell("cd {$this->destinationFull}; {$this->executable} branch --list $branch");
+        $res = $this->shell("cd {$this->destinationFull}; {$this->executable} branch -a | grep $branch");
 
         // fatal: A branch named 'freezy-sk-fix-typo' already exists.
         return !empty($res);
@@ -276,7 +280,7 @@ class Git extends Vcs {
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} checkout -q -b $branch");
 
         // fatal: A branch named 'freezy-sk-fix-typo' already exists.
-        return strpos($res, 'fatal:') !== 0;
+        return !str_starts_with($res, 'fatal:')  ;
     }
 
     public function checkoutBranch(string $branch = ''): bool {
@@ -289,7 +293,7 @@ class Git extends Vcs {
         }
 
         //error: pathspec 'inexistant branch' did not match any file(s) known to git
-        return strpos($res, 'error:') !== 0;
+        return !str_starts_with($res, 'error:')  ;
     }
 
     public function commitFiles(string $message = 'Exakat Cobbler created those files'): bool {
@@ -300,11 +304,10 @@ cd {$this->destinationFull};
 {$this->executable} stage -A ; 
 git commit -m $message
 SHELL
-);
+        );
 
         return true;
     }
-
 }
 
 ?>

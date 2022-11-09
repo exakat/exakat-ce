@@ -24,15 +24,17 @@
 namespace Exakat\Loader;
 
 use Exakat\Tasks\Helpers\Atom;
+use Sqlite3;
+use Exakat\Datastore;
 
 class Collector extends Loader {
-    private $cit        = array();
-    private $functions  = array();
-    private $constants  = array();
+    private array $cit        = array();
+    private array $functions  = array();
+    private array $constants  = array();
 
-    private $datastore  = null;
+    private Datastore $datastore;
 
-    public function __construct(\Sqlite3 $sqlite, Atom $id0) {
+    public function __construct(Sqlite3 $sqlite, Atom $id0) {
         $this->datastore = exakat('datastore');
     }
 
@@ -48,7 +50,7 @@ class Collector extends Loader {
         $isDefine = false;
 
         $lastConst = array();
-        foreach($atoms as $atom) {
+        foreach ($atoms as $atom) {
             if (in_array($atom->atom, array('Class', 'Interface', 'Trait'))) {
                 $this->cit[] = array('name'        => $atom->fullcode,
                                      'fullnspath'  => $atom->fullnspath,

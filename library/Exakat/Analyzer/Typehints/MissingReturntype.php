@@ -56,7 +56,7 @@ or(
     __.not(where(__.out('RETURNTYPE').hasLabel("Identifier", "Nsname", "Self", "Static", "Parent"))).in("ANALYZED").has("analyzer", 'Typehints/CouldBeCIT')
 )
 GREMLIN
-)
+             )
 
              ->back('first');
         $this->prepareQuery();

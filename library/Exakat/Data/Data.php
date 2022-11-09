@@ -23,6 +23,7 @@
 
 namespace Exakat\Data;
 
+use Sqlite3;
 
 abstract class Data {
     private $config = null;
@@ -36,7 +37,7 @@ abstract class Data {
         $this->name = $name;
         $this->config = exakat('config');
 
-        $fullpath = $this->config->dir_root . "/data/$name.sqlite";
+        $fullpath = $this->config->dir_root . '/data/' . $name . '.sqlite';
         if ($this->config->is_phar) {
             $this->phar_tmp = tempnam(sys_get_temp_dir(), $name) . '.sqlite';
             if (file_exists($fullpath)) {
@@ -56,7 +57,7 @@ abstract class Data {
         } else {
             assert(false, "No database for '$name.sqlite'.");
         }
-        $this->sqlite = new \Sqlite3($docPath, \SQLITE3_OPEN_READONLY);
+        $this->sqlite = new Sqlite3($docPath, \SQLITE3_OPEN_READONLY);
     }
 
     public function __destruct() {
@@ -70,7 +71,7 @@ abstract class Data {
         $res = $this->sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_NUM)) {
+        while ($row = $res->fetchArray(\SQLITE3_NUM)) {
             $return[] = $row[0];
         }
 
@@ -90,7 +91,7 @@ abstract class Data {
         $res = $this->sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['version']])) {
                 $return[$row['version']][] = $row['className'];
             } else {
@@ -115,7 +116,7 @@ abstract class Data {
         $res = $this->sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['version']])) {
                 $return[$row['version']][] = $row['className'];
             } else {
@@ -140,7 +141,7 @@ abstract class Data {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['version']])) {
                 $return[$row['version']][] = $row['interfaceName'];
             } else {
@@ -166,7 +167,7 @@ abstract class Data {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['version']])) {
                 $return[$row['version']][] = $row['traitName'];
             } else {
@@ -189,7 +190,7 @@ abstract class Data {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['version']])) {
                 $return[$row['version']][] = $row['namespaceName'];
             } else {
@@ -199,7 +200,6 @@ abstract class Data {
 
         return $return;
     }
-
 }
 
 ?>

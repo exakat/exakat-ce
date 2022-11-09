@@ -29,7 +29,7 @@ class SelectMap extends DSL {
         // @todo : add checks on existence ?
 
         $command = array();
-        foreach($values as $key => $value) {
+        foreach ($values as $key => $value) {
             assert(is_string($value), " SelectMap value vor $key is not a string! ");
             $command[] = "\"$key\": $value,";
         }

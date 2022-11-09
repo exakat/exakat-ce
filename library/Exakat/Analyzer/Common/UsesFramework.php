@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class UsesFramework extends Analyzer {
+abstract class UsesFramework extends Analyzer {
     protected $constants  = array();
     protected $functions  = array();
     protected $classes    = array();
@@ -34,14 +34,14 @@ class UsesFramework extends Analyzer {
     protected $enums      = array();
 
     public function analyze(): void {
-        $analyzerId = null;
+        $analyzerId = -1;
 
         if (!empty($this->constants[0])) {
             $constants    = makeFullNsPath($this->constants, \FNP_CONSTANT);
 
             if (!empty($constants)) {
                 $constantUsage = new ConstantUsage();
-                $constantUsage->setAnalyzer(get_class($this));
+                $constantUsage->setAnalyzer(static::class);
                 $constantUsage->setConstants($constants);
                 $analyzerId = $constantUsage->init($analyzerId);
                 $constantUsage->run();
@@ -58,7 +58,7 @@ class UsesFramework extends Analyzer {
 
             if (!empty($functions)) {
                 $functionsUsage = new FunctionUsage();
-                $functionsUsage->setAnalyzer(get_class($this));
+                $functionsUsage->setAnalyzer(static::class);
                 $functionsUsage->setFunctions($functions);
                 $analyzerId = $functionsUsage->init($analyzerId);
                 $functionsUsage->run();
@@ -75,7 +75,7 @@ class UsesFramework extends Analyzer {
 
             if (!empty($classes)) {
                 $classesUsage = new ClassUsage();
-                $classesUsage->setAnalyzer(get_class($this));
+                $classesUsage->setAnalyzer(static::class);
                 $classesUsage->setClasses($classes);
                 $analyzerId = $classesUsage->init($analyzerId);
                 $classesUsage->run();
@@ -92,7 +92,7 @@ class UsesFramework extends Analyzer {
 
             if (!empty($interfaces)) {
                 $interfacesUsage = new InterfaceUsage();
-                $interfacesUsage->setAnalyzer(get_class($this));
+                $interfacesUsage->setAnalyzer(static::class);
                 $interfacesUsage->setInterfaces($interfaces);
                 $analyzerId = $interfacesUsage->init($analyzerId);
                 $interfacesUsage->run();
@@ -109,7 +109,7 @@ class UsesFramework extends Analyzer {
 
             if (!empty($traits)) {
                 $traitsUsage = new TraitUsage();
-                $traitsUsage->setAnalyzer(get_class($this));
+                $traitsUsage->setAnalyzer(static::class);
                 $traitsUsage->setTraits($traits);
                 $analyzerId = $traitsUsage->init($analyzerId);
                 $traitsUsage->run();
@@ -126,7 +126,7 @@ class UsesFramework extends Analyzer {
 
             if (!empty($namespaces)) {
                 $namespacesUsage = new NamespaceUsage();
-                $namespacesUsage->setAnalyzer(get_class($this));
+                $namespacesUsage->setAnalyzer(static::class);
                 $namespacesUsage->setNamespaces($namespaces);
                 $analyzerId = $namespacesUsage->init($analyzerId);
                 $namespacesUsage->run();
@@ -143,7 +143,7 @@ class UsesFramework extends Analyzer {
 
             if (!empty($enums)) {
                 $enumUsage = new EnumUsage();
-                $enumUsage->setAnalyzer(get_class($this));
+                $enumUsage->setAnalyzer(static::class);
                 $enumUsage->setEnums($enums);
                 $analyzerId = $enumUsage->init($analyzerId);
                 $enumUsage->run();

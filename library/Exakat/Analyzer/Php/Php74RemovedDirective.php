@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Common\UsedDirective;
 
 class Php74RemovedDirective extends UsedDirective {
-    protected $phpVersion = '7.4+';
+    protected string $phpVersion = '7.4+';
 
     public function analyze(): void {
         $this->directives = array('allow_url_include',

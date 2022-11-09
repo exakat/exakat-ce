@@ -24,11 +24,11 @@ namespace Exakat\Analyzer\Dump;
 
 
 class Inclusions extends AnalyzerTable {
-    protected $analyzerName = 'inclusions';
+    protected string $analyzerName = 'inclusions';
 
-    protected $analyzerTable = 'inclusions';
+    protected string $analyzerTable = 'inclusions';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE inclusions (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                            including STRING,
                            included STRING

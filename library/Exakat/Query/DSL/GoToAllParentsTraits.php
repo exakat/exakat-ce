@@ -26,8 +26,6 @@ namespace Exakat\Query\DSL;
 use Exakat\Analyzer\Analyzer;
 
 class GoToAllParentsTraits extends DSL {
-    public const MAX_LOOPING = 6;
-
     public function run(): Command {
         if (func_num_args() === 1) {
             list($self) = func_get_args();
@@ -35,38 +33,47 @@ class GoToAllParentsTraits extends DSL {
             $self = Analyzer::EXCLUDE_SELF;
         }
 
-        $MAX_LOOPING = self::MAX_LOOPING;
+        /*
+                    $command = new Command(<<<'GREMLIN'
+        hasLabel('Class', 'Classanonymous', 'Enum', 'Trait')
+        .repeat(
+            __.union( __.out("USE").out("USE").in("DEFINITION"), 
+                         __.out("EXTENDS").in("DEFINITION")
+                    ).hasLabel('Class', 'Trait')
+        ).emit().hasLabel('Class', 'Trait')
+        GREMLIN
+        );
+                } else {
+                    $command = new Command(<<<'GREMLIN'
+        hasLabel('Class', 'Classanonymous', 'Enum', 'Trait')
+        .union( __.identity(),
+               __.repeat(
+                    __.union( __.out("USE").out("USE").in("DEFINITION"), 
+                                 __.out("EXTENDS").in("DEFINITION")
+                            ).hasLabel('Class', 'Trait')
+                            ).emit().hasLabel('Class', 'Trait')
+        )
+
+        GREMLIN
+        );
+        */
+
         if ($self === Analyzer::EXCLUDE_SELF) {
-            $command = new Command(<<<GREMLIN
-as("gotoallparentstraits").repeat( 
-    __.union( __.out("USE").out("USE"), __.out("EXTENDS"))
-      .in("DEFINITION")
-      .hasLabel("Class", "Classanonymous", "Trait")
-      .simplePath().from("gotoallparentstraits")
+            $command = new Command(<<<'GREMLIN'
+union( __.out("USE").out("USE").in("DEFINITION"), 
+       __.out("EXTENDS").in("DEFINITION")
 )
-.emit( )
-.times($MAX_LOOPING)
-.dedup()
-.hasLabel("Class", "Classanonymous", "Trait")
 GREMLIN
-);
+            );
         } else {
-            $command = new Command(<<<GREMLIN
-union(
-__.as("gotoallparentstraits").repeat( 
-    __.union( __.out("USE").out("USE"), __.out("EXTENDS"))
-      .in("DEFINITION")
-      .hasLabel("Class", "Classanonymous", "Trait")
-      .simplePath().from("gotoallparentstraits")
-)
-.emit( )
-.times($MAX_LOOPING)
-.hasLabel("Class", "Classanonymous", "Trait"),
-identity()
+            $command = new Command(<<<'GREMLIN'
+union( __.identity(),
+       __.out("USE").out("USE").in("DEFINITION"), 
+       __.out("EXTENDS").in("DEFINITION")
 )
 
 GREMLIN
-);
+            );
         }
 
         return $command;

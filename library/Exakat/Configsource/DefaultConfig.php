@@ -26,7 +26,7 @@ use Exakat\Config as Configuration;
 use Exakat\Project;
 
 class DefaultConfig extends Config {
-    protected $config  = array( // directives with boolean value
+    protected array $config  = array( // directives with boolean value
                                'verbose'        => false,
                                'quick'          => false,
                                'quiet'          => false,
@@ -143,9 +143,9 @@ class DefaultConfig extends Config {
                                                              ),
                                'project_rulesets'    => array(),
 
-                                'inside_code'          => Configuration::WITH_PROJECTS,
+                               'inside_code'          => Configuration::WITH_PROJECTS,
 
-                                'php_extensions'       => array('all'),
+                               'php_extensions'       => array('all'),
                               );
 
     public function __construct() {

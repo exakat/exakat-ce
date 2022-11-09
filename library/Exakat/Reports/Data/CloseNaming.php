@@ -23,24 +23,26 @@
 namespace Exakat\Reports\Data;
 
 class CloseNaming extends Data {
-    public function prepare() {
+    public function prepare(): void {
         $res = $this->dump->fetchTable('variables');
         $variables = $res->getColumn('variable');
         $variables = array_filter($variables, function (string $x): bool {
-                                                              return strlen($x) > 3 &&
+            return strlen($x) > 3 &&
                                                                      $x[0] !== '{'  &&
                                                                      $x[1] !== '$';
-                                                                        });
+        });
         $variables = array_unique($variables);
 
         $results = array();
         // Only _ as difference
-        foreach($variables as $variable) {
-            if (strpos($variable, '_') === false) {
+        foreach ($variables as $variable) {
+            if (!str_contains($variable, '_')  ) {
                 continue;
             }
             $v = str_replace('_', '', $variable);
-            $r = array_filter( $variables, function ($x) use ($v) { return str_replace('_', '', $x) === $v; });
+            $r = array_filter( $variables, function (string $x) use ($v) {
+                return str_replace('_', '', $x) === $v;
+            });
             if (count($r) > 1) {
                 $results[$variable]['_'] = array_diff($r, array($variable));
             }
@@ -49,9 +51,13 @@ class CloseNaming extends Data {
         // Only case as difference
         $lowerCase = array_map('mb_strtolower', $variables);
         $groupBy = array_count_values($lowerCase);
-        $diff = array_keys(array_filter($groupBy, function ($x) { return $x > 1;}));
-        foreach($diff as $variable) {
-            $r = array_filter( $variables, function ($x) use ($variable) { return mb_strtolower($x) === mb_strtolower($variable); });
+        $diff = array_keys(array_filter($groupBy, function (string $x): bool {
+            return $x > 1;
+        }));
+        foreach ($diff as $variable) {
+            $r = array_filter( $variables, function (string $x) use ($variable) {
+                return mb_strtolower($x) === mb_strtolower($variable);
+            });
             if (count($r) > 1) {
                 $results[$variable]['case'] = array_diff($r, array($variable));
             }
@@ -59,9 +65,11 @@ class CloseNaming extends Data {
 
         // Only numbers as difference
         $numbers = preg_grep('/[0-9]/', $variables);
-        foreach($numbers as $variable) {
+        foreach ($numbers as $variable) {
             $v = str_replace(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), '', $variable);
-            $r = array_filter( $variables, function ($x) use ($v) { return str_replace(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), '', $x) === $v; });
+            $r = array_filter( $variables, function (string $x) use ($v) {
+                return str_replace(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), '', $x) === $v;
+            });
             if (count($r) > 1) {
                 $results[$variable]['numbers'] = array_diff($r, array($variable));
             }
@@ -69,7 +77,7 @@ class CloseNaming extends Data {
 
         // One char difference
         $sizes = array_fill(4, 200, array());
-        foreach($variables as $variable) {
+        foreach ($variables as $variable) {
             if (strlen($variable) > 200) {
                 continue;
             }
@@ -77,9 +85,11 @@ class CloseNaming extends Data {
         }
 
         $sizes[] = array();// Extra one for the next loop
-        foreach($sizes as $size => $vars) {
-            foreach($vars as $variable) {
-                $r = array_filter( $sizes[$size + 1], function (string $x) use ($variable): bool { return levenshtein($x, $variable) === 1; });
+        foreach ($sizes as $size => $vars) {
+            foreach ($vars as $variable) {
+                $r = array_filter( $sizes[$size + 1], function (string $x) use ($variable): bool {
+                    return levenshtein($x, $variable) === 1;
+                });
                 if (!empty($r)) {
                     $results[$variable]['one'] = $r;
                 }
@@ -87,29 +97,35 @@ class CloseNaming extends Data {
         }
 
         // Group swap : aka confArray and arrayConf
-        foreach($sizes as $size => $vars) {
-            if ($size < 5) { continue; }
-            foreach($vars as $variable) {
-                $r = array_filter( $vars, function (string $x) use ($variable): bool { return $this->groupSwap($x, $variable); });
+        foreach ($sizes as $size => $vars) {
+            if ($size < 5) {
+                continue;
+            }
+            foreach ($vars as $variable) {
+                $r = array_filter( $vars, function (string $x) use ($variable): bool {
+                    return $this->groupSwap($x, $variable);
+                });
                 if (!empty($r)) {
                     $results[$variable]['swap'] = $r;
                 }
             }
         }
 
-        return $results;
+        $this->values = $results;
     }
 
     private function groupSwap(string $a, string $b): bool {
-        if (strpos($b, $a[1]) === false) {
+        if (!str_contains($b, $a[1])  ) {
             return false;
         }
         $n = strlen($a) - 3;
 
-        for($i = 2; $i < $n; ++$i) {
+        for ($i = 2; $i < $n; ++$i) {
             $d = substr($a, $i + 1);
             $e = substr($a, 1, $i);
-            if ($d === $e) { continue; }
+            if ($d === $e) {
+                continue;
+            }
 
             $c = '$' . $d . $e;
             if ($c === $b) {

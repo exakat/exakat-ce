@@ -26,9 +26,9 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class ClassUsage extends Analyzer {
-    protected $classes = array();
+    protected array $classes = array();
 
-    public function setClasses($classes): void {
+    public function setClasses(array $classes): void {
         $this->classes = $classes;
     }
 
@@ -42,15 +42,9 @@ class ClassUsage extends Analyzer {
              ->fullnspathIs($classes);
         $this->prepareQuery();
 
-        $this->atomIs(array('Staticmethodcall', 'Staticproperty', 'Staticconstant', 'Staticclass'))
-             ->outIs('CLASS')
-             ->atomIs(self::CONSTANTS_ALL)
-             ->fullnspathIs($classes);
-        $this->prepareQuery();
-
-        // Typehint (return and argument), catch, instanceof, classes
+        // Typehint (return and argument), catch, instanceof, classes with extends
         $this->atomIs(array('Identifier', 'Nsname'))
-             ->has('line')
+             ->has('line') // what for? 
              ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'CLASS')) // NOT IMPLEMENT
              ->fullnspathIs($classes)
              ->analyzerIsNot('self');

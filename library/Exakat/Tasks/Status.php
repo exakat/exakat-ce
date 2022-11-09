@@ -57,7 +57,7 @@ class Status extends Tasks {
                 $status['Running'] = 'idle';
             }
 
-            $this->display($status, $this->config->json);
+            $this->display($status, $this->config->json ? self::WITH_JSON : self::WITHOUT_JSON);
             return;
         }
 
@@ -96,16 +96,16 @@ class Status extends Tasks {
         if (file_exists("{$this->config->tmp_dir}/Project.json")) {
             $text = file_get_contents("{$this->config->tmp_dir}/Project.json");
             if (empty($text)) {
-                 $inited = $this->datastore->getHash('inited');
-                 $status['status'] = empty($inited) ? 'Init phase' : 'Not running';
+                $inited = $this->datastore->getHash('inited');
+                $status['status'] = empty($inited) ? 'Init phase' : 'Not running';
             } else {
-             $json = json_decode($text);
-             if ($json->project === $project) {
-                 $status['status'] = $json->step;
-             } else {
-                 $inited = $this->datastore->getHash('inited');
-                 $status['status'] = empty($inited) ? 'Init phase' : 'Not running';
-             }
+                $json = json_decode($text);
+                if ($json->project === $project) {
+                    $status['status'] = $json->step;
+                } else {
+                    $inited = $this->datastore->getHash('inited');
+                    $status['status'] = empty($inited) ? 'Init phase' : 'Not running';
+                }
             }
         } else {
             $inited = $this->datastore->getHash('inited');
@@ -116,7 +116,7 @@ class Status extends Tasks {
             $status['hash']      = 'None';
             $status['updatable'] = 'N/A';
         } else {
-            $vcs = new $vcsClass($this->config->project, $this->config->code_dir);
+            $vcs = new $vcsClass((string) $this->config->project, $this->config->code_dir);
             $status = array_merge($status, $vcs->getStatus());
         }
 
@@ -132,7 +132,7 @@ class Status extends Tasks {
         // errors?
 
         $formats = array();
-        foreach(Reports::$FORMATS as $format) {
+        foreach (Reports::$FORMATS as $format) {
             $a = $this->datastore->getHash($format);
             if (!empty($a)) {
                 $formats[$format] = $a;
@@ -141,10 +141,10 @@ class Status extends Tasks {
         // Always have formats, even if empty
         $status['formats'] = $formats;
 
-        $this->display($status, $this->config->json);
+        $this->display($status, $this->config->json ? self::WITH_JSON : self::WITHOUT_JSON);
     }
 
-    private function display(array $status, bool $json = self::WITH_JSON) {
+    private function display(array $status, int $json = self::WITH_JSON) {
         // Json publication
         if ($json === self::WITH_JSON) {
             print json_encode($status);
@@ -154,20 +154,20 @@ class Status extends Tasks {
         // commandline publication
         $text = '';
         $size = 0;
-        foreach($status as $k => $v) {
+        foreach ($status as $k => $v) {
             $size = max($size, strlen($k));
         }
 
-        foreach($status as $field => $value) {
+        foreach ($status as $field => $value) {
             if (is_array($value)) {
                 $sub = str_pad($field, $size, ' ') . ' : ' . PHP_EOL;
 
                 $sizea = 0;
-                foreach($value as $k => $v) {
+                foreach ($value as $k => $v) {
                     $sizea = max($sizea, strlen($k));
                 }
-                foreach($value as $k => $v) {
-                    $sub .= '    ' . str_pad($k, $sizea, ' ') . " : $v" . PHP_EOL;
+                foreach ($value as $k => $v) {
+                    $sub .= '    ' . str_pad($k, $sizea, ' ') . ' : ' . $v . PHP_EOL;
                 }
                 $text .= PHP_EOL . $sub . PHP_EOL;
             } else {

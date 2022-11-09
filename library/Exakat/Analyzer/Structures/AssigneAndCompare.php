@@ -34,10 +34,10 @@ class AssigneAndCompare extends Analyzer {
 
              //Skip comparison that yield boolean
              ->not(
-                $this->side()
-                     ->codeIs(array('==', '==='))
-                     ->outIs(array('LEFT', 'RIGHT'))
-                     ->atomIs('Boolean')
+                 $this->side()
+                      ->codeIs(array('==', '==='))
+                      ->outIs(array('LEFT', 'RIGHT'))
+                      ->atomIs('Boolean')
              )
              ->back('first');
         $this->prepareQuery();

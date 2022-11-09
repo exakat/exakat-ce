@@ -24,11 +24,11 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectClassChanges extends AnalyzerTable {
-    protected $analyzerName = 'classChanges';
+    protected string $analyzerName = 'classChanges';
 
-    protected $analyzerTable = 'classChanges';
+    protected string $analyzerTable = 'classChanges';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE classChanges (  
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     changeType   STRING,
@@ -48,13 +48,12 @@ SQL;
 
 
     public function analyze(): void {
-
         $total = 0;
 
         // Comparing Class constant : values, visibility
 
         // Class constants with different values
-         $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
+        $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
               ->inIs('NAME')
@@ -90,11 +89,11 @@ map{["type": 'Constant Value',
       "classValue":name + " = " + default1];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
 
         // Class constants with different visibility
-         $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
+        $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
               ->inIs('NAME')
@@ -126,14 +125,14 @@ map{["type": "Constant Visibility",
       "classValue":visibility1 + ' ' + name];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
 
         // Comparing Methods : return type, visibility, argument's type, default, name
 
-         // Methods with different signatures : argument's type, default, name
-         // Upgrade this with separate queries for each element.
-         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
+        // Methods with different signatures : argument's type, default, name
+        // Upgrade this with separate queries for each element.
+        $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
               ->inIs('NAME')
@@ -164,11 +163,11 @@ map{["type": "Method Signature",
       "classValue":"function " + name + "(" + signature1.join(", ") + ")"];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
 
-         // Methods with different visibility
-         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
+        // Methods with different visibility
+        $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullnspath', 'fnp')
               ->savePropertyAs('visibility', 'visibility1')
               ->inIs(array('METHOD', 'MAGICMETHOD'))
@@ -188,11 +187,11 @@ map{ ["type": "Method Visibility",
       "classValue":visibility1 + ' ' + fnp.tokenize('::')[1]];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
 
-         // Methods with different visibility
-         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
+        // Methods with different visibility
+        $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullnspath', 'fnp')
               ->outIs('RETURNTYPE')
               ->savePropertyAs('fullnspath', 'fnp1')
@@ -216,14 +215,14 @@ map{ ["type": "Method Returntype",
       "classValue":fnp2 + ' ' + fnp.tokenize('::')[1]];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
 
         // Comparing Properties
         // default value, visibility, typehint
 
-         // Property with different default value
-         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
+        // Property with different default value
+        $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'name')
               ->outIs('DEFAULT')
               ->hasNoIn('RIGHT') // find an explicit default
@@ -255,11 +254,11 @@ map{ ["type": "Member Default",
       "classValue":name + ' = ' + default1];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
 
-         // Property with different visibility
-         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
+        // Property with different visibility
+        $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'name')
               ->inIs('PPP')
               ->savePropertyAs('visibility', 'visibility1')
@@ -284,11 +283,11 @@ map{ ["type": "Member Visibility",
       "classValue":visibility1 + ' ' + name];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
 
-         // Property with different typehint
-         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
+        // Property with different typehint
+        $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'name')
               ->inIs('PPP')
               ->outIs('TYPEHINT')
@@ -317,7 +316,7 @@ map{ ["type": "Member Typehint",
       "classValue":fnp1 + ' ' + name];
 }
 GREMLIN
-);
+              );
         $this->prepareQuery();
     }
 }

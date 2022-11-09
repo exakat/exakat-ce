@@ -29,6 +29,7 @@ class ImplodeArgsOrder extends Analyzer {
         return array('Variables/IsLocalConstant',
                      'Complete/CreateDefaultValues',
                      'Complete/PropagateConstants',
+                     'Variables/SelfTransform',
                     );
     }
 
@@ -38,6 +39,7 @@ class ImplodeArgsOrder extends Analyzer {
         // detect an array in first arg
         // Constants
         $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 0)
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
@@ -46,18 +48,29 @@ class ImplodeArgsOrder extends Analyzer {
 
         // Local variable, argument 0
         $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 0)
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIsIE('NAME')
              ->outIs('DEFAULT')
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
              ->back('first');
         $this->prepareQuery();
 
+        // Local variable, argument 1 with typehint
+        $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
+             ->analyzerIsNot('self')
+             ->outWithRank('ARGUMENT', 0)
+             ->goToTypehint()
+             ->fullnspathIs('\\array')
+             ->back('first');
+        $this->prepareQuery();
+
         // Returntype
         $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 0)
              ->atomIs(self::FUNCTIONS_CALLS)
@@ -69,26 +82,44 @@ class ImplodeArgsOrder extends Analyzer {
 
         // detect a string in second arg
         $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 1)
              ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
              ->back('first');
         $this->prepareQuery();
 
-        // Local variable, argument 1
+        // Local variable, argument 1 with default value
         $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 1)
              ->atomIs('Variable')
-             ->inIs('DEFINITION')
-             ->inIsIE('NAME')
-             ->outIs('DEFAULT')
-             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->filter(
+                 $this->side()
+                     ->inIs('DEFINITION')
+                     ->outIs('DEFAULT')
+                     ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+                      ->inIs('RIGHT')
+                      ->outIs('LEFT')
+                      ->analyzerIsNot('Variables/SelfTransform')
+             )
+             ->back('first');
+        $this->prepareQuery();
+
+        // Local variable, argument 1 with typehint
+        $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
+             ->analyzerIsNot('self')
+             ->outWithRank('ARGUMENT', 1)
+             ->goToTypehint()
+             ->fullnspathIs('\\string')
              ->back('first');
         $this->prepareQuery();
 
         // Returntype
         $this->atomFunctionIs($functions)
+             ->isNot('count', 1)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 1)
              ->atomIs(self::FUNCTIONS_CALLS)

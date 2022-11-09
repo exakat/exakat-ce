@@ -62,7 +62,7 @@ where(
    .sideEffect{ c = c + 1; }.fold()
 ).filter{ c < $count}
 GREMLIN
-, array($stop, $atom));
+            , array($stop, $atom));
     }
 }
 ?>

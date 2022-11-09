@@ -25,7 +25,7 @@ namespace Exakat\Analyzer;
 
 
 class RulesetsExtra implements RulesetsInterface {
-    private $extra_rulesets  = array();
+    private array $extra_rulesets  = array();
 
     public function __construct(array $extra_rulesets = array()) {
         $this->extra_rulesets = $extra_rulesets;
@@ -42,7 +42,7 @@ class RulesetsExtra implements RulesetsInterface {
         }
 
         $return = array(array());
-        foreach($rulesets as $t) {
+        foreach ($rulesets as $t) {
             $return[] = $this->extra_rulesets[$t] ?? array();
         }
 
@@ -51,7 +51,7 @@ class RulesetsExtra implements RulesetsInterface {
 
     public function getRulesetForAnalyzer(string $analyzer = ''): array {
         $return = array();
-        foreach($this->extra_rulesets as $ruleset => $analyzers) {
+        foreach ($this->extra_rulesets as $ruleset => $analyzers) {
             if (in_array($analyzer, $analyzers)) {
                 $return[] = $ruleset;
             }
@@ -64,8 +64,8 @@ class RulesetsExtra implements RulesetsInterface {
         $return = array();
 
         if (empty($analyzer)) {
-            foreach($this->extra_rulesets as $ruleset => $analyzers) {
-                foreach($analyzers as $analyzer)  {
+            foreach ($this->extra_rulesets as $ruleset => $analyzers) {
+                foreach ($analyzers as $analyzer) {
                     array_collect_by($return, $analyzer, $ruleset);
                 }
             }
@@ -73,7 +73,7 @@ class RulesetsExtra implements RulesetsInterface {
             return $return;
         }
 
-        foreach($this->extra_rulesets as $ruleset => $analyzers) {
+        foreach ($this->extra_rulesets as $ruleset => $analyzers) {
             if (in_array($analyzer, $analyzers)) {
                 $return[] = $ruleset;
             }
@@ -110,13 +110,13 @@ class RulesetsExtra implements RulesetsInterface {
         // Human short name : Type/Class
         // Human shortcut : Class (must be unique among the classes)
 
-        if (strpos($name, '\\') !== false) {
+        if (str_contains($name, '\\')  ) {
             if (substr($name, 0, 16) === 'Exakat\\Analyzer\\') {
                 $class = $name;
             } else {
                 $class = "Exakat\\Analyzer\\$name";
             }
-        } elseif (strpos($name, '/') !== false) {
+        } elseif (str_contains($name, '/')  ) {
             $class = 'Exakat\\Analyzer\\' . str_replace('/', '\\', $name);
         } else {
             $class = $name;
@@ -139,7 +139,7 @@ class RulesetsExtra implements RulesetsInterface {
         $list = $this->listAllRulesets();
 
         return array_filter($list, function (string $c) use ($rulesets): bool {
-            foreach($rulesets as $ruleset) {
+            foreach ($rulesets as $ruleset) {
                 $l = levenshtein($c, $ruleset);
                 if ($l < 8) {
                     return true;
@@ -150,7 +150,7 @@ class RulesetsExtra implements RulesetsInterface {
     }
 
     public function getSuggestionClass(string $name): array {
-        return array_filter($this->listAllAnalyzer(), function ($c) use ($name) {
+        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name) : bool {
             $l = levenshtein($c, $name);
 
             return $l < 8;

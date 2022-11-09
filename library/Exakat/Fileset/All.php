@@ -34,7 +34,9 @@ class All extends Fileset {
 
         chdir($path);
         $this->files = rglob('.');
-        $this->files = array_map(function (string $path): string { return ltrim($path, '.'); }, $this->files);
+        $this->files = array_map(function (string $path): string {
+            return ltrim($path, '.');
+        }, $this->files);
         chdir($d);
     }
 }

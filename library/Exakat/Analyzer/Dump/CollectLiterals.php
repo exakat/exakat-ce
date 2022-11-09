@@ -25,12 +25,12 @@ namespace Exakat\Analyzer\Dump;
 use Exakat\Dump\Dump;
 
 class CollectLiterals extends AnalyzerTable {
-    protected $analyzerName = 'Local Variable Counts';
+    protected string $analyzerName = 'Local Variable Counts';
 
     public function analyze(): void {
         $types = array('Integer', 'Float', 'String', 'Heredoc', 'Arrayliteral');
 
-        foreach($types as $type) {
+        foreach ($types as $type) {
             $this->analyzerTable = "literal$type";
             $this->analyzerSQLTable = <<<SQL
 CREATE TABLE literal{$type} (  
@@ -48,7 +48,7 @@ sideEffect{ name = it.get().value("fullcode");
             line = it.get().value('line');
           }
 GREMLIN
-)
+                 )
                  ->goToFile()
                  ->savePropertyAs('fullcode', 'file')
                  ->raw(<<<'GREMLIN'
@@ -59,26 +59,26 @@ map{
        ];
 }
 GREMLIN
-);
+                 );
             $this->prepareQuery();
             $this->execQuery();
         }
-/*
-       $otherTypes = array('Null', 'Boolean', 'Closure');
-       foreach($otherTypes as $type) {
-            $query = <<<GREMLIN
-g.V().hasLabel("$type").count();
-GREMLIN;
-            $total = $this->gremlin->query($query)->toInt();
+        /*
+               $otherTypes = array('Null', 'Boolean', 'Closure');
+               foreach($otherTypes as $type) {
+                    $query = <<<GREMLIN
+        g.V().hasLabel("$type").count();
+        GREMLIN;
+                    $total = $this->gremlin->query($query)->toInt();
 
-            $query = "INSERT INTO resultsCounts (analyzer, count) VALUES (\"$type\", $total)";
-            $this->sqlite->query($query);
-            display( "Other $type : $total\n");
-       }
-*/
+                    $query = "INSERT INTO resultsCounts (analyzer, count) VALUES (\"$type\", $total)";
+                    $this->sqlite->query($query);
+                    display( "Other $type : $total\n");
+               }
+        */
 
-            $this->analyzerTable = 'stringEncodings';
-            $this->analyzerSQLTable = <<<'SQL'
+        $this->analyzerTable = 'stringEncodings';
+        $this->analyzerSQLTable = <<<'SQL'
 CREATE TABLE stringEncodings (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 encoding STRING,
                                 block STRING,
@@ -86,7 +86,7 @@ CREATE TABLE stringEncodings (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                               )
 SQL;
 
-//, 'Concatenation', 'Heredoc' too
+        //, 'Concatenation', 'Heredoc' too
         $this->atomIs('String')
              ->raw(<<<'GREMLIN'
 map{ 
@@ -102,7 +102,7 @@ map{
 .unique()
 
 GREMLIN
-);
+             );
         $this->prepareQuery();
     }
 
@@ -110,6 +110,8 @@ GREMLIN
         if (!$this->hasResults()) {
             return array();
         }
+
+        $report = array();
 
         // todo : we need all the other tables of literals
         $dump = Dump::factory($this->config->dump);
@@ -128,7 +130,6 @@ GREMLIN
 
         return !empty($r);
     }
-
 }
 
 ?>

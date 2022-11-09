@@ -29,7 +29,7 @@ use Exakat\Data\Dictionary;
 
 class CodeIsNot extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1 :
                 $code = func_get_arg(0);
                 $translate = Analyzer::TRANSLATE;

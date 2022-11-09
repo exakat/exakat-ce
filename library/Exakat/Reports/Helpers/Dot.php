@@ -25,9 +25,9 @@ namespace Exakat\Reports\Helpers;
 use Exakat\Exakat;
 
 class Dot {
-    private $links   = array();
-    private $nodes   = array();
-    private $options = array();
+    private array $links   = array();
+    private array $nodes   = array();
+    private array $options = array();
 
     public function addNode(string $label, array $options = array()): int {
         $node = array_merge(compact('label'), $options);
@@ -47,19 +47,19 @@ class Dot {
         $this->options[$what][$name] = $value;
     }
 
-    public function __toString() {
+    public function __toString(): string {
         $atoms = array();
 
-        foreach($this->nodes as $id => $label) {
-            $options = $this->toStyle(array_merge($this->options['nodes'], $label));
+        foreach ($this->nodes as $id => $label) {
+            $options = $this->toStyle(array_merge($this->options['nodes'] ?? array(), $label));
 
             $atoms[] = "$id [$options]";
         }
         $atoms = implode(PHP_EOL, $atoms);
 
         $links = array();
-        foreach($this->links as $origin => $destinations) {
-            foreach($destinations as $destination) {
+        foreach ($this->links as $origin => $destinations) {
+            foreach ($destinations as $destination) {
                 $links[] = $origin . ' -> ' . $destination;
             }
         }
@@ -90,7 +90,7 @@ $links
 
     private function toStyle(array $array = array()): string {
         $return = array();
-        foreach($array as $name => $value) {
+        foreach ($array as $name => $value) {
             $value = addslashes((string) $value);
             $return[] = "$name=\"$value\"";
         }

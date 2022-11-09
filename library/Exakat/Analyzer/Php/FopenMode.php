@@ -30,7 +30,7 @@ class FopenMode extends Analyzer {
              ->outWithRank('ARGUMENT', 1)
              ->atomIs('String') // No checks on variable or properties.
              ->hasNoOut('CONCAT')
-             ->noDelimiterIsNot(array('r', 'r+', 'w', 'w+', 'a', 'a+', 'x', 'x+', 'c', 'c+', 'e',  // Normal
+             ->noDelimiterIsNot(array('r', 'r+', 'w', 'w+', 'a', 'a+', 'x', 'x+', 'c', 'c+', 'e', 'rw', 'wr', // Normal
                                       'rb', 'r+b', 'wb', 'w+b', 'ab', 'a+b', 'xb', 'x+b', 'cb', 'c+b', 'eb',  // binary post
                                       'br', 'br+', 'bw', 'bw+', 'ba', 'ba+', 'bx', 'bx+', 'bc', 'bc+', 'be',  // binary pre
                                       'rt', 'r+t', 'wt', 'w+t', 'at', 'a+t', 'xt', 'x+t', 'ct', 'c+t', 'et',  // text post

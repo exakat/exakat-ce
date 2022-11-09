@@ -54,7 +54,7 @@ if (count($nosot) === count($sot)) {
     }
 }
 
-storeResult($project_dir, $forStorage);
+storeResults($project_dir, $forStorage);
 
 function storeResults($project_dir, array $list) {
     $id = dechex(random_int(0, \PHP_INT_MAX));

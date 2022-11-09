@@ -39,10 +39,10 @@ class SetClassMethodRemoteDefinition extends Complete {
               ->outIs(array('CLASS', 'OBJECT'))
               // Handles variables as object
               ->optional(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('DEFAULT')
-                     ->outIs('NEW')
+                  $this->side()
+                       ->inIs('DEFINITION')
+                       ->outIs('DEFAULT')
+                       ->outIs('NEW')
               )
               ->inIs('DEFINITION')
               ->atomIs(self::CLASSES_TRAITS, self::WITHOUT_CONSTANTS)
@@ -73,34 +73,6 @@ class SetClassMethodRemoteDefinition extends Complete {
               ->inIs('NAME')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
-/*
-        $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
-              ->as('method')
-              ->hasNoIn('DEFINITION')
-              ->outIs('METHOD')
-              ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
-              ->outIs('NAME')
-              ->savePropertyAs('lccode', 'name')
-              ->back('first')
-              ->outIs('CLASS')
-              ->has('fullnspath')
-              ->savePropertyAs('fullnspath', 'fnp')
-              ->filter(
-                    $this->side()
-                         ->goToClass()
-                         ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
-                         ->goToAllParents(self::INCLUDE_SELF)
-                         ->samePropertyAs('fullnspath', 'fnp', self::CASE_SENSITIVE)
-              )
-              ->inIs('DEFINITION')
-              ->goToAllParentsTraits(self::INCLUDE_SELF)
-              ->outIs(array('METHOD', 'MAGICMETHOD'))
-              ->outIs('NAME')
-              ->samePropertyAs('lccode', 'name', self::CASE_SENSITIVE)
-              ->inIs('NAME')
-              ->addETo('DEFINITION', 'method');
-        $this->prepareQuery();
-        */
     }
 }
 

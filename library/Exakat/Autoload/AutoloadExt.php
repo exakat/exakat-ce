@@ -26,17 +26,17 @@ namespace Exakat\Autoload;
 class AutoloadExt implements Autoloader {
     public const LOAD_ALL = null;
 
-    private $pharList   = array();
-    private $extensions = array();
+    private array $pharList   = array();
+    private array $extensions = array();
 
-    public function __construct($path) {
+    public function __construct(string $path) {
         if (!extension_loaded('phar')) {
             // Ignoring it all
             return;
         }
         $list = glob("$path/*.phar", GLOB_NOSORT);
 
-        foreach($list as $phar) {
+        foreach ($list as $phar) {
             $this->pharList[basename($phar, '.phar')] = $phar;
         }
 
@@ -44,11 +44,11 @@ class AutoloadExt implements Autoloader {
         // Could we autoload everything ?
     }
 
-    public function autoload($name) {
+    public function autoload(string $name) : void {
         $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $name);
         $file = "{$fileName}.php";
 
-        foreach($this->pharList as $phar) {
+        foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$file";
             if (file_exists($fullPath)) {
                 include $fullPath;
@@ -57,29 +57,29 @@ class AutoloadExt implements Autoloader {
         }
     }
 
-    public function registerAutoload() {
+    public function registerAutoload() : void {
         spl_autoload_register(array($this, 'autoload'));
     }
 
-    private function checkDependencies() {
+    private function checkDependencies() : void {
         // Report missing extensions, but don't prevent them (some rules may still work, others will be ignored)
-        foreach($this->extensions as $name => $extension) {
+        foreach ($this->extensions as $name => $extension) {
             $diff = array_diff($extension->dependsOnExtensions(), array_keys($this->pharList));
             if (!empty($diff)) {
                 // This is displayed for extensions and also for their dependencies, leading to repetition.
                 display("$name extension requires the following missing extension : " . implode(', ', $diff) . "\nProcessing may be impacted.\nDownload the missing extensions with the 'extension' command.\n");
             }
-         }
+        }
     }
 
-    public function getPharList() {
+    public function getPharList() : array {
         return array_map('basename', $this->pharList);
     }
 
-    public function getRulesets() {
+    public function getRulesets() : array {
         $return = array();
 
-        foreach($this->pharList as $name => $phar) {
+        foreach ($this->pharList as $name => $phar) {
             $fullPath = "phar://$phar/Exakat/Analyzer/analyzers.ini";
 
             if (!file_exists($fullPath)) {
@@ -95,10 +95,10 @@ class AutoloadExt implements Autoloader {
         return $return;
     }
 
-    public function getAnalyzers(string $theme = 'All') {
+    public function getAnalyzers(string $theme = 'All') : array {
         $return = array();
 
-        foreach($this->pharList as $name => $phar) {
+        foreach ($this->pharList as $name => $phar) {
             $fullPath = "phar://$phar/Exakat/Analyzer/analyzers.ini";
 
             if (!file_exists($fullPath)) {
@@ -113,10 +113,10 @@ class AutoloadExt implements Autoloader {
         return $return;
     }
 
-    public function getAllAnalyzers() {
+    public function getAllAnalyzers() : array {
         $return = array();
 
-        foreach($this->pharList as $name => $phar) {
+        foreach ($this->pharList as $name => $phar) {
             $fullPath = "phar://$phar/Exakat/Analyzer/analyzers.ini";
 
             if (!file_exists($fullPath)) {
@@ -132,10 +132,10 @@ class AutoloadExt implements Autoloader {
         return $return;
     }
 
-    public function loadIni($name, $libel = self::LOAD_ALL) {
+    public function loadIni(string $name, ?string $libel = self::LOAD_ALL) : array {
         $return = array();
 
-        foreach($this->pharList as $phar) {
+        foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/data/$name";
 
             if (!file_exists($fullPath)) {
@@ -161,10 +161,10 @@ class AutoloadExt implements Autoloader {
         return array_merge(...$return);
     }
 
-    public function loadJson($name, $libel = self::LOAD_ALL) {
+    public function loadJson(string $name, string $libel = self::LOAD_ALL) : array {
         $return = array(array());
 
-        foreach($this->pharList as $phar) {
+        foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/data/$name";
 
             if (!file_exists($fullPath)) {
@@ -178,7 +178,7 @@ class AutoloadExt implements Autoloader {
 
             $data = json_decode($json, \JSON_ASSOCIATIVE);
 
-            if(json_last_error() !== \JSON_ERROR_NONE) {
+            if (json_last_error() !== \JSON_ERROR_NONE) {
                 continue;
             }
             if (empty($data)) {
@@ -195,9 +195,9 @@ class AutoloadExt implements Autoloader {
         return array_merge(...$return);
     }
 
-    public function loadData($path) {
+    public function loadData(string $path) : string {
         $return = array();
-        foreach($this->pharList as $phar) {
+        foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$path";
 
             if (file_exists($fullPath)) {
@@ -208,8 +208,8 @@ class AutoloadExt implements Autoloader {
         return implode('', $return);
     }
 
-    public function fileExists($path) {
-        foreach($this->pharList as $phar) {
+    public function fileExists(string $path) : bool {
+        foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$path";
 
             if (file_exists($fullPath)) {
@@ -220,16 +220,14 @@ class AutoloadExt implements Autoloader {
         return false;
     }
 
-    public function copyFile($path, $to) {
-        foreach($this->pharList as $phar) {
+    public function copyFile(string $path, string $to) : void {
+        foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$path";
 
             if (file_exists($fullPath)) {
                 copy($fullPath, $to);
             }
         }
-
-        return null;
     }
 }
 

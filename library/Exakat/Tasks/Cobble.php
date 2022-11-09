@@ -26,6 +26,7 @@ use Exakat\Cobbler\Cobbler;
 use Exakat\Config;
 use Exakat\Vcs\Vcs;
 use Exakat\Exceptions\NeedsAnalyzerThema;
+use Exakat\Exceptions\NoSuchCobbler;
 use Exakat\Exceptions\NoCodeInProject;
 use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Helpers\Timer;
@@ -45,6 +46,24 @@ class Cobble extends Tasks {
             throw new ProjectNeeded();
         }
 
+        if (empty($this->config->program)) {
+            throw new NeedsAnalyzerThema();
+        }
+
+        if (is_array($this->config->program)) {
+            $cobblersClass = $this->config->program;
+        } else {
+            $cobblersClass = array($this->config->program);
+        }
+        
+        // @todo check for format now
+
+        foreach ($cobblersClass as $cobbler) {
+            if (!Cobbler::getClass($cobbler)) {
+                throw new NoSuchCobbler($cobbler);
+            }
+        }
+
         $res = $this->gremlin->query('g.V().hasLabel("Project").valueMap(true)');
 
         if (isset($res[0]['code']) && $res[0]['code'][0] !== (string) $this->config->project) {
@@ -59,8 +78,8 @@ class Cobble extends Tasks {
             return;
         }
 
-
-        $vcs = new $vcs($this->config->project, $this->config->code_dir);
+		// @todo : make this call getinstance 
+        $vcs = new $vcs((string) $this->config->project, $this->config->code_dir);
         if (!empty($this->config->branch) && $vcs->hasBranch($this->config->branch)) {
             print 'Branch already exists : cannot overwrite an existing branch. Please, change branch name or remove branch first.';
 
@@ -79,16 +98,17 @@ class Cobble extends Tasks {
                                    'project' => $this->config->project));
 
             display('Loading files' . PHP_EOL);
-            $analyze = new Load(self::IS_SUBTASK);
-            $analyze->run();
-            unset($analyze);
+            $load = new Load(self::IS_SUBTASK);
+            $load->setWS();
+            $load->run();
+            unset($load);
             $this->addSnitch(array('step'    => 'Load',
                                    'project' => $this->config->project));
         }
 
         $loc = $this->datastore->getHash('loc');
         if (intval($loc) === 0) {
-            throw new NoCodeInProject($this->config->project);
+            throw new NoCodeInProject((string) $this->config->project);
         }
 
         if (empty($this->config->program)) {
@@ -96,7 +116,7 @@ class Cobble extends Tasks {
         }
 
         $this->logTime('Cobbling');
-        foreach($this->config->program as $program) {
+        foreach ($this->config->program as $program) {
             $this->logTime('Cobbling ' . $program);
             $cobbler = Cobbler::getInstance($program, $this->config);
 
@@ -111,8 +131,6 @@ class Cobble extends Tasks {
                 $analyze = new Analyze(self::IS_SUBTASK);
                 $analyze->setConfig($configThema);
                 $analyze->run();
-            } else {
-//                print "Pas de dependances\n";
             }
 
             display("Cobbling\n");
@@ -134,7 +152,7 @@ class Cobble extends Tasks {
                         4 => '--format',
                         5 => 'Php',
                         );
-        foreach($this->config->program as $c) {
+        foreach ($this->config->program as $c) {
             $args[] = '-P';
             $args[] = $c;
         }
@@ -181,7 +199,7 @@ class Cobble extends Tasks {
 
         $this->timer->end();
 
-        fwrite($log, $step . "\t" . $this->timer->end() . PHP_EOL);
+        fwrite($log, $step . "\t" . $this->timer->duration() . PHP_EOL);
         $this->timer = new Timer();
     }
 }

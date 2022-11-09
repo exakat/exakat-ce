@@ -37,7 +37,6 @@ class IsClassCompatible extends DSL {
         // ONE and OR : one is sufficient
         // AND : ALL must be validate
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
         $gremlin = <<<GREMLIN
     // collect all types available
  sideEffect{ t = $typehint;
@@ -50,7 +49,7 @@ class IsClassCompatible extends DSL {
     __.sideEffect{ x = []; }
       .union(
                 __.identity(),
-                __.out("EXTENDS", "IMPLEMENTS").emit().repeat(__.in("DEFINITION").out("EXTENDS", "IMPLEMENTS")).times($MAX_LOOPING)
+                __.out("EXTENDS", "IMPLEMENTS").in("DEFINITION")
       )
       .has("fullnspath")
       .sideEffect{ x.add(it.get().value("fullnspath")) ; }

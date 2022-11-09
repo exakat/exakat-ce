@@ -28,23 +28,20 @@ use Exakat\Analyzer\Analyzer;
 class UndefinedConstants extends Analyzer {
     public function dependsOn(): array {
         return array('Classes/DefinedConstants',
-                     'Complete/IsStubStructure',
-                     'Complete/IsPhpStructure',
                     );
     }
 
     public function analyze(): void {
         // A::Undefined
         $this->atomIs('Staticconstant')
-             ->analyzerIsNot(array('Classes/DefinedConstants',
-                                  ))
+             ->analyzerIsNot('Classes/DefinedConstants')
              ->isNot('isPhp', true)
              ->isNot('isExt', true)
              ->isNot('isStub', true)
 
              // cases for array $a[1]
              ->outIs('CLASS')
-             ->atomIsNot(array('Array'))
+             ->atomIsNot('Array')
              ->back('first');
         $this->prepareQuery();
     }

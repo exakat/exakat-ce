@@ -40,13 +40,13 @@ class AssignAnd extends Analyzer {
              ->outIs('RIGHT')
              ->atomIsNot('Exit')
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->atomIs('Functioncall')
-                             ->inIs('DEFINITION')
-                             ->analyzerIs('Functions/KillsApp')
-                     )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->atomIs('Functioncall')
+                               ->inIs('DEFINITION')
+                               ->analyzerIs('Functions/KillsApp')
+                      )
              )
              ->back('first');
         $this->prepareQuery();

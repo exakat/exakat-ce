@@ -23,12 +23,12 @@
 namespace Exakat\Analyzer\Dump;
 
 class CollectVariables extends AnalyzerTable {
-    protected $analyzerName = 'variables';
+    protected string $analyzerName = 'variables';
 
-    protected $analyzerTable = 'variables';
+    protected string $analyzerTable = 'variables';
 
     // Store inclusionss of files within each other
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE variables (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                           variable STRING,
                           type STRING
@@ -47,7 +47,7 @@ sideEffect{
     type = types[type];
 }
 GREMLIN
-)
+             )
              ->getVariable(array('variable', 'type'));
         $this->prepareQuery();
     }

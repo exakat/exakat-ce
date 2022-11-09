@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Common\FunctionDefinition;
 
 class Php81NewFunctions extends FunctionDefinition {
-    protected $phpVersion = '8.1-';
+    protected string $phpVersion = '8.1-';
 
     public function analyze(): void {
         $this->functions = array('\enum_exists',

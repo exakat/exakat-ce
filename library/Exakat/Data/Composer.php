@@ -49,12 +49,11 @@ class Composer {
         if ($vendor !== null) {
             list($vendor, $component) = explode('/', $vendor);
             $query .= " AND vendor = '$vendor' AND component = '$component'";
-
         }
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = strtolower($row['namespace']);
         }
 
@@ -71,7 +70,7 @@ class Composer {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = strtolower($row['classname']);
         }
 
@@ -85,12 +84,11 @@ JOIN interfaces ON interfaces.namespace_id = namespaces.id";
         if ($vendor !== null) {
             list($vendor, $component) = explode('/', $vendor);
             $query .= " WHERE vendor = '$vendor' and component = '$component'";
-
         }
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = strtolower($row['interfacename']);
         }
 
@@ -104,12 +102,11 @@ JOIN traits ON traits.namespace_id = namespaces.id";
         if ($vendor !== null) {
             list($vendor, $component) = explode('/', $vendor);
             $query .= " WHERE vendor = '$vendor' and component = '$component'";
-
         }
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = strtolower($row['traitname']);
         }
 

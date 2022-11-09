@@ -24,10 +24,9 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectDefinitionsStats extends AnalyzerArrayHashResults {
-    protected $analyzerName = 'definitionStats';
+    protected string $analyzerName = 'definitionStats';
 
     public function analyze(): void {
-
         $types = array('Staticconstant'   => 'staticconstants',
                        'Staticmethodcall' => 'staticmethodcalls',
                        'Staticproperty'   => 'staticproperties',
@@ -41,7 +40,7 @@ class CollectDefinitionsStats extends AnalyzerArrayHashResults {
              ->raw(<<<'GREMLIN'
 groupCount("x").by(label).cap("x")
 GREMLIN
-);
+             );
         // Possibly empty when none of the above are used.
         $resAll = $this->rawQuery()->toArray()[0] ?? array();
 
@@ -52,7 +51,7 @@ where(
 ).groupCount("m").by(label).cap("m")
 
 GREMLIN
-);
+             );
         // Possibly empty when none of the above are used.
         $resDefined = $this->rawQuery()->toArray()[0] ?? array();
 
@@ -61,7 +60,7 @@ GREMLIN
 has("isPhp", true).groupCount("m").by(label).cap("m")
 
 GREMLIN
-);
+             );
         // Possibly empty when none of the above are used.
         $resPhp = $this->rawQuery()->toArray()[0] ?? array();
 
@@ -70,7 +69,7 @@ GREMLIN
 has("isStub", true).groupCount("m").by(label).cap("m")
 
 GREMLIN
-);
+             );
         // Possibly empty when none of the above are used.
         $resStub = $this->rawQuery()->toArray()[0] ?? array();
 
@@ -79,11 +78,11 @@ GREMLIN
 has("isExt", true).groupCount("m").by(label).cap("m")
 
 GREMLIN
-);
+             );
         // Possibly empty when none of the above are used.
         $resExt = $this->rawQuery()->toArray()[0] ?? array();
 
-        foreach($types as $label => $name) {
+        foreach ($types as $label => $name) {
             $this->analyzerValues[] = array($name,
                                             $resAll[$label] ?? 0,
                                             );

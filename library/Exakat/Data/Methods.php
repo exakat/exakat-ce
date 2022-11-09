@@ -24,11 +24,9 @@
 namespace Exakat\Data;
 
 use Exakat\Config;
+use SQLite3;
 
 class Methods {
-    private $sqlite = null;
-    private $phar_tmp = null;
-
     public const STRICT = true;
     public const LOOSE  = false;
 
@@ -36,6 +34,9 @@ class Methods {
     public const DIRECT   = true;
 
     private const ARGS_COL = array('arg0', 'arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6', 'arg7', 'arg8', 'arg9', 'arg10', 'arg11');
+
+    private SQLite3 $sqlite;
+    private $phar_tmp = null;
 
     public function __construct(Config $config) {
         if ($config->is_phar) {
@@ -59,7 +60,7 @@ class Methods {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -71,7 +72,7 @@ class Methods {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -83,7 +84,7 @@ class Methods {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -95,7 +96,7 @@ class Methods {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -107,7 +108,7 @@ class Methods {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -116,7 +117,7 @@ class Methods {
 
     public function getFunctionsLastArgsNotBoolean(): array {
         $clauses = array();
-        foreach(self::ARGS_COL as $position => $name) {
+        foreach (self::ARGS_COL as $position => $name) {
             $max = $position + 1;
             $clauses[] = "(args_max = $max AND not instr(arg$position, 'bool') AND arg$position != '')";
         }
@@ -128,7 +129,7 @@ WHERE methods.class = "PHP" AND
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row['fullnspath'];
         }
 
@@ -137,7 +138,7 @@ WHERE methods.class = "PHP" AND
 
     public function getFunctionsReferenceArgs(): array {
         $clauses = array();
-        foreach(self::ARGS_COL as $position => $name) {
+        foreach (self::ARGS_COL as $position => $name) {
             $clauses[] = "SELECT name AS function, $position AS position FROM args_is_ref WHERE Class = 'PHP' AND arg$position = 'reference'";
         }
 
@@ -146,7 +147,7 @@ WHERE methods.class = "PHP" AND
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -155,7 +156,7 @@ WHERE methods.class = "PHP" AND
 
     public function getFunctionsValueArgs(): array {
         $clauses = array();
-        foreach(self::ARGS_COL as $position => $name) {
+        foreach (self::ARGS_COL as $position => $name) {
             $clauses[] = "SELECT name AS function, $position AS position FROM args_is_ref WHERE Class = 'PHP' AND arg$position = 'value'";
         }
 
@@ -164,7 +165,7 @@ WHERE methods.class = "PHP" AND
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -176,7 +177,7 @@ WHERE methods.class = "PHP" AND
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row['name'];
         }
 
@@ -188,7 +189,7 @@ WHERE methods.class = "PHP" AND
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row['name'];
         }
 
@@ -198,23 +199,23 @@ WHERE methods.class = "PHP" AND
     public function getNativeMethodArgType(): array {
         $return = array();
 
-            $query = <<<'SQL'
+        $query = <<<'SQL'
 SELECT lower(class) as class, lower(name) AS name, arg0, arg1 FROM args_type WHERE class != 'PHP' AND arg0 != ''
 SQL;
         $res = $this->sqlite->query($query);
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (!isset($return['\\' . $row['class']])) {
                 $return['\\' . $row['class']] = array();
             }
 
-            foreach(range(0, 11) as $i) {
+            foreach (range(0, 11) as $i) {
                 if (empty($row['arg' . $i])) {
                     continue;
                 }
 
                 $types = explode(',', $row['arg' . $i]);
-                foreach($types as &$type) {
+                foreach ($types as &$type) {
                     if ($type[0] !== '\\') {
                         $type = '\\' . $type;
                     }
@@ -240,20 +241,20 @@ SELECT lower(class) AS class,
 SQL;
         $res = $this->sqlite->query($query);
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (!isset($return['\\' . $row['class']])) {
                 $return['\\' . $row['class']] = array();
             }
 
             $types = explode(',', $row['return']);
-            foreach($types as &$type) {
+            foreach ($types as &$type) {
                 if ($type[0] !== '\\') {
                     $type = '\\' . $type;
                 }
             }
             unset($type);
             $return['\\' . $row['class']][$row['name']] = $types;
-       }
+        }
 
         return $return;
     }
@@ -262,14 +263,14 @@ SQL;
         $return = array();
 
         $args = self::ARGS_COL;
-        foreach($args as $id => $arg) {
+        foreach ($args as $id => $arg) {
             $query = <<<SQL
 SELECT $arg, lower(GROUP_CONCAT('\' || name)) AS functions FROM args_type WHERE class='PHP' AND $arg IN ('int', 'array', 'bool','string') GROUP BY $arg
 SQL;
             $res = $this->sqlite->query($query);
 
             $position = array();
-            while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+            while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
                 $position[$row[$arg]] = explode(',', $row['functions']);
             }
 
@@ -296,7 +297,7 @@ SQL;
         return $return;
     }
 
-    public function getFunctionsByArgType(string $typehint = 'int', $strict = self::STRICT): array {
+    public function getFunctionsByArgType(string $typehint = 'int', bool $strict = self::STRICT): array {
         $return = array_fill(0, 10, array());
 
         if ($strict === self::LOOSE) {
@@ -309,7 +310,7 @@ SQL;
         }
 
         $clauses = array();
-        foreach(self::ARGS_COL as $position => $name) {
+        foreach (self::ARGS_COL as $position => $name) {
             $max = $position + 1;
             $clauses[] = "SELECT name AS function, $position AS position FROM args_type WHERE Class = 'PHP' AND arg$position $search";
         }
@@ -318,7 +319,7 @@ SQL;
 
         $res = $this->sqlite->query($query);
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             array_collect_by($return, (int) $row['position'], '\\' . mb_strtolower($row['function']));
         }
 
@@ -333,7 +334,7 @@ SELECT * FROM bugfixes ORDER BY SUBSTR(solvedIn72, 5) + 0 DESC, SUBSTR(solvedIn7
 SQL;
         $res = $this->sqlite->query($query);
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row;
         }
 
@@ -358,14 +359,14 @@ SELECT return, lower(GROUP_CONCAT('\' || name)) AS functions
 SQL;
         $res = $this->sqlite->query($query);
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $types = explode(',', $row['return']);
-            foreach($types as $type) {
+            foreach ($types as $type) {
                 array_collect_by($return, $type, explode(',', $row['functions']));
             }
         }
 
-        foreach($return as &$list) {
+        foreach ($return as &$list) {
             $list = array_merge(...$list);
         }
         unset($list);
@@ -392,7 +393,7 @@ SELECT return, lower(GROUP_CONCAT('\' || name)) AS functions
 SQL;
         $res = $this->sqlite->query($query);
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = explode(',', $row['functions']);
         }
 
@@ -424,10 +425,10 @@ SELECT CASE WHEN arg0  $not LIKE '%$type%' THEN 1 ELSE 0 END AS arg0 ,
 SQL;
         $res = $this->sqlite->query($query);
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $function = $row['function'];
             unset($row['function']);
-            foreach($row as $arg => $typed) {
+            foreach ($row as $arg => $typed) {
                 $arg = $arg[3];
                 if (!empty($typed)) {
                     $return[$arg][] = $function;

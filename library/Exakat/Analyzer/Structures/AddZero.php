@@ -49,6 +49,8 @@ class AddZero extends Analyzer {
         $this->atomIs('Addition')
              ->outIs(array('LEFT', 'RIGHT'))
              ->followParAs(FollowParAs::FOLLOW_PARAS_ONLY)
+             ->atomIsNot(self::CONTAINERS)
+             ->atomIsNot(self::CALLS)
              ->atomIs(array('Integer', 'Null', 'Boolean'), self::WITH_CONSTANTS)
              ->is('intval', 0)
              ->back('first');
@@ -67,7 +69,7 @@ class AddZero extends Analyzer {
              ->savePropertyAs('fullcode', 'varname')
              ->back('first')
              ->nextSibling()
-             ->atomIsNot(array('Function', 'Class', 'Trait', 'Interface', 'Dowhile', 'While', 'Foreach', 'For'))
+             ->atomIsNot(array('Function', 'Class', 'Trait', 'Interface', 'Enum', 'Dowhile', 'Ifthen', 'While', 'Foreach', 'For', 'Switch', 'Match'))
              ->atomInsideNoDefinition('Addition')
              ->as('results')
              ->analyzerIsNot('self')

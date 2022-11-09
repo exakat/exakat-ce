@@ -55,6 +55,7 @@ class Test extends Tasks {
         $analyze = new CleanDb(self::IS_SUBTASK);
         $analyze->setConfig($configThema);
         $analyze->run();
+        $this->gremlin->empty();
 
         display("Cleaning project\n");
         $clean = new Clean(self::IS_SUBTASK);

@@ -28,8 +28,8 @@ use Exakat\Analyzer\Analyzer;
 class IsExtInterface extends Analyzer {
     public function analyze(): void {
         $interfaces = array_merge(exakat('phpCore')->getInterfaceList(),
-                                  exakat('phpExtensions')->getInterfaceList(),
-                                 );
+            exakat('phpExtensions')->getInterfaceList(),
+        );
         if (empty($interfaces)) {
             return;
         }

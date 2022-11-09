@@ -27,7 +27,8 @@ namespace Exakat\Tasks\Helpers;
 abstract class Plugin {
     protected const NOT_PROVIDED = '';
 
-    public function __construct() {}
+    public function __construct() {
+    }
 
     abstract public function run(Atom $atom, array $extras): void;
 }

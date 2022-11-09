@@ -34,6 +34,7 @@ class ConstantUsage extends Analyzer {
     public function analyze(): void {
         // Nsname that is not used somewhere else
         $this->atomIs('Nsname')
+             ->analyzerIsNot('self')
              ->has('line')
              ->hasNoIn(array('NEW', 'USE', 'NAME', 'EXTENDS', 'IMPLEMENTS', 'CLASS', 'CONST', 'TYPEHINT', 'RETURNTYPE',
                              'FUNCTION', 'GROUPUSE'));
@@ -41,6 +42,7 @@ class ConstantUsage extends Analyzer {
 
         // Identifier that is not used somewhere else
         $this->atomIs('Identifier')
+             ->analyzerIsNot('self')
              ->has('line')
              ->hasNoIn(array('NEW', 'USE', 'NAME', 'CONSTANT', 'MEMBER', 'TYPEHINT', 'INSTEADOF', 'METHOD', 'TYPEHINT', 'RETURNTYPE',
                              'CLASS', 'EXTENDS', 'IMPLEMENTS', 'CLASS', 'AS', 'VARIABLE', 'FUNCTION', 'CONST', 'GROUPUSE'));
@@ -48,12 +50,14 @@ class ConstantUsage extends Analyzer {
 
         // special case for Boolean and Null
         $this->atomIs(array('Boolean', 'Null'))
-                     ->has('line');
+             ->analyzerIsNot('self')
+             ->has('line');
         $this->prepareQuery();
 
         // defined('constant') : then the string is a constant
         $this->atomFunctionIs(array('\defined', '\constant'))
              ->outWithRank('ARGUMENT', 0)
+             ->analyzerIsNot('self')
              ->atomIs('String', self::WITH_CONSTANTS);
         $this->prepareQuery();
 

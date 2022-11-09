@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class MissingSubpattern extends Analyzer {
-     private $pregFunctions = array('\\preg_match_all',
+    private $pregFunctions = array('\\preg_match_all',
                                     '\\preg_match',
                                     '\\preg_replace',
                                     '\\preg_replace_callback',
@@ -39,10 +39,10 @@ class MissingSubpattern extends Analyzer {
              ->hasChildWithRank('ARGUMENT', 2) // subpatterns are captured
              // Also for preg_replace_* but that won't happen.
              ->not(
-                $this->side()
-                     ->outWithRank('ARGUMENT', 3)
-                     ->atomInsideNoDefinition(array('Nsname', 'Identifier'))
-                     ->fullnspathIs('\PREG_UNMATCHED_AS_NULL', self::CASE_SENSITIVE)
+                 $this->side()
+                      ->outWithRank('ARGUMENT', 3)
+                      ->atomInsideNoDefinition(array('Nsname', 'Identifier'))
+                      ->fullnspathIs('\PREG_UNMATCHED_AS_NULL', self::CASE_SENSITIVE)
              )
              ->outWithRank('ARGUMENT', 0)
              ->has('noDelimiter')

@@ -31,9 +31,9 @@ class UncheckedResources extends Analyzer {
         $resourceUsage = $this->loadJson('resource_usage.json');
 
         $positions = array(0);
-        foreach($resourceUsage as $creation => $usage) {
+        foreach ($resourceUsage as $creation => $usage) {
             $creation = makeFullNsPath($creation);
-            foreach($positions as $pos) {
+            foreach ($positions as $pos) {
                 $position = "function$pos";
                 if (!isset($usage->{$position})) {
                     continue;

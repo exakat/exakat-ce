@@ -43,7 +43,7 @@ class RepeatedRegex extends Analyzer {
              ->raw(<<<'GREMLIN'
 groupCount("m").by("code").cap("m").next().findAll{ a,b -> b > 1}.keySet()
 GREMLIN
-);
+             );
         $repeatedRegex = $this->rawQuery()->toArray();
 
         if (empty($repeatedRegex)) {

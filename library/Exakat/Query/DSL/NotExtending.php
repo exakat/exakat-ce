@@ -28,14 +28,12 @@ class NotExtending extends DSL {
     public function run(): Command {
         list($fullnspath) = func_get_args();
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
-        return new Command(<<<GREMLIN
+        return new Command(<<<'GREMLIN'
 not(
-    where( __.emit().repeat( __.out("EXTENDS").in("DEFINITION")).times($MAX_LOOPING)
-                    .out("EXTENDS").has("fullnspath", within(***)) ) 
+    __.out("EXTENDS").has("fullnspath", within(***))
 )
 GREMLIN
-, array($fullnspath));
+            , array($fullnspath));
     }
 }
 ?>

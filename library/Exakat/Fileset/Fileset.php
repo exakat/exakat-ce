@@ -24,11 +24,11 @@
 namespace Exakat\Fileset;
 
 abstract class Fileset {
-    protected $filter;
-    protected $files   = array();
-    protected $ignored = array();
+    protected ?Fileset $filter  = null;
+    protected array    $files   = array();
+    protected array    $ignored = array();
 
-    public function addFilter($filter) {
+    public function addFilter(Fileset $filter) : void {
         if ($this->filter === null) {
             $this->filter = $filter;
             $this->filter->setFiles($this->files);
@@ -37,7 +37,7 @@ abstract class Fileset {
         }
     }
 
-    public function getFiles($files = null): array {
+    public function getFiles(?array $files = null): array {
         if ($this->filter === null) {
             return $this->files;
         } else {

@@ -23,11 +23,11 @@
 namespace Exakat\Analyzer\Dump;
 
 class CollectFilesDependencies extends AnalyzerTable {
-    protected $analyzerName = 'filesDependencies';
+    protected string $analyzerName = 'filesDependencies';
 
-    protected $analyzerTable = 'filesDependencies';
+    protected string $analyzerTable = 'filesDependencies';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE filesDependencies ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                                  including STRING,
                                  included STRING,
@@ -74,25 +74,25 @@ SQL;
              ->raw(<<<'GREMLIN'
 repeat( __.inE().not(hasLabel("DEFINITION")).outV() ).until(hasLabel("File"))
 GREMLIN
-)
+             )
              ->_as('file')
              ->raw(<<<'GREMLIN'
 select("classe").out("EXTENDS")
 .repeat( __.inE().not(hasLabel("DEFINITION")).outV() ).until(hasLabel("File"))
 GREMLIN
-)
+             )
              ->_as('include')
              ->select(array('file'    => 'fullcode',
-                            'include' => 'fullcode',
-                            'type'    => 'extends'
-                            ));
+                                         'include' => 'fullcode',
+                                         'type'    => 'extends'
+                                         ));
         $this->prepareQuery();
 
         // Finding typehint
         $this->atomIs(self::FUNCTIONS_ALL, self::WITHOUT_CONSTANTS)
              ->outIs('ARGUMENT')
              ->outIs('TYPEHINT')
-             ->fullnspathIsNot(array('\\int', '\\\float', '\\object', '\\boolean', '\\string', '\\array', '\\callable', '\\iterable', '\\void'))
+             ->fullnspathIsNot(self::SCALAR_TYPEHINTS)
              ->inIs('DEFINITION')
              ->goToInstruction('File')
              ->_as('include')
@@ -110,7 +110,7 @@ GREMLIN
         // Return Typehints
         $this->atomIs(self::FUNCTIONS_ALL, self::WITHOUT_CONSTANTS)
              ->outIs('RETURNTYPE')
-             ->fullnspathIsNot(array('\\int', '\\\float', '\\object', '\\boolean', '\\string', '\\array', '\\callable', '\\iterable', '\\void'))
+             ->fullnspathIsNot(self::SCALAR_TYPEHINTS)
              ->inIs('DEFINITION')
              ->goToInstruction('File')
              ->_as('include')
@@ -212,7 +212,7 @@ GREMLIN
         // Skipping normal method/property call : They actually depends on new
         // Magic methods : todo!
         // instanceof ?
-        }
+    }
 }
 
 ?>

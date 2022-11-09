@@ -36,15 +36,15 @@ class ConstantStrangeNames extends Analyzer {
         $this->atomIs('Identifier')
              ->hasNoOut('CONCAT')
              ->not(
-                $this->side()
-                     ->inIs('NAME')
-                     ->atomIs('Const')
+                 $this->side()
+                      ->inIs('NAME')
+                      ->atomIs('Const')
              )
              ->analyzerIs('Constants/Constantnames')
              ->regexIsNot('noDelimiter', '^(\\\\\\\\?)[a-zA-Z_\\\\x7f-\\\\xff][a-zA-Z0-9_\\\\x7f-\\\\xff]*\\$')
              // simple constant name
              ->regexIsNot('noDelimiter', '^(\\\\\\\\?)([a-zA-Z_\\\\x7f-\\\\xff][a-zA-Z0-9_\\\\x7f-\\\\xff]*\\\\\\\\)+[a-zA-Z_\\\\x7f-\\\\xff][a-zA-Z0-9_\\\\x7f-\\\\xff]*\\$');
-             // \\\\\\\\ is equivalent to \\ (two slashes) in the final regex.
+        // \\\\\\\\ is equivalent to \\ (two slashes) in the final regex.
         $this->prepareQuery();
     }
 }

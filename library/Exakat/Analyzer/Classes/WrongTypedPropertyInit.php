@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Analyzer;
 
 class WrongTypedPropertyInit extends Analyzer {
-    protected $phpVersion = '7.4+';
+    protected string $phpVersion = '7.4+';
 
     public function dependsOn(): array {
         return array('Complete/PropagateCalls',
@@ -49,13 +49,13 @@ class WrongTypedPropertyInit extends Analyzer {
              ->hasIn('RIGHT')
              ->outIs('NEW')
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->inIs('DEFINITION')
-                             ->goToAllImplements(self::INCLUDE_SELF)
-                             ->samePropertyAs('fullnspath', 'fnp')
-                        )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->inIs('DEFINITION')
+                               ->goToAllImplements(self::INCLUDE_SELF)
+                               ->samePropertyAs('fullnspath', 'fnp')
+                      )
              )
              ->back('first');
         $this->prepareQuery();
@@ -75,11 +75,11 @@ class WrongTypedPropertyInit extends Analyzer {
              ->outIs('RETURNTYPE')
 
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::CIT)
-                     ->goToAllImplements(self::INCLUDE_SELF)
-                     ->samePropertyAs('fullnspath', 'fnp')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::CIT)
+                      ->goToAllImplements(self::INCLUDE_SELF)
+                      ->samePropertyAs('fullnspath', 'fnp')
              )
              ->back('first');
         $this->prepareQuery();
@@ -97,28 +97,35 @@ class WrongTypedPropertyInit extends Analyzer {
 
              ->back('first') // This avoids ending on another property definition when in multiple PPP definition
              ->outIs('DEFAULT')
+             ->hasNoIn('RIGHT')
              ->atomIs(array('Integer', 'Float', 'Null', 'Boolean', 'Arrayliteral', 'String', 'New', 'Functioncall'), self::WITH_CONSTANTS)
+             ->raw('
+or(
+    __.hasLabel("Integer", "Float", "Null", "Boolean", "Arrayliteral", "String" ),
+    __.out("NEW").has("fullnspath")
+)
+             ')
              ->savePropertyAs('label', 'type')
              // For New values
              ->optional(
-                $this->side()
-                     ->atomIs('New')
-                     ->outIs('NEW')
-                     ->savePropertyAs('fullnspath', 'fqn')
+                 $this->side()
+                      ->atomIs('New')
+                      ->outIs('NEW')
+                      ->savePropertyAs('fullnspath', 'fqn')
              )
              // For false values
              ->optional(
-                $this->side()
-                     ->atomIs('Boolean')
-                     ->savePropertyAs('fullnspath', 'fqn2')
+                 $this->side()
+                      ->atomIs('Boolean')
+                      ->savePropertyAs('fullnspath', 'fqn2')
              )
              // For returntypes
              ->optional(
-                $this->side()
-                     ->atomIs('Functioncall')
-                     ->inIs('DEFINITION')
-                     ->outIs('RETURNTYPE') // This wil only works with single return types
-                     ->savePropertyAs('fullnspath', 'fqn3')
+                 $this->side()
+                      ->atomIs('Functioncall')
+                      ->inIs('DEFINITION')
+                      ->outIs('RETURNTYPE') // This wil only works with single return types
+                      ->savePropertyAs('fullnspath', 'fqn3')
              )
              ->back('ppp')
 

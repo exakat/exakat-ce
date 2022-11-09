@@ -25,11 +25,11 @@ namespace Exakat\Autoload;
 use Phar;
 
 class AutoloadDev implements Autoloader {
-    public const LOAD_ALL = null;
+    public const LOAD_ALL = 1;
 
-    private $path = '';
+    private string $path = '';
 
-    public function __construct($path) {
+    public function __construct(string $path) {
         if (class_exists('\\Phar') && phar::running()) {
             // No autoloadDev with phar
             // Ignoring it all
@@ -39,7 +39,7 @@ class AutoloadDev implements Autoloader {
         $this->path = $path;
     }
 
-    public function autoload($name): void {
+    public function autoload(string $name): void {
         if (empty($this->path)) {
             return;
         }
@@ -51,11 +51,11 @@ class AutoloadDev implements Autoloader {
         }
     }
 
-    public function registerAutoload() {
+    public function registerAutoload() : void {
         spl_autoload_register(array($this, 'autoload'));
     }
 
-    public function getAllAnalyzers() {
+    public function getAllAnalyzers() : array {
         $fullPath = "{$this->path}/Analyzer/analyzers.ini";
 
         if (!file_exists($fullPath)) {
@@ -67,7 +67,7 @@ class AutoloadDev implements Autoloader {
         return $ini === false ? array() : $ini;
     }
 
-    public function loadIni($name, $libel = self::LOAD_ALL) {
+    public function loadIni(string $name, int $libel = self::LOAD_ALL) : array {
         $fullPath = "{$this->path}/data/$name";
 
         if (!file_exists($fullPath)) {
@@ -88,7 +88,7 @@ class AutoloadDev implements Autoloader {
         return array_merge($return);
     }
 
-    public function loadJson($name, $libel = self::LOAD_ALL) {
+    public function loadJson(string $name, int $libel = self::LOAD_ALL) : array {
         $fullPath = "{$this->path}/data/$name";
 
         if (!file_exists($fullPath)) {
@@ -108,7 +108,7 @@ class AutoloadDev implements Autoloader {
         return $return;
     }
 
-    public function loadData($path) {
+    public function loadData(string $path) : array {
         $fullPath = "{$this->path}/$path";
 
         if (file_exists($fullPath)) {
@@ -117,7 +117,6 @@ class AutoloadDev implements Autoloader {
             return null;
         }
     }
-
 }
 
 ?>

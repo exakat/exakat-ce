@@ -29,7 +29,7 @@ class Select extends DSL {
 
         $by     = array();
         $select = array();
-        foreach($values as $k => $v) {
+        foreach ($values as $k => $v) {
             assert(in_array($k, $this->availableLabels, \STRICT_COMPARISON), "No such step as '$k'");
 
             if (is_int($k)) {

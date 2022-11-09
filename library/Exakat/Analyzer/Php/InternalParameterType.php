@@ -38,9 +38,9 @@ class InternalParameterType extends Analyzer {
                                 'mixed'    => '' //explicitely here to avoid it
                                 );
 
-        foreach($args as $position => $types) {
-            foreach($types as $type => $functions) {
-                if (strpos($type, ',') !== false) {
+        foreach ($args as $position => $types) {
+            foreach ($types as $type => $functions) {
+                if (str_contains($type, ',')  ) {
                     continue; // No support for multiple type yet
                 }
 
@@ -49,7 +49,7 @@ class InternalParameterType extends Analyzer {
                 }
 
                 $this->atomFunctionIs($functions)
-                     ->raw('or( __.has("isPhp", true), __.has("isExt", true) )')
+                     ->isAnyOf(array('isPhp', 'isExt'), true)
                      ->outWithRank('ARGUMENT', $position)
 
                      // only include literals (and closures and literal array)

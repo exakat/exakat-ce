@@ -30,6 +30,7 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
 
     public function analyze(): void {
         // $a = new X(); $a->m1();
+        // $a = new $this; $a->m1();
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
               ->hasNoIn('DEFINITION')
               ->outIs('METHOD')
@@ -40,8 +41,8 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->inIs('DEFINITION')  // No check on atoms :
               ->atomIs(array('Variabledefinition', 'Parametername', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
               ->outIs('DEFAULT')
-              ->atomIs('New', self::WITHOUT_CONSTANTS)
-              ->outIs('NEW')
+              ->atomIs(array('New', 'Clone'), self::WITHOUT_CONSTANTS)
+              ->outIs(array('NEW', 'CLONE'))
               ->inIs('DEFINITION')
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -64,8 +65,8 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->inIs('DEFINITION')
               ->atomIs(array('Variabledefinition', 'Parametername', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
               ->outIs('DEFAULT')
-              ->atomIs('New', self::WITHOUT_CONSTANTS)
-              ->outIs('NEW')
+              ->atomIs(array('New', 'Clone'), self::WITHOUT_CONSTANTS)
+              ->outIs(array('NEW', 'CLONE'))
               ->inIs('DEFINITION')
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -75,6 +76,8 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
+
+        // @todo (new x)->method()
     }
 }
 

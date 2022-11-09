@@ -46,12 +46,14 @@ class Boolval extends Plugin {
                 return;
 
             default:
-                // All is OK, we proceed
-        }
+            // All is OK, we proceed
+            }
 
-        foreach($extras as $extra) {
-            if (is_array($extra)) { continue; }
-            if ($extra->intval === self::NO_VALUE)  {
+        foreach ($extras as $extra) {
+            if (is_array($extra)) {
+                continue;
+            }
+            if ($extra->intval === self::NO_VALUE) {
                 $atom->intval = self::NO_VALUE;
                 return ;
             }
@@ -59,7 +61,6 @@ class Boolval extends Plugin {
 
         // Ignoring $extras['LEFT'] === null
         if ($atom->atom === 'Assignation') {
-
             return;
         }
 
@@ -174,7 +175,7 @@ class Boolval extends Plugin {
                 if ($atom->code === '!') {
                     $atom->boolean = !$extras['NOT']->boolean;
                 } elseif ($atom->code === '~') {
-                    $atom->boolean = (bool) ~$extras['NOT']->intval;
+                    $atom->boolean = (bool) ~(int) $extras['NOT']->intval;
                 }
                 break;
 
@@ -202,8 +203,8 @@ class Boolval extends Plugin {
                 break;
 
             case 'Spaceship' :
-                    $atom->boolean = (bool) ($extras['LEFT']->boolean <=> $extras['RIGHT']->boolean);
-                    break;
+                $atom->boolean = (bool) ($extras['LEFT']->boolean <=> $extras['RIGHT']->boolean);
+                break;
 
             case 'Logical' :
                 if ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
@@ -262,8 +263,8 @@ class Boolval extends Plugin {
                 }
                 break;
 
-        default :
-            $atom->boolean = false;
+            default :
+                $atom->boolean = false;
         }
     }
 }

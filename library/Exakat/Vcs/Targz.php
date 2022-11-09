@@ -34,7 +34,7 @@ class Targz extends Vcs {
         }
 
         $res = $this->shell('gzip -V 2>&1');
-        if (strpos($res, 'gzip') === false) {
+        if (!str_contains($res, 'gzip')  ) {
             throw new HelperException('gzip');
         }
 

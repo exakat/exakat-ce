@@ -27,8 +27,7 @@ use Exakat\Query\Query;
 
 class PreviousCalls extends DSL {
     public function run(): Command {
-
-        if(func_num_args() === 1) {
+        if (func_num_args() === 1) {
             $times = abs((int) func_get_arg(0));
         } else {
             $times = 1;
@@ -55,7 +54,7 @@ emit().repeat(
 
 ).times($times)
 GREMLIN
-);
+            );
         }
     }
 }

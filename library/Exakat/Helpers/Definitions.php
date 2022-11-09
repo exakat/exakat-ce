@@ -37,8 +37,8 @@ class Definitions {
     public const PROPERTIES        = 'properties';
     public const METHODS           = 'methods';
 
-    private $ini     = array();
-    private $isValid = true;
+    private array $ini     = array();
+    private bool  $isValid = true;
 
     public function __construct(Config $config, string $path) {
         if (file_exists($config->dir_root . '/data/' . $path . '.ini')) {

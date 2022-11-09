@@ -25,7 +25,7 @@ namespace Exakat\Configsource;
 use Exakat\Project as Project;
 
 class RulesetConfig extends Config {
-    private $remoteIniFile = false;
+    private string $remoteIniFile = '';
 
     public function __construct(string $exakat_root) {
         // Normal case : rulesets.ini
@@ -55,7 +55,7 @@ class RulesetConfig extends Config {
             return self::NOT_LOADED;
         }
 
-        foreach($ini as $name => $values) {
+        foreach ($ini as $name => $values) {
             if (!isset($values['analyzer'])) {
                 continue;
             }

@@ -31,28 +31,29 @@ abstract class Vcs {
                                        'none', 'symlink', 'copy',
                                        );
 
-    protected $destination     = '';
-    protected $destinationFull = '';
+    protected string $destination     = '';
+    protected string $destinationFull = '';
 
-    protected $branch = '';
-    protected $tag    = '';
+    protected string $version = '';
+    protected string $branch = '';
+    protected string $tag    = '';
 
-    protected $checked = false;
+    protected bool $checked = false;
 
     public const NO_UPDATE = 'No update';
 
-    public function __construct($destination, $code_dir) {
+    public function __construct(string $destination, string $code_dir) {
         $this->destination     = $destination;
         $this->destinationFull = $code_dir;
     }
 
     abstract public function clone(string $source): void;
 
-    public function getDiffLines($r1, $r2): array {
+    public function getDiffLines(string $r1, string $r2): array {
         return array();
     }
 
-    public function getName() {
+    public function getName(): string {
         $path = explode('\\', static::class);
         return strtolower(array_pop($path));
     }
@@ -68,17 +69,18 @@ abstract class Vcs {
         return true;
     }
 
-    protected function selfCheck(): void { }
+    protected function selfCheck(): void {
+    }
 
-    public function getLineChanges() {
+    public function getLineChanges(): array {
         return array();
     }
 
-    public function update() {
+    public function update(): string {
         return self::NO_UPDATE;
     }
 
-    public static function getVcs(Config $config) {
+    public static function getVcs(Config $config): string {
         if ($config->svn === true) {
             return Svn::class;
         } elseif ($config->hg === true) {
@@ -123,6 +125,10 @@ abstract class Vcs {
         $this->branch = $branch;
     }
 
+    public function setVersion(string $version = ''): void {
+        $this->version = $version;
+    }
+
     public function setTag(string $tag = ''): void {
         $this->tag = $tag;
     }
@@ -132,13 +138,20 @@ abstract class Vcs {
     }
 
     public function getLastCommitDate(): int {
-         return 0;
+        return 0;
     }
 
     public function shell(string $command): string {
-         return shell_exec($command) ?: '' ?? '';
+        return shell_exec($command) ?: '' ?? '';
     }
 
+    public function getRevision(): string {
+        return 'No revision number';
+    }
+
+    public function checkOut(string $next): array {
+        return array();
+    }
 }
 
 ?>

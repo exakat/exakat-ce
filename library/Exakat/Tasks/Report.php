@@ -60,7 +60,7 @@ class Report extends Tasks {
 
         $rulesets = $this->config->project_rulesets;
         $unknown = array();
-        foreach($rulesets as $ruleset) {
+        foreach ($rulesets as $ruleset) {
             if ($ruleset === 'None') {
                 // this one is empty on purpose
                 continue;
@@ -81,16 +81,12 @@ class Report extends Tasks {
         }
 
         $this->log->log(var_export($this->config->project_reports, true));
-        foreach($this->config->project_reports as $format) {
+        foreach ($this->config->project_reports as $format) {
             $this->log->log('Building report ' . $format);
             $b = hrtime(true);
+
             $reportConfig = new ReportConfig($format, $this->config);
             $reportClass = $reportConfig->getFormatClass();
-            if (!class_exists($reportClass)) {
-                display('No such format as ' . $reportConfig->getFormat() . '. Omitting.');
-                $this->log->log('No such format as ' . $reportConfig->getFormat());
-                continue;
-            }
 
             $report = new $reportClass($reportConfig->getConfig());
 

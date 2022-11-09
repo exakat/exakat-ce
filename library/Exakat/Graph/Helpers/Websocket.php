@@ -172,7 +172,7 @@ class Websocket {
 
     protected function receive_fragment() {
 
-    // Just read the main fragment information first.
+        // Just read the main fragment information first.
         $data = $this->read(2);
 
         // Is this the final fragment?  // Bit 0 in byte 0
@@ -185,8 +185,8 @@ class Websocket {
         $rsv3  = (boolean) (ord($data[0]) & 1 << 4);
 
         // Parse opcode
-    $opcode_int = ord($data[0]) & 31; // Bits 4-7
-    $opcode_ints = array_flip(self::$opcodes);
+        $opcode_int = ord($data[0]) & 31; // Bits 4-7
+        $opcode_ints = array_flip(self::$opcodes);
         if (!array_key_exists($opcode_int, $opcode_ints)) {
             throw new \Exception("Bad opcode in websocket frame: $opcode_int");
         }
@@ -198,21 +198,21 @@ class Websocket {
         }
 
         // Masking?
-    $mask = (boolean) (ord($data[1]) >> 7);  // Bit 0 in byte 1
+        $mask = (boolean) (ord($data[1]) >> 7);  // Bit 0 in byte 1
 
-    $payload = '';
+        $payload = '';
 
         // Payload length
-    $payload_length = (integer) ord($data[1]) & 127; // Bits 1-7 in byte 1
-    if ($payload_length > 125) {
-        if ($payload_length === 126) {
-            $data = $this->read(2);
-        } // 126: Payload is a 16-bit unsigned int
-      else {
-          $data = $this->read(8);
-      } // 127: Payload is a 64-bit unsigned int
-      $payload_length = bindec(self::sprintB($data));
-    }
+        $payload_length = (integer) ord($data[1]) & 127; // Bits 1-7 in byte 1
+        if ($payload_length > 125) {
+            if ($payload_length === 126) {
+                $data = $this->read(2);
+            } // 126: Payload is a 16-bit unsigned int
+            else {
+                $data = $this->read(8);
+            } // 127: Payload is a 64-bit unsigned int
+            $payload_length = bindec(self::sprintB($data));
+        }
 
         // Get masking key.
         if ($mask) {
@@ -295,8 +295,8 @@ class Websocket {
 
         if ($written < strlen($data)) {
             throw new \Exception(
-        "Could only write $written out of " . strlen($data) . ' bytes.'
-      );
+                "Could only write $written out of " . strlen($data) . ' bytes.'
+            );
         }
     }
 
@@ -307,16 +307,16 @@ class Websocket {
             if ($buffer === false) {
                 $metadata = stream_get_meta_data($this->socket);
                 throw new \Exception(
-          'Broken frame, read ' . strlen($data) . ' of stated '
-          . $length . ' bytes.  Stream state: '
-          . json_encode($metadata)
-        );
+                    'Broken frame, read ' . strlen($data) . ' of stated '
+                    . $length . ' bytes.  Stream state: '
+                    . json_encode($metadata)
+                );
             }
             if ($buffer === '') {
                 $metadata = stream_get_meta_data($this->socket);
                 throw new \Exception(
-          'Empty read; connection dead?  Stream state: ' . json_encode($metadata)
-        );
+                    'Empty read; connection dead?  Stream state: ' . json_encode($metadata)
+                );
             }
             $data .= $buffer;
         }
@@ -394,8 +394,8 @@ class Websocket {
 
         if (!in_array($scheme, array('ws', 'wss'))) {
             throw new \Exception(
-        "Url should have scheme ws or wss, not '$scheme' from URI '$this->socket_uri' ."
-      );
+                "Url should have scheme ws or wss, not '$scheme' from URI '$this->socket_uri' ."
+            );
         }
 
         $host_uri = ($scheme === 'wss' ? 'ssl' : 'tcp') . '://' . $host;
@@ -407,8 +407,8 @@ class Websocket {
                 $context = $this->options['context'];
             } else {
                 throw new \InvalidArgumentException(
-          "Stream context in \$options['context'] isn't a valid context"
-        );
+                    "Stream context in \$options['context'] isn't a valid context"
+                );
             }
         } else {
             $context = stream_context_create();
@@ -416,18 +416,18 @@ class Websocket {
 
         // Open the socket.  @ is there to supress warning that we will catch in check below instead.
         $this->socket = @stream_socket_client(
-      $host_uri . ':' . $port,
-      $errno,
-      $errstr,
-      $this->options['timeout'],
-      STREAM_CLIENT_CONNECT,
-      $context
-    );
+            $host_uri . ':' . $port,
+            $errno,
+            $errstr,
+            $this->options['timeout'],
+            STREAM_CLIENT_CONNECT,
+            $context
+        );
 
         if ($this->socket === false) {
             throw new \Exception(
-        "Could not open socket to \"$host:$port\": $errstr ($errno)."
-      );
+                "Could not open socket to \"$host:$port\": $errstr ($errno)."
+            );
         }
 
         // Set timeout on the stream as well.
@@ -464,11 +464,11 @@ class Websocket {
         $header =
       'GET ' . $path_with_query . " HTTP/1.1\r\n"
       . implode(
-        "\r\n", array_map(
-          function ($key, $value) {
-              return "$key: $value";
-          }, array_keys($headers), $headers
-        )
+          "\r\n", array_map(
+              function ($key, $value) {
+                  return "$key: $value";
+              }, array_keys($headers), $headers
+          )
       )
       . "\r\n\r\n";
 
@@ -484,9 +484,9 @@ class Websocket {
         if (!preg_match('#Sec-WebSocket-Accept:\s(.*)$#mUi', $response, $matches)) {
             $address = $scheme . '://' . $host . $path_with_query;
             throw new \Exception(
-        "Connection to '{$address}' failed: Server sent invalid upgrade response:\n"
-        . $response
-      );
+                "Connection to '{$address}' failed: Server sent invalid upgrade response:\n"
+                . $response
+            );
         }
 
         $keyAccept = trim($matches[1]);

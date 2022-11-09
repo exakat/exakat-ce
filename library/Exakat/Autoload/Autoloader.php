@@ -23,10 +23,9 @@
 namespace Exakat\Autoload;
 
 interface Autoloader {
-    public function autoload($name);
+    public function autoload(string $name) : void;
 
-    public function registerAutoload();
-
+    public function registerAutoload() : void;
 }
 
 ?>

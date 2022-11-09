@@ -24,11 +24,11 @@ namespace Exakat\Analyzer\Dump;
 
 
 class PublicReach extends AnalyzerTable {
-    protected $analyzerName = 'publicReach';
+    protected string $analyzerName = 'publicReach';
 
-    protected $analyzerTable = 'publicReach';
+    protected string $analyzerTable = 'publicReach';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE publicReach ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                            calling STRING,
                            caller STRING,

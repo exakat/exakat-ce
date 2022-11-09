@@ -43,45 +43,39 @@ class WrongNumberOfArguments extends Analyzer {
                      'Complete/SetClassRemoteDefinitionWithTypehint',
                      'Functions/VariableArguments',
                      'Complete/VariableTypehint',
+                     'Complete/IsStubStructure',
+                     'Complete/SolveTraitMethods',
                     );
     }
 
     public function analyze(): void {
         // this is for functions defined within PHP
-        $functions = $this->methods->getFunctionsArgsInterval();
+        $functions = $this->readStubs('getFunctionsArgsInterval');
         $argsMins = array();
         $argsMaxs = array();
 
-        foreach($functions as $function) {
-            $argsMins[makeFullNsPath($function['name'])] = $function['args_min'];
+        foreach ($functions as $function) {
+            $name = makeFullNsPath($function['name']);
+            $argsMins[$name] = $function['args_min'];
 
             if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makeFullNsPath($function['name'])] = $function['args_max'];
+                $argsMaxs[$name] = $function['args_max'];
             }
         }
 
-        $stubs = exakat('stubs')->getFunctionsArgsInterval();
-        foreach($stubs as $function) {
-            $argsMins[makeFullNsPath($function['name'])] = $function['args_min'];
-
-            if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makeFullNsPath($function['name'])] = $function['args_max'];
-            }
-        }
-
-       $this->atomFunctionIs(array_keys($argsMins))
+        $this->atomFunctionIs(array_keys($argsMins))
             ->savePropertyAs('fullnspath', 'fnp')
             ->hasNoVariadicArgument()
             ->isLessHash('count', $argsMins, 'fnp')
             ->back('first');
-       $this->prepareQuery();
+        $this->prepareQuery();
 
-       $this->atomFunctionIs(array_keys($argsMaxs))
+        $this->atomFunctionIs(array_keys($argsMaxs))
             ->savePropertyAs('fullnspath', 'fnp')
             ->hasNoVariadicArgument()
             ->isMoreHash('count', $argsMaxs, 'fnp')
             ->back('first');
-       $this->prepareQuery();
+        $this->prepareQuery();
 
         // this is for custom functions
         // function foo(1, 2)
@@ -133,17 +127,17 @@ class WrongNumberOfArguments extends Analyzer {
         // new A
         // new A()
         // new class() { function __construct($a) {}}
-/*        $this->atomIs('New')
-             ->outIs('NEW')
-             ->hasNoVariadicArgument()
-             ->savePropertyAs('count', 'args_count')
-             ->inIs('DEFINITION')
-             ->atomIs('Magicmethod')
-             ->analyzerIsNot('Functions/VariableArguments')
-             ->isLess('args_min', 'args_count')
-             ->back('first');
-        $this->prepareQuery();
-*/
+        /*        $this->atomIs('New')
+                     ->outIs('NEW')
+                     ->hasNoVariadicArgument()
+                     ->savePropertyAs('count', 'args_count')
+                     ->inIs('DEFINITION')
+                     ->atomIs('Magicmethod')
+                     ->analyzerIsNot('Functions/VariableArguments')
+                     ->isLess('args_min', 'args_count')
+                     ->back('first');
+                $this->prepareQuery();
+        */
         // this is for custom functions
         // new class() { function __construct($a) {}}
         $this->atomIs('New')
@@ -230,22 +224,22 @@ class WrongNumberOfArguments extends Analyzer {
         $news = $this->methods->getNewArgsInterval();
         $argsMins = array();
         $argsMaxs = array();
-        foreach($news as $new) {
+        foreach ($news as $new) {
             $argsMins[makeFullNsPath($new['class'])] = $new['args_min'];
 
-            if ($function['args_max'] < \MAX_ARGS) {
+            if ($new['args_max'] < \MAX_ARGS) {
                 $argsMaxs[makeFullNsPath($new['class'])] = $new['args_max'];
             }
         }
 
         $stubs = exakat('stubs')->getConstructorsArgsInterval();
-        foreach($stubs as $function) {
-            list($classe, ) = explode('::', $function['name'], 2);
+        foreach ($stubs as $stub) {
+            list($classe ) = explode('::', $stub['name'], 2);
             $classe = makeFullNsPath($classe);
-            $argsMins[$classe] = $function['args_min'];
+            $argsMins[$classe] = $stub['args_min'];
 
-            if ($function['args_max'] < \MAX_ARGS) {
-                $argsMaxs[$classe] = $function['args_max'];
+            if ($stub['args_max'] < \MAX_ARGS) {
+                $argsMaxs[$classe] = $stub['args_max'];
             }
         }
 
@@ -269,18 +263,18 @@ class WrongNumberOfArguments extends Analyzer {
         $methods = $this->methods->getMethodsArgsInterval();
         $argsMins = array();
         $argsMaxs = array();
-        foreach($methods as $method) {
+        foreach ($methods as $method) {
             $argsMins[makeFullNsPath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_min'];
 
-            if ($function['args_max'] < \MAX_ARGS) {
+            if ($method['args_max'] < \MAX_ARGS) {
                 $argsMaxs[makeFullNsPath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_max'];
             }
         }
         $stubs = exakat('stubs')->getMethodsArgsInterval();
-        foreach($stubs as $methods) {
+        foreach ($stubs as $methods) {
             $argsMins[makeFullNsPath($methods['name'])] = $methods['args_min'];
 
-            if ($function['args_max'] < \MAX_ARGS) {
+            if ($methods['args_max'] < \MAX_ARGS) {
                 $argsMaxs[makeFullNsPath($methods['name'])] = $methods['args_max'];
             }
         }
@@ -290,6 +284,31 @@ class WrongNumberOfArguments extends Analyzer {
         $this->atomIs('Methodcall')
              ->outIs('OBJECT')
              ->goToTypehint()
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->back('first')
+
+             ->outIs('METHOD') // for methods calls, static or not.
+             ->hasNoVariadicArgument()
+
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'name')
+             ->inIs('NAME')
+
+             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+
+             ->isLessHash('count', $argsMins, 'fnp')
+             ->back('first');
+        $this->prepareQuery();
+
+        // Method in a trait
+        // For traits, one must go to the definition, and find the trait in the class.
+        $this->atomIs('Methodcall')
+             ->outIs('OBJECT')
+             ->goToTypehint()
+             ->inIs('DEFINITION')
+             ->goToAllParentsTraits(self::INCLUDE_SELF)
+             ->outIs('USE')
+             ->outIs('USE')
              ->savePropertyAs('fullnspath', 'fnp')
              ->back('first')
 
@@ -325,6 +344,32 @@ class WrongNumberOfArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
+        // Method in a trait
+        // For traits, one must go to the definition, and find the trait in the class.
+        $this->atomIs('Methodcall')
+             ->outIs('OBJECT')
+             ->goToTypehint()
+             ->inIs('DEFINITION')
+             ->goToAllParentsTraits(self::INCLUDE_SELF)
+             ->outIs('USE')
+             ->outIs('USE')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->back('first')
+
+             ->outIs('METHOD') // for methods calls, static or not.
+             ->hasNoVariadicArgument()
+
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'name')
+             ->inIs('NAME')
+
+             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+
+             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->back('first');
+        $this->prepareQuery();
+
+        // Statimc methods
         $this->atomIs('Staticmethodcall')
              ->outIs('CLASS')
              ->savePropertyAs('fullnspath', 'fnp')
@@ -345,6 +390,29 @@ class WrongNumberOfArguments extends Analyzer {
 
         $this->atomIs('Staticmethodcall')
              ->outIs('CLASS')
+             ->inIs('DEFINITION')
+             ->goToAllParentsTraits(self::INCLUDE_SELF)
+             ->outIs('USE')
+             ->outIs('USE')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->back('first')
+
+             ->outIs('METHOD') // for methods calls, static or not.
+             ->hasNoVariadicArgument()
+
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'name')
+             ->inIs('NAME')
+
+             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+
+             ->isLessHash('count', $argsMins, 'fnp')
+             ->back('first');
+        $this->prepareQuery();
+
+
+        $this->atomIs('Staticmethodcall')
+             ->outIs('CLASS')
              ->savePropertyAs('fullnspath', 'fnp')
              ->back('first')
 
@@ -361,6 +429,27 @@ class WrongNumberOfArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
+        $this->atomIs('Staticmethodcall')
+             ->outIs('CLASS')
+             ->inIs('DEFINITION')
+             ->goToAllParentsTraits(self::INCLUDE_SELF)
+             ->outIs('USE')
+             ->outIs('USE')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->back('first')
+
+             ->outIs('METHOD') // for methods calls, static or not.
+             ->hasNoVariadicArgument()
+
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'name')
+             ->inIs('NAME')
+
+             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+
+             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->back('first');
+        $this->prepareQuery();
     }
 }
 

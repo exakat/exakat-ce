@@ -35,21 +35,21 @@ class TypehintMustBeReturned extends Analyzer {
              ->isNot('abstract', true)
              // Not an empty block
              ->not(
-                $this->side()
-                     ->outIs('BLOCK')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomIs('Void')
              )
              // Do not throw
              ->not(
-                $this->side()
-                     ->outIs('BLOCK')
-                     ->atomInsideNoDefinition('Throw')
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomInsideNoDefinition('Throw')
              )
              ->not(
-                $this->side()
-                     ->outIs('BLOCK')
-                     ->atomInsideNoDefinition('Functioncall')
-                     ->fullnspathIs(array('\\assert', '\\trigger_error'))
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomInsideNoDefinition('Functioncall')
+                      ->fullnspathIs(array('\\assert', '\\trigger_error'))
              )
              ->outIs('RETURNED')
              ->atomIs('Void')
@@ -66,21 +66,21 @@ class TypehintMustBeReturned extends Analyzer {
              ->back('first')
              ->isNot('abstract', true)
              ->not(
-                $this->side()
-                     ->outIs('BLOCK')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomIs('Void')
              )
              // Do not throw
              ->not(
-                $this->side()
-                     ->outIs('BLOCK')
-                     ->atomInsideNoDefinition('Throw')
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomInsideNoDefinition('Throw')
              )
              ->not(
-                $this->side()
-                     ->outIs('BLOCK')
-                     ->atomInsideNoDefinition('Functioncall')
-                     ->fullnspathIs(array('\\assert', '\\trigger_error'))
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomInsideNoDefinition('Functioncall')
+                      ->fullnspathIs(array('\\assert', '\\trigger_error'))
              )
              ->hasNoOut('RETURNED')
              ->back('first');

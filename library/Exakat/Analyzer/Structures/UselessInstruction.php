@@ -57,49 +57,6 @@ class UselessInstruction extends Analyzer {
              ->noAtomInside(array('Functioncall', 'Staticmethodcall', 'Methodcall', 'Assignation', ));
         $this->prepareQuery();
 
-        $methods = $this->methods->getFunctionsReferenceArgs();
-        $functions = array();
-        foreach($methods as $method) {
-            $functions[$method['function']] = 1;
-        }
-
-        /*
-        // foo(1) // except for functions with references
-        // Too soon : this must skip functions with side effects : ini_set, echo, rmdir, unlink, etc.
-        $this->atomIs('Sequence')
-             ->hasNoIn('FINAL')
-             ->outIs('EXPRESSION')
-             ->atomIs('Functioncall')
-             ->fullnspathIsNot(makeFullnspath(array_keys($functions)))
-             ->hasIn('DEFINITION')
-             ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('ARGUMENT')
-                     ->is('reference', true)
-             )
-             ->noAtomInside(array('Functioncall', 'Staticmethodcall', 'Methodcall', 'Assignation', 'New', ));
-        $this->prepareQuery();
-        */
-
-/*
-        // too soon
-        // s::foo(1)
-        $this->atomIs('Sequence')
-             ->hasNoIn('FINAL')
-             ->outIs('EXPRESSION')
-             ->atomIs(array('Methodcall', 'Staticmethodcall'))
-             ->hasIn('DEFINITION')
-             ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('ARGUMENT')
-                     ->is('reference', true)
-             )
-             ->noAtomInside(array('Functioncall', 'Staticmethodcall', 'Methodcall', 'Assignation', 'New', ));
-        $this->prepareQuery();
-*/
-
         // -$x = 3
         $this->atomIs('Assignation')
              ->outIs('LEFT')
@@ -120,19 +77,19 @@ class UselessInstruction extends Analyzer {
              ->outIs('POSTPLUSPLUS')
              ->atomIsNot(array('Member', 'Staticproperty'))
              ->not(
-                $this->side()
-                     ->atomIs('Variable')
-                     ->inIs('DEFINITION')
-                     ->outIs('DEFINITION')
-                     ->atomIs(array('Staticdefinition', 'Globaldefinition'))
-              )
+                 $this->side()
+                      ->atomIs('Variable')
+                      ->inIs('DEFINITION')
+                      ->outIs('DEFINITION')
+                      ->atomIs(array('Staticdefinition', 'Globaldefinition'))
+             )
              ->not(
-                $this->side()
-                     ->atomIs('Variable')
-                     ->inIs('DEFINITION')
-                     ->inIsIE('NAME')
-                     ->is('reference', true)
-              )
+                 $this->side()
+                      ->atomIs('Variable')
+                      ->inIs('DEFINITION')
+                      ->inIsIE('NAME')
+                      ->is('reference', true)
+             )
              ->back('first');
         $this->prepareQuery();
 
@@ -144,16 +101,16 @@ class UselessInstruction extends Analyzer {
              ->outIs('POSTPLUSPLUS')
              ->atomIs('Variable')
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('DEFINITION')
-                     ->atomIs(array('Staticdefinition', 'Globaldefinition'))
-              )
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('DEFINITION')
+                      ->atomIs(array('Staticdefinition', 'Globaldefinition'))
+             )
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->inIsIE('NAME')
-                     ->is('reference', true)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->inIsIE('NAME')
+                      ->is('reference', true)
              )
              ->back('first');
         $this->prepareQuery();
@@ -172,12 +129,12 @@ class UselessInstruction extends Analyzer {
              ->isReferencedArgument('variable')
             // it is not a global nor a static
              ->not(
-                $this->side()
-                     ->atomIs('Variable')
-                     ->inIs('DEFINITION')
-                     ->outIs('DEFINITION')
-                     ->atomIs(array('Staticdefinition', 'Globaldefinition'))
-              )
+                 $this->side()
+                      ->atomIs('Variable')
+                      ->inIs('DEFINITION')
+                      ->outIs('DEFINITION')
+                      ->atomIs(array('Staticdefinition', 'Globaldefinition'))
+             )
              ->back('first');
         $this->prepareQuery();
 

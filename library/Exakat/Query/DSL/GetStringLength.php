@@ -43,7 +43,7 @@ class GetStringLength extends DSL {
                 break;
 
             default:
-                assert(false, 'No enought arguments for ' . __METHOD__);
+                assert(false, 'No enough arguments for ' . __METHOD__);
         }
 
         $gremlin = <<<'GREMLIN'

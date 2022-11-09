@@ -31,16 +31,15 @@ class MakeClassMethodDefinition extends Complete {
     }
 
     public function analyze(): void {
-
         // Warning : no support for overwritten methods : ALL methods are linked
 
         // Create link between static Class method and its definition
         // This works outside a class too, for static.
         $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('METHOD')
               ->savePropertyAs('lccode', 'name')
@@ -58,9 +57,9 @@ class MakeClassMethodDefinition extends Complete {
 
         $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('METHOD')
               ->savePropertyAs('lccode', 'name')
@@ -82,9 +81,9 @@ class MakeClassMethodDefinition extends Complete {
         // First case for the local class
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
              ->outIs('OBJECT')
              ->atomIs('This', self::WITHOUT_CONSTANTS)
@@ -98,9 +97,9 @@ class MakeClassMethodDefinition extends Complete {
         // Second case for the local traits
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('OBJECT')
               ->atomIs('This', self::WITHOUT_CONSTANTS)
@@ -125,9 +124,9 @@ class MakeClassMethodDefinition extends Complete {
         // class only
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('OBJECT')
               ->atomIs('This', self::WITHOUT_CONSTANTS)
@@ -147,9 +146,9 @@ class MakeClassMethodDefinition extends Complete {
         // class's traits
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('OBJECT')
               ->atomIs('This', self::WITHOUT_CONSTANTS)
@@ -179,9 +178,9 @@ class MakeClassMethodDefinition extends Complete {
         // use a { a as d }
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->hasNoIn('DEFINITION')
               ->outIs('OBJECT')
@@ -218,9 +217,9 @@ class MakeClassMethodDefinition extends Complete {
         // use a,b { a::d insteadof b }
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('OBJECT')
               ->atomIs('This', self::WITHOUT_CONSTANTS)
@@ -254,9 +253,9 @@ class MakeClassMethodDefinition extends Complete {
         // This works only for $this
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('OBJECT')
               ->atomIs('This', self::WITHOUT_CONSTANTS)
@@ -296,9 +295,9 @@ class MakeClassMethodDefinition extends Complete {
         // class y extends x { function b() {  }} // class y has no class FOO
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('OBJECT')
               ->atomIs('This', self::WITHOUT_CONSTANTS)
@@ -315,10 +314,10 @@ class MakeClassMethodDefinition extends Complete {
               ->as('theClass')
 
               ->not(
-                $this->side()
-                     ->outIs(array('METHOD', 'MAGICMETHOD'))
-                     ->outIs('NAME')
-                     ->samePropertyAs('lccode', 'methodname', self::CASE_INSENSITIVE)
+                  $this->side()
+                       ->outIs(array('METHOD', 'MAGICMETHOD'))
+                       ->outIs('NAME')
+                       ->samePropertyAs('lccode', 'methodname', self::CASE_INSENSITIVE)
               )
 
               ->outIs(array('METHOD', 'MAGICMETHOD'))
@@ -326,9 +325,9 @@ class MakeClassMethodDefinition extends Complete {
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
               ->not(
-                $this->side()
-                     ->outIs('DEFINITION')
-                     ->raw('where(eq("first"))')
+                  $this->side()
+                       ->outIs('DEFINITION')
+                       ->raw('where(eq("first"))')
               )
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
@@ -337,9 +336,9 @@ class MakeClassMethodDefinition extends Complete {
         // This works only for $this
         $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('METHOD')
               ->savePropertyAs('lccode', 'name')
@@ -375,9 +374,9 @@ class MakeClassMethodDefinition extends Complete {
         // This works only for $this
         $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('METHOD')
               ->savePropertyAs('lccode', 'name')
@@ -416,9 +415,9 @@ class MakeClassMethodDefinition extends Complete {
         // This works outside a class too, for static.
         $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('METHOD')
               ->savePropertyAs('lccode', 'name')
@@ -440,9 +439,9 @@ class MakeClassMethodDefinition extends Complete {
         // This works outside a class too, for static.
         $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_METHOD)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_METHOD)
              )
               ->outIs('METHOD')
               ->savePropertyAs('lccode', 'name')
@@ -502,7 +501,7 @@ class MakeClassMethodDefinition extends Complete {
               ->raw(<<<'GREMLIN'
 until( __.out("MAGICMETHOD").out("NAME").has("fullcode", "__construct")).repeat( __.out("EXTENDS").in("DEFINITION"))
 GREMLIN
-)
+              )
               ->outIs('MAGICMETHOD')
               ->codeIs('__construct', self::TRANSLATE, self::CASE_INSENSITIVE)
               ->addETo('DEFINITION', 'first');
@@ -530,6 +529,27 @@ GREMLIN
               ->atomIs(self::CLASSES_TRAITS, self::WITHOUT_CONSTANTS)
               ->outIs('MAGICMETHOD')
               ->codeIs('__clone', self::TRANSLATE, self::CASE_INSENSITIVE)
+              ->addETo('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // x $a; $a::Constante -> class x { const Constante}
+        $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
+              ->outIs('METHOD')
+              ->savePropertyAs('lccode', 'name')
+              ->back('first')
+              ->outIs('CLASS')
+              ->atomIs(array('Variable', 'Member', 'Staticproperty'))
+              ->goToTypehint()
+              ->inIs('DEFINITION')
+              ->atomIs(array('Class', 'Classanonymous', 'Interface'), self::WITHOUT_CONSTANTS)
+              ->goToAllParents(self::INCLUDE_SELF)
+              ->outIs(array('METHOD', 'MAGICMETHOD'))
+              ->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
+              ->isNot('visibility', 'private')
+              ->outIs('NAME')
+              ->samePropertyAs('code', 'name', self::CASE_INSENSITIVE)
+              ->inIs('NAME')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
     }

@@ -24,33 +24,20 @@ namespace Exakat\Analyzer\Complete;
 
 class SolveTraitMethods extends Complete {
     public function analyze(): void {
+        // use a,b {m as c};
         // use a,b {a::m as c};
-        $this->atomIs('Usetrait', self::WITHOUT_CONSTANTS)
-              ->outIs('BLOCK')
-              ->outIs('EXPRESSION')
-              ->atomIs('As', self::WITHOUT_CONSTANTS)
-              ->outIs('NAME')
-              ->atomIs('Staticmethod', self::WITHOUT_CONSTANTS)
-              ->as('results')
-              ->tokenIs('T_STRING')
-              ->savePropertyAs('lccode', 'methode')
-              ->back('first')
-              ->outIs('USE')
-              ->inIs('DEFINITION')
-              ->outIs(array('METHOD', 'MAGICMETHOD'))
-              ->outIs('NAME')
-              ->samePropertyAs('lccode', 'methode', self::CASE_INSENSITIVE)
-              ->inIs('NAME')
-              ->addETo('DEFINITION', 'results');
-        $this->prepareQuery();
-
         // use a\d\e,b {a\d\e::m as c};
         $this->atomIs('Usetrait', self::WITHOUT_CONSTANTS)
               ->outIs('BLOCK')
               ->outIs('EXPRESSION')
               ->atomIs('As', self::WITHOUT_CONSTANTS)
+
+              ->outIs('AS')
+              ->atomIs('Identifier', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('lccode', 'methode_target')
+              ->inIs('AS')
+
               ->outIs('NAME')
-              ->as('results')
               ->atomIs('Nsname', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'methode')
               ->back('first')
@@ -60,7 +47,20 @@ class SolveTraitMethods extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'methode', self::CASE_INSENSITIVE)
               ->inIs('NAME')
-              ->addETo('DEFINITION', 'results');
+              ->as('definition')
+
+              ->back('first')
+              ->inIs('USE')
+              ->atomIs(array('Class', 'Trait'))
+              ->outIs('METHOD')
+              ->outIs('DEFINITION')
+              ->as('results')
+              ->outIs('METHOD')
+              ->outIs('NAME')
+              ->samePropertyAs('lccode', 'methode_target', self::CASE_INSENSITIVE)
+
+              ->back('results')
+              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 
         // use a,b {a::m insteadof c};
@@ -69,17 +69,31 @@ class SolveTraitMethods extends Complete {
               ->outIs('EXPRESSION')
               ->atomIs('Insteadof', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
-              ->as('results')
-              ->outIs('NAME')
+              ->outIs('METHOD')
               ->savePropertyAs('lccode', 'methode')
-              ->back('results')
+              ->inIs('METHOD')
               ->outIs('CLASS')
               ->inIs('DEFINITION')
+              ->atomIs('Trait')
               ->outIs(array('METHOD', 'MAGICMETHOD'))
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'methode', self::CASE_INSENSITIVE)
               ->inIs('NAME')
-              ->addETo('DEFINITION', 'results');
+              ->as('definition')
+
+              ->back('first')
+              ->inIs('USE')
+              ->atomIs(array('Class', 'Trait'))
+              ->goToAllChildren(self::INCLUDE_SELF)
+              ->outIs('METHOD')
+              ->outIs('DEFINITION')
+              ->as('results')
+              ->outIs('METHOD')
+              ->outIs('NAME')
+              ->samePropertyAs('lccode', 'methode')
+
+              ->back('results')
+              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
     }
 }

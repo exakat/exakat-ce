@@ -37,18 +37,20 @@ class MakeFunctioncallWithReference extends Complete {
 
     public function analyze(): void {
         // Case of PHP native functions
-        $methods = $this->methods->getFunctionsReferenceArgs();
+        $methods = $this->readStubs('getFunctionsReferenceArgs');
         $functions = array();
-        foreach($methods as $method) {
+        foreach ($methods as $method) {
             array_collect_by($functions, $method['position'], makeFullNsPath($method['function']));
         }
 
-        foreach($functions as $position => $calls) {
+        foreach ($functions as $position => $calls) {
             $this->atomFunctionIs($calls)
                  ->outWithRank('ARGUMENT', $position)
                  ->setProperty('isModified', true);
             $this->prepareQuery();
         }
+
+        // @todo : extends to methods and static methods
 
         // Case of Custom native functions
         $this->atomIs(self::FUNCTIONS_ALL)

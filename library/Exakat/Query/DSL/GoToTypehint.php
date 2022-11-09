@@ -35,7 +35,7 @@ coalesce(
     __.hasLabel("Parenthesis").out("CODE").hasLabel("New").out("NEW").out("TYPEHINT"),
     __.hasLabel("Parenthesis").out("CODE").hasLabel("Clone").out("CLONE").out("TYPEHINT"),
 
-    __.hasLabel("Variable", "Variableobject", "Variablearray").in("DEFINITION").in("NAME").hasLabel("Parameter").out("TYPEHINT"),
+    __.hasLabel("Variable", "Variableobject", "Variablearray").in("DEFINITION").hasLabel("Parameter").out("TYPEHINT"),
     // depends on Complete/Variabletypehint
     __.hasLabel("Variable", "Variableobject", "Variablearray").in("DEFINITION").hasLabel("Variabledefinition").out("TYPEHINT"),
 

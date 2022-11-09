@@ -48,9 +48,11 @@ class Strval extends Plugin {
             return;
         }
 
-        foreach($extras as $extra) {
-            if (is_array($extra)) { continue; }
-            if ($extra->noDelimiter === self::NO_VALUE)  {
+        foreach ($extras as $extra) {
+            if (is_array($extra)) {
+                continue;
+            }
+            if ($extra->noDelimiter === self::NO_VALUE) {
                 $atom->noDelimiter = self::NO_VALUE;
                 return ;
             }
@@ -63,17 +65,17 @@ class Strval extends Plugin {
                 $value = str_replace('_', '', $value);
 
                 if (strtolower(substr($value, 0, 2)) === '0b') {
-                    $actual = bindec(substr($value, 2));
+                    $actual = (string) bindec(substr($value, 2));
                 } elseif (strtolower(substr($value, 0, 2)) === '0x') {
-                    $actual = hexdec(substr($value, 2));
+                    $actual = (string) hexdec(substr($value, 2));
                 } elseif (strtolower(substr($value, 0, 2)) === '0o') {
-                    $actual = octdec(substr($value, 2));
+                    $actual = (string) octdec(substr($value, 2));
                 } elseif (strtolower($value[0]) === '0') {
                     // PHP 7 will just stop.
                     // PHP 5 will work until it fails
-                    $actual = octdec(substr($value, 1));
+                    $actual = (string) octdec(substr($value, 1));
                 } elseif ($value[0] === '+' || $value[0] === '-') {
-                    $actual = (string) (int) pow(-1, substr_count($value, '-')) * (int) strtr($value, '+-', '  ');
+                    $actual = (string) ((int) pow(-1, substr_count($value, '-')) * (int) strtr($value, '+-', '  '));
                 } else {
                     $actual = (string) (int) $value;
                 }
@@ -115,11 +117,11 @@ class Strval extends Plugin {
 
             case 'Addition' :
                 if ($atom->code === '+') {
-                    $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter +
-                                         (int) $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter +
+                                                   (int) $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '-') {
-                    $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter -
-                                         (int) $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter -
+                                                   (int) $extras['RIGHT']->noDelimiter);
                 }
                 break;
 
@@ -134,9 +136,11 @@ class Strval extends Plugin {
                 break;
 
             case 'Power' :
-                $atom->noDelimiter = ((int) $extras['LEFT']->noDelimiter) ** (int) $extras['RIGHT']->noDelimiter;
-                if (is_nan($atom->noDelimiter) || is_infinite($atom->noDelimiter)) {
+                $tmp = ((int) $extras['LEFT']->noDelimiter) ** (int) $extras['RIGHT']->noDelimiter;
+                if (is_nan((float) $tmp) || is_infinite((float) $tmp)) {
                     $atom->noDelimiter = '';
+                } else {
+                    $atom->noDelimiter = (string) $tmp;
                 }
                 break;
 
@@ -146,28 +150,28 @@ class Strval extends Plugin {
 
             case 'Not' :
                 if ($atom->code === '!') {
-                    $atom->noDelimiter = !$extras['NOT']->noDelimiter;
+                    $atom->noDelimiter = (string) !$extras['NOT']->noDelimiter;
                 } elseif ($atom->code === '~') {
-                    $atom->noDelimiter = ~$extras['NOT']->noDelimiter;
+                    $atom->noDelimiter = (string) ~$extras['NOT']->noDelimiter;
                 }
                 break;
 
             case 'Bitwise' :
                 if ($atom->code === '|') {
                     if (is_string($extras['LEFT']->noDelimiter) && is_string($extras['RIGHT']->noDelimiter)) {
-                        $atom->noDelimiter = $extras['LEFT']->noDelimiter | $extras['RIGHT']->noDelimiter;
+                        $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter | $extras['RIGHT']->noDelimiter);
                     } else {
                         $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter | (int) $extras['RIGHT']->noDelimiter);
                     }
                 } elseif ($atom->code === '&') {
                     if (is_string($extras['LEFT']->noDelimiter) && is_string($extras['RIGHT']->noDelimiter)) {
-                        $atom->noDelimiter = $extras['LEFT']->noDelimiter & $extras['RIGHT']->noDelimiter;
+                        $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter & $extras['RIGHT']->noDelimiter);
                     } else {
                         $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter & (int) $extras['RIGHT']->noDelimiter);
                     }
                 } elseif ($atom->code === '^') {
                     if (is_string($extras['LEFT']->noDelimiter) && is_string($extras['RIGHT']->noDelimiter)) {
-                        $atom->noDelimiter = $extras['LEFT']->noDelimiter ^ $extras['RIGHT']->noDelimiter;
+                        $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter ^ $extras['RIGHT']->noDelimiter);
                     } else {
                         $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter ^ (int) $extras['RIGHT']->noDelimiter);
                     }
@@ -180,11 +184,11 @@ class Strval extends Plugin {
 
             case 'Logical' :
                 if ($atom->code === '&&' || mb_strtolower($atom->code) === 'and') {
-                    $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter && (int) $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter && (int) $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '||' || mb_strtolower($atom->code) === 'or') {
-                    $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter && (int) $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter && (int) $extras['RIGHT']->noDelimiter);
                 } elseif (mb_strtolower($atom->code) === 'xor') {
-                    $atom->noDelimiter = ((int) $extras['LEFT']->noDelimiter xor (int) $extras['RIGHT']->noDelimiter);
+                    $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter xor (int) $extras['RIGHT']->noDelimiter);
                 }
                 break;
 
@@ -219,31 +223,31 @@ class Strval extends Plugin {
                     // This would generate an error
                     $atom->noDelimiter = '';
                 } elseif ($atom->code === '>>') {
-                    $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter >> (int) $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter >> (int) $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '<<') {
-                    $atom->noDelimiter = (int) $extras['LEFT']->noDelimiter << (int) $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ((int) $extras['LEFT']->noDelimiter << (int) $extras['RIGHT']->noDelimiter);
                 }
                 break;
 
             case 'Comparison' :
                 if ($atom->code === '==') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter == $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter == $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '===') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter === $extras['RIGHT']->noDelimiter;
-                } elseif ($atom->code === '!=' || $atom->code === '<>') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter != $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter === $extras['RIGHT']->noDelimiter);
+                } elseif (in_array($atom->code, array('!=', '<>'), STRICT_COMPARISON)) {
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter != $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '!==') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter !== $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter !== $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '>') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter > $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter > $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '<') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter < $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter < $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '>=') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter >= $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter >= $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '<=') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter <= $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter <= $extras['RIGHT']->noDelimiter);
                 } elseif ($atom->code === '<=>') {
-                    $atom->noDelimiter = $extras['LEFT']->noDelimiter <=> $extras['RIGHT']->noDelimiter;
+                    $atom->noDelimiter = (string) ($extras['LEFT']->noDelimiter <=> $extras['RIGHT']->noDelimiter);
                 }
                 break;
 
@@ -257,9 +261,9 @@ class Strval extends Plugin {
                 $atom->noDelimiter = $atom->fullcode;
                 break;
 
-        default :
+            default :
             // Nothing, really
-        }
+            }
     }
 }
 

@@ -47,7 +47,7 @@ has("rank")
 
 
 GREMLIN
-);
+        );
     }
 }
 

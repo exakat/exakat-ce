@@ -26,17 +26,18 @@ namespace Exakat\Tasks\Helpers;
 class IsExt extends Plugin {
     public $name = 'isExt';
     public $type = 'boolean';
-    private array $extFunctions        = array();
-    private array $extConstants        = array();
-    private array $extClasses          = array();
-    private array $extInterfaces       = array();
-    private array $extTraits           = array();
-    private array $extEnums            = array();
-    private array $extClassConstants   = array();
-    private array $extClassMethods     = array();
-    private array $extClassProperties  = array();
-    private array $extMethods          = array();
-    private array $extProperties       = array();
+    private array $extFunctions           = array();
+    private array $extConstants           = array();
+    private array $extClasses             = array();
+    private array $extInterfaces          = array();
+    private array $extTraits              = array();
+    private array $extEnums               = array();
+    private array $extClassConstants      = array();
+    private array $extClassMethods        = array();
+    private array $extClassProperties     = array();
+    private array $extClassStaticMethods  = array();
+    private array $extMethods             = array();
+    private array $extProperties          = array();
 
     public function __construct() {
         parent::__construct();
@@ -61,9 +62,11 @@ class IsExt extends Plugin {
         $this->extEnums = makeFullNsPath($this->extEnums);
 
         $this->extClassConstants = array_merge($ext->getClassConstantList(),
-                                               $ext->getEnumCasesList());
-        $this->extProperties     = $ext->getClassPropertyList();
-        $this->extMethods        = $ext->getClassMethodList();
+            $ext->getEnumCasesList());
+        $this->extProperties            = $ext->getClassPropertyList();
+        $this->extStaticProperties      = $ext->getClassStaticPropertyList();
+        $this->extMethods               = $ext->getClassMethodList();
+        $this->extClassStaticMethods    = $ext->getClassStaticMethodList();
     }
 
     public function run(Atom $atom, array $extras): void {
@@ -89,20 +92,26 @@ class IsExt extends Plugin {
             case 'Staticclass' :
                 $path = makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED);
                 if (in_array($path, array_merge($this->extClasses,
-                                                $this->extTraits,
-                                                $this->extEnums,
-                                                $this->extInterfaces,
-                                                ), \STRICT_COMPARISON)) {
+                    $this->extTraits,
+                    $this->extEnums,
+                    $this->extInterfaces,
+                ), \STRICT_COMPARISON)) {
                     $atom->isExt = true;
                     $extras['CLASS']->isExt = true;
                 }
                 break;
 
             case 'Staticmethodcall' :
+                if (empty($extras)) {
+                    break;
+                }
+
                 $path = makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED);
                 $method = mb_strtolower(substr($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, 0, strpos($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, '(') ?: 0));
-                if (in_array($method, $this->extClassMethods[$path] ?? array(), \STRICT_COMPARISON)) {
-                    $atom->isExt = true;
+
+                if (in_array($path . '::' . $method, $this->extClassStaticMethods, \STRICT_COMPARISON)) {
+                    $extras['CLASS']->isPhp = true;
+                    $atom->isPhp = true;
                 }
                 break;
 
@@ -111,11 +120,16 @@ class IsExt extends Plugin {
                 if (in_array($extras['MEMBER']->code ?? self::NOT_PROVIDED, $this->extClassProperties[$path] ?? array(), \STRICT_COMPARISON)) {
                     $atom->isExt = true;
                 }
+
+                if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->extStaticProperties ?? array(), \STRICT_COMPARISON)) {
+                    $atom->isExt = true;
+                }
                 break;
 
             case 'Staticconstant' :
                 if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->extClassConstants, \STRICT_COMPARISON)) {
-                    $atom->isPhp = true;
+                    $extras['CLASS']->isExt = true;
+                    $atom->isExt = true;
                 }
                 break;
 
@@ -140,29 +154,31 @@ class IsExt extends Plugin {
                 break;
 
             case 'Usenamespace' :
-                foreach($extras as $extra) {
-                    $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
-                    $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
+                foreach ($extras as $extra) {
+                    if ($extra->fullnspath === self::NOT_PROVIDED) {
+                        continue;
+                    }
+                    // Not fallback to global here.
 
-                    switch($extra->use) {
+                    switch ($extra->use) {
                         case 'function':
-                            if (in_array(makeFullNsPath($path), $this->extFunctions, \STRICT_COMPARISON)) {
+                            if (in_array(makeFullNsPath($extra->fullnspath ), $this->extFunctions, \STRICT_COMPARISON)) {
                                 $extra->isExt = true;
                             }
-                        break;
+                            break;
 
                         case 'const':
-                            if (in_array(makeFullNsPath($path, \FNP_CONSTANT), $this->extConstants, \STRICT_COMPARISON)) {
+                            if (in_array(makeFullNsPath($extra->fullnspath , \FNP_CONSTANT), $this->extConstants, \STRICT_COMPARISON)) {
                                 $extra->isExt = true;
                             }
-                        break;
+                            break;
 
-                    default: // case class
-                            if (in_array(makeFullNsPath($path), array_merge($this->extClasses,
-                                                                            $this->extTraits,
-                                                                            $this->extEnums,
-                                                                            $this->extInterfaces,
-                                                                            ), \STRICT_COMPARISON)) {
+                        default: // case class
+                            if (in_array(makeFullNsPath($extra->fullnspath ), array_merge($this->extClasses,
+                                $this->extTraits,
+                                $this->extEnums,
+                                $this->extInterfaces,
+                            ), \STRICT_COMPARISON)) {
                                 $extra->isExt = true;
                             }
                     }
@@ -171,7 +187,7 @@ class IsExt extends Plugin {
 
             case 'Class' :
                 if (isset($extras['ATTRIBUTE'])) {
-                    foreach($extras['ATTRIBUTE'] as $extra) {
+                    foreach ($extras['ATTRIBUTE'] as $extra) {
                         if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->extClasses, \STRICT_COMPARISON)) {
                             $extra->isExt = true;
                         }
@@ -185,7 +201,7 @@ class IsExt extends Plugin {
                     $extras['EXTENDS']->isExt = true;
                 }
 
-                foreach($extras['IMPLEMENTS'] ?? array() as $implements) {
+                foreach ($extras['IMPLEMENTS'] ?? array() as $implements) {
                     if (in_array($implements->fullnspath ?? self::NOT_PROVIDED, $this->extInterfaces, \STRICT_COMPARISON)) {
                         $implements->isExt = true;
                     }
@@ -193,7 +209,7 @@ class IsExt extends Plugin {
                 break;
 
             case 'Interface' :
-                foreach($extras['EXTENDS'] as $extra) {
+                foreach ($extras['EXTENDS'] as $extra) {
                     if (in_array($extras['EXTENDS']->fullnspath ?? self::NOT_PROVIDED, $this->extInterfaces, \STRICT_COMPARISON)) {
                         $extra->isExt = true;
                     }
@@ -208,24 +224,11 @@ class IsExt extends Plugin {
             case 'Instanceof' :
                 // Warning : atom->fullnspath for classes (no fallback)
                 if (in_array(makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED), array_merge($this->extClasses,
-                                                                                                             $this->extTraits,
-                                                                                                             $this->extEnums,
-                                                                                                             $this->extInterfaces,
-                                                                                                             ), \STRICT_COMPARISON)) {
+                    $this->extTraits,
+                    $this->extEnums,
+                    $this->extInterfaces,
+                ), \STRICT_COMPARISON)) {
                     $extras['CLASS']->isExt = true;
-                }
-                break;
-
-            case 'Parameter' :
-                foreach($extras as $extra) {
-                    if (in_array(makeFullNsPath($extra->fullnspath ?? self::NOT_PROVIDED), array_merge($this->extClasses,
-                                                                                                       $this->extTraits,
-                                                                                                       $this->extEnums,
-                                                                                                       $this->extInterfaces,
-                                                                                                       ), \STRICT_COMPARISON)) {
-                        $extra->isExt = true;
-                        $atom->isExt = true;
-                    }
                 }
                 break;
 
@@ -240,7 +243,7 @@ class IsExt extends Plugin {
 
             case 'Newcallname' :
                 if (in_array($atom->fullnspath, $this->extClasses, \STRICT_COMPARISON)) {
-                    $atom->isPhp = true;
+                    $atom->isExt = true;
                 }
                 break;
 
@@ -259,6 +262,7 @@ class IsExt extends Plugin {
                 if (empty($path)) {
                     break;
                 }
+
                 if (in_array($path, $this->extConstants, \STRICT_COMPARISON) &&
                     strpos($atom->fullcode, '\\', 1) === false) {
                     $atom->isExt = true;
@@ -266,14 +270,14 @@ class IsExt extends Plugin {
                 break;
 
             case 'Catch' :
-                foreach($extras as $extra) {
+                foreach ($extras as $extra) {
                     $path = $extra->fullnspath ?? self::NOT_PROVIDED;
 
                     if (in_array(makeFullNsPath($path), array_merge($this->extClasses,
-                                                                    $this->extTraits,
-                                                                    $this->extEnums,
-                                                                    $this->extInterfaces,
-                                                                    ), \STRICT_COMPARISON)) {
+                        $this->extTraits,
+                        $this->extEnums,
+                        $this->extInterfaces,
+                    ), \STRICT_COMPARISON)) {
                         $extra->isExt = true;
                     }
                 }
@@ -289,20 +293,36 @@ class IsExt extends Plugin {
                 break;
 
             default :
-                // Nothing
-        }
+            // Nothing
+            }
     }
 
     private function checkTypes(array $extras): void {
-        foreach($extras as $extra) {
+        foreach ($extras as $extra) {
+            if (in_array(makeFullNsPath($extra->fullnspath), array_merge($this->extClasses,
+                $this->extTraits,
+                $this->extEnums,
+                $this->extInterfaces,
+            ), \STRICT_COMPARISON)) {
+                $extra->isExt = true;
+                continue;
+            }
+
+            if (!empty($extra->absolute)) {
+                continue;
+            }
+            if (!empty($extra->use)) {
+                continue;
+            }
+
             $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
             $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
 
             if (in_array(makeFullNsPath($path), array_merge($this->extClasses,
-                                                            $this->extTraits,
-                                                            $this->extEnums,
-                                                            $this->extInterfaces,
-                                                            ), \STRICT_COMPARISON)) {
+                $this->extTraits,
+                $this->extEnums,
+                $this->extInterfaces,
+            ), \STRICT_COMPARISON)) {
                 $extra->isExt = true;
             }
         }

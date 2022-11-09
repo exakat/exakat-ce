@@ -25,7 +25,6 @@ namespace Exakat\Exceptions;
 
 class NoStructureForTable extends \RuntimeException {
     public function __construct(string $table) {
-
         parent::__construct( "No SQL structure exists for table $table.\n");
     }
 }

@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class IndentationLevels extends AnalyzerHashAnalyzer {
-    protected $analyzerName = 'Indentation Levels';
+    protected string $analyzerName = 'Indentation Levels';
 
     public function analyze(): void {
         //function foo() { if (1) { /* level 2 */}}
@@ -33,7 +33,7 @@ class IndentationLevels extends AnalyzerHashAnalyzer {
         $results = $this->rawQuery();
 
         $counts = array_count_values(array_merge(...$results->toArray()) ?? array());
-        foreach($counts  as $key => $value) {
+        foreach ($counts  as $key => $value) {
             $this->analyzerValues[] = array($this->shortAnalyzer, $key, $value);
         }
         $this->prepareQuery();

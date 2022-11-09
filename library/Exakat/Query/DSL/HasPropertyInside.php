@@ -30,7 +30,7 @@ class HasPropertyInside extends DSL {
 
         assert($this->assertProperty($property));
         return new Command('where( __.emit( ).repeat( out(' . self::$linksDown . ') ).times(' . self::$MAX_LOOPING . ').has("' . $property . '", within(***)) )',
-                           makeArray($values));
+            makeArray($values));
     }
 }
 ?>

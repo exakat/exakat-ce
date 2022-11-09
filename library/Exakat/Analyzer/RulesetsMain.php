@@ -23,10 +23,11 @@ declare(strict_types = 1);
 
 namespace Exakat\Analyzer;
 
+use SQLite3;
 
 class RulesetsMain implements RulesetsInterface {
-    private static $sqlite = null;
-    private $phar_tmp      = null;
+    private static sqlite3 $sqlite;
+    private ?string $phar_tmp   = null;
 
     public function __construct(string $path) {
         if (substr($path, 0, 4) == 'phar') {
@@ -36,7 +37,7 @@ class RulesetsMain implements RulesetsInterface {
         } else {
             $docPath = $path;
         }
-        self::$sqlite = new \SQLite3($docPath, \SQLITE3_OPEN_READONLY);
+        self::$sqlite = new SQLite3($docPath, \SQLITE3_OPEN_READONLY);
     }
 
     public function __destruct() {
@@ -51,7 +52,9 @@ class RulesetsMain implements RulesetsInterface {
             // Default is ALL of ruleset
             $where = 'WHERE a.folder != "Common" ';
         } else {
-            $rulesets = array_map(function (string $x): string { return trim($x, '"'); }, $rulesets);
+            $rulesets = array_map(function (string $x): string {
+                return trim($x, '"');
+            }, $rulesets);
             $where = 'WHERE a.folder != "Common" AND c.name in (' . makeList($rulesets) . ')';
         }
 
@@ -66,7 +69,7 @@ SQL;
         $res = self::$sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = "$row[folder]/$row[name]";
         }
 
@@ -89,7 +92,7 @@ SQL;
         $res = self::$sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row['name'];
         }
 
@@ -115,7 +118,7 @@ SQL;
         $res = self::$sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[$row['analyzer']] = explode(',', $row['categories']);
         }
 
@@ -127,7 +130,7 @@ SQL;
 
         $return = array();
         $res = self::$sqlite->query($query);
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[$row['analyzer']] = empty($row['severity']) ? Analyzer::S_NONE : constant(Analyzer::class . '::' . $row['severity']);
         }
 
@@ -139,7 +142,7 @@ SQL;
 
         $return = array();
         $res = self::$sqlite->query($query);
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[$row['analyzer']] = empty($row['timetofix']) ? Analyzer::S_NONE : constant(Analyzer::class . '::' . $row['timetofix']);
         }
 
@@ -154,7 +157,7 @@ SQL;
 
         $return = array();
         $res = self::$sqlite->query($query);
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[$row['analyzer']] = empty($row['frequence']) ? 0 : $row['frequence'];
         }
 
@@ -177,7 +180,7 @@ SQL;
         $res = $stmt->execute();
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = str_replace('\\\\', '\\', $row['name']);
         }
 
@@ -193,7 +196,7 @@ SQL;
         $res = $stmt->execute();
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $return[] = $row['name'];
         }
 
@@ -207,15 +210,15 @@ SQL;
         // Human short name : Type/Class
         // Human shortcut : Class (must be unique among the classes)
 
-        if (strpos($name, '\\') !== false) {
+        if (str_contains($name, '\\')  ) {
             if (substr($name, 0, 16) === 'Exakat\\Analyzer\\') {
                 $class = $name;
             } else {
                 $class = "Exakat\\Analyzer\\$name";
             }
-        } elseif (strpos($name, '/') !== false) {
+        } elseif (str_contains($name, '/')  ) {
             $class = 'Exakat\\Analyzer\\' . str_replace('/', '\\', $name);
-        } elseif (strpos($name, '/') === false) {
+        } elseif (!str_contains($name, '/')  ) {
             $found = $this->getSuggestionClass($name);
 
             if (empty($found)) {
@@ -248,7 +251,7 @@ SQL;
         $list = $this->listAllRulesets();
 
         return array_filter($list, function (string $c) use ($rulesets): bool {
-            foreach($rulesets as $ruleset) {
+            foreach ($rulesets as $ruleset) {
                 $l = levenshtein($c, $ruleset);
                 if ($l < 8) {
                     return true;
@@ -269,6 +272,5 @@ SQL;
     public function getAnalyzerInExtension(string $name): array {
         return array();
     }
-
 }
 ?>

@@ -30,28 +30,30 @@ class InvalidPackFormat extends Analyzer {
                     );
     }
 
-
     public function analyze(): void {
         // pack('nvcT', $s)
         $this->atomFunctionIs('\\unpack')
              ->outWithRank('ARGUMENT', 0)
              ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->noDelimiterIsNot('')
+             ->hasNoOut('CONCAT')
              // Those steps weed out some non-formats
              ->analyzerIs('Type/Pack')
-             ->raw('has("noDelimiter", neq(""))')
              // This regex include names in the format string, for unpacking
-             ->regexIsNot('noDelimiter', '^([@0-9aAhHcCsSnviIlLNVqQJPfgGdeExXZ](\\\\*|\\\\d+)?(\\\\w+\\\\/?)?)+\$')
+             ->regexIsNot('noDelimiter', '^([@0-9aAhHcCsSnviIlLNVqQJPfgGdeExXZ](\\\\*|\\\\d+)?(\\\\w+\\\\/?)?){1,11}\$')
              ->back('first');
         $this->prepareQuery();
 
         $this->atomFunctionIs('\\pack')
              ->outWithRank('ARGUMENT', 0)
              ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->noDelimiterIsNot('')
+             ->hasNoOut('CONCAT')
+
              // Those steps weed out some non-formats
              ->analyzerIs('Type/Pack')
-             ->raw('has("noDelimiter", neq(""))')
              // This regex include names in the format string, for packing
-             ->regexIsNot('noDelimiter', '^([@0-9aAhHcCsSnviIlLNVqQJPfgGdeExXZ](\\\\*|\\\\d+)?)+\$')
+             ->regexIsNot('noDelimiter', '^([@0-9aAhHcCsSnviIlLNVqQJPfgGdeExXZ](\\\\*|\\\\d+)?){1,10}\$')
              ->back('first');
         $this->prepareQuery();
     }

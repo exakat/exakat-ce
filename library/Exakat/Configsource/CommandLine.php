@@ -24,7 +24,6 @@ namespace Exakat\Configsource;
 
 use Exakat\Vcs\Vcs;
 use Exakat\Tasks\Baseline;
-use Exakat\Tasks\Extension;
 use Exakat\Project;
 use Exakat\Graph\Graph;
 
@@ -157,7 +156,7 @@ class CommandLine extends Config {
                                     'install'       => 1,
                                     );
 
-    private $args = array();
+    private array $args = array();
 
     public function __construct() {
         $this->config['command'] = '<no-command>';
@@ -174,8 +173,8 @@ class CommandLine extends Config {
         }
 
         $args = $this->args;
-        // TODO : move this to VCS
-        foreach($this->booleanOptions as $key => $config) {
+        // @todo : move this to Vcs
+        foreach ($this->booleanOptions as $key => $config) {
             $id = array_search($key, $args);
             if ($id !== false) {
                 // git is default, so it should be unset if another is set
@@ -188,8 +187,8 @@ class CommandLine extends Config {
             }
         }
 
-        foreach($this->valueOptions as $key => $config) {
-            while( ($id = array_search($key, $args)) !== false ) {
+        foreach ($this->valueOptions as $key => $config) {
+            while ( ($id = array_search($key, $args)) !== false ) {
                 if (!isset($args[$id + 1])) {
                     // case of a name, without a following name
                     // We just ignore it
@@ -234,7 +233,7 @@ class CommandLine extends Config {
                         if (empty($this->config['configuration'])) {
                             $this->config['configuration'] = array();
                         }
-                        if (strpos($args[$id + 1], '=') === false) {
+                        if (!str_contains($args[$id + 1], '=')  ) {
                             $name = trim($args[$id + 1]);
                             $value = '';
                         } else {
@@ -309,17 +308,7 @@ class CommandLine extends Config {
         if (isset($command, self::$commands[$command])) {
             $this->config['command'] = $command;
 
-            if ($this->config['command'] === 'extension') {
-                $subcommand = array_shift($args);
-                if (!in_array($subcommand, Extension::ACTIONS, STRICT_COMPARISON)) {
-                    $subcommand = 'local';
-                }
-                $this->config['subcommand'] = $subcommand;
-
-                if (in_array($subcommand, array('install', 'uninstall', 'update'), STRICT_COMPARISON)) {
-                    $this->config['extension'] = array_shift($args);
-                }
-            } elseif ($this->config['command'] === 'baseline') {
+            if ($this->config['command'] === 'baseline') {
                 $subcommand = array_shift($args);
                 if (!in_array($subcommand, Baseline::ACTIONS, STRICT_COMPARISON)) {
                     $subcommand = 'list';
@@ -346,10 +335,10 @@ class CommandLine extends Config {
 
         // Special case for onepage command. It will only work on 'onepage' project
         if ($this->config['command'] == 'onepage') {
-
             $this->config['project']   = 'onepage';
             $this->config['ruleset']   = 'OneFile';
 
+		// @todo verifier la présence de OnepageJson
             $this->config['format']    = array('OnepageJson');
             $this->config['file']      = str_replace('/code/', '/reports/', substr($this->config['filename'], 0, -4));
             $this->config['quiet']     = true;

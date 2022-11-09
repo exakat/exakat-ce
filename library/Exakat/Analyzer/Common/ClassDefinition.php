@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class ClassDefinition extends Analyzer {
+abstract class ClassDefinition extends Analyzer {
     protected $classes = array();
 
     public function analyze(): void {

@@ -29,17 +29,13 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
     public const SCALAR  = 1;
     public const ARRAY   = 2;
 
-    private $type = self::EMPTY;
-    private $data  = null;
+    private int $type = self::EMPTY;
+    private ?array $data  = null;
 
-    public function __construct($data = null) {
+    public function __construct(?array $data = null) {
         // Case of empty result set.
 
-//        print "\nExtracted from JSON\n";
-//        var_dump($data);
-//        print "\nExtracted from JSON------\n";
-
-// A garder. Aucun résultat.
+        // A garder. Aucun résultat.
         if ($data === null) {
             $this->type = self::EMPTY;
             $this->data = $data;
@@ -47,12 +43,11 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             return;
         }
 
-// A garder. liste de résultats
+        // A garder. liste de résultats
         if (is_array($data)) {
             if (!isset($data[0]) || ($data[0] === null)) {
                 $this->type = self::EMPTY;
                 $this->data = null;
-
             } else {
                 $this->type = self::ARRAY;
                 $this->data = $data;
@@ -80,35 +75,39 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         unset($data);
     }
 
-    public function deHash(array $extra = null) {
+    public function deHash(array $extra = null) : void {
         if (empty($this->data)) {
             return;
         }
 
         $result = array();
-        foreach($this->data as $value) {
-            foreach($value as $k => $v) {
+        foreach ($this->data as $value) {
+            foreach ($value as $k => $v) {
                 $result[] = array('', $k, $v);
             }
         }
         if ($extra !== null) {
-            $result = array_map(function (array $x) use ($extra): array { return array_merge($x, $extra); }, $result);
+            $result = array_map(function (array $x) use ($extra): array {
+                return array_merge($x, $extra);
+            }, $result);
         }
 
         $this->data = $result;
     }
 
-    public function string2Array(array $extra = null) {
+    public function string2Array(array $extra = null) : void {
         if (empty($this->data)) {
             return;
         }
 
         $result = array();
-        foreach($this->data as $value) {
+        foreach ($this->data as $value) {
             $result[] = array('', array_pop($value));
         }
         if ($extra !== null) {
-            $result = array_map($result, function (array $x) use ($extra): array { return array_merge($x, $extra); });
+            $result = array_map($result, function (array $x) use ($extra): array {
+                return array_merge($x, $extra);
+            });
         }
 
         $this->data = $result;
@@ -120,6 +119,19 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         } else {
             return $this->data;
         }
+    }
+
+    public function toHash(string $key, string $value): array {
+        if ($this->type === self::EMPTY) {
+            return array();
+        }
+
+        $return = array();
+        foreach ($this->data as $row) {
+            $return[$row[$key]] = $row[$value];
+        }
+
+        return $return;
     }
 
     public function toString(): string {
@@ -140,30 +152,27 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         }
 
         return (string) $this->data[0];
-//        return (string) '"'.$this->data[0].'"';
     }
 
-    public function isType($type): bool {
+    public function isType(int $type): bool {
         return $this->type === $type;
     }
 
-    public function offsetExists($offset): bool {
+    public function offsetExists(mixed $offset): bool {
         return isset($this->data[$offset]);
     }
 
     #[\ReturnTypeWillChange]
-    public function offsetGet($offset) {
+    public function offsetGet(mixed $offset) : mixed {
         return $this->data[$offset];
     }
 
-    public function offsetSet($offset, $value): void {
+    public function offsetSet(mixed $offset, mixed $value): void {
         // Nothing. No update on that result
-
     }
 
-    public function offsetUnset($offset): void {
+    public function offsetUnset(mixed $offset): void {
         // Nothing. No update on that result
-
     }
 
     public function rewind(): void {
@@ -173,12 +182,12 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
     }
 
     #[\ReturnTypeWillChange]
-    public function current() {
+    public function current() : mixed {
         return current($this->data);
     }
 
     #[\ReturnTypeWillChange]
-    public function key() {
+    public function key() : mixed {
         if ($this->type === self::ARRAY) {
             return key($this->data);
         }

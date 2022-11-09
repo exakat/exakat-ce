@@ -33,12 +33,12 @@ class NonPpp extends Analyzer {
              ->outIs(self::CLASS_ELEMENTS)
              ->atomIs(array('Method', 'Magicmethod', 'Ppp', 'Constant'))
              ->not(
-                $this->side()
-                     ->outIs('PPP')
-                     ->atomIs('Virtualproperty')
+                 $this->side()
+                      ->outIs('PPP')
+                      ->atomIs('Virtualproperty')
              )
              ->is('visibility', 'none')
-             ;
+        ;
         $this->prepareQuery();
     }
 }

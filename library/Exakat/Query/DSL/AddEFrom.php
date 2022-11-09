@@ -23,14 +23,29 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Exceptions\WrongNumberOfArguments;
 
 class AddEFrom extends DSL {
     public function run(): Command {
-        list($edgeName, $from) = func_get_args();
+        if (func_num_args() === 2) {
+            list($edgeName, $from) = func_get_args();
+            $options = array();
+        } elseif (func_num_args() === 3) {
+            list($edgeName, $from, $options) = func_get_args();
+            assert(is_array($options), 'Edge options must be an array');
+        } else {
+            throw new WrongNumberOfArguments(__METHOD__, func_num_args(), 3);
+        }
 
         assert($this->assertLabel($from, self::LABEL_GO));
 
-        return new Command("addE(\"$edgeName\").from(\"$from\")");
+        $properties = array();
+        foreach ($options as $name => $value) {
+            $properties[] = ".property(\"$name\", $value)";
+        }
+        $properties = implode('', $properties);
+
+        return new Command("addE(\"$edgeName\").from(\"$from\")$properties");
     }
 }
 ?>

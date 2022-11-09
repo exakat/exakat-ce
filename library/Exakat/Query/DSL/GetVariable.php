@@ -42,7 +42,7 @@ class GetVariable extends DSL {
             $name = array_values($name);
             $gremlin = array();
 
-            foreach(array_values($variable) as $id => $v) {
+            foreach (array_values($variable) as $id => $v) {
                 // Value should not be a direct groovy code!!!
                 $this->assertVariable($v, self::VARIABLE_READ);
                 $gremlin[] = "\"{$name[$id]}\" :  $v";

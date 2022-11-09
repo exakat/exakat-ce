@@ -46,7 +46,7 @@ class RegexIsNot extends DSL {
 has("$property")
 .filter{ !(it.get().value("$property") =~ "$regex" ).asBoolean() }
 GREMLIN
-                          );
+        );
     }
 }
 ?>

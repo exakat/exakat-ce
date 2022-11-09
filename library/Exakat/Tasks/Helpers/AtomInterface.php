@@ -26,62 +26,80 @@ use stdClass;
 use Exakat\Tasks\Load;
 
 abstract class AtomInterface {
-    public $id           = 0;
-    public $atom         = 'No Atom Set';
-    public $code         = '';
-    public $lccode       = '';
-    public $fullcode     = '';
-    public $line         = Load::NO_LINE;
-    public $token        = '';
-    public $rank         = ''; // Not 0
-    public $rankName     = '';
-    public $alternative  = Load::NOT_ALTERNATIVE;
-    public $reference    = Load::NOT_REFERENCE;
-    public $heredoc      = false;
-    public $delimiter    = null;
-    public $noDelimiter  = null;
-    public $variadic     = Load::NOT_VARIADIC;
-    public $count        = null;
-    public $fullnspath   = '';
-    public $absolute     = Load::NOT_ABSOLUTE;
-    public $alias        = '';
-    public $origin       = '';
-    public $encoding     = '';
+    public const WITHOUT_WS = false;
+    public const WITH_WS	= true;
+
+    public const NO_RANK	= null;
+    public const NO_ATOM	= 'No Atom Set';
+
+    public int     $id           	= 0;
+    public string  $atom         	= self::NO_ATOM;
+    public int|string $code;
+    public int     $lccode    	    ;
+    // dynamically generated, but only there for DSL Query
+    public string  $fullcode     	= '';
+    public int     $line         	= Load::NO_LINE;
+    public string  $token        	= '';
+    public ?int    $rank         	= self::NO_RANK; // Not 0
+    public string  $rankName     	= '';
+    public bool    $alternative  	= Load::NOT_ALTERNATIVE;
+    public ?string $delimiter    	= null;
+    public ?string $noDelimiter  	= null;
+    public ?int    $count        	= null;
+    public string  $fullnspath   	= '';
+    public string    $alias        	= Load::NOT_ALIASED;
+    public string  $origin       	= '';
+    public string  $encoding     	= '';
     public $block        = '';
-    public $intval       = Intval::NO_VALUE;
-    public $strval       = Strval::NO_VALUE;
-    public $boolean      = Boolval::NO_VALUE;
-    public $enclosing    = Load::NO_ENCLOSING;
-    public $args_max     = '';
-    public $args_min     = '';
-    public $bracket      = Load::NOT_BRACKET;
-    public $flexible     = Load::NOT_FLEXIBLE;
-    public $close_tag    = Load::NO_CLOSING_TAG;
-    public $propertyname = '';
-    public $constant     = Load::NOT_CONSTANT_EXPRESSION;
-    public $globalvar    = false;
-    public $binaryString = Load::NOT_BINARY;
-    public $isNull       = false;
-    public $visibility   = '';
-    public $final        = '';
-    public $abstract     = false;
-    public $readonly     = false;
-    public $static       = '';
-    public $noscream     = 0;
-    public $trailing     = 0;
-    public $isRead       = 0;
-    public $isModified   = 0;
-    public $use          = '';
-    public $typehint     = 'one';
-    public $isPhp        = 0;
-    public $isExt        = 0;
-    public $isStub       = 0;
-    public $position     = 0;
+    public ?int    $intval       	= Intval::NO_VALUE;
+    public ?string  $strval      	= Strval::NO_VALUE;
+    public bool    $boolean      	= Boolval::NO_VALUE;
+    public bool    $enclosing    	= Load::NO_ENCLOSING;
+    public bool    $bracket      	= Load::NOT_BRACKET;
+    public bool    $flexible     	= Load::NOT_FLEXIBLE;
+    public bool    $close_tag    	= Load::NO_CLOSING_TAG;
+    public ?string $propertyname 	= null;
+    public bool    $constant     	= Load::NOT_CONSTANT_EXPRESSION;
+    public string  $binaryString 	= Load::NOT_BINARY;
+    public string  $visibility   	= 'none';  // none, public, private, protected
+
+    public ?int $args_max     = null;
+    public ?int $args_min     = null;
+
+    public bool $reference		= Load::NOT_REFERENCE;
+    public bool $heredoc		= false;
+    public bool $variadic		= Load::NOT_VARIADIC;
+    public bool $absolute		= Load::NOT_ABSOLUTE;
+    public $globalvar		= false;
+    public bool $final			= false;
+    public bool $isNull			= false;
+    public bool $abstract		= false;
+    public bool $readonly		= false;
+    public bool $static			= false;
+    public bool $noscream		= false;
+    public bool $trailing		= false;
+    public bool $isRead			= false;
+    public bool $isModified		= false;
+    public bool $isPhp			= false;
+    public bool $isExt			= false;
+    public bool $isStub			= false;
+    public bool $isConst		= false;
+
+    public $use					= '';
+    public ?string $typehint	= null;
+
     public Whitespace $ws ;
+    public int $eId;
+
+//    public $position     = 0;
+
+    public function __construct(string $ws) {
+        $this->ws   = new Whitespace($ws);
+    }
 
     abstract public function toArray(): array;
 
-    abstract public function toGraphsonLine(int &$id): stdClass;
+    abstract public function toGraphsonLine(int &$id, bool $toSkip = self::SKIP): stdClass;
 
     abstract public function boolProperties(): array;
 

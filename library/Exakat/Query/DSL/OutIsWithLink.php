@@ -52,7 +52,7 @@ class OutIsWithLink extends DSL {
              )
 
 GREMLIN
-);
+            );
         }
     }
 }

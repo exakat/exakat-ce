@@ -23,10 +23,10 @@
 namespace Exakat\Tasks\Helpers;
 
 class Property {
-    public $id    = 0;
-    public $value = 'No value set';
+    public int   $id    = 0;
+    public mixed $value = 'No value set';
 
-    public function __construct(int $id, $value) {
+    public function __construct(int $id, mixed $value) {
         $this->id    = $id;
         // $value might be an integer or a string
         $this->value = $value;

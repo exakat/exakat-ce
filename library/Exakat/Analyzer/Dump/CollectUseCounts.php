@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectUseCounts extends AnalyzerHashHashResults {
-    protected $analyzerName = 'File Use Expression Counts';
+    protected string $analyzerName = 'File Use Expression Counts';
 
     public function analyze(): void {
         // foo() {$t ; }

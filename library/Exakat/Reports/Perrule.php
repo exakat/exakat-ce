@@ -32,8 +32,10 @@ class Perrule extends Reports {
 
         $perfile       = array();
         $titleCache    = array();
-        foreach($analysisResults->toArray() as $row) {
-            if ($row['line'] === -1) { continue; }
+        foreach ($analysisResults->toArray() as $row) {
+            if ($row['line'] === -1) {
+                continue;
+            }
             $this->count();
             if (!isset($titleCache[$row['analyzer']])) {
                 $titleCache[$row['analyzer']] = $this->docs->getDocs($row['analyzer'], 'name');
@@ -53,7 +55,7 @@ class Perrule extends Reports {
         $text = '';
         $line = 100;
 
-        foreach($perfile as &$rule) {
+        foreach ($perfile as &$rule) {
             sort($rule);
         }
         unset($rule);
@@ -61,7 +63,7 @@ class Perrule extends Reports {
         // sort by path
         ksort($perfile);
 
-        foreach($perfile as $file => $issues) {
+        foreach ($perfile as $file => $issues) {
             $text .= str_repeat('-', $line) . "\n" .
                      " $file\n" .
                      str_repeat('-', $line) . "\n" .

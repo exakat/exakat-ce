@@ -23,10 +23,10 @@
 namespace Exakat\Tasks\Helpers;
 
 class Lock {
-    private $path = null;
+    private string $path;
 
     public function __construct(string $path, string $name) {
-        assert(strpos($name, '\\') === false, "Wrong slash for analysis name '$name'.");
+        assert(!str_contains($name, '\\')  , "Wrong slash for analysis name '$name'.");
         $b = array_reverse(explode('/', $name));
         assert(count($b) === 2, "Wrong lock build for '$name'.");
 

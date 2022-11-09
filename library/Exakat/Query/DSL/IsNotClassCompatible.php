@@ -31,7 +31,6 @@ class IsNotClassCompatible extends DSL {
         // ONE or OR :all are missing
         // AND : one missing is enough
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
         $gremlin = <<<GREMLIN
  sideEffect{ t = $typehint;
              fnp = $fnp;
@@ -43,8 +42,8 @@ class IsNotClassCompatible extends DSL {
 .where( 
     __.sideEffect{ x = []; }
       .union(
-                __.filter{ true },
-                __.out("EXTENDS", "IMPLEMENTS").emit().repeat(__.in("DEFINITION").out("EXTENDS", "IMPLEMENTS")).times($MAX_LOOPING)
+                __.identity(),
+                __.out("EXTENDS", "IMPLEMENTS")
       )
       .has("fullnspath")
       .sideEffect{ x.add(it.get().value("fullnspath")) ; }

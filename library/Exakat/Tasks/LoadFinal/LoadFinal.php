@@ -25,17 +25,20 @@ namespace Exakat\Tasks\LoadFinal;
 use Exakat\Query\Query;
 use Exakat\Exceptions\GremlinException;
 use Exakat\Log;
+use Exakat\Config;
+use Exakat\Datastore;
+use Exakat\Graph\Graph;
 use Exakat\Helpers\Timer;
 
 class LoadFinal {
-    protected $gremlin    = null;
-    protected $config     = null;
-    protected $datastore  = null;
+    protected Graph     $gremlin;
+    protected Config    $config ;
+    protected Datastore $datastore;
 
-    protected $PHPconstants = array();
-    protected $PHPfunctions = array();
+    protected array $PHPconstants = array();
+    protected array $PHPfunctions = array();
 
-    protected $log        = null;
+    protected ?Log  $log;
     protected Timer $timer;
 
     public function __construct() {
@@ -45,16 +48,16 @@ class LoadFinal {
         $this->datastore->reuse();
 
         $this->log = new Log(strtolower(substr(static::class, strrpos(self::class, '\\') + 1)),
-                             "{$this->config->projects_root}/projects/{$this->config->project}");
+            "{$this->config->projects_root}/projects/{$this->config->project}");
         $this->timer = new Timer();
     }
 
     protected function newQuery(string $title): Query {
         return new Query(0,
-                         $this->config->project,
-                         $title,
-                         $this->config->executable
-                         );
+            $this->config->project,
+            $title,
+            $this->config->executable
+        );
     }
 
     public function run(): void {
@@ -89,8 +92,11 @@ GREMLIN;
         $list = array('\Exakat\Tasks\LoadFinal\FixFullnspathConstants',
                       '\Exakat\Tasks\LoadFinal\FinishIsModified',
                       '\Exakat\Tasks\LoadFinal\IsInIgnoredDir',
+                      '\Exakat\Tasks\LoadFinal\FinishExtends',
+                      '\Exakat\Tasks\LoadFinal\FinishReadonlyClass',
+                      '\Exakat\Tasks\LoadFinal\FinishPppTypehint',
                       );
-        foreach($list as $class) {
+        foreach ($list as $class) {
             $task = new $class();
             $task->run();
             $this->log($class);
@@ -192,6 +198,7 @@ GREMLIN;
 g.V().hasLabel("Functioncall", "Identifier", "Nsname")
      .not(__.in("NAME").not(hasLabel("Functioncall")))
      .not(__.in("CLASS").hasLabel("Instanceof"))
+     .not(__.out("USED")) // No local use expression already in place
      .not(has("absolute", true))
      .not(has("token", within('T_NAME_QUALIFIED', 'T_NS_SEPARATOR')))
      .has("fullnspath")
@@ -207,6 +214,7 @@ g.V().hasLabel("Functioncall", "Identifier", "Nsname")
                  ),
          __.has("isPhp", true).not(__.where(__.in('DEFINITION'))).sideEffect{ actual = '\\' + it.get().value("fullnspath").tokenize('\\\\').last();},
          __.has("isExt", true).not(__.where(__.in('DEFINITION'))).sideEffect{ actual = '\\' + it.get().value("fullnspath").tokenize('\\\\').last();},
+         __.has("isStub", true).not(__.where(__.in('DEFINITION'))).sideEffect{ actual = '\\' + it.get().value("fullnspath").tokenize('\\\\').last();}
       )
      .select("identifier")
      .sideEffect{ 
@@ -356,7 +364,7 @@ GREMLIN;
         $exts[] = 'php_constants';
         $exts[] = 'php_functions';
 
-        foreach($exts as $ext) {
+        foreach ($exts as $ext) {
             $inifile = str_replace('Extensions\Ext', '', $ext) . '.ini';
             $fullpath = "{$this->config->dir_root}/data/$inifile";
 

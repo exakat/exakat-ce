@@ -35,7 +35,6 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('OBJECT')
               ->atomIs('Variableobject')
               ->inIs('DEFINITION')
-              ->inIs('NAME')
               ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
@@ -46,16 +45,18 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
                        ->atomIs(self::STATIC_NAMES, self::WITHOUT_CONSTANTS)
                        ->inIs('IMPLEMENTS')
               )
-              ->atomIs(array('Class', 'Classanonymous'))
+              ->atomIs(array('Class', 'Classanonymous', 'Interface'))
               // No check on Atom == Class, as it may not exists
-              ->goToAllParentsTraits(self::INCLUDE_SELF)
-              ->atomIs(array('Class', 'Classanonymous', 'Trait'))
+              ->goToAllImplements(self::INCLUDE_SELF)
+              ->atomIs(array('Class', 'Classanonymous', 'Trait', 'Interface'))
               ->outIs('METHOD')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
+
+        // @todo : checks for methods which are in traits
 
         // class B { public A $p; function bar() { $this->a->foo()}; class A { function foo() {}}
         $this->atomIs(array('Methodcall', 'Staticmethodcall'), self::WITHOUT_CONSTANTS)
@@ -92,7 +93,6 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('OBJECT')
               ->atomIs('Variableobject')
               ->inIs('DEFINITION')
-              ->inIs('NAME')
               ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->outIs('TYPEHINT')
               ->savePropertyAs('fullnspath', 'fnp')
@@ -124,7 +124,6 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('OBJECT')
               ->atomIs('Variableobject')
               ->inIs('DEFINITION')
-              ->inIs('NAME')
               ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->outIs('TYPEHINT')
               ->savePropertyAs('fullnspath', 'fnp')
@@ -170,7 +169,6 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->inIs('CONSTANT')
               ->outIs('CLASS')
               ->inIs('DEFINITION')
-              ->inIs('NAME')
               ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
@@ -181,9 +179,9 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
                        ->atomIs(self::STATIC_NAMES, self::WITHOUT_CONSTANTS)
                        ->inIs('IMPLEMENTS')
               )
-              ->atomIs(array('Class', 'Trait'), self::WITHOUT_CONSTANTS)
+              ->atomIs(array('Class', 'Interface'), self::WITHOUT_CONSTANTS)
               // No check on Atom == Class, as it may not exists
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllImplements(self::INCLUDE_SELF)
               ->outIs('CONST')
               ->outIs('CONST')
               ->outIs('NAME')
@@ -217,6 +215,27 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->addETo('DEFINITION', 'constante');
         $this->prepareQuery();
 
+        // Static constants, but the definition is in the parent family
+        $this->atomIs('Staticconstant', self::WITHOUT_CONSTANTS)
+              ->as('constante')
+              ->hasNoIn('DEFINITION')
+              ->outIs('CONSTANT')
+              ->atomIs('Name', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('code', 'name')
+              ->inIs('CONSTANT')
+              ->outIs('CLASS')
+              ->atomIs(array('Self', 'Parent', 'Static', 'Identifier', 'Nsname'))
+              ->inIs('DEFINITION')
+              ->atomIs(array('Class', 'Classanonymous', 'Interface'))
+              ->goToAllImplements(self::INCLUDE_SELF)
+              ->outIs('CONST')
+              ->outIs('CONST')
+              ->outIs('NAME')
+              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->inIs('NAME')
+              ->addETo('DEFINITION', 'constante');
+        $this->prepareQuery();
+
         // Create link between static Class method and its definition
         // This works outside a class too, for static.
         $this->atomIs('Staticmethodcall', self::WITHOUT_CONSTANTS)
@@ -227,7 +246,6 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('CLASS')
               ->atomIs('Variable', self::WITHOUT_CONSTANTS)
               ->inIs('DEFINITION')
-              ->inIs('NAME')
               ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
               ->optional(

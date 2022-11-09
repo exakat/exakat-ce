@@ -25,8 +25,13 @@ namespace Exakat;
 use Exakat\Exceptions\NoPhpBinary;
 
 class Phpexec {
-    private $phpexec          = 'php';
-    private static $extraTokens    = array(';'       => 'T_SEMICOLON',
+    private const CLI_OR_DOCKER_REGEX = '#[a-z0-9]+:[a-z0-9]+#i';
+
+    public const VERSIONS         = array('5.2', '5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2');
+    public const VERSIONS_COMPACT = array('52',  '53',  '54',  '55',  '56',  '70',  '71',  '72',  '73',  '74',  '80',  '81',  '82');
+
+    private string $phpexec        = 'php';
+    private static array $extraTokens    = array(';'       => 'T_SEMICOLON',
                                            '='       => 'T_EQUAL',
                                            '+'       => 'T_PLUS',
                                            '-'       => 'T_MINUS',
@@ -58,18 +63,13 @@ class Phpexec {
                                            '`'       => 'T_SHELL_QUOTE',
                                            '`_CLOSE' => 'T_SHELL_QUOTE_CLOSE',
                                            '~'       => 'T_TILDE');
-    private static $tokens    = array();
-    private $config           = null;
-    private $isCurrentVersion = false;
-    private $actualVersion    = null;
-    private $requestedVersion = null;
-    private $error            = array();
-    private $version          = '';
-
-    private const CLI_OR_DOCKER_REGEX = '#[a-z0-9]+:[a-z0-9]+#i';
-
-    public const VERSIONS         = array('5.2', '5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2');
-    public const VERSIONS_COMPACT = array('52',  '53',  '54',  '55',  '56',  '70',  '71',  '72',  '73',  '74',  '80',  '81',  '82');
+    private static array $tokens    = array();
+    private array $config    = array();
+    private bool $isCurrentVersion = false;
+    private string $actualVersion    = '';
+    private string $requestedVersion = '';
+    private array $error            = array();
+    private string $version          = '';
 
     public function __construct(string $phpversion = null, string $pathToBinary = '') {
         assert($phpversion !== null, "Php version must be a valid version, not $phpversion.");
@@ -171,7 +171,7 @@ class Phpexec {
         return self::$tokens;
     }
 
-    public function getTokenName($token): string {
+    public function getTokenName(int|string $token): string {
         return self::$tokens[$token];
     }
 
@@ -224,7 +224,7 @@ class Phpexec {
         // Can't use PHP_SELF, because short_ini_tag can't be changed.
         $filename = $this->escapeFile($file);
         if (preg_match(self::CLI_OR_DOCKER_REGEX, $this->phpexec)) {
-            $res = shell_exec($this->phpexec . ' -d short_open_tag=1 -r "print count(@token_get_all(file_get_contents(' . $filename . '))); ?>" 2>&1    ') ?? '';
+            assert(false, 'No support for docker'); // @todo support for docker
         } else {
             $res = shell_exec($this->phpexec . ' -d short_open_tag=1 -r "print count(@token_get_all(file_get_contents(' . $filename . '))); ?>" 2>&1    ') ?? '';
         }
@@ -246,7 +246,7 @@ class Phpexec {
 
             $res = shell_exec($shell) ?? '';
         } else {
-            $res = shell_exec("{$this->phpexec} -v 2>&1");
+            $res = shell_exec("{$this->phpexec} -v 2>&1") ?? '';
         }
 
         if (!preg_match('/^PHP ([0-9\.]+)/', $res, $r)) {
@@ -272,9 +272,9 @@ class Phpexec {
             $dirName  = realpath(dirname($file));
 
             $shell = "docker run -v $dirName:/exakat -w /exakat -it --entrypoint /bin/bash --rm {$this->phpexec} -c 'php -l $filename'";
-            $res = trim(shell_exec($shell));
+            $res = trim(shell_exec($shell) ?? '');
        } else {
-            $res = shell_exec($this->phpexec . ' -l ' . escapeshellarg($file) . ' 2>&1');
+            $res = shell_exec($this->phpexec . ' -l ' . escapeshellarg($file) . ' 2>&1') ?? '';
             $res = trim($res);
        }
 
@@ -364,7 +364,7 @@ class Phpexec {
         );
     }
 
-    public function getConfiguration(string $name = null) {
+    public function getConfiguration(string $name = null) : mixed {
         if ($name === null) {
             return $this->config;
         } elseif (isset($this->config[$name])) {

@@ -28,7 +28,7 @@ class NoArgumentWithName extends DSL {
     public function run(): Command {
         list($name) = func_get_args();
 
-// Assert parameter name ? It should start with $ and be a variable
+        // Assert parameter name ? It should start with $ and be a variable
 //        $this->assertLink($links);
 
         if (is_array($name)) {

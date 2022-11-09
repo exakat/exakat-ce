@@ -40,7 +40,7 @@ choose(__.or(__.where( __.out("RETURNTYPE", "TYPEHINT").hasLabel("Null") ),
                       __.sideEffect{ {$variable} = false;}
                    )
 GREMLIN
-);
+        );
     }
 }
 ?>

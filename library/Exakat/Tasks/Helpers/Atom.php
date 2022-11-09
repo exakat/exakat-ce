@@ -28,17 +28,18 @@ class Atom extends AtomInterface {
     public const STRING_MAX_SIZE = 500;
 
     public function __construct(int $id, string $atom, int $line, string $ws = '') {
+        parent::__construct($ws);
         $this->id   = $id;
+        $this->eId  = $id;
         $this->atom = $atom;
         $this->line = $line;
-        $this->ws   = new Whitespace($ws);
     }
 
-    public function __set($name, $value) {
+    public function __set(string $name, mixed $value) {
         die("Fatal error : trying to set '$name' property on " . self::class);
     }
 
-    public function __get($name) {
+    public function __get(string $name) : mixed {
         die("Fatal error : trying to get '$name' property on " . self::class);
     }
 
@@ -53,8 +54,8 @@ class Atom extends AtomInterface {
             $this->fullcode = substr($this->fullcode, 0, self::STRING_MAX_SIZE) . '...[ total ' . strlen($this->fullcode) . ' chars]';
         }
 
+        $this->lccode        = $this->protectString(mb_strtolower($this->code));
         $this->code          = $this->protectString($this->code       );
-        $this->lccode        = $this->protectString($this->lccode     );
         $this->fullcode      = $this->protectString($this->fullcode   );
         $this->fullnspath    = $this->protectString($this->fullnspath );
         $this->strval        = $this->protectString($this->strval     );
@@ -89,7 +90,7 @@ class Atom extends AtomInterface {
         return (array) $this;
     }
 
-    public function toGraphsonLine(int &$id): stdClass {
+    public function toGraphsonLine(int &$id, bool $withWs = self::WITHOUT_WS): stdClass {
         $integerValues = array('args_max',
                                'args_min',
                                'count',
@@ -108,7 +109,7 @@ class Atom extends AtomInterface {
                                                  'count'       => 0,
                                                  'fullcode'    => 0,
                                                  'rank'        => 0,
-                                                 'ws'          => 0,
+                                                 'eId'         => 0,
                                                  ),
 
                              // This one is used to skip the values configure
@@ -137,8 +138,19 @@ class Atom extends AtomInterface {
                                                  'isPhp'       => 0,
                                                  'isExt'       => 0,
                                                  'isStub'      => 0,
-                               )
+                                                 'isConst'     => 0,
+
+                            // permanant exclusion
+                                                 'position'	   => 0,
+                               ),
                             );
+
+        // for cobbler only
+        if ($withWs === AtomInterface::WITH_WS) {
+            $atomsValues['Sequence']['ws'] = 0;
+        } else {
+            $atomsValues['to_skip']['ws'] = 0;
+        }
 
         if (isset($atomsValues[$this->atom])) {
             $list = array_intersect_key((array) $this, $atomsValues[$this->atom]);
@@ -146,8 +158,12 @@ class Atom extends AtomInterface {
             $list = array_diff_key((array) $this, $atomsValues['to_skip']);
         }
 
-        foreach($list as $l => $value) {
-            if ($value === null) { continue; }
+        $properties['lccode'] = array( new Property($id++, mb_strtolower((string) $this->code)) );
+
+        foreach ($list as $l => $value) {
+            if ($value === null) {
+                continue;
+            }
 
             if (in_array($l, $falseValues) &&
                 !$value) {
@@ -156,11 +172,6 @@ class Atom extends AtomInterface {
 
             if ($l === 'ws') {
                 $value = $this->ws->toJson();
-            }
-
-            if ($l === 'lccode') {
-                $this->lccode = mb_strtolower((string) $this->code);
-                $value = $this->lccode;
             }
 
             if (!in_array($l, array('noDelimiter', 'lccode', 'code', 'fullcode', 'ws')) &&
@@ -181,8 +192,8 @@ class Atom extends AtomInterface {
 
         $object = array('id'         => $this->id,
                         'label'      => $this->atom,
-                        'inE'        => new \stdClass(),
-                        'outE'       => new \stdClass(),
+                        'inE'        => new stdClass(),
+                        'outE'       => new stdClass(),
                         'properties' => $properties,
                         );
 
@@ -191,7 +202,7 @@ class Atom extends AtomInterface {
 
     public function boolProperties(): array {
         $return = array();
-        foreach(array(
+        foreach (array(
                  'noscream',
                  'reference',
                  'variadic',
@@ -215,6 +226,7 @@ class Atom extends AtomInterface {
                  'isPhp',
                  'isExt',
                  'isStub',
+                 'isConst',
                                ) as $property) {
             if ($this->$property == true) {
                 $return[] = $property;

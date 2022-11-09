@@ -31,6 +31,7 @@ interface StubsInterface {
     public function getEnumList(): array;
     public function getTraitList(): array;
     public function getClassList(): array;
+    public function getAbstractClassList(): array;
     public function getClassConstantList(): array;
     public function getEnumCasesList(): array;
     public function getClassPropertyList(): array;
@@ -42,9 +43,19 @@ interface StubsInterface {
     public function getInterfaceMethodsNameAndCount(): array;
     public function getFinalClasses(): array;
     public function getFinalClassConstants(): array;
+    public function getFinalClassMethods(): array;
     public function getFunctionNamesList(): array;
     public function getClassMethodNamesList(): array;
     public function getNamespaceList(): array;
     public function getConstructorsArgsInterval(): array;
     public function getMethodsArgsInterval(): array;
+    public function getClassImplementingList(): array;
+    public function getFunctionsReferenceArgs(): array;
+    public function getPropertyListWithVisibility(string $visibility): array;
+    public function getConstantListWithVisibility(string $visibility): array;
+    public function getMethodListWithVisibility(string $visibility): array;
+    public function getFunctionParameterNames(array $functions): array;
+    public function getNoNullReturningFunctions(): array;
+    public function getNativeMethodReturn(): array;
+    public function getVoidReturningFunctions(): array;
 }

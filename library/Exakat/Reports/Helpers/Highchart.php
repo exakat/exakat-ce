@@ -23,9 +23,9 @@
 namespace Exakat\Reports\Helpers;
 
 class Highchart {
-    private $series = array();
-    private $xAxis  = array();
-    private $donuts = array();
+    private array $series = array();
+    private array $xAxis  = array();
+    private array $donuts = array();
 
     public function addSeries(string $name, array $xAxis, array ...$series): void {
         $this->xAxis  [$name]= $xAxis;
@@ -38,13 +38,13 @@ class Highchart {
 
     public function __toString(): string {
         $return = array();
-        foreach($this->xAxis as $name => $x) {
+        foreach ($this->xAxis as $name => $x) {
             $return []= $this->chart($name, $x, $this->series[$name]);
         }
         $return = implode(PHP_EOL, $return);
 
         $donuts = array();
-        foreach($this->donuts as $name => $donut) {
+        foreach ($this->donuts as $name => $donut) {
             $data = json_encode($donut);
 
             $donuts[] = <<<JAVASCRIPT

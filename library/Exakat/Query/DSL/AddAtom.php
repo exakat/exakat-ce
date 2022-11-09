@@ -31,7 +31,7 @@ class AddAtom extends DSL {
 
         $return = new Command('addV("' . $atom . '")');
 
-        foreach($properties as $name => $value) {
+        foreach ($properties as $name => $value) {
             if (!$this->isVariable((string) $value)) {
                 $value = $this->protectValue($value);
             }

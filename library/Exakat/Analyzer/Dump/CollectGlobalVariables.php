@@ -23,12 +23,12 @@
 namespace Exakat\Analyzer\Dump;
 
 class CollectGlobalVariables extends AnalyzerTable {
-    protected $analyzerName = 'globalVariables';
+    protected string $analyzerName = 'globalVariables';
 
-    protected $analyzerTable = 'globalVariables';
+    protected string $analyzerTable = 'globalVariables';
 
     // Store inclusionss of files within each other
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE globalVariables ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                                variable STRING,
                                file STRING,
@@ -54,9 +54,13 @@ SQL;
              ->savePropertyAs('isRead', 'isRead')
              ->savePropertyAs('isModified', 'isModified')
              ->raw(<<<'GREMLIN'
-sideEffect{ type = type == "Variabledefinition" ? "implicit" : type == "Globaldefinition" ? "global" : "\$GLOBALS"; }
-GREMLIN
+coalesce(
+    __.hasLabel("Array").sideEffect{ type = "\$GLOBALS"; },
+    __.where(__.in("GLOBAL")).sideEffect{ type = "explicit"; },
+    __.sideEffect{ type = "implicit"; }
 )
+GREMLIN
+             )
              ->getVariable(array('file', 'ligne', 'variable', 'isRead', 'isModified', 'type'));
         $this->prepareQuery();
     }

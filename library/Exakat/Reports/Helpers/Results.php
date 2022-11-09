@@ -26,12 +26,12 @@ use SQLite3Result;
 use Closure;
 
 class Results {
-    private $count        = -1;
-    private $values       = null;
-    private $options      = array();
-    private $res          = null;
+    private int $count           = -1;
+    private ?array $values       = null;
+    private array $options       = array();
+    private ?SQLite3Result $res  = null;
 
-    public function __construct(?SQLite3Result $res = null, $options = array()) {
+    public function __construct(?SQLite3Result $res = null, array $options = array()) {
         if ($res === null) {
             $this->values = array();
         } else {
@@ -39,14 +39,14 @@ class Results {
         }
 
         $this->options = $options;
-        $this->options['phpsyntax'] = $this->options['phpsyntax']  ?? array();
+        $this->options['phpsyntax'] ??= array();
     }
 
     public function load(): int {
         $this->values = array();
         $this->count  = 0;
 
-        while($row = $this->res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $this->res->fetchArray(\SQLITE3_ASSOC)) {
             foreach ($this->options['phpsyntax'] as $source => $destination) {
                 $row[$destination] = PHPSyntax((string) $row[$source]);
             }
@@ -84,7 +84,7 @@ class Results {
 
         $return = array();
         if (empty($col2)) {
-            foreach($this->values as $row) {
+            foreach ($this->values as $row) {
                 if (isset($return[$row[$col1]]) ) {
                     $return[$row[$col1]][] = $row;
                 } else {
@@ -92,7 +92,7 @@ class Results {
                 }
             }
         } else {
-            foreach($this->values as $row) {
+            foreach ($this->values as $row) {
                 if (!isset($return[$row[$col1]]) ) {
                     $return[$row[$col1]] = array();
                 }
@@ -114,7 +114,7 @@ class Results {
         }
 
         $return = array();
-        foreach($this->values as $row) {
+        foreach ($this->values as $row) {
             if (!isset($return[$row[$col]]) ) {
                 $return[$row[$col]] = 1;
                 continue;
@@ -134,7 +134,7 @@ class Results {
         return $this->values;
     }
 
-    public function toArrayHash($key = ''): array {
+    public function toArrayHash(string $key = ''): array {
         if ($this->values === null) {
             $this->load();
         }
@@ -144,7 +144,7 @@ class Results {
         }
 
         $return = array();
-        foreach($this->values as $value) {
+        foreach ($this->values as $value) {
             $return[$value[$key]] = $value;
         }
 
@@ -239,7 +239,9 @@ class Results {
             $this->load();
         }
 
-        $f = function (array $a, array $b) use ($k): int { return $a[$k] <=> $b[$k]; };
+        $f = function (array $a, array $b) use ($k): int {
+            return $a[$k] <=> $b[$k];
+        };
         usort($this->values, $f);
 
         return $this;

@@ -24,15 +24,26 @@
 namespace Exakat\Analyzer\Structures;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Query\DSL\FollowParAs;
 
 class NestedTernary extends Analyzer {
+    protected $minNestedTernary = 2;
+
     public function analyze(): void {
+        if ($this->minNestedTernary < 2) {
+            display('minNesterTernary is too low. Make it 2 or more. ');
+
+            return;
+        }
         //$a ? $b : $c ? $d : $e
-        $this->atomIs('Ternary')
-             ->outIs(array('THEN', 'ELSE'))
-             ->outIsIE('CODE') // for parenthesis
-             ->atomIs('Ternary')
-             ->back('first');
+        $this->atomIs('Ternary');
+        for ($i = 0; $i < $this->minNestedTernary - 1; ++$i) {
+            $this->outIs(array('THEN', 'ELSE'))
+                 ->followParAs(FollowParAs::FOLLOW_PARAS_ONLY) // for parenthesis and assignations
+                 ->atomIs('Ternary');
+        }
+        $this->back('first');
+
         $this->prepareQuery();
     }
 }

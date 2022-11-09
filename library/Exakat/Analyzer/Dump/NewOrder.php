@@ -23,12 +23,12 @@
 namespace Exakat\Analyzer\Dump;
 
 class NewOrder extends AnalyzerTable {
-    protected $analyzerName = 'newOrder';
+    protected string $analyzerName = 'newOrder';
 
-    protected $analyzerTable = 'newOrder';
+    protected string $analyzerTable = 'newOrder';
 
     // Store inclusionss of files within each other
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE newOrder (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                          calling STRING,
                          called STRING,

@@ -32,7 +32,7 @@ class NativeClassTypeCompatibility extends Analyzer {
         // extension, method, return
 
         // extract the actual list of classes => method => types
-        $returns = $this->methods->getNativeMethodReturn();
+        $returns = $this->readStubs('getNativeMethodReturn');
 
         $this->atomIs(self::CLASSES_ALL)
              ->initVariable('phplist', $returns, initVariable::TYPE_ARGUMENT)
@@ -46,9 +46,9 @@ class NativeClassTypeCompatibility extends Analyzer {
              ->as('results')
             // Attribute returntypewillchange verificaiton
              ->not(
-                $this->side()
-                     ->outIs('ATTRIBUTE')
-                     ->fullnspathIs('\returntypewillchange')
+                 $this->side()
+                      ->outIs('ATTRIBUTE')
+                      ->fullnspathIs('\returntypewillchange')
              )
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'method')
@@ -76,9 +76,9 @@ class NativeClassTypeCompatibility extends Analyzer {
              ->as('results')
             // Attribute returntypewillchange verificaiton : this may not apply to arguments though
              ->not(
-                $this->side()
-                     ->outIs('ATTRIBUTE')
-                     ->fullnspathIs('\returntypewillchange')
+                 $this->side()
+                      ->outIs('ATTRIBUTE')
+                      ->fullnspathIs('\returntypewillchange')
              )
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'method')

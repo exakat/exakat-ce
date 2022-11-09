@@ -36,7 +36,7 @@ class PhpExtStubPropertyMethod extends Analyzer {
 
         $properties = array();
         $methods    = array();
-        foreach($exts as $ext) {
+        foreach ($exts as $ext) {
             $inifile = str_replace('Extensions\Ext', '', $ext);
             if (!file_exists($this->config->dir_root . '/data/' . $inifile . '.ini')) {
                 continue;
@@ -44,14 +44,14 @@ class PhpExtStubPropertyMethod extends Analyzer {
             $ini = parse_ini_file($this->config->dir_root . '/data/' . $inifile . '.ini');
 
             if (!empty($ini['methods'][0])) {
-                foreach($ini['methods'] as $fullMethod) {
+                foreach ($ini['methods'] as $fullMethod) {
                     list($class, $method) = explode('::', $fullMethod, 2);
                     array_collect_by($methods, mb_strtolower($method), makeFullNsPath($class));
                 }
             }
 
             if (!empty($ini['properties'][0])) {
-                foreach($ini['properties'] as $fullProperty) {
+                foreach ($ini['properties'] as $fullProperty) {
                     list($class, $property) = explode('::', $fullProperty, 2);
                     array_collect_by($properties, ltrim($property, '$'), makeFullNsPath($class));
                 }
@@ -88,12 +88,12 @@ class PhpExtStubPropertyMethod extends Analyzer {
              ->outIs('OBJECT')
              ->atomIs('Variableobject')
              ->filter(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('DEFAULT')
-                     ->atomIs('New')
-                     ->outIs('NEW')
-                     ->isHash('fullnspath', $properties, 'property')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('DEFAULT')
+                      ->atomIs('New')
+                      ->outIs('NEW')
+                      ->isHash('fullnspath', $properties, 'property')
              )
              ->back('first')
              ->property('isExt', true);
@@ -133,12 +133,12 @@ class PhpExtStubPropertyMethod extends Analyzer {
              ->outIs('OBJECT')
              ->atomIs('Variableobject')
              ->filter(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('DEFAULT')
-                     ->atomIs('New')
-                     ->outIs('NEW')
-                     ->isHash('fullnspath', $methods, 'method')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('DEFAULT')
+                      ->atomIs('New')
+                      ->outIs('NEW')
+                      ->isHash('fullnspath', $methods, 'method')
              )
              ->back('first')
              ->property('isExt', true);

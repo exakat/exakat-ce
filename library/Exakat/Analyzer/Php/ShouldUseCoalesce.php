@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class ShouldUseCoalesce extends Analyzer {
-    protected $phpVersion = '7.0+';
+    protected string $phpVersion = '7.0+';
 
     public function analyze(): void {
         //isset($a) ? $a : 'b';

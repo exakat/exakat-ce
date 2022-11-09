@@ -32,7 +32,8 @@ class DuplicateNode extends DSL {
     // copy vertex properties
     select("source").properties().as("p").
     select("clone").
-      property(select("p").key(), select("p").value()))
+      property(select("p").key(), select("p").value())).
+      property("extra", true)
 
 GREMLIN);
     }

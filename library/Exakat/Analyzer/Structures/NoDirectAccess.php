@@ -98,7 +98,6 @@ class NoDirectAccess extends Analyzer {
              ->atomIs('Exit')
              ->back('first');
         $this->prepareQuery();
-
     }
 }
 

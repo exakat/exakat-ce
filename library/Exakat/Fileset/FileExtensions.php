@@ -32,7 +32,7 @@ class FileExtensions extends Fileset {
     }
 
     public function setFiles(array $files) {
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $ext = pathinfo($file, PATHINFO_EXTENSION);
             if (in_array(mb_strtolower($ext), $this->extensions)) {
                 $this->files[] = $file;

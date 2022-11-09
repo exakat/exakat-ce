@@ -26,11 +26,15 @@ use Exakat\Configsource\ProjectConfig;
 use Exakat\Configsource\DotExakatYamlConfig;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Config as Configuration;
+use Exakat\Exceptions\ProjectNeeded;
 
 class Config extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
+        if ($this->config->project->isDefault()) {
+            throw new ProjectNeeded();
+        }
         $project = $this->config->project;
 
         // May be in-code!!

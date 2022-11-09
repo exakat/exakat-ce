@@ -27,13 +27,13 @@ use Exakat\Exceptions\HelperException;
 class SevenZ extends Vcs {
     private $executable = '7z';
 
-    public function __construct($destination, $project_root) {
+    public function __construct(string $destination, string $project_root) {
         parent::__construct($destination, $project_root);
     }
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable}  2>&1");
-        if (strpos($res, '7-Zip') === false) {
+        if (!str_contains($res, '7-Zip')  ) {
             throw new HelperException('7z');
         }
 
@@ -54,7 +54,7 @@ class SevenZ extends Vcs {
         unlink($archiveFile);
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = $this->shell("{$this->executable}  2>&1");

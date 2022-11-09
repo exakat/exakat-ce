@@ -30,7 +30,7 @@ class Cvs extends Vcs {
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");
-        if (strpos($res, 'CVS') === false) {
+        if (!str_contains($res, 'CVS')  ) {
             throw new HelperException('Cvs');
         }
     }
@@ -42,7 +42,7 @@ class Cvs extends Vcs {
         $this->shell("cd {$this->destinationFull}; {$this->executable} checkout --quiet $source code");
     }
 
-    public function update() {
+    public function update(): string {
         $this->check();
 
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} update");
@@ -71,11 +71,11 @@ class Cvs extends Vcs {
         return 'No branch';
     }
 
-    public function getRevision() {
+    public function getRevision(): string {
         return 'No revision';
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = trim($this->shell("{$this->executable} --version 2>&1"));
@@ -99,7 +99,7 @@ class Cvs extends Vcs {
         return $status;
     }
 
-    public function getDiffLines($r1, $r2): array {
+    public function getDiffLines(string $r1, string $r2): array {
         display("No support for line diff in CVS.\n");
         return array();
     }

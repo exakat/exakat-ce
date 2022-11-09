@@ -28,7 +28,7 @@ use Exakat\Analyzer\Analyzer;
 class TraitUsage extends Analyzer {
     protected array $traits = array();
 
-    public function setTraits($traits) {
+    public function setTraits(array $traits) {
         $this->traits = $traits;
     }
 
@@ -51,7 +51,7 @@ class TraitUsage extends Analyzer {
 
         // Instanceof doesn't use traits
 
-// Check that... Const/function and aliases
+        // Check that... Const/function and aliases
         $this->atomIs('Usetrait')
              ->outIs('USE')
              ->outIsIE('NAME')

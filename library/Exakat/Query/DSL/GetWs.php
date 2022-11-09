@@ -32,7 +32,7 @@ class GetWs extends DSL {
         // @todo : initialize the variables
         $code = array();
         $arguments = array();
-        foreach($values as $element => $variable) {
+        foreach ($values as $element => $variable) {
             $code[] = "$variable = j[\"$element\"];";
         }
 

@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class InterfaceUsage extends Analyzer {
-    protected $interfaces = array();
+    protected array $interfaces = array();
 
     public function setInterfaces(array $interfaces): void {
         $this->interfaces = $interfaces;

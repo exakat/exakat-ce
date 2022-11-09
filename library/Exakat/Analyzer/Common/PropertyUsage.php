@@ -26,13 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class PropertyUsage extends Analyzer {
-    protected $properties = array();
+    protected array $properties = array();
 
     public function analyze(): void {
         $staticHash = array();
         $propertyHash = array();
-        foreach($this->properties as $class => $properties) {
-            foreach($properties as $property => $details) {
+        foreach ($this->properties as $class => $properties) {
+            foreach ($properties as $property => $details) {
                 if (!isset($details['fullname'])) {
                     continue;
                 }

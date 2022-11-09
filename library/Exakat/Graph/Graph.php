@@ -23,21 +23,25 @@
 namespace Exakat\Graph;
 
 use Exakat\Graph\Helpers\GraphResults;
+use Exakat\Config;
 
 abstract class Graph {
-    protected $config = null;
+    protected Config $config;
 
-    protected $initialId = null;
+    public const CHECKED     = 1;
+    public const UNCHECKED   = 0;
+    public const UNAVAILABLE = 2;
+
+    protected int $status           = self::UNCHECKED;
 
     public const GRAPHDB = array('nogremlin',
-                                 'gsneo4j',
                                  'gsneo4jV3',
-                                 'tinkergraph',
                                  'tinkergraphv3',
+                                 'tinkergraph',
                                  );
 
-    public function __construct() {
-        $this->config = exakat('config');
+    public function __construct(Config $config) {
+        $this->config = $config;
     }
 
     abstract public function query(string $query, array $params = array(),array $load = array()): GraphResults;
@@ -64,9 +68,16 @@ abstract class Graph {
     abstract public function clean(): void;
 
     public function empty(): void {
+        $res = $this->query('g.V().count();');
+        display('Emptying with ' . $res->toInt() . " nodes\n");
+
         // don't catch max(id) here
+        $b = hrtime(true);
         $this->query('g.V().drop();');
         $this->query('g.E().drop();');
+        $e = hrtime(true);
+
+        display('Emptying in ' . number_format(($e - $b) / 1000000) . " ms\n");
     }
 
     // Produces an id for storing a new value.
@@ -76,19 +87,20 @@ abstract class Graph {
         return 'null';
     }
 
-    public function fixId($id) {
-        return $id + $this->initialId;
-    }
-
-    public static function getConnexion(string $gremlin = null): self {
+    public static function getConnexion(Config $config, string $gremlin): self {
         if ($gremlin === null) {
             $config = exakat('config');
             $gremlin = $config->gremlin;
         }
 
         $graphDBClass = "\\Exakat\\Graph\\$gremlin";
+        assert(class_exists($graphDBClass), "No such class as $gremlin\n");
 
-        return new $graphDBClass();
+        return new $graphDBClass($config);
+    }
+
+    public function setConfigFile(): void {
+        // This is intentionnaly empty
     }
 }
 

@@ -31,7 +31,7 @@ class IsLiteral extends DSL {
 hasLabel("Integer", "Boolean", "Null", "Magicconstant", "Float", "String", "Heredoc", "Closure", "Arrayliteral").has("constant", true)
 
 GREMLIN
-);
+        );
     }
 }
 ?>

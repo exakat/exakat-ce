@@ -24,25 +24,39 @@
 namespace Exakat\Analyzer\Structures;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Query\DSL\FollowParAs;
 
 class CouldUseShortAssignation extends Analyzer {
+    public function dependsOn(): array {
+        return array('Complete/VariableTypehint',
+                    );
+    }
+
     public function analyze(): void {
         // Commutative operation : Addition
+        // $a = $a + 1 (no array)
         $this->atomIs('Assignation')
              ->codeIs('=')
              ->outIs('LEFT')
              ->savePropertyAs('fullcode', 'receiver')
+             ->not(
+                 $this->side()
+                      ->goToTypehint()
+                      ->fullnspathIs('\\array')
+             )
              ->inIs('LEFT')
              ->outIs('RIGHT')
-             ->atomInsideExpression('Addition')
+             ->followParAs(FollowParAs::FOLLOW_PARAS_ONLY)
              ->tokenIs('T_PLUS')
              ->hasNoChildren('Arrayliteral', array( array('LEFT', 'RIGHT')) )
              ->outIsIE(array('LEFT', 'RIGHT', 'CODE'))
+             ->hasNoParent('Coalesce', array('LEFT'))
              ->samePropertyAs('fullcode', 'receiver', self::CASE_SENSITIVE)
              ->back('first');
         $this->prepareQuery();
 
         // Commutative operation : Multiplication
+        // $a = $a * 1
         $this->atomIs('Assignation')
              ->codeIs('=')
              ->outIs('LEFT')
@@ -57,6 +71,7 @@ class CouldUseShortAssignation extends Analyzer {
         $this->prepareQuery();
 
         // Non-Commutative operation
+        // $a = $a - 1;
         $this->atomIs('Assignation')
              ->codeIs('=')
              ->outIs('LEFT')
@@ -72,6 +87,7 @@ class CouldUseShortAssignation extends Analyzer {
         $this->prepareQuery();
 
         // Special case for .
+        // $a = $a . 1;
         $this->atomIs('Assignation')
              ->codeIs('=')
              ->outIs('LEFT')

@@ -38,25 +38,42 @@ class MultipleIdenticalKeys extends Analyzer {
         $this->atomIs('Arrayliteral')
              ->is('constant', true)
              ->isLess('count', $this->arrayMaxSize)
+             ->isMore('count', 1)
 
-            // Check that the array is a hash
-             ->not(
-                $this->side()
-                     ->outIs('ARGUMENT')
-                     ->atomIsNot('Keyvalue')
+            // Check that the array has at least one key=>value pair
+             ->filter(
+                 $this->side()
+                      ->outIs('ARGUMENT')
+                      ->atomIs('Keyvalue')
              )
 
              ->filter(
-                $this->side()
-                     ->initVariable('counts', '[:]')
-                     ->outIs('ARGUMENT')
-                     ->atomIs('Keyvalue')
-                     ->outIs('INDEX')
-                     ->atomIs(array('String', 'Heredoc', 'Concatenation', 'Integer', 'Float', 'Boolean', 'Null', 'Staticclass'), self::WITH_CONSTANTS)
-                     ->raw('or(has("intval"), has("noDelimiter"))')
-                     ->raw(<<<'GREMLIN'
-sideEffect{ 
-    if (it.get().label() in ["String", "Heredoc", "Concatenation", "Staticclass"] ) { 
+                 $this->side()
+                      ->initVariable('counts', '[:]')
+                      ->outIs('ARGUMENT')
+                      ->initVariable('k', 'null')
+                      ->optional(
+                          $this->side()
+                               ->atomIsNot('Keyvalue')
+                               ->hasNoOut('INDEX')
+                               ->raw('sideEffect{ k = it.get().value("rank"); }')
+                      )
+                      ->not(
+                          $this->side()
+                               ->outIs('INDEX')
+                               ->atomIs(array('Identifier', 'Nsname', 'Staticconstant'))
+                               ->hasNoIn('DEFINITION')
+                      )
+                      ->optional(
+                          $this->side()
+                               ->atomIs('Keyvalue')
+                               ->outIs('INDEX')
+                               ->atomIs(array('String', 'Heredoc', 'Concatenation', 'Integer', 'Float', 'Boolean', 'Null', 'Staticclass'), self::WITH_CONSTANTS)
+                               ->atomIsNot(array('Identifier'))
+                               ->raw('or(has("intval"), has("noDelimiter"))')
+                               ->raw(<<<'GREMLIN'
+filter{ 
+    if (it.get().label() in ["String", "Heredoc", "Concatenation", "Staticclass", "Null"] ) { 
         k = it.get().value("noDelimiter"); 
         if (k.isInteger()) {
             k = k.toInteger();
@@ -65,11 +82,21 @@ sideEffect{
                 k = it.get().value("noDelimiter"); 
             }
         }
+        true;
     } 
-    else { 
+    else if (it.get().label() in ["Integer", "Float", "Boolean"] ) {  
         k = it.get().value("intval"); 
-    } 
-
+        true;
+    }  else {
+        k = null;
+        false;
+    }
+}
+GREMLIN
+                               )
+                      )
+                     ->raw(<<<'GREMLIN'
+sideEffect{
     if (counts[k] == null) { 
         counts[k] = 1; 
     } else { 
@@ -77,9 +104,9 @@ sideEffect{
     }
 }
 
-.filter{ counts.findAll{it.value > 1}.size() > 0; }
+.filter{ (counts.values().sum() > 1) && (counts.findAll{it.value > 1}.size() > 0); }
 GREMLIN
-)
+                     )
              )
 
              ->back('first');

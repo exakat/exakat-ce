@@ -28,8 +28,8 @@ use Exakat\Analyzer\Analyzer;
 class RedeclaredPhpFunction extends Analyzer {
     public function analyze(): void {
         $functions = array_merge(exakat('phpCore')->getFunctionList(),
-                                 exakat('phpExtensions')->getFunctionList(),
-                                 );
+            exakat('phpExtensions')->getFunctionList(),
+        );
 
         $this->atomIs('Function')
              ->fullnspathIs($functions);

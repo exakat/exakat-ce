@@ -73,6 +73,7 @@ CREATE TABLE cit (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                     type STRING,
                     abstract INTEGER,
                     final INTEGER,
+                    readonly INTEGER,
                     begin INTEGER,
                     end INTEGER,
                     file INTEGER,
@@ -253,7 +254,7 @@ SQL;
             $cols = '*';
         } else {
             $list = array();
-            foreach($cols as $k => $col) {
+            foreach ($cols as $k => $col) {
                 if (is_int($k)) {
                     $list[] = $col;
                 } else {
@@ -311,7 +312,7 @@ SQL;
         return $this->query($query);
     }
 
-    public function getCit($type = 'class'): Results {
+    public function getCit(string $type = 'class'): Results {
         assert(in_array($type, array('class', 'trait', 'interface')));
 
         $query = "SELECT name FROM cit WHERE type='$type' ORDER BY name";
@@ -758,9 +759,9 @@ SQL;
     public function fetchPlantUml(): Results {
         $query = <<<SQL
 SELECT name, cit.id, extends, type, namespace, 
-       (SELECT GROUP_CONCAT(method,   "\n")   FROM methods    WHERE citId = cit.id) AS methods,
-       (SELECT GROUP_CONCAT(visibility || ' ' || case when static != 0 then 'static ' else '' end ||  case when value != '' then property || " = " || substr(value, 0, 40) else property end, "\n") 
-            FROM properties WHERE citId = cit.id) AS properties
+       COALESCE((SELECT GROUP_CONCAT(method,   "\n")   FROM methods    WHERE citId = cit.id), '') AS methods,
+       COALESCE((SELECT GROUP_CONCAT(visibility || ' ' || case when static != 0 then 'static ' else '' end ||  case when value != '' then property || " = " || substr(value, 0, 40) else property end, "\n") 
+            FROM properties WHERE citId = cit.id), '') AS properties
     FROM cit
     JOIN namespaces
         ON namespaces.id = cit.namespaceId
@@ -952,25 +953,28 @@ SQL;
 
     public function getTraitConflicts(): Results {
         $query = <<<'SQL'
-SELECT
+   SELECT
    t1.name AS t1,
-   t2.name AS t2,
-   LOWER(SUBSTR(m1.METHOD, INSTR(m1.METHOD, 'function ') + 9, INSTR(m1.METHOD, '(') - (INSTR(m1.METHOD, 'function ') + 9))) AS method 
+   m1.method AS method,
+   t2.name AS t2
 FROM
    cit AS t1 
    JOIN
       methods AS m1 
       ON m1.citId = t1.id 
    JOIN
-      methods AS m2 
-      ON m1.id != m2.id 
-      AND LOWER(SUBSTR(m1.METHOD, INSTR(m1.METHOD, 'function ') + 9, INSTR(m1.METHOD, '(') - (INSTR(m1.METHOD, 'function ') + 9))) = LOWER(SUBSTR(m2.METHOD, INSTR(m2.METHOD, 'function ') + 9, INSTR(m2.METHOD, '(') - (INSTR(m2.METHOD, 'function ') + 9))) 
-   JOIN
       cit AS t2 
       ON m2.citId = t2.id 
+
+   JOIN
+      methods AS m2 
+      ON m1.id != m2.id 
+         AND LOWER(m1.method) == LOWER(m2.method)
+
 WHERE
    t1.type = 'trait' 
    AND t2.type = 'trait'
+
 SQL;
         $result = $this->sqlite->query($query);
 
@@ -1066,8 +1070,33 @@ SQL;
         $result = $this->sqlite->query($query);
         return new Results($result);
     }
+
+    public function getConstructorDependencies(): Results {
+        $query = <<<'SQL'
+SELECT cit.name AS destination, 
+       lower(namespaces.namespace || cit.name) as destinationId,  
+       typehints.name AS origin, 
+       lower(typehints.fnp)  AS originId,
+       rank,
+       arguments.name
+    FROM methods 
+    JOIN cit 
+        ON methods.citId = cit.id
+    JOIN namespaces 
+        ON cit.namespaceId = namespaces.id
+    JOIN arguments 
+        ON arguments.methodId = methods.id
+    JOIN typehints
+        ON arguments.id = typehints.object AND 
+           typehints.type='argument'       AND
+           typehints.fnp NOT IN ('\string', '\array', '\bool', '\int', '\stdclass', '\null')
+    WHERE
+        method='__construct';
+
+SQL;
+        $result = $this->sqlite->query($query);
+        return new Results($result);
+    }
 }
-
-
 
 ?>

@@ -25,20 +25,25 @@ namespace Exakat\Query\DSL;
 
 class GoToMethod extends DSL {
     public function run(): Command {
+		$this->assertArguments(1, func_num_args(), __METHOD__);
         list($name) = func_get_args();
 
-        $name = mb_strtolower($name);
+		if (is_array($name)) {
+			$names = array_map('mb_strtolower', $name);
+		} else {
+	        $names = array(mb_strtolower($name));
+		}
 
         // also handle variables
         //assert($this->assertProperty($name));
 
         $gremlin = <<<GREMLIN
  out("METHOD", "MAGICMETHOD").hasLabel("Method", "Magicmethod")
-.out("NAME").filter{ it.get().value("fullcode").toLowerCase() == "$name"}
+.out("NAME").filter{ it.get().value("fullcode").toLowerCase() in ***}
 .in("NAME")
 GREMLIN;
 
-        return new Command($gremlin);
+        return new Command($gremlin, array($names));
     }
 }
 ?>

@@ -32,7 +32,7 @@ class HasNoChildren extends DSL {
 
         $this->assertAtom($childrenClass);
         $diff = $this->normalizeAtoms($childrenClass);
-        if (empty($diff)){
+        if (empty($diff)) {
             return new Command(Query::NO_QUERY);
         }
 

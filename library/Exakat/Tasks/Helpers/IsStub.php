@@ -62,11 +62,11 @@ class IsStub extends Plugin {
 
         // cases and constants are mixed! NO way to disambiguate them later.
         $this->stubClassConstants   = array_merge($stubs->getClassConstantList(),
-                                                  $stubs->getEnumCasesList());
-        $this->stubProperties       = $stubs->getClassPropertyList();
-        $this->stubStaticProperties = $stubs->getClassStaticPropertyList();
-        $this->stubMethods          = $stubs->getClassMethodList();
-        $this->stubStaticMethods    = $stubs->getClassStaticMethodList();
+            $stubs->getEnumCasesList());
+        $this->stubProperties         = $stubs->getClassPropertyList();
+        $this->stubStaticProperties   = $stubs->getClassStaticPropertyList();
+        $this->stubMethods            = $stubs->getClassMethodList();
+        $this->stubClassStaticMethods = $stubs->getClassStaticMethodList();
     }
 
     public function run(Atom $atom, array $extras): void {
@@ -92,24 +92,25 @@ class IsStub extends Plugin {
             case 'Staticclass' :
                 $path = makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED);
                 if (in_array($path, array_merge($this->stubClasses,
-                                                $this->stubTraits,
-                                                $this->stubEnums,
-                                                $this->stubInterfaces,
-                                                ), \STRICT_COMPARISON)) {
+                    $this->stubTraits,
+                    $this->stubEnums,
+                    $this->stubInterfaces,
+                ), \STRICT_COMPARISON)) {
                     $atom->isStub = true;
                     $extras['CLASS']->isStub = true;
                 }
                 break;
 
             case 'Staticmethodcall' :
-                $path = makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED);
-                $method = mb_strtolower(substr($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, 0, strpos($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, '(') ?: 0));
-                if (in_array($method, $this->stubClassMethods[$path] ?? array(), \STRICT_COMPARISON)) {
-                    $atom->isStub = true;
+                if (empty($extras)) {
+                    break;
                 }
 
-                if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->stubStaticMethods ?? array(), \STRICT_COMPARISON)) {
-                    $atom->isStub = true;
+                $path = makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED);
+                $method = mb_strtolower(substr($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, 0, strpos($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, '(') ?: 0));
+                if (in_array($path . '::' . $method, $this->stubClassStaticMethods, \STRICT_COMPARISON)) {
+                    $extras['CLASS']->isPhp = true;
+                    $atom->isPhp = true;
                 }
                 break;
 
@@ -127,6 +128,7 @@ class IsStub extends Plugin {
 
             case 'Staticconstant' :
                 if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->stubClassConstants, \STRICT_COMPARISON)) {
+                    $extras['CLASS']->isStub = true;
                     $atom->isStub = true;
                 }
                 break;
@@ -157,29 +159,30 @@ class IsStub extends Plugin {
                 break;
 
             case 'Usenamespace' :
-                foreach($extras as $extra) {
-                    $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
-                    $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
+                foreach ($extras as $extra) {
+                    if ($extra->fullnspath === self::NOT_PROVIDED) {
+                        continue;
+                    }
 
-                    switch($extra->use) {
+                    switch ($extra->use) {
                         case 'function':
-                            if (in_array(makeFullNsPath($path), $this->stubFunctions, \STRICT_COMPARISON)) {
+                            if (in_array(makeFullNsPath($extra->fullnspath), $this->stubFunctions, \STRICT_COMPARISON)) {
                                 $extra->isStub = true;
                             }
-                        break;
+                            break;
 
                         case 'const':
-                            if (in_array(makeFullNsPath($path, \FNP_CONSTANT), $this->stubConstants, \STRICT_COMPARISON)) {
+                            if (in_array(makeFullNsPath($extra->fullnspath, \FNP_CONSTANT), $this->stubConstants, \STRICT_COMPARISON)) {
                                 $extra->isStub = true;
                             }
-                        break;
+                            break;
 
-                    default: // case class
-                            if (in_array(makeFullNsPath($path), array_merge($this->stubClasses,
-                                                                            $this->stubTraits,
-                                                                            $this->stubEnums,
-                                                                            $this->stubInterfaces,
-                                                                            ), \STRICT_COMPARISON)) {
+                        default: // case class
+                            if (in_array(makeFullNsPath($extra->fullnspath), array_merge($this->stubClasses,
+                                $this->stubTraits,
+                                $this->stubEnums,
+                                $this->stubInterfaces,
+                            ), \STRICT_COMPARISON)) {
                                 $extra->isStub = true;
                             }
                     }
@@ -188,7 +191,7 @@ class IsStub extends Plugin {
 
             case 'Usetrait' :
                 // for specific namespaces
-                foreach($extras as $extra) {
+                foreach ($extras as $extra) {
                     if (in_array($extra->fullnspath, $this->stubTraits, \STRICT_COMPARISON)) {
                         $extra->isStub = true;
                     }
@@ -197,30 +200,30 @@ class IsStub extends Plugin {
 
             case 'Class' :
                 if (isset($extras['ATTRIBUTE'])) {
-                    foreach($extras['ATTRIBUTE'] as $extra) {
+                    foreach ($extras['ATTRIBUTE'] as $extra) {
                         if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, array_merge($this->stubClasses,
-                                                                                           $this->stubTraits,
-                                                                                           $this->stubEnums,
-                                                                                           $this->stubInterfaces,
-                                                                                           ), \STRICT_COMPARISON)) {
+                            $this->stubTraits,
+                            $this->stubEnums,
+                            $this->stubInterfaces,
+                        ), \STRICT_COMPARISON)) {
                             $extra->isStub = true;
                         }
                     }
                 }
                 // Fallthrough is OK
 
-            //case 'Class' :
+                //case 'Class' :
             case 'Classanonymous' :
                 if (isset($extras['EXTENDS']) &&
                     in_array($extras['EXTENDS']->fullnspath ?? self::NOT_PROVIDED, array_merge($this->stubClasses,
-                                                                                               $this->stubTraits,
-                                                                                               $this->stubEnums,
-                                                                                               $this->stubInterfaces,
-                                                                                               ), \STRICT_COMPARISON)) {
+                        $this->stubTraits,
+                        $this->stubEnums,
+                        $this->stubInterfaces,
+                    ), \STRICT_COMPARISON)) {
                     $extras['EXTENDS']->isStub = true;
                 }
 
-                foreach($extras['IMPLEMENTS'] ?? array() as $implements) {
+                foreach ($extras['IMPLEMENTS'] ?? array() as $implements) {
                     if (in_array($implements->fullnspath ?? self::NOT_PROVIDED, $this->stubInterfaces, \STRICT_COMPARISON)) {
                         $implements->isStub = true;
                     }
@@ -228,7 +231,7 @@ class IsStub extends Plugin {
                 break;
 
             case 'Interface' :
-                foreach($extras['EXTENDS'] as $extra) {
+                foreach ($extras['EXTENDS'] as $extra) {
                     if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->stubInterfaces, \STRICT_COMPARISON)) {
                         $extra->isStub = true;
                     }
@@ -243,24 +246,11 @@ class IsStub extends Plugin {
             case 'Instanceof' :
                 // Warning : atom->fullnspath for classes (no fallback)
                 if (in_array(makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED), array_merge($this->stubClasses,
-                                                                                                             $this->stubTraits,
-                                                                                                             $this->stubEnums,
-                                                                                                             $this->stubInterfaces,
-                                                                                                             ), \STRICT_COMPARISON)) {
+                    $this->stubTraits,
+                    $this->stubEnums,
+                    $this->stubInterfaces,
+                ), \STRICT_COMPARISON)) {
                     $extras['CLASS']->isStub = true;
-                }
-                break;
-
-            case 'Parameter' :
-                foreach($extras as $extra) {
-                    if (in_array(makeFullNsPath($extra->fullnspath ?? self::NOT_PROVIDED), array_merge($this->stubClasses,
-                                                                                                       $this->stubTraits,
-                                                                                                       $this->stubEnums,
-                                                                                                       $this->stubInterfaces,
-                                                                                                       ), \STRICT_COMPARISON)) {
-                        $extra->isStub = true;
-                        $atom->isStub = true;
-                    }
                 }
                 break;
 
@@ -278,20 +268,20 @@ class IsStub extends Plugin {
                 }
                 // Warning : atom->fullnspath for classes (no fallback)
                 if (in_array(makeFullNsPath($atom->fullnspath), array_merge($this->stubClasses,
-                                                                            $this->stubTraits,
-                                                                            $this->stubEnums,
-                                                                            $this->stubInterfaces,
-                                                                            ), \STRICT_COMPARISON)) {
+                    $this->stubTraits,
+                    $this->stubEnums,
+                    $this->stubInterfaces,
+                ), \STRICT_COMPARISON)) {
                     $atom->isStub = true;
                 }
                 break;
 
             case 'Newcallname' :
                 if (in_array($atom->fullnspath, array_merge($this->stubClasses,
-                                                            $this->stubTraits,
-                                                            $this->stubEnums,
-                                                            $this->stubInterfaces,
-                                                            ), \STRICT_COMPARISON)) {
+                    $this->stubTraits,
+                    $this->stubEnums,
+                    $this->stubInterfaces,
+                ), \STRICT_COMPARISON)) {
                     $atom->isStub = true;
                 }
                 break;
@@ -315,14 +305,14 @@ class IsStub extends Plugin {
                 break;
 
             case 'Catch' :
-                foreach($extras as $extra) {
+                foreach ($extras as $extra) {
                     $path = $extra->fullnspath ?? self::NOT_PROVIDED;
 
                     if (in_array(makeFullNsPath($path), array_merge($this->stubClasses,
-                                                                    $this->stubTraits,
-                                                                    $this->stubEnums,
-                                                                    $this->stubInterfaces,
-                                                                    ), \STRICT_COMPARISON)) {
+                        $this->stubTraits,
+                        $this->stubEnums,
+                        $this->stubInterfaces,
+                    ), \STRICT_COMPARISON)) {
                         $extra->isStub = true;
                     }
 
@@ -342,28 +332,36 @@ class IsStub extends Plugin {
                 break;
 
             default :
-                // Nothing
-        }
+            // Nothing
+            }
     }
 
     private function checkTypes(array $extras): void {
-        foreach($extras as $extra) {
+        foreach ($extras as $extra) {
+            if (in_array(makeFullNsPath($extra->fullnspath), array_merge($this->stubClasses,
+                $this->stubTraits,
+                $this->stubEnums,
+                $this->stubInterfaces,
+            ), \STRICT_COMPARISON)) {
+                $extra->isStub = true;
+                continue;
+            }
+
+            if (!empty($extra->absolute)) {
+                continue;
+            }
+            if (!empty($extra->use)) {
+                continue;
+            }
+
             $id   = strrpos($extra->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
             $path = substr($extra->fullnspath ?? self::NOT_PROVIDED, $id);
 
             if (in_array(makeFullNsPath($path), array_merge($this->stubClasses,
-                                                            $this->stubTraits,
-                                                            $this->stubEnums,
-                                                            $this->stubInterfaces,
-                                                            ), \STRICT_COMPARISON)) {
-                $extra->isStub = true;
-            }
-
-            if (in_array($extra->fullnspath, array_merge($this->stubClasses,
-                                                         $this->stubTraits,
-                                                         $this->stubEnums,
-                                                         $this->stubInterfaces,
-                                                         ), \STRICT_COMPARISON)) {
+                $this->stubTraits,
+                $this->stubEnums,
+                $this->stubInterfaces,
+            ), \STRICT_COMPARISON)) {
                 $extra->isStub = true;
             }
         }

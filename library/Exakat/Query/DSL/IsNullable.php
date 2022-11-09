@@ -28,7 +28,7 @@ class IsNullable extends DSL {
     public const IMPLICIT = false;
 
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1:
                 list($nullable) = func_get_args();
                 $nullable = in_array($nullable, array(self::EXPLICIT, self::IMPLICIT), \STRICT_COMPARISON) ? $nullable : self::IMPLICIT;

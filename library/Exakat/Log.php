@@ -23,12 +23,13 @@
 namespace Exakat;
 
 use Exakat\Helpers\Timer;
+use SplFileObject;
 
 class Log {
-    private $name  = null;
-    private $log   = null;
-    private $timer = null;
-    private $first = null;
+    private string 		 	$name;
+    private ?SplFileObject	$log;
+    private Timer  			$timer;
+    private string 		 	$first = '';
 
     public function __construct(string $name = '', string $dir = '.') {
         $this->name = $name;
@@ -41,10 +42,10 @@ class Log {
         if (!file_exists("$dir/log/")) { return ; }
         if (!is_dir("$dir/log/")) { return ; }
         if (file_exists("$dir/log/{$this->name}.log")) {
-            $this->log = fopen("$dir/log/{$this->name}.log", 'a');
+            $this->log = new SplFileObject("$dir/log/{$this->name}.log", 'a');
             $this->first = "$this->name resuming on " . date('r');
         } else {
-            $this->log = fopen("$dir/log/{$this->name}.log", 'w+');
+            $this->log = new SplFileObject("$dir/log/{$this->name}.log", 'w+');
             $this->first = "{$this->name} created on " . date('r');
         }
         if (!$this->log) {
@@ -67,19 +68,18 @@ class Log {
         $this->log('Memory peak : ' . memory_get_peak_usage(true));
         $this->log("{$this->name} closed on " . date('r'));
 
-        fclose($this->log);
-        unset($this->log);
+        $this->log = null;
     }
 
     public function log(string $message): void {
         if ($this->log === null) { return; }
 
-        if ($this->first !== null) {
-            fwrite($this->log, "{$this->first}\n");
-            $this->first = null;
+        if ($this->first !== '') {
+            $this->log->fwrite("{$this->first}\n");
+            $this->first = '';
         }
 
-        fwrite($this->log, "$message\n");
+        $this->log->fwrite("$message\n");
     }
 }
 

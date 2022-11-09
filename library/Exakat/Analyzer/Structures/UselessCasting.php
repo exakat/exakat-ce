@@ -43,10 +43,10 @@ class UselessCasting extends Analyzer {
 
         $returnTypes = $this->methods->getFunctionsByReturn(Methods::STRICT);
 
-        foreach($casts as $token => $type) {
+        foreach ($casts as $token => $type) {
             if (is_array($type)) {
                 $returned = array();
-                foreach($type as $t) {
+                foreach ($type as $t) {
                     $returned[] = $returnTypes[$t];
                 }
                 $returned = array_merge(...$returned);
@@ -74,10 +74,10 @@ class UselessCasting extends Analyzer {
                  ->atomIs(self::CALLS)
                  ->inIs('DEFINITION')
                  ->not(
-                    $this->side()
-                         ->outIs('RETURNTYPE')
-                         ->count()
-                         ->isMore(1)
+                     $this->side()
+                          ->outIs('RETURNTYPE')
+                          ->count()
+                          ->isMore(1)
                  )
                  ->outIs('RETURNTYPE')
                  ->is('fullnspath', makeFullNsPath($type))
@@ -108,10 +108,11 @@ filter{
 }
 
 GREMLIN
-)
+             )
              ->inIs('TYPEHINT')
              ->is('typehint', 'one')
-             ->back('first');
+             ->back('first')
+        ;
         $this->prepareQuery();
 
         // (bool) ($a > 2)
@@ -122,13 +123,37 @@ GREMLIN
              ->back('first');
         $this->prepareQuery();
 
-        // (int) 100
+        // (int) D ; const D = 1;
         $this->atomIs('Cast')
              ->tokenIs('T_INT_CAST')
-             ->outIsIE('CODE')
              ->outIs('CAST')
-             ->atomIsNot(array('Coalesce', 'Ternary'))
+             ->outIsIE('CODE')
              ->atomIs('Integer', self::WITH_CONSTANTS)
+             ->back('first');
+        $this->prepareQuery();
+
+        // (int) 100 % 3
+        $this->atomIs('Cast')
+             ->tokenIs('T_INT_CAST')
+             ->outIs('CAST')
+             ->outIsIE('CODE')
+             ->atomIs('Multiplication')
+             ->tokenIs('T_PERCENTAGE')
+             ->back('first');
+        $this->prepareQuery();
+
+        // (int) $a * 10
+        $this->atomIs('Cast')
+             ->tokenIs('T_INT_CAST')
+             ->outIs('CAST')
+             ->outIsIE('CODE')
+             ->atomIs(array('Multiplication', 'Power', 'Addition'), self::WITH_CONSTANTS)
+             ->tokenIsNot('T_PERCENTAGE')
+             ->not(
+                 $this->side()
+                      ->outIs(array('LEFT', 'RIGHT'))
+                      ->atomIsNot('Integer')
+             )
              ->back('first');
         $this->prepareQuery();
     }

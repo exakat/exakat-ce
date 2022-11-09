@@ -22,41 +22,42 @@
 
 namespace Exakat;
 
+use Exakat\Graph\Graph;
 
 class Stats {
-    private $stats       = array();
-    private $file_filter = '';
-    private $gremlin     = null;
+	private array  $stats	   	= array();
+	private string $file_filter = '';
+	private Graph  $gremlin;
 
-    public function __construct() {
-        $this->gremlin = exakat('graphdb');
-    }
+	public function __construct() {
+		$this->gremlin = exakat('graphdb');
+	}
 
-    public function toArray(): array {
-        return $this->stats;
-    }
+	public function toArray(): array {
+		return $this->stats;
+	}
 
-    public function setFileFilter(string $file): bool {
-        $this->file_filter = ".has('file', '$file')";
+	public function setFileFilter(string $file): bool {
+		$this->file_filter = ".has('file', '$file')";
 
-        return true;
-    }
+		return true;
+	}
 
-    public function __get($name) {
-        if (isset($this->stats[$name])) {
-            return $this->stats[$name];
-        } else {
-            return null;
-        }
-    }
+	public function __get(string $name) : miixed {
+		if (isset($this->stats[$name])) {
+			return $this->stats[$name];
+		} else {
+			return null;
+		}
+	}
 
-    public function collect(): void {
-        $this->stats['tokens_count']        = $this->gremlin->queryOne('g.V().has(id, neq(0))' . $this->file_filter . '.count()');//'.has("atom",not(within("Index")))
-        $this->stats['relations_count']     = $this->gremlin->queryOne('g.E().has(id, neq(0))' . $this->file_filter . '.count()');
-        $this->stats['atoms_count']         = $this->gremlin->queryOne('g.V().label().unique()' . $this->file_filter . '.size()');
-        $this->stats['LINK_count']          = $this->gremlin->queryOne('g.E().label().unique()' . $this->file_filter . '.size()');
-        $this->stats['file_count']          = $this->gremlin->queryOne('g.V().inE("FILE").count(); ');
-    }
+	public function collect(): void {
+		$this->stats['tokens_count']	= $this->gremlin->queryOne('g.V().has(id, neq(0))' . $this->file_filter . '.count()');
+		$this->stats['relations_count']	= $this->gremlin->queryOne('g.E().has(id, neq(0))' . $this->file_filter . '.count()');
+		$this->stats['atoms_count']		= $this->gremlin->queryOne('g.V().label().unique()' . $this->file_filter . '.size()');
+		$this->stats['LINK_count']		= $this->gremlin->queryOne('g.E().label().unique()' . $this->file_filter . '.size()');
+		$this->stats['file_count']		= $this->gremlin->queryOne('g.V().inE("FILE").count(); ');
+	}
 }
 
 ?>

@@ -27,25 +27,18 @@ use Exakat\Autoload\Autoloader;
 use Exakat\Analyzer\Common\None;
 
 class Rulesets implements RulesetsInterface {
-    private $main   = null;
-    private $extra  = null;
-    private $dev    = null;
-    private $ignore = null;
+    private RulesetsMain   $main  ;
+    private RulesetsExtra  $extra ;
+    private RulesetsDev    $dev   ;
+    private RulesetsIgnore $ignore;
 
     private static $instanciated = array();
 
-    public function __construct($path, Autoloader $dev, array $extra_rulesets = array(), array $ignore_rulesets = array()) {
+    public function __construct(string $path, Autoloader $dev, array $extra_rulesets = array(), array $ignore_rulesets = array()) {
         $this->main   = new RulesetsMain($path);
         $this->extra  = new RulesetsExtra($extra_rulesets);
         $this->dev    = new RulesetsDev($dev);
         $this->ignore = new RulesetsIgnore($ignore_rulesets);
-    }
-
-    public function __destruct() {
-        $this->main   = null;
-        $this->extra  = null;
-        $this->dev    = null;
-        $this->ignore = null;
     }
 
     public function getRulesetsAnalyzers(array $rulesets = array()): array {
@@ -165,6 +158,5 @@ class Rulesets implements RulesetsInterface {
             return new None();
         }
     }
-
 }
 ?>

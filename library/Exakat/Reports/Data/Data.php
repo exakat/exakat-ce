@@ -25,18 +25,18 @@ namespace Exakat\Reports\Data;
 use Exakat\Dump\Dump;
 
 abstract class Data {
-    protected $dump = null;
-    protected $values = null;
+    protected Dump  $dump;
+    protected array $values = array();
 
     public function __construct(Dump $dump) {
         $this->dump = $dump;
     }
 
-    public function values() {
+    public function getValues(): array {
         return $this->values;
     }
 
-    abstract public function prepare();
+    abstract public function prepare(): void;
 }
 
 ?>

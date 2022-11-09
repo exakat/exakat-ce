@@ -31,7 +31,9 @@ class Phpcompilation extends Reports {
     protected function _generate(array $analyzerList): string {
         $themed = $this->rulesets->getRulesetsAnalyzers(array('Appinfo'));
         $res = $this->dump->fetchAnalysersCounts($themed);
-        $sources = array_filter($res->toHash('analyzer', 'count'), function (int $x): bool { return $x > -1;});
+        $sources = array_filter($res->toHash('analyzer', 'count'), function (int $x): bool {
+            return $x > -1;
+        });
         $this->count($res->getCount());
 
         $configureDirectives = json_decode(file_get_contents("{$this->config->dir_root}/data/configure.json"));
@@ -46,9 +48,9 @@ TEXT
         ,
         './configure');
         $pecl = array();
-        foreach($configureDirectives as $configure) {
+        foreach ($configureDirectives as $configure) {
             if (isset($sources[$configure->analysis])) {
-                if(!empty($configure->activate) && $sources[$configure->analysis] != 0) {
+                if (!empty($configure->activate) && $sources[$configure->analysis] != 0) {
                     $return[] = ' ' . $configure->activate;
                     if (!empty($configure->others)) {
                         $return[] = '   ' . implode(PHP_EOL . '    ', $configure->others);
@@ -56,7 +58,7 @@ TEXT
                     if (!empty($configure->pecl)) {
                         $pecl[] = '#pecl install ' . basename($configure->pecl) . ' (' . $configure->pecl . ')';
                     }
-                } elseif(!empty($configure->deactivate) && $sources[$configure->analysis] == 0) {
+                } elseif (!empty($configure->deactivate) && $sources[$configure->analysis] == 0) {
                     $return[] = ' ' . $configure->deactivate;
                 }
             }

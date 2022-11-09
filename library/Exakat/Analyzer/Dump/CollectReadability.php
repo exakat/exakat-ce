@@ -23,12 +23,12 @@
 namespace Exakat\Analyzer\Dump;
 
 class CollectReadability extends AnalyzerTable {
-    protected $analyzerName = 'readability';
+    protected string $analyzerName = 'readability';
 
-    protected $analyzerTable = 'readability';
+    protected string $analyzerTable = 'readability';
 
     // Store inclusionss of files within each other
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE readability ( id      INTEGER PRIMARY KEY AUTOINCREMENT,
                            name    STRING,
                            type    STRING,
@@ -45,9 +45,9 @@ SQL;
              ->initVariable('name', '""')
              ->initVariable('expression', '0')
              ->not(
-                $this->side()
-                     ->outIs('BLOCK')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomIs('Void')
              )
              ->raw(<<<GREMLIN
      sideEffect{ ++functions; }
@@ -70,7 +70,7 @@ SQL;
         }
     }
 GREMLIN
-);
+             );
 
         // Readability index : "index": 102 - expression - total / expression,
         $this->prepareQuery();

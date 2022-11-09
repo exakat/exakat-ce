@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Structures;
 use Exakat\Analyzer\Common\WithoutTry;
 
 class EvalWithoutTry extends WithoutTry {
-    protected $phpVersion = '7.0+';
+    protected string $phpVersion = '7.0+';
 
     public function analyze(): void {
         $this->atoms = array('Eval');

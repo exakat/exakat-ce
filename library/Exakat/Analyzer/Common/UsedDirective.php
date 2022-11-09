@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class UsedDirective extends Analyzer {
+abstract class UsedDirective extends Analyzer {
     protected $directives = array();
 
     public function analyze(): void {

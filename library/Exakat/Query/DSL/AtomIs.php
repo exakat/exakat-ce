@@ -61,13 +61,16 @@ union( __.identity(),
                   __.hasLabel("Variable", "Variablearray", "Variableobject", "Phpvariable").in("DEFINITION").hasLabel("Variabledefinition").out("DEFAULT"),
 
                  // literal value, passed as an argument (Method, closure, function)
-                  __.hasLabel("Variable", "Phpvariable").in("DEFINITION").in("NAME").hasLabel('Parameter').as("p1").in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
+                  __.hasLabel("Variable", "Phpvariable").in("DEFINITION").hasLabel('Parameter').as("p1").in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
 
                  // literal value, passed as an argument
                   __.hasLabel("Ternary").out("THEN", "ELSE").not(hasLabel('Void')),
 
                 // \$a ?? 'b'
                   __.hasLabel("Coalesce").out("LEFT", "RIGHT"),
+
+				// \$a = A
+				__.hasLabel("Assignation").out("RIGHT"),
 
                 // (\$a)
                   __.hasLabel("Parenthesis").out("CODE")
@@ -89,11 +92,11 @@ union( __.identity(),
                       __.hasLabel("Variable").not(__.in("LEFT").hasLabel("Assignation")).in("DEFINITION").hasLabel('Variabledefinition').has("isConst").optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT").not(hasLabel("Functioncall", "Methodcall", "Staticmethodcall")),
                       
                       // literal value, passed as an argument (Method, closure, function)
-                      __.hasLabel("Variable").in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").out("DEFAULT"),
-            
-                      __.hasLabel("Variable").in("DEFINITION").in("NAME").hasLabel("Parameter", "Ppp").as("p1").timeLimit($TIME_LIMIT).in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
+                      __.hasLabel("Variable").in("DEFINITION").hasLabel("Parameter", "Ppp").out("DEFAULT").not(where(__.in("RIGHT"))),
             
                       // literal value, passed as an argument
+                      __.hasLabel("Variable").in("DEFINITION").hasLabel("Parameter", "Ppp").as("p1").timeLimit($TIME_LIMIT).in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD", "NEW")).out("ARGUMENT").as("p2").where("p1", eq("p2")).by("rank"),
+            
                       __.hasLabel("Ternary").not(__.out("THEN").hasLabel("Void")).out("THEN", "ELSE"),
 
                       __.hasLabel("Ternary").where(__.out("THEN").hasLabel("Void")).out("CONDITION", "ELSE"),
@@ -101,6 +104,9 @@ union( __.identity(),
                       __.hasLabel("Coalesce").out("LEFT", "RIGHT"),
             
                       __.hasLabel("Parenthesis").out("CODE"),
+
+					  // \$a = A
+                      __.hasLabel("Assignation").out("RIGHT"),
             
                       __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in('DEFINITION').where( __.out("RETURNTYPE").hasLabel("Void")).out('RETURNED').not(hasLabel("Functioncall", "Methodcall", "Staticmethodcall"))
                       )

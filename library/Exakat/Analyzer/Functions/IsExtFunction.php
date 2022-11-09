@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Functions;
 use Exakat\Analyzer\Analyzer;
 
 class IsExtFunction extends Analyzer {
-
     public function analyze(): void {
         // substr('abc', 0, 1)
         $this->atomIs('Functioncall')

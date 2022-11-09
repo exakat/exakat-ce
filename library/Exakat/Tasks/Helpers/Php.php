@@ -26,7 +26,7 @@ use Exakat\Exceptions\NoRecognizedTokens;
 
 abstract class Php {
 
-// Exakat home-made tokens
+    // Exakat home-made tokens
     public const T_BANG                         = '!';
     public const T_CLOSE_BRACKET                = ']';
     public const T_CLOSE_PARENTHESIS            = ')';
@@ -247,7 +247,7 @@ abstract class Php {
     public const T_DOUBLE_COLON                                     = -1;
     public const T_CHARACTER                                        = -1;
 
-    public static function getInstance($tokens): self {
+    public static function getInstance(array $tokens): self {
         $errors = array();
 
         if (empty($tokens)) {
@@ -256,10 +256,11 @@ abstract class Php {
 
         $versions = array('Php82', 'Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
 
-        foreach($versions as $version) {
+        foreach ($versions as $version) {
             $errors = array_filter($tokens,
                 function (string $v, string $k) use ($version): bool {
-                    return (string) constant(__NAMESPACE__ . '\\' . $version . '::' . $v) !== $k; },
+                    return (string) constant(__NAMESPACE__ . '\\' . $version . '::' . $v) !== $k;
+                },
                 ARRAY_FILTER_USE_BOTH);
 
             if (empty($errors)) {

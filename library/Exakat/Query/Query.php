@@ -39,19 +39,21 @@ class Query {
     public const QUERY_RUNNING = true;
     public const QUERY_STOPPED = false;
 
+    public const QUERY_EMPTY = 'Query Empty';
+
     private const SACK = '.withSack(["m":[], "processed":0, "total":0])';
 
-    private $id         = null;
-    private $project    = null;
-    private $analyzer   = null;
-    private $php        = null;
+    private int     $id        ;
+    private Project $project   ;
+    private string  $analyzer  ;
+    private string  $php       ;
 
-    private $commands         = array();
-    private $arguments        = array();
-    private $query            = null;
-    private $queryFactory     = null;
-    private $sides            = array();
-    private $stopped          = self::QUERY_RUNNING;
+    private array      $commands         = array();
+    private array      $arguments        = array();
+    private string     $query            = self::QUERY_EMPTY;
+    private DSLFactory $queryFactory;
+    private array      $sides            = array();
+    private bool       $stopped          = self::QUERY_RUNNING;
 
     public function __construct(int $id, Project $project, string $analyzer, string $php, array $dependsOn = array()) {
         $this->id        = $id;
@@ -88,7 +90,7 @@ class Query {
         }
 
         if (count($this->commands) === 1 && empty($this->sides)) {
-            switch(strtolower($name)) {
+            switch (strtolower($name)) {
                 case 'atomis' :
                 case 'atomfunctionis' :
                     $this->_as('first');
@@ -111,7 +113,7 @@ class Query {
                 default :
                     if ($this->commands[0]->gremlin === self::STOP_QUERY) {
                         $this->_as('first');
-                        // Keep going
+                    // Keep going
                     } else {
                         assert(false, 'No gremlin optimization : gremlin query "' . $name . '" in analyzer should have use g.V. ! ' . $this->commands[0]->gremlin);
                     }
@@ -168,7 +170,7 @@ class Query {
             return true;
         }
 
-        assert($this->query === null, 'query is already ready');
+        assert($this->query === self::QUERY_EMPTY, 'query is already ready');
         assert(empty($this->sides), 'sides are not empty : left ' . count($this->sides) . ' element');
 
         // @doc This is when the object is a placeholder for others.
@@ -188,7 +190,7 @@ class Query {
             return false;
         }
 
-        foreach($commands as $id => $command) {
+        foreach ($commands as $id => $command) {
             if ($command === self::NO_QUERY) {
                 unset($commands[$id], $arguments[$id]);
             }
@@ -219,7 +221,7 @@ class Query {
             return ;
         }
 
-        foreach($commands as $id => $command) {
+        foreach ($commands as $id => $command) {
             if ($command === self::NO_QUERY) {
                 unset($commands[$id], $arguments[$id]);
             }
@@ -242,7 +244,7 @@ class Query {
     }
 
     public function getQuery(): string {
-        assert($this->query !== null, 'Null Query found!');
+        assert($this->query !== self::QUERY_EMPTY, 'Null Query found!');
         return $this->query;
     }
 
@@ -258,8 +260,8 @@ class Query {
         die(__METHOD__);
     }
 
-    private function prepareSack(array $commands) {
-        foreach($commands as $command) {
+    private function prepareSack(array $commands) : string {
+        foreach ($commands as $command) {
             if ($command->getSack() === Command::SACK_NONE) {
                 continue;
             }
@@ -276,7 +278,7 @@ class Query {
         }
 
         $return = array();
-        foreach($sack as $name => $init) {
+        foreach ($sack as $name => $init) {
             $return[] = "\"$name\":" . trim((string) $init, ' {}');
         }
 

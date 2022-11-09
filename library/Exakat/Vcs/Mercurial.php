@@ -29,7 +29,7 @@ class Mercurial extends Vcs {
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");
-        if (strpos($res, 'Mercurial') === false) {
+        if (!str_contains($res, 'Mercurial')  ) {
             throw new HelperException('Mercurial');
         }
     }
@@ -42,7 +42,7 @@ class Mercurial extends Vcs {
         $this->shell("cd {$codePath}; {$this->executable} clone $sourceArg code");
     }
 
-    public function update() {
+    public function update(): string {
         $this->check();
 
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} pull 2>&1; {$this->executable} update; {$this->executable} log -l 1");
@@ -52,7 +52,7 @@ class Mercurial extends Vcs {
         return "$changeset[1] ($date[1])";
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = trim($this->shell($this->executable . ' --version 2>&1'));
@@ -72,7 +72,7 @@ class Mercurial extends Vcs {
         return trim(substr($res, 8), " *\n");
     }
 
-    public function getRevision() {
+    public function getRevision(): string {
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} summary 2>&1 | grep parent");
         return trim(substr($res, 8), " *\n");
     }
@@ -87,7 +87,7 @@ class Mercurial extends Vcs {
         return $status;
     }
 
-    public function getDiffLines($r1, $r2): array {
+    public function getDiffLines(string $r1, string $r2): array {
         display("No support for line diff in Hg.\n");
         return array();
     }

@@ -98,7 +98,7 @@ function copyDir(string $src, string $dst): int {
     }
     $dir = opendir($src);
     if (!is_resource($dir)) {
-        throw new NoSuchDir("Can't open dir : '$src' : " . error_get_last()[0]);
+        throw new NoSuchDir("Can't open dir : '$src' : " . error_get_last()['message']);
     }
 
     $total = 0;
@@ -400,7 +400,7 @@ function PHPSyntax(string $code): string {
     return $cache[$code];
 }
 
-function makeArray($value): array {
+function makeArray(mixed $value): array {
     if (is_array($value)) {
         return array_values($value);
     } else {
@@ -411,7 +411,7 @@ function makeArray($value): array {
 const FNP_CONSTANT     = true;
 const FNP_NOT_CONSTANT = false;
 
-function makeFullNsPath($functions, bool $constant = \FNP_NOT_CONSTANT) {
+function makeFullNsPath(array|string $functions, bool $constant = \FNP_NOT_CONSTANT) : mixed {
     // case for classes and functions
     if ($constant === \FNP_NOT_CONSTANT) {
         $cb = function (string $x): string {
@@ -449,9 +449,7 @@ function makeFullNsPath($functions, bool $constant = \FNP_NOT_CONSTANT) {
         return $cb($functions);
     } elseif (is_array($functions)) {
         return array_map($cb, $functions);
-    } else {
-        assert(is_int($functions));
-    }
+    } 
 
     throw new WrongParameterType(gettype($functions), __METHOD__);
 }
@@ -584,7 +582,7 @@ array('a/b' => 1 ) to Array
 
 )
 */
-function raiseDimensions($array, $split='/'): array {
+function raiseDimensions(array $array, string $split = '/'): array {
     $return = array();
 
     foreach ($array as $k => $value) {
@@ -684,7 +682,7 @@ function array_sub_sort(array &$list): void {
     unset($l);
 }
 
-function array_collect_by(array &$array, $key, $value): void {
+function array_collect_by(array &$array, int|string $key, mixed $value): void {
     if (isset($array[$key])) {
         $array[$key][] = $value;
     } else {
@@ -709,7 +707,7 @@ function listToArray(string $string, string $separator = ','): array {
     return $list;
 }
 
-function exakat(string $what) {
+function exakat(string $what) : mixed {
     static $container;
 
     if ($container === null) {

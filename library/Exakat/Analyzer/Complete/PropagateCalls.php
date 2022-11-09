@@ -41,7 +41,7 @@ class PropagateCalls extends Complete {
         $this->setCount($count);
     }
 
-    private function propagateCalls($level = 0): int {
+    private function propagateCalls(int $level = 0): int {
         $total = 0;
 
         $total += $this->processReturnedType();
@@ -83,7 +83,7 @@ class PropagateCalls extends Complete {
                        ->as('origin')
                        ->dedup(array('first', 'origin'))
                        ->addETo('DEFINITION', 'first')
-                )
+              )
               ->count();
         $c1 = $this->rawQuery()->toInt();
 
@@ -110,7 +110,7 @@ class PropagateCalls extends Complete {
               ->dedup(array('first', 'origin'))
               ->addETo('DEFINITION', 'first')
               ->count();
-       $c2 = $this->rawQuery()->toInt();
+        $c2 = $this->rawQuery()->toInt();
 
         //$a = function () {}; $a()
         $this->atomIs(array('Variabledefinition', 'Parametername', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
@@ -127,9 +127,9 @@ class PropagateCalls extends Complete {
              ->dedup(array('call', 'origin'))
              ->addEFrom('DEFINITION', 'origin')
              ->count();
-       $c3 = $this->rawQuery()->toInt();
+        $c3 = $this->rawQuery()->toInt();
 
-       return $c1 + $c2 + $c3;
+        return $c1 + $c2 + $c3;
     }
 
     private function processReturnedType(): int {
@@ -250,7 +250,7 @@ class PropagateCalls extends Complete {
               ->count();
         $c3 = $this->rawQuery()->toInt();
 
-       return $c1 + $c2 + $c3;
+        return $c1 + $c2 + $c3;
     }
 
     private function processParenthesis(): int {
@@ -266,9 +266,9 @@ class PropagateCalls extends Complete {
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
@@ -296,9 +296,9 @@ class PropagateCalls extends Complete {
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
@@ -325,9 +325,9 @@ class PropagateCalls extends Complete {
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
@@ -355,9 +355,9 @@ class PropagateCalls extends Complete {
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')
@@ -384,9 +384,9 @@ class PropagateCalls extends Complete {
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
               ->optional(
-                $this->side()
-                     ->atomIs('Assignation')
-                     ->outIs('RIGHT')
+                  $this->side()
+                       ->atomIs('Assignation')
+                       ->outIs('RIGHT')
               )
               ->atomIs('New', self::WITHOUT_CONSTANTS)
               ->outIs('NEW')

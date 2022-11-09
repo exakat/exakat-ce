@@ -110,16 +110,16 @@ if ($mode == 'Categories') {
     display_form_analyzer($id);
 }
 
-function display_form_category($id) {
+function display_form_category(int $id) : void {
     display_form($id, 'Categories');
 }
 
-function display_form_analyzer($id) {
+function display_form_analyzer(int $id) : void {
     display_form($id, 'Analyzer');
 }
 
 
-function display_form($id, $mode) {
+function display_form(int $id, string $mode) : void {
     global $sqlite;
     
     if ($mode == "Analyzer") {

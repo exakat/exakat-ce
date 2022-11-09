@@ -22,7 +22,11 @@
 
 namespace Exakat\Reports;
 
+use Exakat\Reports\Helpers\Docs;
+use Exakat\Analyzer\Rulesets;
 use Exakat\Dump\Dump;
+use Exakat\Datastore;
+use Exakat\Config;
 use Exakat\Exceptions\NoSuchReport;
 
 abstract class Reports {
@@ -45,35 +49,36 @@ abstract class Reports {
                                           'Migration73', 'Migration74', 'Migration80', 'Migration81', 'Migration82',
                                           'Meters', 'Perrule',
                                           'CompatibilityPHP56', 'CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81',
+                                          'Compatibility',
                                           'Unused',
                                           //'DailyTodo',
                                           );
 
-    protected $themesToShow = array('CompatibilityPHP56', //'CompatibilityPHP53', 'CompatibilityPHP54', 'CompatibilityPHP55',
-                                    'CompatibilityPHP70', 'CompatibilityPHP71', 'CompatibilityPHP72', 'CompatibilityPHP73',
-                                    'CompatibilityPHP74',
-                                    'CompatibilityPHP80',
-                                    'CompatibilityPHP81',
-                                    'Dead code', 'Security', 'Analyze', 'Inventories',
-                                    'Dump',
-                                    );
+    protected array $themesToShow = array('CompatibilityPHP56', //'CompatibilityPHP53', 'CompatibilityPHP54', 'CompatibilityPHP55',
+                                    	  'CompatibilityPHP70', 'CompatibilityPHP71', 'CompatibilityPHP72', 'CompatibilityPHP73',
+                                    	  'CompatibilityPHP74',
+                                    	  'CompatibilityPHP80',
+                                    	  'CompatibilityPHP81',
+                                    	  'Dead code', 'Security', 'Analyze', 'Inventories',
+                                    	  'Dump',
+                                    	  );
 
-    private $count = 0;
+    private int 			$count = 0;
 
-    protected $themesList = '';      // cache for themes list in SQLITE
-    protected $config     = null;
-    protected $docs       = null;
+    protected array|string 	$themesList = array();      // cache for themes list in SQLITE
+    protected Config 		$config;
+    protected Docs 			$docs;
 
-    protected $dump       = null;
+    protected Dump $dump;
 
-    protected $datastore = null;
-    protected $rulesets  = null;
+    protected Datastore $datastore;
+    protected ?Rulesets $rulesets = null;
 
-    protected $options   = array();
+    protected array $options   = array();
 
     public function __construct() {
         $this->config    = exakat('config');
-        $format = explode('\\', get_class($this));
+        $format = explode('\\', static::class);
         $format = array_pop($format);
         // warning, this is case sensitive. Options should not be.
         // warning, options for reports (and others) are simply based on the report name, and may end in conflict with other names
@@ -87,7 +92,7 @@ abstract class Reports {
 
             // Default analyzers
             $analyzers = array_merge($this->rulesets->getRulesetsAnalyzers($this->config->project_results ?? array()),
-                                     array_keys($this->config->rulesets));
+                array_keys($this->config->rulesets));
             $this->themesList = makeList($analyzers);
         }
     }
@@ -128,7 +133,7 @@ abstract class Reports {
             echo $final;
             return '';
         } elseif ($name === self::INLINE) {
-            return $final ;
+            return $final;
         } else {
             file_put_contents("$folder/$name." . $this::FILE_EXTENSION, $final);
             return '';
@@ -176,6 +181,16 @@ abstract class Reports {
         }
 
         return new $class();
+    }
+
+    public static function getSuggestion(string $report): array {
+        return array_filter(self::$FORMATS, function (string $c) use ($report): bool {
+            $l = levenshtein($c, $report);
+            if ($l < 6) {
+                return true;
+            }
+            return false;
+        });
     }
 }
 

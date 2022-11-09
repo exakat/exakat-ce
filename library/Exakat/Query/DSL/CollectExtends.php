@@ -39,14 +39,14 @@ class CollectExtends extends DSL {
         return new Command(<<<GREMLIN
 where( 
     __.sideEffect{ $variable = []; }
-      .repeat( __.out("IMPLEMENTS", "EXTENDS").in("DEFINITION") ).emit().times($MAX_LOOPING)
+      .out("IMPLEMENTS", "EXTENDS")
       .hasLabel("Class")
       .sideEffect{ $variable.add(it.get().value("fullnspath")) ; }
       .fold() 
 ) 
 
 GREMLIN
-);
+        );
     }
 }
 ?>

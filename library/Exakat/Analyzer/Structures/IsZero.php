@@ -92,7 +92,7 @@ sideEffect{x = [:]; id2 = it.get().id();}
 .filter{ x.findAll{a,b -> b == 0} != [:]; }
 
 GREMLIN
-);
+             );
         $this->prepareQuery();
     }
 }

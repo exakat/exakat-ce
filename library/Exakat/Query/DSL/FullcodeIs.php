@@ -27,8 +27,6 @@ use Exakat\Analyzer\Analyzer;
 
 class FullcodeIs extends DSL {
     public function run(): Command {
-        assert(func_num_args() <= 2, 'Too many arguments for ' . __METHOD__);
-
         switch (func_num_args()) {
             case 2:
                 list($code, $caseSensitive) = func_get_args();
@@ -40,7 +38,7 @@ class FullcodeIs extends DSL {
                 break;
 
             default:
-                assert(false, 'No enought arguments for ' . __METHOD__);
+                assert(false, 'Wrong number of arguments for ' . __METHOD__);
         }
 
         $return = new Command('has("fullcode")');

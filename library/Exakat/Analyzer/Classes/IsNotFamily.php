@@ -39,13 +39,13 @@ class IsNotFamily extends Analyzer {
              ->atomIs('Class')
 
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->atomIs('Class')
-                             ->goToAllParents(self::INCLUDE_SELF)
-                             ->fullnspathIs('fnp')
-                     )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->atomIs('Class')
+                               ->goToAllParents(self::INCLUDE_SELF)
+                               ->fullnspathIs('fnp')
+                      )
              )
              ->back('first');
         $this->prepareQuery();

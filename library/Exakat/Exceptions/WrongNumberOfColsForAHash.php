@@ -25,7 +25,6 @@ namespace Exakat\Exceptions;
 
 class WrongNumberOfColsForAHash extends \RuntimeException {
     public function __construct(string $table, int $provided) {
-
         parent::__construct( "Wrong number of cols provided for table $table : $provided cols provided.\n");
     }
 }

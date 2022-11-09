@@ -25,9 +25,9 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Common\KeywordUsage;
 
 class MixedKeyword extends KeywordUsage {
-    protected $phpVersion = '8.0-';
+    protected string $phpVersion = '8.0-';
 
-    protected $keyword = 'mixed';
+    protected string $keyword = 'mixed';
 }
 
 ?>

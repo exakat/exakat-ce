@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class CollectVariables extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 2:
                 list($variable, $type) = func_get_args();
                 break;
@@ -57,10 +57,10 @@ sideEffect{ $variable = []; }.where(
 )
 
 GREMLIN
-, array(self::$LINKS,
-        $containers
-        )
-  );
+            , array(self::$LINKS,
+                    $containers
+                    )
+        );
     }
 }
 ?>

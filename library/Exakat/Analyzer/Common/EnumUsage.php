@@ -36,7 +36,7 @@ class EnumUsage extends Analyzer {
         $enums =  makeFullNsPath($this->enums);
 
         // Typehint (return and argument), catch, instanceof, classes
-        $this->atomIs(array('Identifier', 'Nsname'))
+        $this->atomIs(self::STATIC_NAMES)
              ->has('line')
              ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'CLASS')) // NOT IMPLEMENT
              ->fullnspathIs($enums)

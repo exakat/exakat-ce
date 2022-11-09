@@ -25,6 +25,8 @@ namespace Exakat\Tasks;
 use Exakat\Exceptions\VcsSupport;
 use Exakat\Vcs\Vcs;
 use Exakat\Export\Export as ExportFormat;
+use Exakat\Exceptions\ProjectNeeded;
+use Exakat\Phpexec;
 
 class Export extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -34,9 +36,13 @@ class Export extends Tasks {
 
     public const NO_NEXT = -1;
 
-    private $php             = null;
+    private Phpexec $php;
 
-    public function run(): void {
+    public function run(): void {	
+        if ($this->config->project->isDefault()) {
+            throw new ProjectNeeded();
+        }
+
         $gremlinVersion = $this->gremlin->serverInfo()[0];
         $this->php = exakat('php');
 
@@ -50,7 +56,7 @@ class Export extends Tasks {
 
         $V = array();
         $root = 0;
-        foreach($vertices as $v) {
+        foreach ($vertices as $v) {
             if ($v['label'] === 'Project') {
                 $root = $v['id'];
             }
@@ -65,18 +71,18 @@ class Export extends Tasks {
         $edges = $this->gremlin->query($queryTemplate);
 
         $E = array();
-        foreach($edges as $e) {
+        foreach ($edges as $edge) {
             // Special for version 3.4
-            if (isset($e['e'])) {
-                $e = array_merge($e, $e['e']);
+            if (isset($edge['e'])) {
+                $edge = array_merge($edge, $edge['e']);
             }
-            $id = $e['outV'];
+            $id = $edge['outV'];
 
             if (!isset($E[$id])) {
                 $E[$id] = array();
             }
 
-            array_collect_by($E[$id], $e['inV'], $e['label']);
+            array_collect_by($E[$id], $edge['inV'], $edge['label']);
         }
 
         if (in_array('Vis', $this->config->project_reports)) {
@@ -109,7 +115,7 @@ class Export extends Tasks {
             }
 
             if (!empty($this->config->dirname)) {
-                foreach($files as $file => $code) {
+                foreach ($files as $file => $code) {
                     if (!file_exists($this->config->dirname . '/' . dirname($file))) {
                         mkdir($this->config->dirname . '/' . dirname($file), 0755);
                     }
@@ -122,7 +128,7 @@ class Export extends Tasks {
 
             if (!empty($this->config->inplace)) {
                 display("Writing in place\n");
-                foreach($files as $file => $code) {
+                foreach ($files as $file => $code) {
                     file_put_contents($this->config->code_dir . '/' . $file, $code);
                     $this->checkCompilation($this->config->code_dir . '/' . $file);
                 }
@@ -135,11 +141,11 @@ class Export extends Tasks {
                     display("Writing in branch : {$this->config->branch}\n");
 
                     $vcs = Vcs::getVcs($this->config);
-                    $vcs = new $vcs($this->config->project, $this->config->code_dir);
+                    $vcs = new $vcs( (string) $this->config->project, $this->config->code_dir);
                     $branch = $vcs->getBranch();
                     $vcs->createBranch($this->config->branch);
 
-                    foreach($files as $file => $code) {
+                    foreach ($files as $file => $code) {
                         file_put_contents($this->config->code_dir . '/' . $file, $code);
                         $this->checkCompilation($this->config->code_dir . '/' . $file);
                     }
@@ -165,7 +171,7 @@ class Export extends Tasks {
         }
 
         if ($filenames = $this->config->filename) {
-            foreach($filenames as $filename) {
+            foreach ($filenames as $filename) {
                 $filename = array_pop($filenames);
                 if (in_array('Dot', $this->config->project_reports)) {
                     $fp = fopen($filename . '.dot', 'w+');

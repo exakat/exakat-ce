@@ -39,16 +39,16 @@ class ObjectReferences extends Analyzer {
                  $this->side()
                       ->outIs('TYPEHINT')
                       ->fullnspathIs($scalars)
-                      ->fullnspathIsNot('\null')
              )
 
             // One of the requested type is an object
              ->outIs('TYPEHINT')
              ->atomIsNot('Void')
-             ->fullnspathIsNot($scalars)
-
+             ->atomIs(array('Identifier', 'Nsname'))
              ->back('first');
         $this->prepareQuery();
+
+        // @todo : case of callable, or iterable : are they typed as object only?
 
         // f(&$x) and $x->y();
         // f(&$x) and $x->y;
@@ -56,22 +56,22 @@ class ObjectReferences extends Analyzer {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
              ->is('reference', true)
+             ->outIs('TYPEHINT')
+             ->atomIs('Void')
+             ->inIs('TYPEHINT')
              ->savePropertyAs('code', 'variable') // Avoid &
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->outIs('NAME')
-                             ->outIs('DEFINITION')
-                             ->inIs('LEFT')
-                             ->atomIs('Assignation') // any assignation will break the reference
-                )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->outIs('DEFINITION')
+                               ->inIs('LEFT')
+                               ->atomIs('Assignation') // any assignation will break the reference
+                      )
              )
-             ->inIs('ARGUMENT')
-             ->outIs('BLOCK')
-             ->atomInsideNoDefinition(array('Methodcall', 'Member'))
-             ->outIs('OBJECT')
-             ->samePropertyAs('code', 'variable')
+             ->outIs('DEFINITION')
+             ->inIs(array('OBJECT', 'CLASS'))
+             ->atomIs(array('Methodcall', 'Member', 'Staticconstant', 'Staticmethodcall', 'Staticproperty'))
              ->back('first');
         $this->prepareQuery();
 

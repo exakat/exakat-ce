@@ -28,11 +28,18 @@ use Exakat\Query\Query;
 
 class FullnspathIs extends DSL {
     public function run(): Command {
-        if (func_num_args() === 2) {
-            list($code, $caseSensitive) = func_get_args();
-        } else {
-            list($code) = func_get_args();
-            $caseSensitive = Analyzer::CASE_INSENSITIVE;
+        switch (func_num_args()) {
+            case 2:
+                list($code, $caseSensitive) = func_get_args();
+                break;
+
+            case 1:
+                list($code) = func_get_args();
+                $caseSensitive = Analyzer::CASE_INSENSITIVE;
+                break;
+
+            default:
+                assert(false, 'No enough arguments for ' . __METHOD__);
         }
 
         if (empty($code)) {

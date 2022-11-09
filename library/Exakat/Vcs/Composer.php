@@ -25,15 +25,15 @@ namespace Exakat\Vcs;
 use Exakat\Exceptions\HelperException;
 
 class Composer extends Vcs {
-    private $executable = 'composer';
+    private string $executable = 'composer';
 
-    public function __construct($destination, $project_root) {
+    public function __construct(string $destination, string $project_root) {
         parent::__construct($destination, $project_root);
     }
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");
-        if (strpos($res, 'Composer') === false) {
+        if (!str_contains($res, 'Composer')  ) {
             throw new HelperException('Composer');
         }
     }
@@ -45,7 +45,11 @@ class Composer extends Vcs {
         $composer = new \stdClass();
         $composer->{'minimum-stability'} = 'dev';
         $composer->require = new \stdClass();
-        $composer->require->$source = '*';
+        if (empty($this->version)) {
+            $composer->require->$source = '*';
+        } else {
+            $composer->require->$source = $this->version;
+        }
         $json = json_encode($composer, JSON_PRETTY_PRINT);
 
         mkdir($this->destinationFull, 0755);
@@ -53,7 +57,7 @@ class Composer extends Vcs {
         $this->shell("cd {$this->destinationFull}; {$this->executable} -q install --ignore-platform-reqs");
     }
 
-    public function update() {
+    public function update(): string {
         $this->check();
 
         $this->shell("cd {$this->destinationFull}; {$this->executable} -q update");
@@ -89,7 +93,7 @@ class Composer extends Vcs {
         return '';
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = trim($this->shell("{$this->executable} -V 2>&1"));

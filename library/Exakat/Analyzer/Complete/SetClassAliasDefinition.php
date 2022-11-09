@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Complete;
 class SetClassAliasDefinition extends Complete {
     public function analyze(): void {
         // class_alias('A', 'B')
-        $this->atomIs(array('Class', 'Interface', 'Trait'), self::WITHOUT_CONSTANTS)
+        $this->atomIs(self::CIT, self::WITHOUT_CONSTANTS)
               ->as('method')
               ->savePropertyAs('fullnspath', 'fnp')
               ->outIs('DEFINITION')

@@ -28,9 +28,8 @@ use Exakat\Vcs\Vcs;
 
 class ProjectConfig extends Config {
     private string  $projects_root = '.';
-    protected Project $project;
 
-    protected $config = array('phpversion'          => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
+    protected array $config = array('phpversion'          => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
                               'project_name'        => '',
                               'project_url'         => '',
                               'project_vcs'         => 'git',
@@ -38,8 +37,8 @@ class ProjectConfig extends Config {
                               'project_branch'      => '',
                               'project_tag'         => '',
                               'project_rulesets'    => array(),
-// No default value,
-//                              'project_rulesets'    => array(),
+                              'project_reports'     => array(),
+
                               'file_extensions'     => array('php',
                                                              'php3',
                                                              'inc',
@@ -85,7 +84,7 @@ class ProjectConfig extends Config {
             return self::NOT_LOADED;
         }
 
-        foreach(array_keys($this->config) as $key) {
+        foreach (array_keys($this->config) as $key) {
             if (!isset($ini[$key])) {
                 $ini[$key] = $this->config[$key];
             }
@@ -106,11 +105,11 @@ class ProjectConfig extends Config {
             $iniCache = parse_ini_file($pathToCache);
             if (isset($iniCache['ignore_dirs'])) {
                 $this->config['ignore_dirs'] = array_merge($this->config['ignore_dirs'],
-                                                           $iniCache['ignore_dirs']);
+                    $iniCache['ignore_dirs']);
             }
         }
 
-        $this->config['project_vcs'] = $this->config['project_vcs'] ?? '';
+        $this->config['project_vcs'] ??= '';
 
         // Default behavior to keep exakat running until everyone has a filled file_extension option in config.ini
         if (empty($this->config['file_extensions'])) {
@@ -124,7 +123,7 @@ class ProjectConfig extends Config {
         if (isset($this->config['other_php_versions']) &&
             is_string($this->config['other_php_versions'])) {
             $this->config['other_php_versions'] = listToArray($this->config['other_php_versions']);
-            foreach($this->config['other_php_versions'] as &$version) {
+            foreach ($this->config['other_php_versions'] as &$version) {
                 $version = trim($version, '. ');
             }
             unset($version);
@@ -133,7 +132,7 @@ class ProjectConfig extends Config {
         if (isset($this->config['file_extensions']) &&
             is_string($this->config['file_extensions'])) {
             $this->config['file_extensions'] = listToArray($this->config['file_extensions']);
-            foreach($this->config['file_extensions'] as &$ext) {
+            foreach ($this->config['file_extensions'] as &$ext) {
                 $ext = trim($ext, '. ');
             }
             unset($ext);
@@ -149,7 +148,7 @@ class ProjectConfig extends Config {
         if (isset($this->config['project_reports']) &&
             is_string($this->config['project_reports'])) {
             $this->config['project_reports'] = listToArray($this->config['project_reports']);
-            foreach($this->config['project_reports'] as &$ext) {
+            foreach ($this->config['project_reports'] as &$ext) {
                 $ext = trim($ext);
             }
             unset($ext);
@@ -164,6 +163,17 @@ class ProjectConfig extends Config {
             $this->config['project_rulesets'] = array_map('trim', $this->config['project_rulesets']);
             $this->config['project_rulesets'] = array_unique($this->config['project_rulesets']);
         }
+
+        if (isset($this->config['project_reports'])) {
+            if (is_string($this->config['project_reports'])) {
+                $this->config['project_reports'] = listToArray($this->config['project_reports']);
+            }
+
+            $this->config['project_reports'] = array_filter($this->config['project_reports'] ?? array());
+            $this->config['project_reports'] = array_map('trim', $this->config['project_reports']);
+            $this->config['project_reports'] = array_unique($this->config['project_reports']);
+        }
+
 
         if (in_array($this->config['project_vcs'], Vcs::SUPPORTED_VCS)) {
             $this->config['git'] = false; // remove Git, which is by default
@@ -185,7 +195,7 @@ class ProjectConfig extends Config {
         $stubs = array(array());
         $code_dir="{$this->projects_root}{$project}/code/";
         $this->config['stubs'] = makeArray($this->config['stubs']);
-        foreach($this->config['stubs'] as $stub) {
+        foreach ($this->config['stubs'] as $stub) {
             $d = getcwd();
             $path = realpath($code_dir . $stub);
 
@@ -208,7 +218,9 @@ class ProjectConfig extends Config {
             if (is_dir($path)) {
                 chdir($path);
                 $allFiles = rglob('.');
-                $allFiles = array_map(function (string $path) use ($stub): string { return $stub . ltrim($path, '.'); }, $allFiles);
+                $allFiles = array_map(function (string $path) use ($stub): string {
+                    return $stub . ltrim($path, '.');
+                }, $allFiles);
                 chdir($d);
 
                 $stubs[$stub] = $allFiles;
@@ -223,7 +235,7 @@ class ProjectConfig extends Config {
     }
 
     // required for Init Project
-    public function setConfig(string $name, $value): void {
+    public function setConfig(string $name, mixed $value): void {
         $this->config[$name] = $value;
     }
 
@@ -243,20 +255,20 @@ class ProjectConfig extends Config {
 
         $iniFiles = glob("$dir_root/human/en/*/*.ini");
         $default = array();
-        foreach($iniFiles as $file) {
+        foreach ($iniFiles as $file) {
             $ini = parse_ini_file($file, \INI_PROCESS_SECTIONS);
             if (isset($ini['parameter1']['default'])) {
                 $default[basename(dirname($file)) . '/' . basename($file, '.ini')][$ini['parameter1']['name']] = $ini['parameter1']['default'];
             }
         }
 
-        foreach($this->config as $key => $value) {
-            if (strpos($key, '/') === false) {
+        foreach ($this->config as $key => $value) {
+            if (!str_contains($key, '/')  ) {
                 continue;
             }
 
             $cc = "[$key]\n";
-            foreach($value as $name => $values) {
+            foreach ($value as $name => $values) {
                 if (is_array($values)) {
                     $cc .= "{$name}[] = " . implode(";\n{$name}[] = ", $values) . ";\n; default = {$default[$key][$name]}\n";
                 } elseif (is_string($values)) {
@@ -278,9 +290,9 @@ class ProjectConfig extends Config {
             $custom_configs[] = $cc;
         }
 
-        foreach($default as $key => $value) {
+        foreach ($default as $key => $value) {
             $cc2 = "[$key]\n";
-            foreach($value as $name => $values) {
+            foreach ($value as $name => $values) {
                 if (is_array($values)) {
                     $cc2 .= "{$name}[] = " . implode(";\n{$name}[] = ", $values) . ";\n; default value\n\n";
                 } elseif (is_string($values)) {
@@ -325,7 +337,8 @@ project_vcs         = "{$this->config['project_vcs']}";
 project_description = "{$this->config['project_description']}";
 project_branch      = "{$this->config['project_branch']}";
 project_tag         = "{$this->config['project_tag']}";
-project_rulesets[]  = "";
+project_rulesets[]  = "";  
+project_reports[]   = "";
 
 $custom_configs
 
@@ -338,7 +351,7 @@ INI;
         return $name . '[] = "' . implode("\";\n{$name}[] = \"", $array) . "\";\n";
     }
 
-    public function __get(string $name) {
+    public function __get(string $name) : mixed {
         if (isset($this->config[$name])) {
             return $this->config[$name];
         } else {

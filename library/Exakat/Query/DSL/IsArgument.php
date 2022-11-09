@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class IsArgument extends DSL {
     public function run(): Command {
-        return new Command('where( __.in("DEFINITION").where( __.in("NAME")))');
+        return new Command('where( __.in("DEFINITION").hasLabel("Parameter") )');
     }
 }
 ?>

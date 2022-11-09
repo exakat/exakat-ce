@@ -42,7 +42,7 @@ class CouldBeCIT extends CouldBeType {
         //Not possible ATM
 //        $this->checkPropertyWithPHPCalls('bool');
 
-//Cas de syntaxe : utilisé dans des syntaxes objets
+        //Cas de syntaxe : utilisé dans des syntaxes objets
 
 
         // return type
@@ -80,7 +80,6 @@ class CouldBeCIT extends CouldBeType {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
              ->as('result')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->inIs('VARIABLE')
              ->atomIs('Instanceof')
@@ -92,7 +91,6 @@ class CouldBeCIT extends CouldBeType {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
              ->as('result')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->inIs(array('OBJECT', 'CLASS'))
              ->atomIs(array('Member', 'Methodcall', 'Staticmethodcall', 'Staticclass', 'Staticproperty', 'Staticconstant'))
@@ -103,7 +101,6 @@ class CouldBeCIT extends CouldBeType {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
              ->as('result')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->inIs('THROW')
              ->atomIs('Throw')

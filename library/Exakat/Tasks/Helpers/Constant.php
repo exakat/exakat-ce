@@ -25,23 +25,25 @@ namespace Exakat\Tasks\Helpers;
 use Exakat\Tasks\Load;
 
 class Constant extends Plugin {
-    public $name = 'constant';
-    public $type = 'boolean';
+    public string $name = 'constant';
+    public string $type = 'boolean';
 
-    private $deterministFunctions = array();
+    private array $deterministFunctions = array();
 
-    private $skipAtoms = array('Trait'          => 1,
-                               'Class'          => 1,
-                               'Classanonymous' => 1,
-                               'Interface'      => 1,
-                               'Enum'           => 1,
-                             );
+    private array $skipAtoms = array('Trait'          => 1,
+                           		     'Class'          => 1,
+                           		     'Classanonymous' => 1,
+                           		     'Interface'      => 1,
+                           		     'Enum'           => 1,
+                           		   );
 
     public function __construct() {
         parent::__construct();
 
         $deterministFunctions = exakat('methods')->getDeterministFunctions();
-        $this->deterministFunctions = array_map(function (string $x): string { return "\\$x";}, $deterministFunctions);
+        $this->deterministFunctions = array_map(function (string $x): string {
+            return "\\$x";
+        }, $deterministFunctions);
     }
 
     public function run(Atom $atom, array $extras = array()): void {
@@ -49,9 +51,11 @@ class Constant extends Plugin {
             return;
         }
 
-        foreach($extras as $extra) {
-            if (is_array($extra)) { continue; }
-            if ($extra->constant === null)  {
+        foreach ($extras as $extra) {
+            if (is_array($extra)) {
+                continue;
+            }
+            if ($extra->constant === null) {
                 $atom->constant = null;
                 return ;
             }
@@ -65,7 +69,6 @@ class Constant extends Plugin {
             case 'Void' :
             case 'Nsname' :
             case 'Identifier' :
-            case 'Staticclass' :
             case 'Name' :
             case 'Self' :
             case 'Static' :
@@ -88,7 +91,9 @@ class Constant extends Plugin {
                     break;
                 }
                 $constants = array_column($extras, 'constant');
-                $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool { return $carry && $item; }, true);
+                $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool {
+                    return $carry && $item;
+                }, true);
                 break;
 
             case 'String' :
@@ -98,7 +103,9 @@ class Constant extends Plugin {
             case 'Classalias':
             case 'Sequence' :
                 $constants = array_column($extras, 'constant');
-                $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool { return $carry && $item; }, true);
+                $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool {
+                    return $carry && $item;
+                }, true);
                 break;
 
             case 'Return' :
@@ -106,6 +113,7 @@ class Constant extends Plugin {
                 break;
 
             case 'Staticconstant' :
+            case 'Staticclass' :
                 $atom->constant = $extras['CLASS']->constant;
                 break;
 
@@ -152,7 +160,9 @@ class Constant extends Plugin {
                 } elseif (in_array($atom->fullnspath, $this->deterministFunctions)) {
                     if (isset($extras[0])) {
                         $constants = array_column($extras, 'constant');
-                        $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool { return $carry && $item; }, true);
+                        $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool {
+                            return $carry && $item;
+                        }, true);
                     } else {
                         $atom->constant  = Load::CONSTANT_EXPRESSION;
                     }

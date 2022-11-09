@@ -22,12 +22,13 @@
 
 namespace Exakat\Analyzer\Dump;
 
+// @todo make the same for stubs and ext
 class CollectPhpStructures extends AnalyzerTable {
-    protected $analyzerName = 'phpStructures';
+    protected string $analyzerName = 'phpStructures';
 
-    protected $analyzerTable = 'phpStructures';
+    protected string $analyzerTable = 'phpStructures';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE phpStructures (id INTEGER PRIMARY KEY AUTOINCREMENT,
                             type STRING,
                             name STRING,
@@ -36,37 +37,37 @@ CREATE TABLE phpStructures (id INTEGER PRIMARY KEY AUTOINCREMENT,
 SQL;
 
     public function dependsOn(): array {
-        return array('Constants/IsExtConstant',
-                     'Interfaces/IsExtInterface',
-                     'Traits/IsExtTrait',
-                     'Classes/IsExtClass',
+        return array('Constants/ConstantUsage',
+                     'Interfaces/InterfaceUsage',
+                     'Traits/TraitUsage',
+                     'Php/EnumUsage',
+                     'Classes/ClassUsage',
+
+                     'Complete/VariableTypehint', // This use to have a bug, so it is added for security
                     );
     }
 
     public function analyze(): void {
         $this->collectPhpFunctioncall(                                                                                 'function');
-        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Constants/IsExtConstant',   'constant');
-        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Interfaces/IsExtInterface', 'interface');
-        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Traits/IsExtTrait',         'trait');
-        $this->collectPhpStructuresWithAnalyzer(array('Newcall', 'Identifier', 'Nsname', 'Newcallname'), 'Classes/IsExtClass',        'class');
+        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Constants/ConstantUsage',   'constant');
+        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Interfaces/InterfaceUsage', 'interface');
+        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Traits/TraitUsage',         'trait');
+        $this->collectPhpStructuresWithAnalyzer(array('Identifier', 'Nsname'),            'Php/EnumUsage',             'enum');
+        $this->collectPhpStructuresWithAnalyzer(array('Newcall', 'Identifier', 'Nsname', 'Newcallname'), 'Classes/ClassUsage',        'class');
+        // @todo make the same for global variables
     }
 
     private function collectPhpStructuresWithAnalyzer(array $label, string $analyzer, string $type): void {
         $this->atomIs($label)
              ->analyzerIs($analyzer)
+             ->isAnyOf(array('isPhp', 'isExt'), true)
              ->raw('groupCount("m").by("fullnspath").cap("m").map{ x = []; for(key in it.get().keySet()) { x.add(["type":"' . $type . '", "name":key, "count":it.get().getAt(key)]);}; x }[0]');
         $this->prepareQuery();
     }
 
     private function collectPhpFunctioncall(string $type): void {
         $this->atomIs('Functioncall')
-             ->raw(<<<'GREMLIN'
-or(
-    __.has('isPhp', true),
-    __.has('isExt', true)
-)
-GREMLIN
-)
+             ->isAnyOf(array('isPhp', 'isExt'), true)
              ->raw('groupCount("m").by("fullnspath").cap("m").map{ x = []; for(key in it.get().keySet()) { x.add(["type":"' . $type . '", "name":key, "count":it.get().getAt(key)]);}; x }[0]');
         $this->prepareQuery();
     }

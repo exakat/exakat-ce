@@ -30,7 +30,7 @@ class Encoding extends Plugin {
 
         switch ($atom->atom) {
             case 'Identifier' :
-                $atom->encoding = mb_detect_encoding($atom->noDelimiter);
+                $atom->encoding = mb_detect_encoding($atom->noDelimiter) ?: '';
                 if ($atom->encoding === 'UTF-8') {
                     $blocks = unicode_blocks($atom->noDelimiter);
                     $atom->block = array_keys($blocks)[0] ?? '';
@@ -45,16 +45,16 @@ class Encoding extends Plugin {
                     break;
                 }
 
-                $atom->encoding = mb_detect_encoding($atom->noDelimiter);
+                $atom->encoding = mb_detect_encoding($atom->noDelimiter) ?: '';
                 if ($atom->encoding === 'UTF-8') {
                     $blocks = unicode_blocks($atom->noDelimiter);
                     $atom->block = array_keys($blocks)[0] ?? '';
                 }
                 break;
 
-        default :
+            default :
             // Nothing, really
-        }
+            }
     }
 }
 

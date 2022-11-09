@@ -25,12 +25,10 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Analyzer;
 
 class NoParent extends Analyzer {
-    protected $phpVersion = '7.4-';
-
     public function analyze(): void {
         // class x { function foo() { parent::fooo(); }}
         $this->atomIs('Parent')
-             ->goToFunction()
+             ->goToInstruction(array('Method', 'Magicmethod'))
              ->inIs(array('METHOD', 'MAGICMETHOD'))
              ->atomIs(array('Class', 'Classanonymous')) // No traits...
              ->hasNoOut('EXTENDS')

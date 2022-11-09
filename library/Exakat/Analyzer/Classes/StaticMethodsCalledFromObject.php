@@ -26,60 +26,42 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Analyzer;
 
 class StaticMethodsCalledFromObject extends Analyzer {
+    public function dependsOn(): array {
+        return array('Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/SetClassRemoteDefinitionWithGlobal',
+                     'Complete/SetClassRemoteDefinitionWithInjection',
+                     'Complete/SetClassRemoteDefinitionWithLocalNew',
+                     'Complete/SetClassRemoteDefinitionWithParenthesis',
+                     'Complete/SetClassRemoteDefinitionWithReturnTypehint',
+                     'Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/VariableTypehint',
+                    );
+    }
+
     public function analyze(): void {
-        $this->atomIs(array('Method', 'Magicmethod'))
-             ->hasClassTrait()
+        // class x { static function x () }
+        // (new x)->x();
+        $this->atomIs('Method')
              ->is('static', true)
-             ->isNot('abstract', true)
-             ->outIs('NAME')
-             ->values('lccode')
-             ->unique();
-        $staticMethods = $this->rawQuery()
-                              ->toArray();
-
-        if (empty($staticMethods)) {
-            return;
-        }
-
-        $this->atomIs(array('Method', 'Magicmethod'))
-             ->hasClassTrait()
-             ->isNot('static', true)
-             ->isNot('abstract', true)
-             ->outIs('NAME')
-             ->values('lccode')
-             ->unique();
-        $normalMethods = $this->rawQuery()
-                              ->toArray();
-
-        $methods = array_diff($staticMethods, $normalMethods);
-        if (empty($methods)) {
-            return;
-        }
-
-        // $a->staticMethod (Anywhere in the code)
-        $this->atomIs('Methodcall')
-             ->outIs('OBJECT')
-             ->atomIsNot('This')
-             ->back('first')
-             ->outIs('METHOD')
-             ->codeIs($methods, self::NO_TRANSLATE, self::CASE_INSENSITIVE)
-             ->back('first');
+             ->outIs('DEFINITION')
+             ->atomIs('Methodcall');
         $this->prepareQuery();
 
-        // $this->staticMethod (In the local class tree)
+        // class x { static function x () }
+        // (new x)->x();
+        $fullnspath = $this->readStubs('getClassStaticMethodList');
+
         $this->atomIs('Methodcall')
-             ->outIs('OBJECT')
-             ->atomIs('This')
-             ->back('first')
              ->outIs('METHOD')
              ->outIs('NAME')
-             ->savePropertyAs('lccode', 'name')
-             ->goToClass()
-             ->goToAllParents(self::INCLUDE_SELF)
-             ->outIs(array('METHOD', 'MAGICMETHOD'))
-             ->is('static', true)
-             ->outIs('NAME')
-             ->samePropertyAs('code', 'name', self::CASE_INSENSITIVE)
+             ->savePropertyAs('fullcode', 'name')
+             ->back('first')
+
+             ->outIs('OBJECT')
+             ->goToTypehint()
+
+             ->isAnyOf(array('isPhp', 'isStub', 'isExt'), true)
+             ->raw('filter{ (it.get().value("fullnspath") + "::" + name.toLowerCase()) in ***}', $fullnspath)
              ->back('first');
         $this->prepareQuery();
     }

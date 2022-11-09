@@ -24,9 +24,10 @@
 namespace Exakat\Exceptions;
 
 use Exception;
+use RuntimeException;
 
-class ProjectNotInited extends \RuntimeException {
-    public function __construct($project = '', $code = 0, ?Exception $previous = null) {
+class ProjectNotInited extends RuntimeException {
+    public function __construct(string $project = '', int $code = 0, Exception $previous = null) {
         parent::__construct("Project $project hasn't been initialized. Run exakat init first.", $code, $previous);
     }
 }

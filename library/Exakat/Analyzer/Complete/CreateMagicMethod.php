@@ -43,11 +43,11 @@ class CreateMagicMethod extends Complete {
 
              // For variables
              ->optional(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Parametername', self::WITHOUT_CONSTANTS)
-                     ->inIs('NAME')
-                     ->outIs('TYPEHINT')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Parametername', self::WITHOUT_CONSTANTS)
+                      ->inIs('NAME')
+                      ->outIs('TYPEHINT')
              )
 
               ->inIs('DEFINITION')
@@ -68,11 +68,11 @@ class CreateMagicMethod extends Complete {
 
              // For variables
              ->optional(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Parametername', self::WITHOUT_CONSTANTS)
-                     ->inIs('NAME')
-                     ->outIs('TYPEHINT')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Parametername', self::WITHOUT_CONSTANTS)
+                      ->inIs('NAME')
+                      ->outIs('TYPEHINT')
              )
 
               ->inIs('DEFINITION')

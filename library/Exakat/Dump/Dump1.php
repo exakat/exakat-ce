@@ -309,7 +309,7 @@ SQL;
             $cols = '*';
         } else {
             $list = array();
-            foreach($cols as $k => $col) {
+            foreach ($cols as $k => $col) {
                 if (is_int($k)) {
                     $list[] = $col;
                 } else {
@@ -358,7 +358,7 @@ SQL;
         return $this->query($query);
     }
 
-    public function getCit($type = 'class'): Results {
+    public function getCit(string $type = 'class'): Results {
         assert(in_array($type, array('class', 'trait', 'interface')));
 
         $query = "SELECT name FROM cit WHERE type='$type' ORDER BY name";
@@ -942,7 +942,6 @@ SQL;
 
         return new Results($result);
     }
-
 }
 
 ?>

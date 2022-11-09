@@ -60,7 +60,7 @@ class Sarif extends Reports {
         $descriptionCache = array();
 
         $analysisResults = $this->dump->fetchAnalysers($analyzerList);
-        foreach($analysisResults->toArray() as $row) {
+        foreach ($analysisResults->toArray() as $row) {
             // $sarif->addRule($row['analyzer'], $titleCache[$row['analyzer']], $descriptionCache[$row['analyzer']], $severityCache[$row['analyzer']], $precisionCache[$row['analyzer']]);
             if (!isset($titleCache[$row['analyzer']])) {
                 $titleCache[$row['analyzer']]       = $this->docs->getDocs($row['analyzer'], 'name');
@@ -125,7 +125,7 @@ class Sarif extends Reports {
 
     private function severity2level(string $severity): string {
         // levels : none, note, warning, error
-        switch($severity) {
+        switch ($severity) {
             case 'Critical':
             case 'Major':
                 $level = 'error';
@@ -146,7 +146,7 @@ class Sarif extends Reports {
         return $level;
     }
 
-    private function fingerprints($fileName, $line, $fullcode): string {
+    private function fingerprints(string $fileName, int $line, string $fullcode): string {
         return sha1($fileName . ':' . $line . ':' . $fullcode);
     }
 }

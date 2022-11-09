@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class CompatibleWithType extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 2 :
                 list($types, $withNull) = func_get_args();
                 $withNull = in_array($withNull, array(NotCompatibleWithType::ALLOW_NULL, NotCompatibleWithType::DISALLOW_NULL), STRICT_COMPARISON) ? $withNull : NotCompatibleWithType::DISALLOW_NULL;

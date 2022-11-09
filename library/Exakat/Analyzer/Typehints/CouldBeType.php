@@ -45,14 +45,20 @@ abstract class CouldBeType extends Analyzer {
         // foo($b = array())
         $this->atomIs(self::FUNCTIONS_ALL)
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->outIs('ARGUMENT')
+             ->filter(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
+             )
              ->as('result')
              ->analyzerIsNot('self')
              ->outIs('DEFAULT')
+             ->hasNoIn('RIGHT')
              ->atomIs($atoms, self::WITH_CONSTANTS)
              ->back('result');
         $this->prepareQuery();
@@ -62,19 +68,18 @@ abstract class CouldBeType extends Analyzer {
         // foo($b) { $b[] = 1;}
         $this->atomIs(self::FUNCTIONS_ALL)
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->outIs('ARGUMENT')
              ->filter(
                  $this->side()
                       ->outIs('TYPEHINT')
                       ->atomIs('Void')
-              )
+             )
              ->as('result')
              ->analyzerIsNot('self')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->atomIs($atoms, self::WITH_CONSTANTS)
              ->back('result');
@@ -85,9 +90,9 @@ abstract class CouldBeType extends Analyzer {
         // foo($b) { bar($b)} ; function bar(array $c) {}
         $this->atomIs(self::FUNCTIONS_ALL)
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->outIs('ARGUMENT')
              ->isNot('variadic', true)
@@ -95,10 +100,9 @@ abstract class CouldBeType extends Analyzer {
                  $this->side()
                       ->outIs('TYPEHINT')
                       ->atomIs('Void')
-              )
+             )
              ->as('result')
              ->analyzerIsNot('self')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->goToParameterDefinition()
              ->isNot('variadic', true)
@@ -111,19 +115,18 @@ abstract class CouldBeType extends Analyzer {
         // foo(...$b) { bar($b[x])} ; function bar(array $c) {}
         $this->atomIs(self::FUNCTIONS_ALL)
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->outIs('ARGUMENT')
              ->filter(
                  $this->side()
                       ->outIs('TYPEHINT')
                       ->atomIs('Void')
-              )
+             )
              ->as('result')
              ->analyzerIsNot('self')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->inIs('VARIABLE')
              ->atomIs('Array')
@@ -149,12 +152,11 @@ abstract class CouldBeType extends Analyzer {
              ->hasIn('RETURN')
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIs('NAME')
              ->atomIs('Parameter')
              ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot('Void')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIsNot('Void')
              );
         $this->prepareQuery();
 
@@ -175,16 +177,15 @@ abstract class CouldBeType extends Analyzer {
             return;
         }
 
-        foreach($ini as $rank => $functions) {
+        foreach ($ini as $rank => $functions) {
             // foo($arg) { array_map($arg, '') ; }
             $this->atomIs('Parameter')
                  ->analyzerIsNot('self')
                  ->filter(
-                    $this->side()
-                         ->outIs('TYPEHINT')
-                         ->atomIs('Void')
+                     $this->side()
+                          ->outIs('TYPEHINT')
+                          ->atomIs('Void')
                  )
-                 ->outIs('NAME')
                  ->outIs('DEFINITION')
                  ->is('rank', (int) $rank)
                  ->inIs('ARGUMENT')
@@ -203,9 +204,9 @@ abstract class CouldBeType extends Analyzer {
         $this->atomIs('Parameter')
              ->analyzerIsNot('self')
              ->filter(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
              )
              ->goToParameterUsage()
              ->atomIs($types)
@@ -217,13 +218,12 @@ abstract class CouldBeType extends Analyzer {
         $this->atomIs('Parameter')
              ->analyzerIsNot('self')
              ->filter(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
              )
              ->goToParameterUsage()
              ->inIs('DEFINITION')  // argument and variables
-             ->inIs('NAME')
              ->outIs('TYPEHINT')
              ->atomIs($types)
 
@@ -234,9 +234,9 @@ abstract class CouldBeType extends Analyzer {
         $this->atomIs('Parameter')
              ->analyzerIsNot('self')
              ->filter(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
              )
              ->goToParameterUsage()
              ->atomIs('Functioncall')
@@ -251,9 +251,9 @@ abstract class CouldBeType extends Analyzer {
         $this->atomIs('Parameter')
              ->analyzerIsNot('self')
              ->filter(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
              )
              ->goToParameterUsage()
              ->atomIs('Member')
@@ -276,9 +276,9 @@ abstract class CouldBeType extends Analyzer {
              ->analyzerIsNot('self')
              ->savePropertyAs('rank', 'ranked')
              ->filter(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIs('Void')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
              )
              ->inIs('ARGUMENT')
              ->atomIs('Method')
@@ -299,9 +299,9 @@ abstract class CouldBeType extends Analyzer {
              ->analyzerIsNot('self')
              ->analyzerIsNot('Functions/IsGenerator')
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->outIs('RETURNED')
              ->hasIn('RETURN')
@@ -340,9 +340,9 @@ abstract class CouldBeType extends Analyzer {
              ->analyzerIsNot('self')
              ->analyzerIsNot('Functions/IsGenerator')
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->outIs('RETURNTYPE')
              ->atomIs('Void')
@@ -352,7 +352,6 @@ abstract class CouldBeType extends Analyzer {
              ->hasIn('RETURN')
              ->atomIs('Variable', self::WITH_CONSTANTS)
              ->inIs('DEFINITION')
-             ->inIsIE('NAME')
              ->atomIs('Parameter')
              ->outIs('TYPEHINT')
              ->atomIs($atoms)
@@ -363,9 +362,9 @@ abstract class CouldBeType extends Analyzer {
         // class x { private array $p; function foo () { return $this->p;} }
         $this->atomIs(self::FUNCTIONS_ALL)
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->analyzerIsNot('self')
              ->outIs('RETURNTYPE')
@@ -387,9 +386,9 @@ abstract class CouldBeType extends Analyzer {
         // return array(1,2,3)
         $this->atomIs(self::FUNCTIONS_ALL)
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->analyzerIsNot('self')
              ->analyzerIsNot('Functions/IsGenerator')
@@ -397,7 +396,6 @@ abstract class CouldBeType extends Analyzer {
              ->hasIn('RETURN')
              ->atomIs('Variable', self::WITH_CONSTANTS)
              ->inIs('DEFINITION')
-             ->inIs('NAME')
              ->atomIs('Parameter')
              ->outIs('DEFAULT')
              ->atomIs($atoms)
@@ -409,9 +407,9 @@ abstract class CouldBeType extends Analyzer {
         // return array(1,2,3)
         $this->atomIs(self::FUNCTIONS_ALL)
              ->optional(
-                $this->side()
-                     ->is('abstract', true)
-                     ->inIs('OVERWRITE')
+                 $this->side()
+                      ->is('abstract', true)
+                      ->inIs('OVERWRITE')
              )
              ->analyzerIsNot('self')
              ->analyzerIsNot('Functions/IsGenerator')
@@ -479,7 +477,6 @@ abstract class CouldBeType extends Analyzer {
              ->outIs('DEFAULT')
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIs('NAME')
              ->outIs('DEFAULT')
              ->atomIs($atoms, self::WITH_CONSTANTS)
              ->back('first');
@@ -493,7 +490,6 @@ abstract class CouldBeType extends Analyzer {
              ->outIs('DEFAULT')
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIsIE('NAME')
              ->outIs('TYPEHINT')
              ->atomIs($atoms)
              ->fullnspathIs($fullnspath)
@@ -524,23 +520,47 @@ abstract class CouldBeType extends Analyzer {
              ->fullnspathIs($fullnspath)
              ->back('first');
         $this->prepareQuery();
+
+        // class x { private $p; function foo() { bar($this->p); }} function bar(array $a) {}
+        $this->atomIs('Propertydefinition')
+             ->analyzerIsNot('self')
+             ->outIs('DEFINITION')
+             ->goToParameterDefinition()
+             ->outIs('TYPEHINT')
+             ->atomIs($atoms)
+             ->fullnspathIs($fullnspath)
+             ->back('first');
+        $this->prepareQuery();
     }
 
     protected function checkPropertyWithPHPCalls(string $type = ''): void {
         // foo($b) { bar($b)} ; function bar(array $c) {}
         $ini = $this->methods->getFunctionsByReturnType($type, Methods::LOOSE);
 
-        if (empty($ini)) {
-            return;
+        if (!empty($ini)) {
+            $this->atomIs('Propertydefinition')
+                 ->analyzerIsNot('self')
+                 ->outIs('DEFAULT')
+                 ->atomIs('Functioncall', self::WITH_VARIABLES)
+                 ->fullnspathIs($ini)
+                 ->back('first');
+            $this->prepareQuery();
         }
 
-        $this->atomIs('Propertydefinition')
-             ->analyzerIsNot('self')
-             ->outIs('DEFAULT')
-             ->atomIs('Functioncall', self::WITH_VARIABLES)
-             ->fullnspathIs($ini)
-             ->back('first');
-        $this->prepareQuery();
+        // foo($b) { bar($b)} ; function bar(array $c) {}
+        $ini = $this->methods->getFunctionsByArgType($type, Methods::LOOSE);
+
+        foreach ((array) $ini as $position => $functions) {
+            $this->atomIs('Propertydefinition')
+                 ->analyzerIsNot('self')
+                 ->outIs('DEFINITION')
+                 ->is('rank', $position)
+                 ->inIs('ARGUMENT')
+                 ->atomIs('Functioncall', self::WITH_VARIABLES)
+                 ->fullnspathIs($functions)
+                 ->back('first');
+            $this->prepareQuery();
+        }
     }
 
     protected function checkArgumentValidation(array $filters = array(), array $atoms = array()): void {
@@ -548,14 +568,13 @@ abstract class CouldBeType extends Analyzer {
         if (!empty($filters)) {
             $this->atomIs(self::FUNCTIONS_ALL)
                  ->optional(
-                    $this->side()
-                         ->is('abstract', true)
-                         ->inIs('OVERWRITE')
+                     $this->side()
+                          ->is('abstract', true)
+                          ->inIs('OVERWRITE')
                  )
                  ->outIs('ARGUMENT')
                  ->analyzerIsNot('self')
                  ->as('result')
-                 ->outIs('NAME')
                  ->outIs('DEFINITION')
                  ->inIs('ARGUMENT')
                  ->functioncallIs($filters)
@@ -567,14 +586,13 @@ abstract class CouldBeType extends Analyzer {
         if (!empty($atoms)) {
             $this->atomIs(self::FUNCTIONS_ALL)
                  ->optional(
-                    $this->side()
-                         ->is('abstract', true)
-                         ->inIs('OVERWRITE')
+                     $this->side()
+                          ->is('abstract', true)
+                          ->inIs('OVERWRITE')
                  )
                  ->outIs('ARGUMENT')
                  ->analyzerIsNot('self')
                  ->as('result')
-                 ->outIs('NAME')
                  ->outIs('DEFINITION')
                  ->inIs(array('LEFT', 'RIGHT'))
                  ->atomIs('Comparison')
@@ -590,18 +608,17 @@ abstract class CouldBeType extends Analyzer {
         if (!empty($token)) {
             $this->atomIs(self::FUNCTIONS_ALL)
                  ->optional(
-                    $this->side()
-                         ->is('abstract', true)
-                         ->inIs('OVERWRITE')
+                     $this->side()
+                          ->is('abstract', true)
+                          ->inIs('OVERWRITE')
                  )
                  ->optional(
-                    $this->side()
-                         ->outIs('OVERWRITE')
+                     $this->side()
+                          ->outIs('OVERWRITE')
                  )
                  ->outIs('ARGUMENT')
                  ->analyzerIsNot('self')
                  ->as('result')
-                 ->outIs('NAME')
                  ->outIs('DEFINITION')
                  ->inIs('CAST')
                  ->atomIs('Cast')
@@ -614,14 +631,13 @@ abstract class CouldBeType extends Analyzer {
         if (!empty($functions)) {
             $this->atomIs(self::FUNCTIONS_ALL)
                  ->optional(
-                    $this->side()
-                         ->is('abstract', true)
-                         ->inIs('OVERWRITE')
+                     $this->side()
+                          ->is('abstract', true)
+                          ->inIs('OVERWRITE')
                  )
                  ->outIs('ARGUMENT')
                  ->analyzerIsNot('self')
                  ->as('result')
-                 ->outIs('NAME')
                  ->outIs('DEFINITION')
                  ->inIs('ARGUMENT')
                  ->fullnspathIs($functions)

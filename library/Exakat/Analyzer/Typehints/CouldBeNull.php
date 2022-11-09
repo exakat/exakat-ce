@@ -88,7 +88,6 @@ class CouldBeNull extends CouldBeType {
              ->outIs('ARGUMENT')
              ->as('result')
              ->analyzerIsNot('self')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->inIs(array('LEFT', 'RIGHT'))
              ->atomIs(array('Coalesce'))
@@ -100,13 +99,21 @@ class CouldBeNull extends CouldBeType {
              ->outIs('ARGUMENT')
              ->as('result')
              ->analyzerIsNot('self')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->inIs(array('LEFT', 'RIGHT'))
              ->atomIs(array('Comparison'))
              ->outIs(array('LEFT', 'RIGHT'))
              ->atomIs('Null')
              ->back('result');
+        $this->prepareQuery();
+
+        // foo($a = null)
+        $this->atomIs('Parameter')
+             ->analyzerIsNot('self')
+             ->outIs('DEFAULT')
+             ->hasNoIn('RIGHT')
+             ->atomIs('Null')
+             ->back('first');
         $this->prepareQuery();
 
         // May also cover if( $arg).,

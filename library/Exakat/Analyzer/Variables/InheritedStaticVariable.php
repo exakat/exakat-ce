@@ -26,7 +26,7 @@ use Exakat\Analyzer\Analyzer;
 
 class InheritedStaticVariable extends Analyzer {
     // PHP version restrictions
-    protected $phpVersion = '8.1-';
+    protected string $phpVersion = '8.1-';
 
     public function analyze(): void {
         // class a { function foo() { static $i;}} class b extends a; b::foo(); a::foo();
@@ -46,12 +46,12 @@ class InheritedStaticVariable extends Analyzer {
              ->not(
                  $this->side()
                       ->filter(
-                           $this->side()
-                                ->outIs('METHOD')
-                                ->outIs('NAME')
-                                ->propertyIs('fullcode', 'name', self::CASE_INSENSITIVE)
-                    )
-                )
+                          $this->side()
+                               ->outIs('METHOD')
+                               ->outIs('NAME')
+                               ->propertyIs('fullcode', 'name', self::CASE_INSENSITIVE)
+                      )
+             )
              ->back('result');
         $this->prepareQuery();
     }

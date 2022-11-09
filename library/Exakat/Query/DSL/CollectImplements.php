@@ -38,21 +38,16 @@ class CollectImplements extends DSL {
         $command = new Command(<<<GREMLIN
 where( 
     __.sideEffect{ {$variable} = []; }
-      .as("collectimplements")
-      .emit( )
-      .repeat( __.out("EXTENDS", "IMPLEMENTS")
-                 .in("DEFINITION")
-                 .hasLabel("Class", "Classanonymous", "Interface")
-                 .simplePath().from("collectimplements")
-              )
-              .times($MAX_LOOPING)
-              .hasLabel("Class", "Classanonymous", "Interface")
-              .out("EXTENDS", "IMPLEMENTS")
-              .sideEffect{ {$variable}.add(it.get().value("fullnspath")) ; }
-              .fold() 
+      .union(
+        __.identity(),
+        __.out("EXTENDS", "IMPLEMENTS").in("DEFINITION").hasLabel("Class", "Classanonymous", "Interface")
+      )
+      .out("EXTENDS", "IMPLEMENTS")
+      .sideEffect{ {$variable}.add(it.get().value("fullnspath")) ; }
+      .fold() 
 )
 GREMLIN
-);
+        );
         return $command;
     }
 }

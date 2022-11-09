@@ -26,8 +26,8 @@ namespace Exakat\Analyzer;
 use Exakat\Autoload\Autoloader;
 
 class RulesetsDev {
-    private $all           = array('All' => array());
-    private $rulesets      = array();
+    private array $all           = array('All' => array());
+    private array $rulesets      = array();
 
     public function __construct(Autoloader $dev) {
         $this->all      = $dev->getAllAnalyzers() ?: array('All' => array());
@@ -40,7 +40,7 @@ class RulesetsDev {
 
     public function getSuggestionRuleset(array $rulesets = array()): array {
         return array_filter($this->rulesets, function (string $c) use ($rulesets): bool {
-            foreach($rulesets as $r) {
+            foreach ($rulesets as $r) {
                 $l = levenshtein($c, $r);
                 if ($l < 8) {
                     return true;
@@ -72,7 +72,7 @@ class RulesetsDev {
             return array();
         }
         $return = array();
-        foreach($ruleset as $t) {
+        foreach ($ruleset as $t) {
             $return[] = $this->all[$t] ?? array();
         }
 
@@ -94,13 +94,13 @@ class RulesetsDev {
             $return = array_fill_keys($list['All'], array());
             unset($list['All']);
 
-            foreach($list as $rulesets => $ruleset) {
-                foreach($ruleset as $rule) {
+            foreach ($list as $rulesets => $ruleset) {
+                foreach ($ruleset as $rule) {
                     $return[$rule][] = $rulesets;
                 }
             }
         } else {
-            foreach($this->all as $rulesets => $ruleset) {
+            foreach ($this->all as $rulesets => $ruleset) {
                 if (in_array($analyzer, $ruleset, STRICT_COMPARISON)) {
                     $return[] = $rulesets;
                 }
@@ -111,29 +111,29 @@ class RulesetsDev {
     }
 
     public function getSuggestionClass(string $name): array {
-        return array_filter($this->listAllAnalyzer(), function ($c) use ($name) {
+        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name) : bool {
             $l = levenshtein($c, $name);
 
             return $l < 8;
         });
     }
 
-    public function getClass($name) {
+    public function getClass(string $name) : string|bool {
         // accepted names :
         // PHP full name : Analyzer\\Type\\Class
         // PHP short name : Type\\Class
         // Human short name : Type/Class
         // Human shortcut : Class (must be unique among the classes)
 
-        if (strpos($name, '\\') !== false) {
+        if (str_contains($name, '\\')  ) {
             if (substr($name, 0, 16) === 'Exakat\\Analyzer\\') {
                 $class = $name;
             } else {
                 $class = "Exakat\\Analyzer\\$name";
             }
-        } elseif (strpos($name, '/') !== false) {
+        } elseif (str_contains($name, '/')  ) {
             $class = 'Exakat\\Analyzer\\' . str_replace('/', '\\', $name);
-        } elseif (strpos($name, '/') === false) {
+        } elseif (!str_contains($name, '/')  ) {
             $found = $this->getSuggestionClass($name);
 
             if (empty($found)) {

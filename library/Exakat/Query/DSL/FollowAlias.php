@@ -26,12 +26,12 @@ namespace Exakat\Query\DSL;
 
 class FollowAlias extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1:
                 $loopings = (int) func_get_arg(0);
                 break;
 
-           default:
+            default:
                 $loopings = self::$MAX_LOOPING;
                 break;
         }
@@ -42,7 +42,7 @@ emit().repeat(
     __.out("DEFINITION").in("DEFAULT").hasLabel("Variabledefinition")
 ).times($loopings)
 GREMLIN
-);
+        );
     }
 }
 ?>

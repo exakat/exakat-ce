@@ -23,12 +23,12 @@
 namespace Exakat\Analyzer\Dump;
 
 class ConstantOrder extends AnalyzerTable {
-    protected $analyzerName = 'constantOrder';
+    protected string $analyzerName = 'constantOrder';
 
-    protected $analyzerTable = 'constantOrder';
+    protected string $analyzerTable = 'constantOrder';
 
     // Store inclusionss of files within each other
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE constantOrder (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                             built STRING,
                             built_fullcode STRING,

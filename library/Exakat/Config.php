@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -37,25 +37,25 @@ class Config extends Configsource {
     public const IS_PHAR      = true;
     public const IS_NOT_PHAR  = false;
 
-    public $dir_root              = '.';
-    public $ext_root              = '.';
-    public $projects_root         = '.';
-    public $is_phar               = true;
-    public $executable            = '';
-    public $ext                   = null;
-    public $dev                   = null;
+    public string $dir_root              = '.';
+    public string $ext_root              = '.';
+    public string $projects_root         = '.';
+    public bool   $is_phar               = true;
+    public string $executable            = '';
+    public AutoloadExt $ext;
+    public AutoloadDev $dev;
 
-    private $projectConfig         = null;
-    private $commandLineConfig     = null;
-    private $defaultConfig         = null;
-    private $exakatConfig          = null;
-    private $dotExakatConfig       = null;  // For .yaml and .ini (in that order)
-    private $envConfig             = null;
-    private $argv                  = null;
-    private $screen_cols           = 100;
+    private ?Configsource $projectConfig         = null;
+    private ?Configsource $commandLineConfig     = null;
+    private ?Configsource $defaultConfig         = null;
+    private ?Configsource $exakatConfig          = null;
+    private ?Configsource $dotExakatConfig       = null;  // For .yaml and .ini (in that order)
+    private ?Configsource $envConfig             = null;
+    private array $argv                  		 = array();
+    private int $screen_cols        		     = 100;
 
-    private $configFiles = array();
-    private $rulesets    = array();
+    private array $configFiles = array();
+    private array $rulesets    = array();
 
     public function __construct(array $argv) {
         $this->argv = $argv;
@@ -214,7 +214,6 @@ class Config extends Configsource {
                                      $this->commandLineConfig  ->toArray()
                                      );
 
-
         // todo : consider 'onefile' as a separate config, as the others.
         if ($this->commandLineConfig->get('command') === 'onefile') {
             $this->options['project'] = $project;
@@ -245,8 +244,10 @@ class Config extends Configsource {
         }
 
         //program has precedence over rulesets
-        if (isset($this->commandLineConfig->toArray()['program'])) {
+        if (isset($this->commandLineConfig->toArray()['program']) && 
+        	$this->command !== 'export') {
             $this->options['project_rulesets'] = array();
+            $this->options['project_reports'] = array();
         }
 
         $rulesets = new RulesetConfig($this->dir_root);
@@ -267,14 +268,14 @@ class Config extends Configsource {
             $this->checkSelf();
         }
 
-        $this->options['stubs'] = array_unique(array_merge($this->projectConfig->toArray()['stubs']                     ?? array(),
-                                                          $this->exakatConfig->toArray()['stubs']                       ?? array(),
-                                                          $this->dotExakatConfig->toArray()['stubs']                    ?? array(),
-                                                          $this->commandLineConfig->toArray()['directives']['stubs']    ?? array(),
+        $this->options['stubs'] = array_unique(array_merge($this->projectConfig->toArray()['stubs']                      ?? array(),
+                                                           $this->exakatConfig->toArray()['stubs']                       ?? array(),
+                                                           $this->dotExakatConfig->toArray()['stubs']                    ?? array(),
+                                                           $this->commandLineConfig->toArray()['directives']['stubs']    ?? array(),
                                             ));
 
         // autoload dev
-        $this->dev = new AutoloadDev($this->extension_dev);
+        $this->dev = new AutoloadDev($this->extension_dev ?? '');
         $this->dev->registerAutoload();
 
         // autoload extensions
@@ -347,11 +348,11 @@ TEXT;
         }
     }
 
-    public function __isset($name): bool {
+    public function __isset(string $name): bool {
         return isset($this->options[$name]);
     }
 
-    public function __get($name) {
+    public function __get(string $name) : mixed {
         if ($name === 'configFiles') {
             $return = $this->configFiles;
         } elseif ($name === 'rulesets') {
@@ -374,13 +375,13 @@ TEXT;
         return $return;
     }
 
-    public function __set($name, $value) {
+    public function __set(string $name, mixed $value) : void {
         display("It is not possible to modify configuration $name with value '" . var_export($value, true) . "'\n");
     }
 
     private function checkSelf(): void {
-        if (version_compare(PHP_VERSION, '7.3.0') < 0) {
-            throw new InaptPHPBinary('PHP needs to be version 7.3.0 or more to run exakat.(' . PHP_VERSION . ' provided)');
+        if (version_compare(PHP_VERSION, '7.4.0') < 0) {
+            throw new InaptPHPBinary('PHP needs to be version 7.4.0 or more to run exakat.(' . PHP_VERSION . ' provided)');
         }
         $extensions = array('curl', 'mbstring', 'sqlite3', 'hash', 'json');
 
@@ -406,7 +407,7 @@ TEXT;
         return json_encode(array_values($return));
     }
 
-    public function duplicate($options): self {
+    public function duplicate(array $options): self {
         $return = clone $this;
 
         // Only update existing values : ignoring the rest

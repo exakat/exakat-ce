@@ -70,10 +70,10 @@ class UselessParenthesis extends Analyzer {
              ->outIs('RIGHT')
              ->atomIs('Parenthesis')
              ->not(
-                $this->side()
-                     ->outIs('CODE')
-                     ->atomIs('Logical')
-                     ->tokenIs(array('T_LOGICAL_XOR', 'T_LOGICAL_AND', 'T_LOGICAL_OR'))
+                 $this->side()
+                      ->outIs('CODE')
+                      ->atomIs('Logical')
+                      ->tokenIs(array('T_LOGICAL_XOR', 'T_LOGICAL_AND', 'T_LOGICAL_OR'))
              );
         $this->prepareQuery();
 
@@ -146,7 +146,6 @@ class UselessParenthesis extends Analyzer {
              ->hasNoIn('RIGHT')
              ->back('first');
         $this->prepareQuery();
-
     }
 }
 

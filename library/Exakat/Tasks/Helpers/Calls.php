@@ -23,10 +23,31 @@
 namespace Exakat\Tasks\Helpers;
 
 class Calls {
-    private $callsSqlite   = null;
+    public const A_CLASS        = 'class';
+    public const FUNCTION       = 'function';
+    public const CONST          = 'const';
+    public const STATICCONSTANT = 'staticconstant';
+    public const STATICMETHOD   = 'staticmethod';
+    public const STATICPROPERTY = 'staticproperty';
+    public const METHOD         = 'method';
+    public const PROPERTY       = 'property';
+    public const GOTO           = 'goto';
 
-    private $definitions = array();
-    private $calls       = array();
+    public const ALL = array(self::A_CLASS,
+                        self::FUNCTION,
+                        self::CONST,
+                        self::STATICCONSTANT,
+                        self::STATICMETHOD,
+                        self::STATICPROPERTY,
+                        self::METHOD,
+                        self::PROPERTY,
+                        self::GOTO,
+                       );
+
+    private \sqlite3 $callsSqlite;
+
+    private array $definitions = array();
+    private array $calls       = array();
 
     public function __construct(\Sqlite3 $sqlite) {
         $this->callsSqlite = $sqlite;
@@ -63,7 +84,7 @@ SQL;
     public function save(): void {
         if (!empty($this->calls)) {
             $chunks = array_chunk($this->calls, SQLITE_CHUNK_SIZE);
-            foreach($chunks as $chunk) {
+            foreach ($chunks as $chunk) {
                 $query = 'INSERT INTO calls VALUES ' . implode(', ', $chunk);
                 $this->callsSqlite->query($query);
             }
@@ -72,7 +93,7 @@ SQL;
 
         if (!empty($this->definitions)) {
             $chunks = array_chunk($this->definitions, SQLITE_CHUNK_SIZE);
-            foreach($chunks as $chunk) {
+            foreach ($chunks as $chunk) {
                 $query = 'INSERT INTO definitions VALUES ' . implode(', ', $chunk);
                 $this->callsSqlite->query($query);
             }
@@ -81,7 +102,7 @@ SQL;
 
         if (!empty($this->globals)) {
             $chunks = array_chunk($this->globals, SQLITE_CHUNK_SIZE);
-            foreach($chunks as $chunk) {
+            foreach ($chunks as $chunk) {
                 $query = 'INSERT INTO globals VALUES ' . implode(', ', $chunk);
                 $this->callsSqlite->query($query);
             }
@@ -90,6 +111,8 @@ SQL;
     }
 
     public function addCall(string $type, string $fullnspath, AtomInterface $call): void {
+        assert(in_array($type, self::ALL), "Unknown call type : $type\n");
+
         if (empty($fullnspath)) {
             return;
         }
@@ -133,14 +156,14 @@ SQL;
             return; // Can't be a class anyway.
         }
 
-        if (strpos($call->noDelimiter, '::') === false) {
+        if (!str_contains($call->noDelimiter, '::')  ) {
             $types = array('function', 'class');
 
             $fullnspath = mb_strtolower($call->noDelimiter);
             if (empty($fullnspath) || $fullnspath[0] !== '\\') {
                 $fullnspath = '\\' . $fullnspath;
             }
-            if (strpos($fullnspath, '\\\\') !== false) {
+            if (str_contains($fullnspath, '\\\\')  ) {
                 $fullnspath = stripslashes($fullnspath);
             }
         } else {
@@ -159,7 +182,7 @@ SQL;
 
         $atom = 'String';
 
-        foreach($types as $type) {
+        foreach ($types as $type) {
             $globalpath = $this->makeGlobalPath($fullnspath);
 
             $this->calls[] = "('$type',
@@ -171,6 +194,7 @@ SQL;
     }
 
     public function addDefinition(string $type, string $fullnspath, AtomInterface $definition): void {
+        assert(in_array($type, self::ALL), "Unknown definition type : $type\n");
         if (empty($fullnspath)) {
             return;
         }

@@ -33,9 +33,9 @@ class DirectCallToMagicMethod extends Analyzer {
              ->codeIs($magicMethods)
              ->inIs('METHOD')
              ->not(
-                $this->side()
-                     ->outIs('CLASS')
-                     ->atomIs(self::RELATIVE_CLASS)
+                 $this->side()
+                      ->outIs('CLASS')
+                      ->atomIs(self::RELATIVE_CLASS)
              );
         $this->prepareQuery();
     }

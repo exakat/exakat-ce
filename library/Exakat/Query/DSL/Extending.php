@@ -28,12 +28,10 @@ class Extending extends DSL {
     public function run(): Command {
         list($fullnspath) = func_get_args();
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
-        return new Command(<<<GREMLIN
-where( __.emit().repeat( __.out("EXTENDS").in("DEFINITION")).times($MAX_LOOPING)
-                .out("EXTENDS").has("fullnspath", within(***)) ) 
+        return new Command(<<<'GREMLIN'
+    out("EXTENDS").has("fullnspath", within(***))
 GREMLIN
-, array($fullnspath));
+            , array($fullnspath));
     }
 }
 ?>

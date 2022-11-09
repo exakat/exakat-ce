@@ -30,7 +30,7 @@ class Api extends Tasks {
     public function run(): void {
         if ($this->config->stop    === true ||
             $this->config->restart === true
-            ) {
+        ) {
             $display = @file_get_contents('http://localhost:' . self::PORT . '/?json=["stop"]');
             if (empty($display)) {
                 $display = 'No server found';

@@ -38,21 +38,21 @@ class Emissary extends Reports {
     public const FILE_EXTENSION = '';
     public const CONFIG_YAML    = 'Emissary';
 
-    protected $projectPath     = null;
-    protected $finalName       = null;
-    private $tmpName           = '';
+    protected string $projectPath     = '';
+    protected string $finalName       = '';
+    private   string $tmpName         = '';
 
-    protected $frequences        = array();
-    protected $timesToFix        = array();
-    protected $themesForAnalyzer = array();
-    protected $severities        = array();
+    protected array $frequences        = array();
+    protected array $timesToFix        = array();
+    protected array $themesForAnalyzer = array();
+    protected array $severities        = array();
 
-    protected $generations       = array();
-    protected $generations_files = array();
+    protected array $generations       = array();
+    protected array $generations_files = array();
 
-    protected $usedFiles         = array();
+    protected array $usedFiles         = array();
 
-    private $baseHTML = '';
+    private string $baseHTML = '';
 
     public const TOPLIMIT = 10;
     public const LIMITGRAPHE = 40;
@@ -80,11 +80,11 @@ class Emissary extends Reports {
     public function __construct() {
         parent::__construct();
 
-        foreach(Config::PHP_VERSIONS as $shortVersion) {
+        foreach (Config::PHP_VERSIONS as $shortVersion) {
             $this->compatibilities[$shortVersion] = "Compatibility PHP $shortVersion[0].$shortVersion[1]";
         }
 
-        if ($this->rulesets !== null ){
+        if ($this->rulesets !== null ) {
             $this->frequences        = $this->rulesets->getFrequences();
             $this->timesToFix        = $this->rulesets->getTimesToFix();
             $this->themesForAnalyzer = $this->rulesets->getRulesetsForAnalyzer();
@@ -98,7 +98,7 @@ class Emissary extends Reports {
         $menu = array('<ul class="sidebar-menu">',
                       '<li class="header">&nbsp;</li>',
                       );
-        foreach($menuYaml as $section) {
+        foreach ($menuYaml as $section) {
             $menu[] = $this->makeMenuHtml($section);
         }
 
@@ -127,7 +127,7 @@ class Emissary extends Reports {
                           '<ul class="treeview-menu">',
                           );
 
-            foreach($sections['subsections'] as $subsection) {
+            foreach ($sections['subsections'] as $subsection) {
                 $menu[] = $this->makeMenuHtml($subsection);
             }
 
@@ -157,8 +157,8 @@ class Emissary extends Reports {
 
         $menu = $this->makeMenu();
         $inventories = array();
-        foreach($this->inventories as $fileName => $title) {
-            if (strpos($fileName, '/') === false) {
+        foreach ($this->inventories as $fileName => $title) {
+            if (!str_contains($fileName, '/')  ) {
                 $inventory_name = $fileName;
             } else {
                 $total = $this->dump->fetchAnalysersCounts(array($fileName))->toInt();
@@ -171,9 +171,14 @@ class Emissary extends Reports {
         }
 
         $rulesets = $this->dump->fetchTable('themas');
-        $rulesets->filter(function (array $x): bool { return substr($x['thema'], 0, 13) === 'Compatibility';});
-        $compatibilities = array_map(function (string $x): string { $v = substr($x, -2); return "              <li><a href=\"compatibility_php$v.html\"><i class=\"fa fa-circle-o\"></i>{$this->compatibilities[$v]}</a></li>\n";},
-                                     $rulesets->getColumn('thema'));
+        $rulesets->filter(function (array $x): bool {
+            return substr($x['thema'], 0, 13) === 'Compatibility';
+        });
+        $compatibilities = array_map(function (string $x): string {
+            $v = substr($x, -2);
+            return "              <li><a href=\"compatibility_php$v.html\"><i class=\"fa fa-circle-o\"></i>{$this->compatibilities[$v]}</a></li>\n";
+        },
+            $rulesets->getColumn('thema'));
 
         $menu = $this->injectBloc($menu, 'INVENTORIES', implode(PHP_EOL, $inventories));
         $menu = $this->injectBloc($menu, 'COMPATIBILITIES', implode(PHP_EOL, $compatibilities));
@@ -194,10 +199,13 @@ class Emissary extends Reports {
     }
 
     protected function putBasedPage(string $file, string $html): void {
-        if (strpos($html, '{{BLOC-JS}}') !== false) {
+        if (str_contains($html, '{{BLOC-JS}}')  ) {
             $html = str_replace('{{BLOC-JS}}', '', $html);
         }
         $html = str_replace('{{TITLE}}', "PHP Static analysis for {$this->config->project_name}", $html);
+
+        $r = array(0 => '');
+//        assert(preg_match('/{{[A-Z_]+}}/', $html, $r) == 0, 'Still one ' . ($r[0] ?? '') . " in $file\n");
 
         file_put_contents("$this->tmpName/data/$file.html", $html);
 
@@ -229,7 +237,7 @@ class Emissary extends Reports {
         $this->initFolder();
         $this->initBasePage();
 
-        foreach($this->generations as $generation) {
+        foreach ($this->generations as $generation) {
             $method = $generation->method;
             if (!method_exists($this, $method)) {
                 print "Warning : no such method as $method; Skipping\n";
@@ -238,7 +246,7 @@ class Emissary extends Reports {
             $this->$method($generation);
         }
 
-        foreach($this->generations_files as $file) {
+        foreach ($this->generations_files as $file) {
             $baseHTML = $this->getBasedPage($file);
             $this->putBasedPage($file, $baseHTML);
         }
@@ -270,7 +278,7 @@ class Emissary extends Reports {
 
         $files = glob("{$this->tmpName}/data/*.html");
         $files = array_map('basename', $files);
-        foreach(array_diff($files, $this->usedFiles) as $file) {
+        foreach (array_diff($files, $this->usedFiles) as $file) {
             unlink("{$this->tmpName}/data/$file");
         }
 
@@ -303,7 +311,7 @@ class Emissary extends Reports {
         $baseHTML = $this->getBasedPage($section->source);
         $docHTML = array();
 
-        foreach($analyzersList as $analyzerName) {
+        foreach ($analyzersList as $analyzerName) {
             $analyzer = $this->rulesets->getInstance($analyzerName, null, $this->config);
             assert ($analyzer instanceof Analyzer, "Could not get an analyzer for $analyzerName in the documentation\n");
 
@@ -314,20 +322,20 @@ class Emissary extends Reports {
 
             $badges = array();
             $exakatSince = $description['exakatSince'] ?? '';
-            if(!empty($exakatSince)){
+            if (!empty($exakatSince)) {
                 $badges[] = "[Since $exakatSince]";
             }
 
             $badges[] = '[ -P ' . $analyzer->getInBaseName() . ' ]';
             if (isset($description['name'])) {
-                $badges[] = '[ <a href="https://exakat.readthedocs.io/en/latest/Rules.html#' . $this->toOnlineId($description['name']) . '">Online docs</a> ]';
+                $badges[] = '[ <a href="https://exakat.readthedocs.io/en/latest/Reference/Rules.html#' . $this->toOnlineId($description['name']) . '">Online docs</a> ]';
             }
 
             $versionCompatibility = $description['phpversion'];
             if ($versionCompatibility !== Analyzer::PHP_VERSION_ANY) {
-                if (strpos($versionCompatibility, '+') !== false) {
+                if (str_contains($versionCompatibility, '+')  ) {
                     $versionCompatibility = substr($versionCompatibility, 0, -1) . ' and more recent ';
-                } elseif (strpos($versionCompatibility, '-') !== false) {
+                } elseif (str_contains($versionCompatibility, '-')  ) {
                     $versionCompatibility = ' older than ' . substr($versionCompatibility, 0, -1);
                 }
                 $badges[] = '[ PHP ' . $versionCompatibility . ']';
@@ -335,18 +343,20 @@ class Emissary extends Reports {
 
             $analyzersDocHTML .= '<p>' . implode(' - ', $badges) . '</p>';
 
-            if (!empty($description['seeAlso'][0])) {
+            if (empty($description['seeAlso'][0])) {
+                $description = $description['description'];
+            } else {
                 $last = count($description['seeAlso']) - 1;
                 $seeAlso[$last] = 'and ' . $description['seeAlso'][$last] . '.';
                 $description = $description['description'] . "\nSee also " . implode(', ', $description['seeAlso']);
-            } else {
-                $description = $description['description'];
             }
 
             static $regex;
             if (empty($regex)) {
                 $php_native_functions = parse_ini_file("{$this->config->dir_root}/data/php_functions.ini")['functions'];
-                usort($php_native_functions, function (string $a, string $b): int { return strlen($b) <=> strlen($a);} );
+                usort($php_native_functions, function (string $a, string $b): int {
+                    return strlen($b) <=> strlen($a);
+                } );
                 $regex = '/(' . implode('|', $php_native_functions) . ')\(\)/m';
             }
             $description = preg_replace($regex, '`\1() <https://www.php.net/\1>`_', $description);
@@ -359,7 +369,7 @@ class Emissary extends Reports {
             $analyzersDocHTML  = rstlist2html($analyzersDocHTML);
 
             $clearphp = $description['clearphp'] ?? '';
-            if(!empty($clearphp)){
+            if (!empty($clearphp)) {
                 $analyzersDocHTML.='<p>This rule is named <a target="_blank" href="https://github.com/dseguy/clearPHP/blob/master/rules/' . $clearphp . '.md">' . $clearphp . '</a>, in the clearPHP reference.</p>';
             }
             $docHTML[] = $analyzersDocHTML;
@@ -382,7 +392,7 @@ class Emissary extends Reports {
         $html = array();
         $highchart = new Highchart();
 
-        foreach(array_keys((array) $favoritesList) as $analyzer) {
+        foreach (array_keys((array) $favoritesList) as $analyzer) {
             $analyzerList = $this->dump->fetchHashAnalyzer($analyzer)->toHash('key', 'value');
 
             $table = array();
@@ -390,7 +400,7 @@ class Emissary extends Reports {
             $name = $this->docs->getDocs($analyzer, 'name');
 
             $total = 0;
-            foreach($analyzerList as $key => $value) {
+            foreach ($analyzerList as $key => $value) {
                 $table []= '
                 <div class="clearfix">
                    <div class="block-cell">' . makeHtml($key) . '</div>
@@ -489,21 +499,21 @@ HTML;
 
         $fileOverview = $this->getFileOverview();
         $highchart->addSeries('filename',
-                              $fileOverview['scriptDataFiles'],
-                              array('name' => 'Critical', 'data' => $fileOverview['scriptDataCritical']),
-                              array('name' => 'Major',    'data' => $fileOverview['scriptDataMajor']),
-                              array('name' => 'Minor',    'data' => $fileOverview['scriptDataMinor']),
-                              array('name' => 'None',     'data' => $fileOverview['scriptDataNone'])
-                              );
+            $fileOverview['scriptDataFiles'],
+            array('name' => 'Critical', 'data' => $fileOverview['scriptDataCritical']),
+            array('name' => 'Major',    'data' => $fileOverview['scriptDataMajor']),
+            array('name' => 'Minor',    'data' => $fileOverview['scriptDataMinor']),
+            array('name' => 'None',     'data' => $fileOverview['scriptDataNone'])
+        );
 
         $analyzerOverview = $this->getAnalyzerOverview();
         $highchart->addSeries('container',
-                              $analyzerOverview['scriptDataAnalyzer'],
-                              array('name' => 'Critical', 'data' => $analyzerOverview['scriptDataAnalyzerCritical']),
-                              array('name' => 'Major',    'data' => $analyzerOverview['scriptDataAnalyzerMajor']),
-                              array('name' => 'Minor',    'data' => $analyzerOverview['scriptDataAnalyzerMinor']),
-                              array('name' => 'None',     'data' => $analyzerOverview['scriptDataAnalyzerNone'])
-                              );
+            $analyzerOverview['scriptDataAnalyzer'],
+            array('name' => 'Critical', 'data' => $analyzerOverview['scriptDataAnalyzerCritical']),
+            array('name' => 'Major',    'data' => $analyzerOverview['scriptDataAnalyzerMajor']),
+            array('name' => 'Minor',    'data' => $analyzerOverview['scriptDataAnalyzerMinor']),
+            array('name' => 'None',     'data' => $analyzerOverview['scriptDataAnalyzerNone'])
+        );
 
         $blocjs = (string) $highchart;
 
@@ -541,9 +551,9 @@ HTML;
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
-                              array_keys($data),
-                              array('name' => $name, 'data' => array_values($data))
-                              );
+            array_keys($data),
+            array('name' => $name, 'data' => array_values($data))
+        );
         $blocjs = (string) $highchart;
 
         $finalHTML = $this->injectBloc($finalHTML, 'BLOC-JS',  $blocjs);
@@ -568,7 +578,7 @@ HTML;
         $parents = array();
         $children = array();
         $names = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (empty($row['extends'])) {
                 $parents[$row['id']] = array();
             } else {
@@ -580,7 +590,7 @@ HTML;
 
         $res_implements = $this->dump->fetchTable('cit_implements')->toArray();
         $implements = array();
-        foreach($res_implements as $row) {
+        foreach ($res_implements as $row) {
             array_collect_by($implements, $row['implementing'], $row);
             array_collect_by($parents, $row['implementing'], intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements']);
             array_collect_by($children, intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements'], $row['implementing']);
@@ -589,9 +599,9 @@ HTML;
         /// Collect classes and interfaces that accept a class as typehint : class C extends B {} => C => [C, B]
         do {
             $parents2 = array();
-            foreach($parents as $key => $aieux) {
+            foreach ($parents as $key => $aieux) {
                 $cleaned = array(array());
-                foreach($aieux as $id => $aieul) {
+                foreach ($aieux as $id => $aieul) {
                     if (isset($parents[$aieul])) {
                         $cleaned[] = $parents[$aieul];
                         $cleaned[] = array($aieul);
@@ -605,15 +615,15 @@ HTML;
 
             $toPropagate = count($parents2, 1) - count($parents, 1);
             $parents = $parents2;
-        } while($toPropagate > 0);
+        } while ($toPropagate > 0);
 
         /// Collect classes that can fit a class used as typehint : class C extends B {} => B => [C, B]
         // children classes may fit when the parent is used as typehint. Interface don't count as result
         do {
             $children2 = array();
-            foreach($children as $key => $child) {
+            foreach ($children as $key => $child) {
                 $cleaned = array();
-                foreach($child as $id => $kid) {
+                foreach ($child as $id => $kid) {
                     if (isset($children[$kid])) {
                         $cleaned[] = $children[$kid];
                     }
@@ -624,9 +634,9 @@ HTML;
 
             $toPropagate = count($children2, 1) - count($children, 1);
             $children = $children2;
-        } while($toPropagate > 0);
+        } while ($toPropagate > 0);
 
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $td = array();
             $td[] = '<td style="vertical-align: top">' . $namespaces[$row['namespaceId']] . '</td>';
             $td[] = '<td style="vertical-align: top">' . $row['type'] . ' ' . $row['name'] . '</td>';
@@ -637,7 +647,7 @@ HTML;
                 $list[] = $names[$row['id']] ?? $row['id'];
             }
             if (isset($parents[$row['id']])) {
-                foreach($parents[$row['id']] as $higher) {
+                foreach ($parents[$row['id']] as $higher) {
                     $list[] = $names[$higher] ?? $higher;
                 }
             }
@@ -656,7 +666,7 @@ HTML;
                 $list[] = $names[$row['id']] ?? $row['id'];
             }
             if (isset($children[$row['id']])) {
-                foreach($children[$row['id']] as $higher) {
+                foreach ($children[$row['id']] as $higher) {
                     $n = $names[$higher] ?? $higher;
                     if ($n[0] === 'c') {
                         $list[] = $n;
@@ -709,7 +719,7 @@ HTML;
         $list = $this->rulesets->getRulesetsAnalyzers($this->themesToShow);
         $res = $this->dump->fetchAnalysersCounts($list);
         $rulesets = array('[ruleset_name]');
-        foreach($res->toArray() as $r) {
+        foreach ($res->toArray() as $r) {
             $rulesets[] = "analyzer[] = \"$r[analyzer]\";";
         }
 
@@ -744,8 +754,12 @@ HTML;
     protected function generatePHPFunctionBreakdown(Section $section): void {
         // List of php functions used
         $res = $this->dump->fetchTable('phpStructures');
-        $res->filter(function (array $x): bool { return $x['type'] === 'function'; });
-        $res->order(function (array $a, array $b): int { return $b['count'] <=> $a['count']; });
+        $res->filter(function (array $x): bool {
+            return $x['type'] === 'function';
+        });
+        $res->order(function (array $a, array $b): int {
+            return $b['count'] <=> $a['count'];
+        });
 
         $html = array();
         $data = array();
@@ -765,7 +779,9 @@ HTML;
     protected function generateClassTypehints(Section $section): void {
         // List of typehints used
         $res = $this->dump->fetchHashResults('Typehinting stats');
-        $res->order(function (array $a, array $b): int { return $b['value'] <=> $a['value']; });
+        $res->order(function (array $a, array $b): int {
+            return $b['value'] <=> $a['value'];
+        });
 
         $html = array();
         $data = array();
@@ -800,7 +816,9 @@ HTML;
         );
 
         foreach ($res->toArray() as $value) {
-            if (in_array($value['key'], $omit, \STRICT_COMPARISON)) { continue; }
+            if (in_array($value['key'], $omit, \STRICT_COMPARISON)) {
+                continue;
+            }
             $data[$value['key']] = $value['value'];
 
             $html []= '<div class="clearfix">
@@ -816,8 +834,12 @@ HTML;
     protected function generatePHPConstantsBreakdown(Section $section): void {
         // List of php constant used
         $res = $this->dump->fetchTable('phpStructures');
-        $res->filter(function (array $x): bool { return $x['type'] === 'constant'; });
-        $res->order(function (array $a, array $b): int { return $b['count'] <=> $a['count']; });
+        $res->filter(function (array $x): bool {
+            return $x['type'] === 'constant';
+        });
+        $res->order(function (array $a, array $b): int {
+            return $b['count'] <=> $a['count'];
+        });
 
         $html = array();
         $data = array();
@@ -837,8 +859,12 @@ HTML;
     protected function generatePHPClassesBreakdown(Section $section): void {
         // List of php functions used
         $res = $this->dump->fetchTable('phpStructures');
-        $res->filter(function (array $x): bool { return in_array($x['type'], array('class', 'interface', 'trait'), \STRICT_COMPARISON); });
-        $res->order(function (array $a, array $b): int { return $b['count'] <=> $a['count']; });
+        $res->filter(function (array $x): bool {
+            return in_array($x['type'], array('class', 'interface', 'trait'), \STRICT_COMPARISON);
+        });
+        $res->order(function (array $a, array $b): int {
+            return $b['count'] <=> $a['count'];
+        });
 
         $html = array();
         $data = array();
@@ -861,13 +887,13 @@ HTML;
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
-                              array_keys($data),
-                              array('name' => $data_name, 'data' => array_values($data))
-                              );
+            array_keys($data),
+            array('name' => $data_name, 'data' => array_values($data))
+        );
         $blocjs = (string) $highchart;
 
         $finalHTML = $this->injectBloc($finalHTML, 'BLOC-JS',  $blocjs);
-        $finalHTML = $this->injectBloc($finalHTML, 'TITLE', $title);
+        //$finalHTML = $this->injectBloc($finalHTML, 'TITLE', $title);
 
         $this->putBasedPage($filename, $finalHTML);
     }
@@ -963,7 +989,9 @@ HTML;
         foreach ($rulesets AS $key => $categorie) {
             $list = $this->rulesets->getRulesetsAnalyzers(array($categorie));
             $res = $this->dump->fetchAnalysersCounts($list);
-            $res->filter(function (array $x): bool { return $x['count'] >= -1;});
+            $res->filter(function (array $x): bool {
+                return $x['count'] >= -1;
+            });
             $counts = $res->getColumn('count');
             $data[] = array('label' => $key, 'value' => array_sum($counts));
         }
@@ -1081,20 +1109,24 @@ HTML;
         'Analyze',
         'Security',
         'Performances',
-        'CompatibilityPHP53',
-        'CompatibilityPHP54',
-        'CompatibilityPHP55',
-        'CompatibilityPHP56',
-        'CompatibilityPHP70',
-        'CompatibilityPHP71',
-        'CompatibilityPHP72',
-        'CompatibilityPHP73',
-        'CompatibilityPHP74',
+        'CompatibilityPHP82',
+        'CompatibilityPHP81',
         'CompatibilityPHP80',
+        'CompatibilityPHP74',
+        'CompatibilityPHP73',
+        'CompatibilityPHP72',
+        'CompatibilityPHP71',
+        'CompatibilityPHP70',
+        'CompatibilityPHP56',
+        'CompatibilityPHP55',
+        'CompatibilityPHP54',
+        'CompatibilityPHP53',
         ));
 
         $result = $this->dump->fetchAnalysersCounts($list);
-        $result->filter(function (array $x): bool { return substr($x['analyzer'], 0, 6) !== 'Common';});
+        $result->filter(function (array $x): bool {
+            return substr($x['analyzer'], 0, 6) !== 'Common';
+        });
 
         $baseHTML = $this->getBasedPage($section->source);
 
@@ -1187,7 +1219,9 @@ HTML;
 
         $severities = $this->getSeveritiesNumberBy('file');
         unset($severities['None']);
-        uasort($severities, function (array $a, array $b): int { return array_sum($b) <=> array_sum($a); });
+        uasort($severities, function (array $a, array $b): int {
+            return array_sum($b) <=> array_sum($a);
+        });
         $severities = array_slice($severities, 0, 10);
 
         foreach ($severities as $file => $value) {
@@ -1252,7 +1286,7 @@ HTML;
 
         $res = $this->dump->getSeveritiesNumberBy($list, $type);
         $return = array();
-        foreach($res->toArray() as $value) {
+        foreach ($res->toArray() as $value) {
             $return[$value[$type]][$value['severity']] = $value['count'];
         }
 
@@ -1330,7 +1364,7 @@ $issues
       var item_template =  
         '<tr>' +
           '<td width="20%"><a href="<%= "analyses_doc.html#" + obj.analyzer_md5 %>" title="Documentation for <%= obj.analyzer %>"><i class="fa fa-book"></i></a> <%= obj.analyzer %></td>' +
-          '<td width="20%"><a href="<%= "codes.html#file=" + obj.file + "&line=" + obj.line %>" title="Go to code"><%= obj.file + ":" + obj.line %></a></td>' +
+          '<td width="20%"><%= obj.file + ":" + obj.line %></td>' +
           '<td width="18%"><%= obj.code %></td>' + 
           '<td width="2%"><%= obj.code_detail %></td>' +
           '<td width="7%" align="center"><%= obj.severity %></td>' +
@@ -1338,7 +1372,7 @@ $issues
           '<td width="16%"><%= obj.recipe %></td>' +
         '</tr>' +
         '<tr class="fullcode">' +
-          '<td colspan="7" width="100%"><div class="analyzer_help"><%= obj.analyzer_help %></div><pre><code><%= obj.code_plus %></code><div class="text-right"><a target="_BLANK" href="<%= "codes.html#file=" + obj.file + "&line=" + obj.line %>" class="btn btn-info">View File</a></div></pre></td>' +
+          '<td colspan="7" width="100%"><div class="analyzer_help"><%= obj.analyzer_help %></div><pre><code><%= obj.code_plus %></code><div class="text-right"></div></pre></td>' +
         '</tr>';
       var settings = { 
         items           : data_items,
@@ -1395,12 +1429,12 @@ JAVASCRIPTCODE;
 
         $result = $this->dump->fetchTable('linediff');
         $linediff = array();
-        foreach($result->toArray() as $row) {
+        foreach ($result->toArray() as $row) {
             $linediff[$row['file']][$row['line']] = $row['diff'];
         }
 
         $oldIssues = $this->getIssuesFacetedDb($ruleset);
-        foreach($oldIssues as &$issue) {
+        foreach ($oldIssues as &$issue) {
             $i = json_decode($issue);
 
             // Skip wrong lines, but why ?
@@ -1409,7 +1443,7 @@ JAVASCRIPTCODE;
             }
 
             if (isset($linediff[$i->file]) && $i->line > -1) {
-                foreach($linediff[$i->file] as $line => $diff) {
+                foreach ($linediff[$i->file] as $line => $diff) {
                     if ($i->line > $line) {
                         $i->line += $diff;
                     }
@@ -1426,7 +1460,9 @@ JAVASCRIPTCODE;
 
     public function getIssuesFacetedDb(array $ruleset): array {
         $results = $this->dump->fetchAnalysers($ruleset);
-        $results->filter(function (array $x): bool { return !in_array($x['fullcode'], array('Not Compatible With PHP Version', 'Not Compatible With PHP Configuration'), \STRICT_COMPARISON); });
+        $results->filter(function (array $x): bool {
+            return !in_array($x['fullcode'], array('Not Compatible With PHP Version', 'Not Compatible With PHP Configuration'), \STRICT_COMPARISON);
+        });
 
         $TTFColors = array('Instant'  => '#5f492d',
                            'Quick'    => '#e8d568',
@@ -1441,7 +1477,7 @@ JAVASCRIPTCODE;
                                 );
 
         $items = array();
-        foreach($results->toArray() as $row) {
+        foreach ($results->toArray() as $row) {
             $item = array();
             $ini = $this->docs->getDocs($row['analyzer']);
             $item['analyzer']       = $ini['name'];
@@ -1473,7 +1509,7 @@ JAVASCRIPTCODE;
             $class = 'text-red';
         } elseif ($type === 'Minor' || $type === 'Quick') {
             $class = 'text-yellow';
-        }  elseif ($type === 'Note' || $type === 'Instant') {
+        } elseif ($type === 'Note' || $type === 'Instant') {
             $class = 'text-blue';
         } else {
             $class = 'text-gray';
@@ -1485,15 +1521,17 @@ JAVASCRIPTCODE;
     protected function generateProcFiles(Section $section): void {
         $files = array();
         $fileList = $this->dump->fetchTable('files')->getColumn('file');
-        foreach($fileList as $file) {
+        foreach ($fileList as $file) {
             $files []= "<tr><td>$file</td></tr>";
         }
         $files = implode(PHP_EOL, $files);
 
         $nonFiles = array();
         $ignoredFiles = $this->dump->fetchTable('ignoredFiles')->toArray();
-        foreach($ignoredFiles as $row) {
-            if (empty($row['file'])) { continue; }
+        foreach ($ignoredFiles as $row) {
+            if (empty($row['file'])) {
+                continue;
+            }
 
             $nonFiles []= "<tr><td>{$row['file']}</td><td>{$row['reason']}</td></tr>";
         }
@@ -1510,7 +1548,7 @@ JAVASCRIPTCODE;
     protected function generateAnalyzersList(Section $section): void {
         $analyzers = array();
 
-        foreach($this->rulesets->getRulesetsAnalyzers($this->themesToShow) as $analyzer) {
+        foreach ($this->rulesets->getRulesetsAnalyzers($this->themesToShow) as $analyzer) {
             $analyzers []= '<tr><td>' . $this->docs->getDocs($analyzer, 'name') . '</td><td>' . $analyzer . "</td></tr>\n";
         }
         $analyzers = implode(PHP_EOL, $analyzers);
@@ -1528,7 +1566,7 @@ JAVASCRIPTCODE;
         $libraries = array();
         $externallibrariesList = $this->dump->fetchTable('externallibraries')->toArray();
 
-        foreach($externallibrariesList as $row) {
+        foreach ($externallibrariesList as $row) {
             $name = strtolower($row['library']);
             $url  = $externallibraries->{$name}->homepage;
             $name = $externallibraries->{$name}->name;
@@ -1555,18 +1593,22 @@ JAVASCRIPTCODE;
         $results = $this->dump->fetchAnalysers(array('Php/MiddleVersion'));
 
         $rows = array();
-        foreach($results->toArray() as $row) {
+        foreach ($results->toArray() as $row) {
             $rows[strtolower(substr($row['fullcode'], 0, (int) strpos($row['fullcode'], '(')))] = $row;
         }
 
-        foreach($bugfixes as $bugfix) {
+        foreach ($bugfixes as $bugfix) {
             if (empty($bugfix['solvedIn73']) &&
                 empty($bugfix['solvedIn72']) &&
                 empty($bugfix['solvedIn71']) &&
-                empty($bugfix['solvedIn70']) ) { continue; }
+                empty($bugfix['solvedIn70']) ) {
+                continue;
+            }
 
             if (!empty($bugfix['function'])) {
-                if (!isset($rows[$bugfix['function']])) { continue; }
+                if (!isset($rows[$bugfix['function']])) {
+                    continue;
+                }
 
                 $cve = $this->Bugfixes_cve($bugfix['cve'] ?? '');
                 $table .= '<tr>
@@ -1584,7 +1626,9 @@ JAVASCRIPTCODE;
 
                 $cve = $this->Bugfixes_cve($bugfix['cve']);
 
-                if ($subanalyze === 0) { continue; }
+                if ($subanalyze === 0) {
+                    continue;
+                }
                 $table .= '<tr>
     <td>' . $bugfix['title'] . '</td>
     <td>' . ($bugfix['solvedIn73'] ? $bugfix['solvedIn73'] : '-') . '</td>
@@ -1637,10 +1681,10 @@ JAVASCRIPTCODE;
 
         $data = array();
         $data2 = array();
-        foreach($analyzers as $analyzer => $analyzerVersion) {
+        foreach ($analyzers as $analyzer => $analyzerVersion) {
             $coeff = $analyzerVersion[-1] === '+' ? 1 : -1;
 
-            foreach($versions as $version) {
+            foreach ($versions as $version) {
                 if (!isset($counts[$analyzer])) {
                     $data2[$analyzer][$version] = '<i class="fa fa-eye-slash" style="color: #dddddd"></i>';
                 } elseif ($counts[$analyzer] === 0) {
@@ -1655,7 +1699,7 @@ JAVASCRIPTCODE;
         }
 
         $incompilable = array();
-        foreach($versions as $version) {
+        foreach ($versions as $version) {
             $shortVersion = $version[0] . $version[2];
 
             $res = $this->dump->fetchHash("notCompilable$shortVersion")->toString();
@@ -1677,7 +1721,7 @@ JAVASCRIPTCODE;
         $titles = '<tr><th>Version</th><th>Name</th><th>' . implode('</th><th>', array_keys(array_values($data2)[0]) ) . '</th></tr>';
         $table []= '<tr><td>&nbsp;</td><td>Compilation</td><td>' . implode('</td><td>', $incompilable) . "</td></tr>\n";
         $data = array_merge($data, $data2);
-        foreach($data as $name => $row) {
+        foreach ($data as $name => $row) {
             if (!class_exists("\Exakat\Analyzer\\" . str_replace('/', '\\', $name))) {
                 continue;
             }
@@ -1757,12 +1801,12 @@ HTML;
         $info[] = array('Exakat version', $this->dump->fetchHash('exakat_version')->toString() . ' ( Build ' . $this->dump->fetchHash('exakat_build')->toString() . ') ');
         $list = $this->config->ext->getPharList();
         $html = array();
-        foreach(array_keys($list) as $name) {
+        foreach (array_keys($list) as $name) {
             $html[] = '<li>' . basename($name, '.phar') . '</li>';
         }
         $info[] = array('Exakat modules', '<ul>' . implode(PHP_EOL, $html) . '</ul>');
 
-        foreach($info as &$row) {
+        foreach ($info as &$row) {
             $row = '<tr><td>' . implode('</td><td>', $row) . '</td></tr>';
         }
         unset($row);
@@ -1780,7 +1824,7 @@ HTML;
 
         $results = $this->dump->fetchAnalysers(array('Structures/ErrorMessages'));
 
-        foreach($results->toArray() as $row) {
+        foreach ($results->toArray() as $row) {
             $errorMessages .= "<tr><td>{$row['htmlcode']}</td><td>{$row['file']}</td><td>{$row['line']}</td></tr>\n";
         }
 
@@ -1794,7 +1838,7 @@ HTML;
         $externalServices = array();
 
         $res = $this->dump->fetchTable('configFiles')->toArray();
-        foreach($res as $row) {
+        foreach ($res as $row) {
             if (empty($row['homepage'])) {
                 $link = '';
             } else {
@@ -1833,7 +1877,7 @@ HTML;
         $list = $this->rulesets->getRulesetsAnalyzers(array('Appinfo'));
         $res = $this->dump->fetchAnalysersCounts($list);
 
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $data = array();
 
             if ($row['analyzer'] === 'Structures/FileUploadUsage' && $row['count'] !== 0) {
@@ -1853,7 +1897,7 @@ HTML;
                 $data = json_decode(file_get_contents("{$this->config->dir_root}/data/directives/errorlog.json"));
             } elseif ($row['analyzer'] === 'Security/CantDisableFunction' ||
                       $row['analyzer'] === 'Security/CantDisableClass'
-                      ) {
+            ) {
                 $list = $this->dump->getFunctionsFromAnalyzer('Security/CantDisableFunction');
 
                 if (isset($disable)) {
@@ -1883,7 +1927,7 @@ HTML;
                 }
             }
 
-            foreach($data as $directive) {
+            foreach ($data as $directive) {
                 $directiveList .= "<tr><td>{$directive->name}</td><td>{$directive->suggested}</td><td>{$directive->documentation}</td></tr>\n";
             }
         }
@@ -1899,7 +1943,9 @@ HTML;
 
         $total = $this->dump->fetchHash('files')->toInt();
 
-        foreach(array_unique(array_merge(array($this->config->phpversion[0] . $this->config->phpversion[2]), $this->config->other_php_versions)) as $suffix) {
+        $suffixes = array_unique(array_merge(array($this->config->phpversion[0] . $this->config->phpversion[2]), $this->config->other_php_versions));
+        rsort($suffixes);
+        foreach ($suffixes as $suffix) {
             $suffix = (string) $suffix;
             $res = $this->dump->fetchHash("compilation$suffix");
             if ($res->getCount() === -1) {
@@ -1996,7 +2042,7 @@ HTML;
         $res = $this->dump->fetchAnalysersCounts($list);
         $counts = $res->toHash('analyzer', 'count');
 
-        foreach($list as $analyzer) {
+        foreach ($list as $analyzer) {
             $ini = $this->docs->getDocs($analyzer);
             if (isset($counts[$analyzer])) {
                 $resultState = (int) $counts[$analyzer];
@@ -2029,7 +2075,7 @@ HTML;
 
         $results = $this->dump->fetchAnalysers(array('Structures/DynamicCode'));
 
-        foreach($results->toArray() as $row) {
+        foreach ($results->toArray() as $row) {
             $dynamicCode .= "<tr><td>{$row['htmlcode']}</td><td>{$row['file']}</td><td>{$row['line']}</td></tr>\n";
         }
 
@@ -2048,7 +2094,7 @@ HTML;
         }
 
         $tree = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $variable = trim($row['variable'], '{}&@');
             $name = preg_replace('/^\$GLOBALS\[[ \'"]*(.*?)[ \'"]*\]$/', '$\1', $variable);
             if (substr($variable, 0, 8) === '$GLOBALS') {
@@ -2070,10 +2116,12 @@ HTML;
             }
         }
 
-        uasort($tree, function (array $a, array $b): int { return $a['count'] <=> $b['count'];});
+        uasort($tree, function (array $a, array $b): int {
+            return $a['count'] <=> $b['count'];
+        });
 
         $theGlobals = array();
-        foreach($tree as $variable => $details) {
+        foreach ($tree as $variable => $details) {
             $count      = $details['count'];
             $types      = implode('<br />', $details['type']);
             $status     = implode('<br />', $details['status']);
@@ -2154,31 +2202,33 @@ HTML;
     }
 
     private function generateInventories(Section $section, array $analyzer, string $description): void {
-       $results = $this->dump->fetchAnalysers($analyzer);
+        $results = $this->dump->fetchAnalysers($analyzer);
 
-       $groups = array();
-       foreach($results->toArray() as $row) {
-           $groups[$row['htmlcode']][] = $row['file'];
-       }
-       uasort($groups, function (array $a, array $b): int { return count($a) <=> count($b);});
+        $groups = array();
+        foreach ($results->toArray() as $row) {
+            $groups[$row['htmlcode']][] = $row['file'];
+        }
+        uasort($groups, function (array $a, array $b): int {
+            return count($a) <=> count($b);
+        });
 
-       $theTable = array();
-       foreach($groups as $code => $list) {
-           $c = count($list);
-           $htmlList = '<ul><li>' . implode('</li><li>', $list) . '</li></ul>';
-           $theTable []= "<tr><td>{$code}</td><td>$c</td><td>{$htmlList}</td></tr>";
-       }
+        $theTable = array();
+        foreach ($groups as $code => $list) {
+            $c = count($list);
+            $htmlList = '<ul><li>' . implode('</li><li>', $list) . '</li></ul>';
+            $theTable []= "<tr><td>{$code}</td><td>$c</td><td>{$htmlList}</td></tr>";
+        }
 
-       $html = $this->getBasedPage($section->source);
-       $html = $this->injectBloc($html, 'TITLE', $section->title);
-       $html = $this->injectBloc($html, 'DESCRIPTION', $description);
-       $html = $this->injectBloc($html, 'TABLE', implode(PHP_EOL, $theTable));
-       $this->putBasedPage($section->file, $html);
+        $html = $this->getBasedPage($section->source);
+        $html = $this->injectBloc($html, 'TITLE', $section->title);
+        $html = $this->injectBloc($html, 'DESCRIPTION', $description);
+        $html = $this->injectBloc($html, 'TABLE', implode(PHP_EOL, $theTable));
+        $this->putBasedPage($section->file, $html);
     }
 
     private function generateInterfaceTree(Section $section): void {
         $res = $this->dump->getCitTree('interface');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (empty($row['parent'])) {
                 continue;
             }
@@ -2200,7 +2250,7 @@ HTML;
             $top = array_diff(array_keys($list), $secondaries);
 
             $theTableArray = array();
-            foreach($top as $t) {
+            foreach ($top as $t) {
                 $theTableArray[] = '<ul class="tree">' . $this->extends2ul($t, $list) . '</ul>';
             }
             $theTable = implode(PHP_EOL, $theTableArray);
@@ -2211,13 +2261,12 @@ HTML;
         $html = $this->injectBloc($html, 'DESCRIPTION', 'Here are the interface trees : the interfaces that are extended by another interface. Interface without extension are not represented here');
         $html = $this->injectBloc($html, 'CONTENT', $theTable);
         $this->putBasedPage($section->file, $html);
-
     }
 
     private function generateConstantTree(Section $section): void {
         $list = array();
         $res = $this->dump->fetchTable('constantOrder');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (empty($row['built'])) {
                 continue;
             }
@@ -2239,7 +2288,7 @@ HTML;
             $top = array_diff(array_keys($list), $secondaries);
 
             $theTableArray = array();
-            foreach($top as $t) {
+            foreach ($top as $t) {
                 $theTableArray[] = '<ul class="tree">' . $this->extends2ul($t, $list) . '</ul>';
             }
             $theTable = implode(PHP_EOL, $theTableArray);
@@ -2250,100 +2299,13 @@ HTML;
         $html = $this->injectBloc($html, 'DESCRIPTION', 'Here are the constant trees : a constant (global or class) is build based on another constant. Constants built only with literals are not represented here.');
         $html = $this->injectBloc($html, 'CONTENT', $theTable);
         $this->putBasedPage($section->file, $html);
-
-    }
-
-    private function generateTraitMatrix(Section $section): void {
-        // list of all traits, for building the table
-        $traits = $this->dump->getCit('trait')->getColumn('name');
-
-        // INIT
-        $table = array_fill_keys($traits, array_fill_keys($traits, array()));
-
-        // Get conflicts
-        $res = $this->dump->getTraitConflicts();
-        foreach($res->toArray() as $row) {
-            $table[$row['t1']][$row['t2']][] = $row['method'];
-        }
-
-        // Get trait usage
-        $res = $this->dump->getTraitUsage();
-        $usage = $res->toHash('t1', 't2');
-
-        $rows = array();
-        foreach($table as $name => $row) {
-            $closure = function (&$r, $t2) use ($name, $usage): void {
-                $content = empty($r) ? '&nbsp;' : implode('(), ', $r) . '()';
-                $background = isset($usage[$name][$t2]) ? ' bgcolor="darkgray"' : '';
-
-                $r = "<td$background>$content</td>";
-            };
-            array_walk($row, $closure);
-            $row = implode('', $row);
-
-            $rows[] = "<tr><td>$name</td>$row</tr>\n";
-        }
-
-        $cells = implode('</td><td>', $traits);
-        $rows = implode('', $rows);
-        $theTable = <<<HTML
-<table class="table table-striped">
-    <tr>
-        <td>&nbsp;</td>
-        <td>$cells</td>
-    </tr>
-    $rows
-</table>
-HTML;
-
-        $html = $this->getBasedPage($section->source);
-        $html = $this->injectBloc($html, 'TITLE', $section->title);
-        $html = $this->injectBloc($html, 'DESCRIPTION', 'Here are the trait matrix. Conflicting methods between any two traits are listed in the cells : when they are used in the same class, those traits will require conflict resolutions. And dark gray cells are traits that are actually included one into the other.');
-        $html = $this->injectBloc($html, 'CONTENT', $theTable);
-        $this->putBasedPage($section->file, $html);
-    }
-
-    private function generateTraitTree(Section $section): void {
-        $list = array();
-
-        $res = $this->dump->getCitTree('trait');
-        foreach($res->toArray() as $row) {
-            if (empty($row['child'])) {
-                continue;
-            }
-
-            $parent = $row['child'];
-            if (!isset($list[$parent])) {
-                $list[$parent] = array();
-            }
-
-            $list[$parent][] = $row['parent'];
-        }
-
-        if (empty($list)) {
-            $theTable = 'No trait were found in this repository.';
-        } else {
-            array_sub_sort($list);
-
-            $theTable = array();
-            foreach(array_keys($list) as $t) {
-                $theTable[] = '<ul class="tree">' . $this->extends2ul($t, $list) . '</ul>';
-            }
-            $theTable = implode(PHP_EOL, $theTable);
-        }
-
-        $html = $this->getBasedPage($section->source);
-        $html = $this->injectBloc($html, 'TITLE', $section->title);
-        $html = $this->injectBloc($html, 'DESCRIPTION', 'Here are the extension trees of the traits : a trait is extended when it uses another trait. Traits without any extension are not represented. The same trait may be mentionned several times, as trait may use an arbitrary number of traits.');
-        $html = $this->injectBloc($html, 'CONTENT', $theTable);
-        $this->putBasedPage($section->file, $html);
     }
 
     private function generateClassTree(Section $section): void {
         $list = array();
 
         $res = $this->dump->getCitTree('class');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (empty($row['parent'])) {
                 continue;
             }
@@ -2365,7 +2327,7 @@ HTML;
             $top = array_diff(array_keys($list), $secondaries);
 
             $theTable = array();
-            foreach($top as $t) {
+            foreach ($top as $t) {
                 $theTable[] = '<ul class="tree">' . $this->extends2ul($t, $list) . '</ul>';
             }
             $theTable = implode(PHP_EOL, $theTable);
@@ -2386,8 +2348,8 @@ HTML;
         }
 
         $return = array();
-        foreach($paths[$root] as $sub) {
-            if (isset($paths[$sub])){
+        foreach ($paths[$root] as $sub) {
+            if (isset($paths[$sub])) {
                 if (!isset($done[$sub]) && $level < 10) {
                     $done[$sub] = 1;
                     $secondary = $this->extends2ul($sub, $paths, $level + 1);
@@ -2408,37 +2370,37 @@ HTML;
     private function generateAttributeInventory(Section $section): void {
         $res = $this->dump->fetchTable('cit');
         $cit = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $cit[$row['type']][$row['id']] = $row['name'];
         }
 
         $res = $this->dump->fetchTable('functions');
         $functions = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $functions[$row['id']] = $row['function'];
         }
 
         $res = $this->dump->fetchTable('methods');
         $methods = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $methods[$row['id']] = $row['method'];
         }
 
         $res = $this->dump->fetchTable('classconstants');
         $classconstants = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $classconstants[$row['id']] = $row['constant'];
         }
 
         $res = $this->dump->fetchTable('arguments');
         $arguments = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $arguments[$row['id']] = $row['name'];
         }
 
         $theTable = array();
         $res = $this->dump->fetchTable('attributes');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             // todo Add al lthe other types
             // todo add color syntax
             switch ($row['type']) {
@@ -2447,11 +2409,11 @@ HTML;
                     break;
 
                 case 'function' :
-                   $location = 'function ' . $functions[$row['type_id']] . ' ()';
+                    $location = 'function ' . $functions[$row['type_id']] . ' ()';
                     break;
 
                 case 'method' :
-                   $location = 'function ' . $methods[$row['type_id']] . ' ()';
+                    $location = 'function ' . $methods[$row['type_id']] . ' ()';
                     break;
 
                 case 'argument' :
@@ -2568,7 +2530,7 @@ HTML;
 
         $theTable = '';
         $res = $this->dump->fetchAnalysers(array('Exceptions/DefinedExceptions'));
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (!preg_match('/ extends (\S+)/', $row['fullcode'], $r)) {
                 continue;
             }
@@ -2582,8 +2544,7 @@ HTML;
                 $list[$parent] = array();
             }
 
-            $class = str_replace(' { /**/ }', '', $row['fullcode']);
-            $class = str_replace('final ', '', $class);
+            $class = str_replace(array(' { /**/ }', 'final '), array('', ''), $row['fullcode']);
             $class = PHPSyntax($class);
             $list[$parent][] = $class;
         }
@@ -2602,7 +2563,7 @@ HTML;
         $return = array();
 
         $recursive = array();
-        foreach($paths as $path) {
+        foreach ($paths as $path) {
             $folders = explode('\\', $path);
 
             $first = empty($folders[0]) ? '\\' : $folders[0];
@@ -2617,7 +2578,7 @@ HTML;
             $return[$first][] = implode('\\', array_slice($folders, 1));
         }
 
-        foreach(array_keys($recursive) as $recurrent) {
+        foreach (array_keys($recursive) as $recurrent) {
             $return[$recurrent] = $this->path2tree($return[$recurrent]);
         }
 
@@ -2630,7 +2591,7 @@ HTML;
         }
         $return = array('<ul>');
 
-        foreach($path as $k => $v) {
+        foreach ($path as $k => $v) {
             $return []= '<li>';
 
             if (is_string($v)) {
@@ -2663,8 +2624,13 @@ HTML;
     private function generateNamespaceTree(Section $section): void {
         $theTable = '';
         $res = $this->dump->fetchTable('namespaces');
-        $res->order(function (array $a, array $b): int { return $a['namespace'] <=> $b['namespace'];});
-                $res->map(function (array $x): array { $x['namespace'] = trim($x['namespace'], '\\'); return $x;});
+        $res->order(function (array $a, array $b): int {
+            return $a['namespace'] <=> $b['namespace'];
+        });
+        $res->map(function (array $x): array {
+            $x['namespace'] = trim($x['namespace'], '\\');
+            return $x;
+        });
         $paths = $res->getColumn('namespace');
 
         $paths = $this->path2tree($paths);
@@ -2683,7 +2649,7 @@ HTML;
         }
         $return = '<ul>';
 
-        foreach($tree as $k => $v) {
+        foreach ($tree as $k => $v) {
             $return .= '<li>';
 
             $parent = '\\' . strtolower((string) $k);
@@ -2711,8 +2677,8 @@ HTML;
         $methods    = $this->generateVisibilityMethodsSuggestions();
 
         $classes = array_unique(array_merge(array_keys($constants),
-                                            array_keys($properties),
-                                            array_keys($methods)));
+            array_keys($properties),
+            array_keys($methods)));
 
         $visibilityTable = array(<<<'HTML'
 <table class="table table-striped">
@@ -2729,7 +2695,7 @@ HTML;
 HTML
 );
 
-        foreach($classes as $id) {
+        foreach ($classes as $id) {
             list(, $class) = explode(':', $id);
             $visibilityTable []= '<tr><td colspan="9">class ' . PHPSyntax($class) . '</td></tr>' . PHP_EOL .
                                 (isset($constants[$id]) ? implode('', $constants[$id]) : '') .
@@ -2754,7 +2720,7 @@ HTML
         $classes = array_unique(array_merge($finals, $abstracts));
 
         $visibilityTable = array();
-        foreach($classes as $path => $fullcode) {
+        foreach ($classes as $path => $fullcode) {
             $class = str_replace('{ /**/ } ', '', $fullcode);
 
             if (isset($finals[$path])) {
@@ -2807,7 +2773,7 @@ The green stars <i class="fa fa-star" style="color:green"></i> mention a valid a
 The absence of star report currently configured classes.  
 
 HTML
-);
+        );
         $html = $this->injectBloc($html, 'CONTENT', $visibilityHtml);
         $this->putBasedPage($section->file, $html);
     }
@@ -2816,7 +2782,7 @@ HTML
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBeFinal'));
 
         $couldBeFinal = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (!preg_match('/(class|interface|trait) (\S+) /i', $row['fullcode'], $classname)) {
                 continue;
             }
@@ -2832,7 +2798,7 @@ HTML
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBeAbstractClass'));
 
         $couldBeAbstract = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (!preg_match('/(class|interface|trait) (\S+) /i', $row['fullcode'], $classname)) {
                 continue;
             }
@@ -2848,7 +2814,7 @@ HTML
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBePrivateMethod'));
 
         $couldBePrivate = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (!preg_match('/(class|interface|trait) (\S+) /i', $row['class'], $classname)) {
                 // todo : should log this
                 continue;
@@ -2870,7 +2836,7 @@ HTML
 
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBeProtectedMethod'));
         $couldBeProtected = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (!preg_match('/(class|interface|trait) (\S+) /i', $row['class'], $classname)) {
                 // todo : should log this
                 continue;
@@ -2891,7 +2857,9 @@ HTML
         }
 
         $res = $this->dump->fetchTableMethods();
-        $res->filter(function (array $x): bool { return $x['type'] === 'class'; });
+        $res->filter(function (array $x): bool {
+            return $x['type'] === 'class';
+        });
 
         $ranking = array(''          => 0,
                          'none'      => 0,
@@ -2903,7 +2871,7 @@ HTML
         $theClass = '';
         $aClass = array();
 
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if ($theClass != $row['fullnspath'] . ':' . $row['class']) {
                 $return[$theClass] = $aClass;
                 $theClass = $row['fullnspath'] . ':' . $row['class'];
@@ -2938,7 +2906,7 @@ HTML
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBePrivateConstante'));
 
         $couldBePrivate = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (!preg_match('/class (\S+) /i', $row['class'], $classname)) {
                 continue; // it is an interface or a trait
             }
@@ -2958,7 +2926,7 @@ HTML
 
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBeProtectedConstant'));
         $couldBeProtected = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (!preg_match('/class (\S+) /i', $row['class'], $classname)) {
                 continue; // it is an interface or a trait
             }
@@ -2976,7 +2944,9 @@ HTML
         }
 
         $res = $this->dump->fetchTableClassConstants();
-        $res->filter(function (array $x): bool { return $x['type'] === 'class'; });
+        $res->filter(function (array $x): bool {
+            return $x['type'] === 'class';
+        });
 
         $theClass = '';
         $ranking = array(''          => 1,
@@ -2987,7 +2957,7 @@ HTML
         $return = array();
 
         $aClass = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if ($theClass != $row['fullnspath'] . ':' . $row['class']) {
                 $return[$theClass] = $aClass;
                 $theClass = $row['fullnspath'] . ':' . $row['class'];
@@ -2999,14 +2969,14 @@ HTML
 
             if (isset($couldBePrivate[$row['fullnspath']]) &&
                 in_array($row['constant'], $couldBePrivate[$row['fullnspath']], \STRICT_COMPARISON)) {
-                    $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
-                    $visibilities[$ranking['private']] = '<i class="fa fa-star" style="color:green"></i>';
+                $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
+                $visibilities[$ranking['private']] = '<i class="fa fa-star" style="color:green"></i>';
             }
 
             if (isset($couldBeProtected[$row['fullnspath']]) &&
                 in_array($row['constant'], $couldBeProtected[$row['fullnspath']], \STRICT_COMPARISON)) {
-                    $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
-                    $visibilities[$ranking['protected']] = '<i class="fa fa-star" style="color:#FFA700"></i>';
+                $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
+                $visibilities[$ranking['protected']] = '<i class="fa fa-star" style="color:#FFA700"></i>';
             }
 
             $aClass[] = '<tr><td>&nbsp;</td><td>' . PHPSyntax($row['constant']) . '</td><td class="exakat_short_text">' .
@@ -3021,10 +2991,9 @@ HTML
     }
 
     private function generateVisibilityPropertySuggestions(): array {
-
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBePrivate'));
         $couldBePrivate = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             preg_match('/(class|trait) (\S+) /i', $row['class'], $classname);
             assert(isset($classname[1]), 'Missing class in ' . $row['class']);
             $fullnspath = $row['namespace'] . '\\' . strtolower($classname[2]);
@@ -3041,7 +3010,7 @@ HTML
 
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBeProtectedProperty'));
         $couldBeProtected = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             preg_match('/(class|trait) (\S+) /i', $row['class'], $classname);
             $fullnspath = $row['namespace'] . '\\' . strtolower($classname[1]);
 
@@ -3056,7 +3025,7 @@ HTML
 
         $res = $this->dump->fetchAnalysers(array('Classes/CouldBeClassConstant'));
         $couldBeConstant = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             preg_match('/(class|trait) (\S+) /i', $row['class'], $classname);
             $fullnspath = $row['namespace'] . '\\' . strtolower($classname[1]);
 
@@ -3070,7 +3039,9 @@ HTML
         }
 
         $res = $this->dump->fetchTableProperty();
-        $res->filter(function (array $x): bool { return $x['type'] === 'class'; });
+        $res->filter(function (array $x): bool {
+            return $x['type'] === 'class';
+        });
 
         $theClass = '';
         $ranking = array(''          => 1,
@@ -3082,7 +3053,7 @@ HTML
         $return = array();
 
         $aClass = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if ($theClass != $row['fullnspath'] . ':' . $row['class']) {
                 $return[$theClass] = $aClass;
                 $theClass = $row['fullnspath'] . ':' . $row['class'];
@@ -3096,19 +3067,19 @@ HTML
 
             if (isset($couldBePrivate[$row['fullnspath']]) &&
                 in_array($row['property'], $couldBePrivate[$row['fullnspath']], \STRICT_COMPARISON)) {
-                    $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
-                    $visibilities[$ranking['private']] = '<i class="fa fa-star" style="color:green"></i>';
+                $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
+                $visibilities[$ranking['private']] = '<i class="fa fa-star" style="color:green"></i>';
             }
 
             if (isset($couldBeProtected[$row['fullnspath']]) &&
                 in_array($row['property'], $couldBeProtected[$row['fullnspath']], \STRICT_COMPARISON)) {
-                    $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
-                    $visibilities[$ranking['protected']] = '<i class="fa fa-star" style="color:#FFA700"></i>';
+                $visibilities[$ranking[$row['visibility']]] = '<i class="fa fa-star" style="color:red"></i>';
+                $visibilities[$ranking['protected']] = '<i class="fa fa-star" style="color:#FFA700"></i>';
             }
 
             if (isset($couldBeConstant[$row['fullnspath']]) &&
                 in_array($row['property'], $couldBeConstant[$row['fullnspath']], \STRICT_COMPARISON)) {
-                    $visibilities[$ranking['constant']] = '<i class="fa fa-star" style="color:black"></i>';
+                $visibilities[$ranking['constant']] = '<i class="fa fa-star" style="color:black"></i>';
             }
 
             $aClass[] = '<tr><td>&nbsp;</td><td>' . PHPSyntax($row['property']) . '</td><td class="exakat_short_text">' .
@@ -3124,12 +3095,13 @@ HTML
     private function generateAlteredDirectives(Section $section): void {
         $alteredDirectives = array();
         $res = $this->dump->fetchAnalysers(array('Php/DirectivesUsage'));
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $alteredDirectives []= '<tr><td>' . PHPSyntax($row['fullcode']) . "</td><td>$row[file]</td><td>$row[line]</td></tr>";
         }
         $alteredDirectives = implode(PHP_EOL, $alteredDirectives);
 
         $html = $this->getBasedPage($section->source);
+        $html = $this->injectBloc($html, 'TOPFILE', $alteredDirectives);
         $html = $this->injectBloc($html, 'ALTERED_DIRECTIVES', $alteredDirectives);
         $html = $this->injectBloc($html, 'TITLE', $section->title);
         $this->putBasedPage($section->file, $html);
@@ -3142,10 +3114,10 @@ HTML
         if ($res->isEmpty() === true) {
             $changedClasses = 'No changes detected';
         } else {
-            foreach($res->toArray() as $row) {
+            foreach ($res->toArray() as $row) {
                 if ($row['changeType'] === 'Member Visibility') {
                     $row['parentValue'] .= ' $' . $row['name'];
-                    $row['childValue']   = ' $' . $row['name'];
+                    $row['childValue']   = $row['parentValue'];
                 } elseif ($row['changeType'] === 'Member Default') {
                     $row['parentValue'] = '$' . $row['name'] . ' = ' . $row['parentValue'];
                     $row['childValue']  = '$' . $row['name'] . ' = ' . $row['childValue'];
@@ -3184,11 +3156,15 @@ HTML
 
         $res = $this->dump->fetchTable('arguments');
         $parameters = $res->toGroupedCount('name');
-        uasort($parameters, function ($a, $b): int { return $b <=> $a;});
+        uasort($parameters, function (int $a, int $b): int {
+            return $b <=> $a;
+        });
 
         $typehints = array();
-        foreach($res->toArray() as $row) {
-            if (empty($row['typehint'])) { continue; }
+        foreach ($res->toArray() as $row) {
+            if (empty($row['typehint'])) {
+                continue;
+            }
             if (!isset($typehints[$row['name']])) {
                 $typehints[$row['name']] = array($row['typehint']);
 
@@ -3200,8 +3176,10 @@ HTML
         $typehints = array_map('array_unique', $typehints);
 
         $defaults  = array();
-        foreach($res->toArray() as $row) {
-            if (empty($row['init'])) { continue; }
+        foreach ($res->toArray() as $row) {
+            if (empty($row['init'])) {
+                continue;
+            }
             if (!isset($defaults[$row['name']])) {
                 $defaults[$row['name']] = array($row['init']);
 
@@ -3243,7 +3221,9 @@ HTML
 
         $html = array();
         $data = array();
-        foreach ($res->order(function (array $a, array $b): int { return $b['value'] <=> $a['value']; })->toArray() as $value) {
+        foreach ($res->order(function (array $a, array $b): int {
+            return $b['value'] <=> $a['value'];
+        })->toArray() as $value) {
             $data[$value['key'] . ' level' . ($value['key'] == 1 ? '' : 's')] = $value['value'];
 
             $html []= '<div class="clearfix">
@@ -3257,9 +3237,9 @@ HTML
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
-                              array_keys($data),
-                              array('name' => 'Fossilized Methods', 'data' => array_values($data))
-                              );
+            array_keys($data),
+            array('name' => 'Fossilized Methods', 'data' => array_values($data))
+        );
         $blocjs = (string) $highchart;
 
         $finalHTML = $this->injectBloc($finalHTML, 'BLOC-JS', $blocjs);
@@ -3283,7 +3263,7 @@ HTML
         $html = array();
         $data = array();
         foreach ($res->toArray() as $value) {
-                $data[$value['key'] . ' level' . ($value['key'] == 1 ? '' : 's')] = $value['value'];
+            $data[$value['key'] . ' level' . ($value['key'] == 1 ? '' : 's')] = $value['value'];
 
             $html []= '<div class="clearfix">
                       <div class="block-cell-name">' . $value['key'] . '</div>
@@ -3296,9 +3276,9 @@ HTML
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
-                              array_keys($data),
-                              array('name' => 'Depth', 'data' => array_values($data))
-                              );
+            array_keys($data),
+            array('name' => 'Depth', 'data' => array_values($data))
+        );
         $blocjs = (string) $highchart;
 
         $finalHTML = $this->injectBloc($finalHTML, 'BLOC-JS',  $blocjs);
@@ -3332,9 +3312,9 @@ HTML
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
-                              array_keys($data),
-                              array('name' => 'Class size (lines)', 'data' => array_values($data))
-                              );
+            array_keys($data),
+            array('name' => 'Class size (lines)', 'data' => array_values($data))
+        );
         $blocjs = (string) $highchart;
 
         $finalHTML = $this->injectBloc($finalHTML, 'BLOC-JS',  $blocjs);
@@ -3372,9 +3352,9 @@ HTML
                 continue;
             }
 
-        if (strpos($value['key'], '\\') !== false) {
-            $data['object'] += $value['value'];
-        }
+            if (str_contains($value['key'], '\\')  ) {
+                $data['object'] += $value['value'];
+            }
 
             $html []= '<div class="clearfix">
                       <div class="block-cell-name">' . $value['key'] . '</div>
@@ -3386,7 +3366,7 @@ HTML
         arsort($data);
 
         $html = array();
-        foreach($data as $name => $value) {
+        foreach ($data as $name => $value) {
             $html []= <<<HTML
 <div class="clearfix">
     <div class="block-cell-name">$name</div>
@@ -3400,10 +3380,10 @@ HTML;
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
-                              array_keys($data),
-                              array('name' => 'Typehint stats',
-                                    'data' => array_values($data))
-                              );
+            array_keys($data),
+            array('name' => 'Typehint stats',
+                  'data' => array_values($data))
+        );
         $blocjs = (string) $highchart;
 
         $finalHTML = $this->injectBloc($finalHTML, 'BLOC-JS',  $blocjs);
@@ -3418,7 +3398,9 @@ HTML;
 
         // List of extensions used
         $res = $this->dump->getMethodsBySize();
-        $res->order(function (array $a, array $b): int { return $b['size'] <=> $a['size'];});
+        $res->order(function (array $a, array $b): int {
+            return $b['size'] <=> $a['size'];
+        });
 
         $html = array();
         $data = array();
@@ -3438,9 +3420,9 @@ HTML;
 
         $highchart = new Highchart();
         $highchart->addSeries('filename',
-                              array_keys($data),
-                              array('name' => 'Method size', 'data' => array_values($data))
-                              );
+            array_keys($data),
+            array('name' => 'Method size', 'data' => array_values($data))
+        );
         $blocjs = (string) $highchart;
 
         $finalHTML = $this->injectBloc($finalHTML, 'BLOC-JS',  $blocjs);
@@ -3453,13 +3435,13 @@ HTML;
     private function generateStats(Section $section): void {
         $results = new Stats();
         $report = $results->generate('', self::INLINE);
-        $report = json_decode($report);
+        $report = json_decode($report) ?? array();
 
         $stats = array();
-        foreach($report as $group => $hash) {
+        foreach ($report as $group => $hash) {
             $stats []= "<tr><td colspan=2 bgcolor=\"#BBB\">$group</td></tr>";
 
-            foreach($hash as $name => $count) {
+            foreach ($hash as $name => $count) {
                 $stats []= "<tr><td>$name</td><td>$count</td></tr>";
             }
         }
@@ -3478,7 +3460,7 @@ HTML;
         $counts = array_count_values($expr);
 
         $expressions = array();
-        foreach($results->toArray() as $row) {
+        foreach ($results->toArray() as $row) {
             $expressions []= "<tr><td>{$row['file']}:{$row['line']}</td><td>{$counts[$row['fullcode']]}</td><td>{$row['htmlcode']}</td></tr>";
         }
 
@@ -3495,7 +3477,7 @@ HTML;
 
         $filesList = $this->dump->fetchTable('files')->toArray();
         $files = '';
-        foreach($filesList as $row) {
+        foreach ($filesList as $row) {
             if (!file_exists($path . '/' . dirname($row['file']))) {
                 mkdir($path . '/' . dirname($row['file']), 0755, true);
             }
@@ -3553,10 +3535,12 @@ JAVASCRIPT;
 
     private function generateFileDependencies(Section $section): void {
         $res = $this->dump->fetchTable('filesDependencies');
-        $res->filter(function (array $x): bool { return ($x['included'] !== $x['including']) && in_array($x['type'], array('IMPLEMENTS', 'EXTENDS', 'INCLUDE', 'NEW'), \STRICT_COMPARISON);});
+        $res->filter(function (array $x): bool {
+            return ($x['included'] !== $x['including']) && in_array($x['type'], array('IMPLEMENTS', 'EXTENDS', 'INCLUDE', 'NEW'), \STRICT_COMPARISON);
+        });
 
         $nodes = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (isset($nodes[$row['including']][$row['included']])) {
                 $nodes[$row['including']][$row['included']] .= ', ' . $row['type'];
             } else {
@@ -3565,10 +3549,10 @@ JAVASCRIPT;
         }
 
         $next = array();
-        foreach($nodes as $in => $out) {
+        foreach ($nodes as $in => $out) {
             $set = false;
 
-            foreach($next as $file => &$inc) {
+            foreach ($next as $file => &$inc) {
                 if ($file === $in) {
                     $inc = $out;
                     $set = true;
@@ -3582,7 +3566,7 @@ JAVASCRIPT;
         }
         unset($out);
 
-        foreach($next as $in => &$out) {
+        foreach ($next as $in => &$out) {
             $out = array_keys($out);
             sort($out);
         }
@@ -3596,7 +3580,7 @@ JAVASCRIPT;
         $top = array_diff(array_keys($next), $secondaries);
 
         $theTable = array();
-        foreach($top as $t) {
+        foreach ($top as $t) {
             $theTable[] = '<ul class="tree">' . $this->extends2ul($t, $next) . '</ul>';
         }
         $theTable = implode(PHP_EOL, $theTable);
@@ -3612,7 +3596,7 @@ JAVASCRIPT;
         $res = $this->dump->getIdenticalFiles();
 
         $theTable = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $list = str_replace(',', "</li>\n<li>", $row['list']);
 
             $theTable[] = <<<HTML
@@ -3640,9 +3624,9 @@ HTML;
         $res = $this->dump->getConcentratedIssues($list);
 
         $table = array();
-        foreach($res->toArray() as list('line' => $line, 'file' => $file, 'count' => $count, 'list' => $list)) {
+        foreach ($res->toArray() as list('line' => $line, 'file' => $file, 'count' => $count, 'list' => $list)) {
             $listHtml = array();
-            foreach(explode(',', $list) as $l) {
+            foreach (explode(',', $list) as $l) {
                 $listHtml[] = '<li>' . $this->makeDocLink($l) . '</li>';
             }
             $listHtml = '<ul>' . implode(PHP_EOL, $listHtml) . '</ul>';
@@ -3659,7 +3643,8 @@ HTML;
 
     private function generateConfusingVariables(Section $section): void {
         $data = new Data\CloseNaming($this->dump);
-        $results = $data->prepare();
+        $data->prepare();
+        $results = $data->getValues();
         $reasons = array('_'       => 'One _',
                          'numbers' => 'One digit',
                          'swap'    => 'Partial inversion',
@@ -3668,10 +3653,10 @@ HTML;
                          );
 
         $table = array();
-        foreach($results as $variable => $close) {
+        foreach ($results as $variable => $close) {
             $confused = array();
 
-            foreach($close as $reason => $variables) {
+            foreach ($close as $reason => $variables) {
                 $list = '<ul><li>' . implode('</li><li>', $variables) . "</li></ul>\n";
                 $confused[] = "<tr><td>$list</td><td>{$reasons[$reason]}</td></tr>\n";
             }
@@ -3689,7 +3674,7 @@ HTML;
     }
 
     protected function makeIcon(string $tag): string {
-        switch($tag) {
+        switch ($tag) {
             case self::YES :
                 return '<i class="fa fa-check-square-o"></i>';
             case self::NO :
@@ -3708,12 +3693,12 @@ HTML;
             return '-';
         }
 
-        if (strpos($cve, ', ') === false) {
+        if (!str_contains($cve, ', ')  ) {
             $cveHtml = '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=' . $cve . '">' . $cve . '</a>';
         } else {
             $cves = explode(', ', $cve);
             $cveHtml = array();
-            foreach($cves as $cve) {
+            foreach ($cves as $cve) {
                 $cveHtml[] = '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=' . $cve . '">' . $cve . '</a>';
             }
             $cveHtml = implode(',<br />', $cveHtml);
@@ -3761,7 +3746,7 @@ HTML;
         $vcsClass = Vcs::getVcs($this->config);
         $vcsName = explode('\\', $vcsClass);
         $vcsName = array_pop($vcsName);
-        switch($vcsName) {
+        switch ($vcsName) {
             case 'Git':
                 $info[] = array('Git URL', $this->dump->fetchHash('vcs_url')->toString());
 
@@ -3835,10 +3820,9 @@ HTML;
 
         $list = array();
         $originals = $data->originals();
-        foreach($data->values() as $group => $points) {
+        foreach ($data->getValues() as $group => $points) {
             $listPoint = array();
-            foreach($points as $point => $status) {
-
+            foreach ($points as $point => $status) {
                 if (isset($originals[$group][$point], $this->frequences[$originals[$group][$point]])) {
                     $percentage = $this->frequences[$originals[$group][$point]];
                     $percentageDisplay = "$percentage %";
@@ -3893,7 +3877,7 @@ HTML;
         asort($values);
 
         $theTable = array();
-        foreach($values as $encoding => $count) {
+        foreach ($values as $encoding => $count) {
             $codeHtml = PHPSyntax($encoding);
             $theTable []= "<tr><td>{$codeHtml}</td><td>$count</td><td>&nbsp</td></tr>";
         }
@@ -3913,7 +3897,7 @@ HTML;
         asort($values);
 
         $theTable = array();
-        foreach($values as $encoding => $count) {
+        foreach ($values as $encoding => $count) {
             $codeHtml = PHPSyntax($encoding);
             $theTable []= "<tr><td>{$codeHtml}</td><td>$count</td><td>&nbsp</td></tr>";
         }
@@ -3933,7 +3917,7 @@ HTML;
         asort($values);
 
         $theTable = array();
-        foreach($values as $encoding => $count) {
+        foreach ($values as $encoding => $count) {
             $codeHtml = PHPSyntax($encoding);
             $theTable []= "<tr><td>{$codeHtml}</td><td>$count</td><td>&nbsp</td></tr>";
         }
@@ -4018,7 +4002,7 @@ HTML;
                                  $headers,
                                  );
 
-        foreach($classes as $id) {
+        foreach ($classes as $id) {
             list(, $class) = explode(':', $id, 3);
             $visibilityTable []= '<tr><td colspan="9">' . PHPSyntax($class) . '</td></tr>' . PHP_EOL .
                                 $headers . PHP_EOL .
@@ -4063,7 +4047,10 @@ HTML;
     private function generateTypehintMethodsSuggestions(): array {
         $res = $this->dump->fetchTableMethodsByArgument();
         $arguments = array();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
+        	if (!isset($row['fullnspath'])) {
+        		continue;
+        	}
             $theMethod = $row['fullnspath'];
             $visibilities = array($row['typehint'], $row['init']);
 
@@ -4076,7 +4063,7 @@ HTML;
 
         $return = array();
         $res = $this->dump->fetchTableMethodsByReturntype();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $visibilities = array($row['returntype'], '&nbsp;');
 
             $method = '<tr><td>&nbsp;</td><td>' . PHPSyntax($row['method'] ?? '') . '</td><td>&nbsp;</td><td class="exakat_short_text">' .
@@ -4095,13 +4082,15 @@ HTML;
     protected function generateForeachFavorites(Section $section): void {
         // List of indentation used
         $res = $this->dump->fetchHashResults('Foreach Names');
-        $res->map(function (array $x): array { $x['key'] = str_replace('&', '', $x['key']); return $x; });
+        $res->map(function (array $x): array {
+            $x['key'] = str_replace('&', '', $x['key']);
+            return $x;
+        });
 
         // merging results from &$v and $v into one
         $data = array();
         foreach ($res->toArray() as $value) {
-            $data[$value['key']] =
-                (int) $value['value'] + ($data[$value['key']] ?? 0);
+            $data[$value['key']] = (int) $value['value'] + ($data[$value['key']] ?? 0);
         }
         arsort($data);
 
@@ -4124,11 +4113,13 @@ HTML;
         $results->load();
 
         $expr = $results->getColumn('fullcode');
-        $expr = array_map(function (string $x): string { return trim($x, '{}');}, $expr);
+        $expr = array_map(function (string $x): string {
+            return trim($x, '{}');
+        }, $expr);
         $counts = array_count_values($expr);
 
         $expressions = '';
-        foreach($results->toArray() as $row) {
+        foreach ($results->toArray() as $row) {
             $row['fullcode'] = trim($row['fullcode'], '{}');
             $fullcode = PHPSyntax($row['fullcode']);
             $expressions .= "<tr><td>{$row['file']}:{$row['line']}</td><td>{$counts[$row['fullcode']]}</td><td>$fullcode</td></tr>\n";
@@ -4140,7 +4131,6 @@ HTML;
         $html = $this->injectBloc($html, 'TITLE', $section->title);
         $this->putBasedPage($section->file, $html);
     }
-
 }
 
 ?>

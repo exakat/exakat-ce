@@ -49,7 +49,7 @@ sideEffect{ line = it.get().value("line");
        "function":theFunction,
        "analyzer":"xxxx"];}
 GREMLIN
-);
+        );
     }
 }
 ?>

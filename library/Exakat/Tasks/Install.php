@@ -38,7 +38,7 @@ class Install extends Tasks {
         }
 
         $res = shell_exec('zip -help 2>&1') ?? '';
-        if (strpos($res, 'Zip 3.0') === false) {
+        if (!str_contains($res, 'Zip 3.0')  ) {
             $error[] = 'Please install Zip 3.0 or more recent';
         } else {
             print "Zip : OK\n";
@@ -56,10 +56,10 @@ class Install extends Tasks {
             print "Starting download of tinkergraph.\n";
             $tinkerpop = file_get_contents('https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-' . self::TINKERGRAPH_VERSION . '-bin.zip') ?? '';
 
-            if (hash('sha256', $tinkerpop) !== substr(@file_get_contents('https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-' . self::TINKERGRAPH_VERSION . '-bin.zip.sha256') ?? '', 0, 64)) {
-                die('SHA256 checksum doesn\'t match the downloaded version of tinkerpop. Aborting install' . PHP_EOL);
-            } else {
+            if (hash('sha256', $tinkerpop) === substr(@file_get_contents('https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-' . self::TINKERGRAPH_VERSION . '-bin.zip.sha256') ?? '', 0, 64)) {
                 print "Gremlin server checksum OK\n";
+            } else {
+                die('SHA256 checksum doesn\'t match the downloaded version of tinkerpop. Aborting install' . PHP_EOL);
             }
             file_put_contents($this->config->projects_root . '/apache-tinkerpop-gremlin-server-' . self::TINKERGRAPH_VERSION . '-bin.zip', $tinkerpop);
 

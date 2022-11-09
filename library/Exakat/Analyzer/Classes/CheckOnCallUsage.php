@@ -39,9 +39,9 @@ class CheckOnCallUsage extends Analyzer {
              ->outIs('BLOCK')
              // no call to method_exists
              ->not(
-                $this->side()
-                     ->atomInsideNoDefinition('Functioncall')
-                     ->functioncallIs('\\method_exists')
+                 $this->side()
+                      ->atomInsideNoDefinition('Functioncall')
+                      ->functioncallIs('\\method_exists')
              )
 
             // call is made directly on $this
@@ -60,9 +60,9 @@ class CheckOnCallUsage extends Analyzer {
              ->outIs('BLOCK')
              // no call to method_exists
              ->not(
-                $this->side()
-                     ->atomInsideNoDefinition('Functioncall')
-                     ->functioncallIs('\\method_exists')
+                 $this->side()
+                      ->atomInsideNoDefinition('Functioncall')
+                      ->functioncallIs('\\method_exists')
              )
 
              ->outIs('EXPRESSION')

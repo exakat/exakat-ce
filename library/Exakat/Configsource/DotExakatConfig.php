@@ -27,7 +27,7 @@ use Exakat\Project;
 use Exakat\Config as Configuration;
 
 class DotExakatConfig extends Config {
-    private $dotExakat = '';
+    private string $dotExakat = '';
 
     public function __construct(Project $project, string $project_root) {
         if ($project->isDefault()) {
@@ -50,7 +50,7 @@ class DotExakatConfig extends Config {
         $this->config = parse_ini_file($this->dotExakat);
 
         // removing empty values in the INI file
-        foreach($this->config as &$value) {
+        foreach ($this->config as &$value) {
             if (is_array($value) && empty($value[0])) {
                 unset($value[0]);
             }
@@ -66,7 +66,7 @@ class DotExakatConfig extends Config {
         }
 
         $other_php_versions = array();
-        foreach(Configuration::PHP_VERSIONS as $version) {
+        foreach (Configuration::PHP_VERSIONS as $version) {
             if (empty($this->config['php' . $version])) {
                 continue;
             }
@@ -85,7 +85,7 @@ class DotExakatConfig extends Config {
                            'project_reports'    => array('Text'),
                         );
 
-        foreach($defaults as $name => $value) {
+        foreach ($defaults as $name => $value) {
             if (empty($this->config[$name])) {
                 $this->config[$name] = $value;
             }
@@ -93,7 +93,7 @@ class DotExakatConfig extends Config {
 
         if (is_string($this->config['other_php_versions'])) {
             $this->config['other_php_versions'] = listToArray($this->config['other_php_versions']);
-            foreach($this->config['other_php_versions'] as &$version) {
+            foreach ($this->config['other_php_versions'] as &$version) {
                 $version = str_replace('.', '', trim($version));
             }
             unset($version);
@@ -106,7 +106,7 @@ class DotExakatConfig extends Config {
 
         if (is_string($this->config['project_reports'])) {
             $this->config['project_reports'] = listToArray($this->config['project_reports']);
-            foreach($this->config['project_reports'] as &$ext) {
+            foreach ($this->config['project_reports'] as &$ext) {
                 $ext = trim($ext);
             }
             unset($ext);
@@ -114,7 +114,7 @@ class DotExakatConfig extends Config {
 
         if (is_string($this->config['project_rulesets'])) {
             $this->config['project_rulesets'] = listToArray($this->config['project_rulesets']);
-            foreach($this->config['project_rulesets'] as &$ext) {
+            foreach ($this->config['project_rulesets'] as &$ext) {
                 $ext = trim($ext);
             }
             unset($ext);

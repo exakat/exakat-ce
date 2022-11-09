@@ -30,13 +30,13 @@ class HasChildren extends DSL {
         assert(func_num_args() === 2, 'Wrong number of argument for ' . __METHOD__ . '. 2 are expected, ' . func_num_args() . ' provided');
         list($childrenClass, $outs) = func_get_args();
 
-        if (empty($outs)){
+        if (empty($outs)) {
             return new Command(Query::NO_QUERY);
         }
 
         $this->assertAtom($childrenClass);
         $diff = $this->normalizeAtoms($childrenClass);
-        if (empty($diff)){
+        if (empty($diff)) {
             return new Command(Query::NO_QUERY);
         }
 

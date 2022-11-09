@@ -77,12 +77,12 @@ class CouldBeArray extends CouldBeType {
         // argument because used in a specific operation with ...
         $this->atomIs(array('Parameter', 'Ppp'))
              ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIs('Scalartypehint')
-                     ->fullnspathIs('\\array')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Scalartypehint')
+                      ->fullnspathIs('\\array')
              )
-             ->outIs(array('PPP', 'NAME'))
+             ->outIsIE(array('PPP'))
              ->as('results')
              ->outIs('DEFINITION')
              ->hasIn('ARGUMENT') // functioncall or array
@@ -92,17 +92,16 @@ class CouldBeArray extends CouldBeType {
 
         $this->atomIs(self::FUNCTIONS_ALL)
              ->not(
-                $this->side()
-                     ->outIs('RETURNTYPE')
-                     ->atomIs('Scalartypehint')
-                     ->fullnspathIs('\\array')
+                 $this->side()
+                      ->outIs('RETURNTYPE')
+                      ->atomIs('Scalartypehint')
+                      ->fullnspathIs('\\array')
              )
              ->outIs('DEFINITION')
              ->hasIn('ARGUMENT') // functioncall or array
              ->is('variadic', true)
              ->back('first');
         $this->prepareQuery();
-
     }
 }
 

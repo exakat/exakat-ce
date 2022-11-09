@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class Extension extends Analyzer {
+abstract class Extension extends Analyzer {
     protected $source = '';
 
     public function dependsOn(): array {
@@ -68,8 +68,7 @@ class Extension extends Analyzer {
             $ini->namespaces = array_filter($ini->namespaces ?? array());
             $namespaces = makeFullNsPath($ini->namespaces);
 
-            $ini->directives = array_filter($ini->directives ?? array());
-            $directives = makeFullNsPath($ini->directives);
+            $directives = array_filter($ini->directives ?? array());
 
             $ini->classconstants = array_filter($ini->classconstants ?? array());
             $classConstants = makeFullNsPath($ini->classconstants);
@@ -86,10 +85,7 @@ class Extension extends Analyzer {
             $ini->staticmethods = array_filter($ini->staticmethods ?? array());
             $staticMethods = makeFullNsPath($ini->staticmethods);
 
-            $directives = array_filter($ini->directives ?? array());
-
             $enumCases        = array();
-
         } elseif (substr($this->source, -5) === '.json') {
             $json = $this->loadJson($this->source);
 
@@ -114,9 +110,6 @@ class Extension extends Analyzer {
             $json->namespaces = array_filter($json->namespaces ?? array());
             $namespaces = makeFullNsPath($json->namespaces);
 
-            $json->directives = array_filter($json->directives ?? array());
-            $directives = makeFullNsPath($json->directives);
-
             $json->classconstants = array_filter($json->classconstants ?? array());
             $classConstants = makeFullNsPath($json->classconstants);
 
@@ -132,11 +125,9 @@ class Extension extends Analyzer {
             $json->staticmethods = array_filter($json->staticmethods ?? array());
             $staticMethods = makeFullNsPath($json->staticmethods);
 
-            $json->directives = array_filter($json->directives ?? array());
-            $directives = makeFullNsPath($json->directives);
+            $directives = array_filter($json->directives ?? array());
 
             $enumCases        = array();
-
         } elseif (substr($this->source, -5) === '.pdff') {
             $pdff = $this->loadPdff($this->source);
 
@@ -146,7 +137,7 @@ class Extension extends Analyzer {
             $interfaces   = $pdff->getInterfaceList();
             $traits       = $pdff->getTraitList();
             $enums        = $pdff->getEnumList();
-            $namespaces   = $pdff->getEnumList();
+            $namespaces   = $pdff->getNamespaceList();
             $directives   = array();
 
             $classConstants   = $pdff->getClassConstantList();
@@ -155,7 +146,6 @@ class Extension extends Analyzer {
             $methods          = $pdff->getClassMethodList();
             $staticMethods    = $pdff->getClassStaticMethodList();
             $enumCases        = $pdff->getEnumCasesList();
-
         } else {
             return ;
         }
@@ -292,6 +282,7 @@ class Extension extends Analyzer {
             return;
         }
 
+
         $this->analyzerIs('Php/DirectivesUsage')
              ->outWithRank('ARGUMENT', 0)
              ->noDelimiterIs($usedDirectives, self::CASE_SENSITIVE);
@@ -304,7 +295,7 @@ class Extension extends Analyzer {
         }
 
         $classesConstantsHash = array();
-        foreach((array) $classconstants as $c) {
+        foreach ($classconstants as $c) {
             list($class, $constant) = explode('::', $c, 2);
             array_collect_by($classesConstantsHash, makeFullNsPath($class), $constant);
         }
@@ -330,7 +321,7 @@ class Extension extends Analyzer {
         // TODO : Properties with returntypes, local new.
 
         $propertiesHash = array();
-        foreach(array_filter($properties) as $p) {
+        foreach (array_filter($properties) as $p) {
             list($class, $property) = explode('::', $p, 2);
             array_collect_by($propertiesHash, makeFullNsPath($class), ltrim($property, '$'));
         }
@@ -339,7 +330,6 @@ class Extension extends Analyzer {
              ->outIs('OBJECT')
              // find Typehint for argument or property
              ->inIs('DEFINITION')
-             ->inIsIE('NAME')
              ->outIs('TYPEHINT')
              ->atomIs(self::STATIC_NAMES)
              ->fullnspathIs(array_keys($propertiesHash))
@@ -360,7 +350,7 @@ class Extension extends Analyzer {
         // Properties, with typehints (parameters and properties)
         // TODO : Properties with returntypes, local new.
         $propertiesHash = array();
-        foreach(array_filter($staticproperties) as $p) {
+        foreach (array_filter($staticproperties) as $p) {
             list($class, $property) = explode('::', $p, 2);
             array_collect_by($propertiesHash, makeFullNsPath($class), ltrim($property, '$'));
         }
@@ -385,7 +375,7 @@ class Extension extends Analyzer {
         // Methods, with typehints (parameters and properties)
         // TODO : Methods with returntypes, local new.
         $methodsHash = array();
-        foreach(array_filter($methods) as $m) {
+        foreach (array_filter($methods) as $m) {
             list($class, $method) = explode('::', $m, 2);
             array_collect_by($methodsHash, makeFullNsPath($class), mb_strtolower($method));
         }
@@ -394,7 +384,6 @@ class Extension extends Analyzer {
              ->outIs('OBJECT')
              // find Typehint for argument or property
              ->inIs('DEFINITION')
-             ->inIsIE('NAME')
              ->outIs('TYPEHINT')
              ->fullnspathIs(array_keys($methodsHash))
              ->savePropertyAs('fullnspath', 'fqn')
@@ -414,7 +403,7 @@ class Extension extends Analyzer {
         }
 
         $staticmethodsHash = array();
-        foreach(array_filter($staticmethods) as $m) {
+        foreach (array_filter($staticmethods) as $m) {
             list($class, $method) = explode('::', $m, 2);
             array_collect_by($staticmethodsHash, makeFullNsPath($class), mb_strtolower($method));
         }
@@ -439,7 +428,7 @@ class Extension extends Analyzer {
         }
 
         $enumCasesHash = array();
-        foreach((array) $enumcases as $c) {
+        foreach ($enumcases as $c) {
             list($class, $constant) = explode('::', $c, 2);
             array_collect_by($enumCasesHash, makeFullNsPath($class), $constant);
         }

@@ -51,12 +51,12 @@ class NoChoice extends Analyzer {
         // $a == 2 ?: doThis();
         $this->atomIs('Ternary')
              ->filter(
-                $this->side()
-                     ->outIs('THEN')
-                     ->atomIs('Void')
-                     ->count()
-                     ->isEqual(1)
-              )
+                 $this->side()
+                      ->outIs('THEN')
+                      ->atomIs('Void')
+                      ->count()
+                      ->isEqual(1)
+             )
              ->outIs('CONDITION')
              ->atomIs(self::CONTAINERS)
              ->savePropertyAs('fullcode', 'cdt')
@@ -74,9 +74,9 @@ class NoChoice extends Analyzer {
 
              // exclude large structures, as fullcode is not sufficient
              ->not(
-                $this->side()
-                     ->outIs('EXPRESSION')
-                     ->atomIs($skipExpression)
+                 $this->side()
+                      ->outIs('EXPRESSION')
+                      ->atomIs($skipExpression)
              )
              ->raw('sideEffect{ sthen = []; it.get().vertices(OUT, "EXPRESSION").sort{it.value("rank")}.each{ sthen.add(it.value("fullcode"));} }')
              ->inIs('THEN')
@@ -84,9 +84,9 @@ class NoChoice extends Analyzer {
              ->atomIs('Sequence')
              // exclude large structures, as fullcode is not sufficient
              ->not(
-                $this->side()
-                     ->outIs('EXPRESSION')
-                     ->atomIs($skipExpression)
+                 $this->side()
+                      ->outIs('EXPRESSION')
+                      ->atomIs($skipExpression)
              )
              ->raw('sideEffect{ selse = []; it.get().vertices(OUT, "EXPRESSION").sort{it.value("rank")}.each{ selse.add(it.value("fullcode"));} }')
              ->raw('filter{ sthen.join(";") == selse.join(";") }')
@@ -96,12 +96,12 @@ class NoChoice extends Analyzer {
         // $a == 2 ?: false;
         $this->atomIs('Ternary')
              ->filter(
-                $this->side()
-                     ->outIs('THEN')
-                     ->atomIs('Void')
-                     ->count()
-                     ->isEqual(1)
-              )
+                 $this->side()
+                      ->outIs('THEN')
+                      ->atomIs('Void')
+                      ->count()
+                      ->isEqual(1)
+             )
              ->outIs('ELSE')
              ->atomIs('Boolean', self::WITH_CONSTANTS)
              ->fullnspathIs('\\false')
@@ -125,7 +125,8 @@ class NoChoice extends Analyzer {
              ->atomIs(self::CONTAINERS)
              ->samePropertyAs('fullcode', 'cdt', self::CASE_SENSITIVE)
              ->back('first');
-        $this->prepareQuery();    }
+        $this->prepareQuery();
+    }
 }
 
 ?>

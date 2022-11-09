@@ -28,20 +28,28 @@ use Exakat\Analyzer\Analyzer;
 class UndefinedProperty extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/CreateMagicProperty',
+                     'Complete/VariablesTypehint',
                      'Classes/HasMagicProperty',
-                     'Complete/SetClassRemoteDefinitionWithTypehint',
-                     'Complete/SetClassRemoteDefinitionWithLocalNew',
                      'Complete/SetClassPropertyDefinitionWithTypehint',
-                     'Complete/VariableTypehint',
                      'Complete/IsPhpStructure',
                      'Complete/IsStubStructure',
                      'Classes/ExtendsStdclass',
+                     'Complete/VariableTypehint',
                     );
     }
 
     public function analyze(): void {
-        // Check proeprties with local definition
+        // Check properties with local definition
         $this->atomIs(self::PROPERTIES)
+            ->hasNoTrait()
+
+            // static property names
+            ->not(
+                $this->side()
+                     ->atomIs('Member')
+                     ->outIs('MEMBER')
+                     ->atomIsNot('Name')
+            )
 
             // do not have __get/__set set up (trait or parents or else)
             ->not(
@@ -64,11 +72,11 @@ class UndefinedProperty extends Analyzer {
              ->inIs('DEFINITION')
              ->atomIs('Virtualproperty')
              ->not(
-                $this->side()
-                     ->outIs('OVERWRITE')
-                     ->atomIs('Propertydefinition')
-                     ->inIs('PPP')
-                     ->isNot('visibility','private')
+                 $this->side()
+                      ->outIs('OVERWRITE')
+                      ->atomIs('Propertydefinition')
+                      ->inIs('PPP')
+                      ->isNot('visibility','private')
              )
 
              // Not a property in a included component
@@ -78,6 +86,7 @@ class UndefinedProperty extends Analyzer {
         // Check on properties with external definition
         // relies on isPHP, isStub, isExt
         $this->atomIs(self::PROPERTIES)
+             ->hasNoTrait()
              ->analyzerIsNot('self')
              ->hasNoIn('DEFINITION') // No definition found
 
@@ -85,17 +94,40 @@ class UndefinedProperty extends Analyzer {
              ->isNot('isExt', true)
              ->isNot('isStub', true)
 
-             ->not( // No dynamic elements
+            // The supporting object has No Definition
+            ->not(
+                $this->side()
+                     ->outIs('OBJECT')
+                     ->inIs('DEFINITION')
+                     ->hasNoOut(array('TYPEHINT', 'RETURNTYPE')) // This might be a method too
+            )
+
+            // static property names
+            ->not(
                 $this->side()
                      ->atomIs('Member')
                      ->outIs('MEMBER')
-                     ->tokenIsNot('T_STRING')
+                     ->atomIsNot('Name')
+            )
+
+             ->not( // No dynamic elements
+                 $this->side()
+                      ->outIs('OBJECT')
+                      ->inIs('DEFINITION')
+                      ->atomIs('Virtualproperty')
+             )
+
+             ->not( // No dynamic elements
+                 $this->side()
+                      ->atomIs('Member')
+                      ->outIs('MEMBER')
+                      ->tokenIsNot('T_STRING')
              )
              ->not( // No dynamic elements
-                $this->side()
-                     ->atomIs('Staticproperty')
-                     ->outIs('MEMBER')
-                     ->tokenIsNot('T_VARIABLE')
+                 $this->side()
+                      ->atomIs('Staticproperty')
+                      ->outIs('MEMBER')
+                      ->tokenIsNot('T_VARIABLE')
              )
 
              // Not a property in a included component
@@ -104,6 +136,7 @@ class UndefinedProperty extends Analyzer {
 
         // case of public access
         $this->atomIs(self::PROPERTIES)
+             ->hasNoTrait()
              ->analyzerIsNot('self')
              ->hasNoIn('DEFINITION')
              ->outIs(array('OBJECT', 'CLASS'))
@@ -111,6 +144,9 @@ class UndefinedProperty extends Analyzer {
              ->inIsIE('NAME')
              ->outIs('TYPEHINT')
              ->inIs('DEFINITION')
+             ->isNot('isPhp', true)
+             ->isNot('isStub', true)
+             ->isNot('isExt', true)
              ->back('first');
         $this->prepareQuery();
     }

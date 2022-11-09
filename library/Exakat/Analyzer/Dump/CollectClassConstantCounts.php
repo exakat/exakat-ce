@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectClassConstantCounts extends AnalyzerHashHashResults {
-    protected $analyzerName = 'CIT class constant counts';
+    protected string $analyzerName = 'CIT class constant counts';
 
     public function analyze(): void {
         // foo() {const A=1, B=2; }

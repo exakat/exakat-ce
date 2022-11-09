@@ -23,8 +23,10 @@
 
 namespace Exakat\Exceptions;
 
+use Exception;
+
 class NoCodeInProject extends \RuntimeException {
-    public function __construct($project = '', $code = 0, \Exception $previous = null) {
+    public function __construct(string $project = '', int $code = 0, Exception $previous = null) {
         parent::__construct("No code in project '$project'\n", $code, $previous);
     }
 }

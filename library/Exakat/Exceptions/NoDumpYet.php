@@ -27,7 +27,6 @@ use Exception;
 
 class NoDumpYet extends \Exception {
     public function __construct(string $project = '', int $code = 0, Exception $previous = null) {
-
         parent::__construct("No results are available for project '$project' yet. May be the analysis is still running.\n", $code, $previous);
     }
 }

@@ -41,7 +41,7 @@ class CollectValues extends DSL {
       .fold() 
     )
 GREMLIN
-);
+        );
         return $command;
     }
 }

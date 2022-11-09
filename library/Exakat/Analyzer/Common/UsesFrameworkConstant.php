@@ -24,8 +24,8 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class UsesFrameworkConstant extends Analyzer {
-    protected $constants   = array();
+abstract class UsesFrameworkConstant extends Analyzer {
+    protected array $constants   = array();
 
     public function analyze(): void {
         $analyzerId = null;

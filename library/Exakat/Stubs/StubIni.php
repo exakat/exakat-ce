@@ -24,8 +24,8 @@ namespace Exakat\Stubs;
 
 
 class StubIni extends Stubs implements StubsInterface {
-    private $stubFile    = '';
-    private $stub        = array();
+    private string $stubFile    = '';
+    private array  $stub        = array();
 
     public function __construct(string $stubFile) {
         $this->stubFile = $stubFile;
@@ -91,6 +91,10 @@ class StubIni extends Stubs implements StubsInterface {
         return array();
     }
 
+    public function getFinalClassMethods(): array {
+        return array();
+    }
+
     public function getFunctionNamesList(): array {
         return array();
     }
@@ -128,6 +132,42 @@ class StubIni extends Stubs implements StubsInterface {
     }
 
     public function getInterfaceMethodsNameAndCount(): array {
+        return array();
+    }
+
+    public function getClassImplementingList(): array {
+        return array();
+    }
+
+    public function getFunctionsReferenceArgs(): array {
+        return array();
+    }
+
+    public function getPropertyListWithVisibility(string $visibility): array {
+        return array();
+    }
+
+    public function getMethodListWithVisibility(string $visibility): array {
+        return array();
+    }
+
+    public function getConstListWithVisibility(string $visibility): array {
+        return array();
+    }
+
+    public function getFunctionParameterNames(array $functions): array {
+        return array();
+    }
+
+    public function getNoNullReturningFunctions(): array {
+        return array();
+    }
+
+    public function getAbstractClassList(): array {
+        return array();
+    }
+
+    public function getVoidReturningFunctions(): array {
         return array();
     }
 }

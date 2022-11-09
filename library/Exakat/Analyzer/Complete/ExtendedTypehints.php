@@ -29,9 +29,9 @@ class ExtendedTypehints extends Complete {
                     );
     }
     public function analyze(): void {
-       // returntype, contravariant (Interface => Class)
-       // returntype, contravariant (Interface => Class => subclass)
-       // returntype, contravariant (Interface => Subinterface => Class => subclass)
+        // returntype, contravariant (Interface => Class)
+        // returntype, contravariant (Interface => Class => subclass)
+        // returntype, contravariant (Interface => Subinterface => Class => subclass)
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
