@@ -32,11 +32,15 @@ use Exakat\Fileset\{All, Filenames, FileExtensions, IgnoreDirs};
 class Files extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
-    private $tmpFileName = '';
+    private string $tmpFileName = '';
 
     public function run(): void {
+        if ($this->config->project->isDefault()) {
+            throw new ProjectNeeded();
+        }
+
         $stats = array();
-        foreach(Config::PHP_VERSIONS as $version) {
+        foreach (Config::PHP_VERSIONS as $version) {
             $stats["notCompilable$version"] = 'N/C';
         }
 
@@ -71,7 +75,7 @@ class Files extends Tasks {
         $filesRows = array();
         $hashes = array();
         $duplicates = 0;
-        foreach($files as $id => $file) {
+        foreach ($files as $id => $file) {
             $fnv132 = hash_file('fnv132', $this->config->code_dir . $file);
             if (isset($hashes[$fnv132])) {
                 $ignoredFiles[$file] = "Duplicate ({$hashes[$fnv132]})";
@@ -94,16 +98,16 @@ class Files extends Tasks {
                                                    'ignore_dirs'     => json_encode($this->config->ignore_dirs),
                                                    'include_dirs'    => json_encode($this->config->include_dirs),
                                                )
-                                            );
+            );
             return;
         }
 
         $this->tmpFileName = "{$this->config->tmp_dir}/files{$this->config->pid}.txt";
         $tmpFiles = array_map(function (string $file): string {
             return str_replace(array('\\', '(', ')', ' ', '$', '<', "'", '"', ';', '&', '`', '|', "\t"),
-                               array('\\\\', '\\(', '\\)', '\\ ', '\\$', '\\<', "\\'", '\\"', '\\;', '\\&', '\\`', '\\|', "\\\t", ),
-                               ".$file");
-                               }, $files);
+                array('\\\\', '\\(', '\\)', '\\ ', '\\$', '\\<', "\\'", '\\"', '\\;', '\\&', '\\`', '\\|', "\\\t", ),
+                ".$file");
+        }, $files);
         file_put_contents($this->tmpFileName, implode("\n", $tmpFiles));
 
         $SQLresults = $this->checkCompilations();
@@ -111,7 +115,7 @@ class Files extends Tasks {
         $SQLresults += $this->checkShortTags();
 
         $i = array();
-        foreach($ignoredFiles as $file => $reason) {
+        foreach ($ignoredFiles as $file => $reason) {
             $i[] = compact('file', 'reason');
         }
         $ignoredFiles = $i;
@@ -128,7 +132,7 @@ class Files extends Tasks {
                                                'ignore_dirs'     => json_encode($this->config->ignore_dirs),
                                                'include_dirs'    => json_encode($this->config->include_dirs),
                                                )
-                                            );
+        );
         $this->datastore->reload();
 
         $stats['php'] = count($files);
@@ -137,16 +141,16 @@ class Files extends Tasks {
         // check for special files
         display('Check config files');
         // Avoid , GLOB_BRACE
-        $files = array_merge(glob("{$this->config->code_dir}/.*"),
-                             glob("{$this->config->code_dir}/*")) ;
+        $files = array_merge(glob("{$this->config->code_dir}/.*") ?: array(),
+            glob("{$this->config->code_dir}/*") ?: array()) ;
         $files = array_map('basename', $files);
 
         $services = json_decode(file_get_contents("{$this->config->dir_root}/data/serviceConfig.json"));
 
         $configFiles = array();
-        foreach($services as $name => $service) {
+        foreach ($services as $name => $service) {
             $diff = array_intersect((array) $service->file, $files);
-            foreach($diff as $d) {
+            foreach ($diff as $d) {
                 $configFiles[] = array('file'     => $d,
                                        'name'     => $name,
                                        'homepage' => $service->homepage);
@@ -157,7 +161,7 @@ class Files extends Tasks {
 
         $files = array();
         $i = 0;
-        while(count($files) != $SQLresults) {
+        while (count($files) != $SQLresults) {
             $files = glob("{$this->config->project_dir}/.exakat/dump-*.php");
             usleep(random_int(0,1000) * 1000);
 
@@ -168,7 +172,7 @@ class Files extends Tasks {
         }
         // TODO : log it when
 
-        foreach($files as $file) {
+        foreach ($files as $file) {
             include $file;
 
             $this->datastore->storeQueries($queries);
@@ -211,7 +215,7 @@ class Files extends Tasks {
         $licenses = parse_ini_file($this->config->dir_root . '/data/license.ini');
         $licenses = $licenses['files'];
 
-        foreach($licenses as $file) {
+        foreach ($licenses as $file) {
             if (file_exists("$dir/$file")) {
                 $this->datastore->addRow('hash', array('licence_file' => 'unknown'));
 
@@ -246,7 +250,7 @@ class Files extends Tasks {
             unset($versions[$id]);
         }
 
-        foreach($versions as $version) {
+        foreach ($versions as $version) {
             $phpVersion = "php$version";
 
             if (empty($this->config->{$phpVersion})) {

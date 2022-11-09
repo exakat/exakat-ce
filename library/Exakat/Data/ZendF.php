@@ -58,7 +58,7 @@ class ZendF {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['release']])) {
                 $return[$row['release']][] = $row['class'];
             } else {
@@ -83,7 +83,7 @@ class ZendF {
             $query .= " WHERE releases.release = \"release-$release.0\"";
         }
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['release']])) {
                 $return[$row['release']][] = $row['interface'];
             } else {
@@ -108,7 +108,7 @@ class ZendF {
             $query .= " WHERE releases.release = \"release-$release.0\"";
         }
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['release']])) {
                 $return[$row['release']][] = $row['trait'];
             } else {

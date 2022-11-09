@@ -31,12 +31,12 @@ class HiddenUse extends Analyzer {
              ->savePropertyAs('rank', 'ranked')
              ->inIs('EXPRESSION')
              ->filter(
-                $this->side()
-                     ->outIs('EXPRESSION')
-                     ->has('rank')
-                     ->isLess('rank', 'ranked')
-                     ->atomIsNot(array('Usenamespace', 'Usetrait', 'Declare', 'Include'))
-               )
+                 $this->side()
+                      ->outIs('EXPRESSION')
+                      ->has('rank')
+                      ->isLess('rank', 'ranked')
+                      ->atomIsNot(array('Usenamespace', 'Usetrait', 'Declare', 'Include'))
+             )
              ->back('first');
         $this->prepareQuery();
 
@@ -46,14 +46,13 @@ class HiddenUse extends Analyzer {
              ->savePropertyAs('rank', 'ranked')
              ->inIs('USE')
              ->filter(
-                $this->side()
-                     ->outIs(array('CONST', 'METHOD', 'PPP'))
-                     ->has('rank')
-                     ->isLess('rank', 'ranked')
+                 $this->side()
+                      ->outIs(array('CONST', 'METHOD', 'PPP'))
+                      ->has('rank')
+                      ->isLess('rank', 'ranked')
              )
              ->back('first');
         $this->prepareQuery();
-
     }
 }
 

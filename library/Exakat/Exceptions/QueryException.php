@@ -23,9 +23,11 @@
 
 namespace Exakat\Exceptions;
 
-class QueryException extends \RuntimeException {
-    public function __construct($message, $code = 0, \Exception $previous = null) {
+use Exception;
+use RuntimeException;
 
+class QueryException extends RuntimeException {
+    public function __construct(string $message, int $code = 0, Exception $previous = null) {
         parent::__construct( "Gremlin Query Exception : $message\n", $code, $previous);
     }
 }

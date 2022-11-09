@@ -113,7 +113,7 @@ GREMLIN;
              ->regexIs('fullcode', '^.\\\\s*(" + delimiter + ").*(" + delimiterFinal + ")([a-df-zA-Z]*?e[a-df-zA-Z]*?).\$')
              ->back('first');
         $this->prepareQuery();
-// Actual letters used for Options in PHP imsxeuADSUXJ (others may yield an error) case is important
+        // Actual letters used for Options in PHP imsxeuADSUXJ (others may yield an error) case is important
 
         $this->atomFunctionIs(array('\\mb_eregi_replace',
                                     '\\mb_ereg_replace',
@@ -123,7 +123,7 @@ GREMLIN;
              ->tokenIs('T_CONSTANT_ENCAPSED_STRING')
              ->regexIs('noDelimiter', 'e')
              ->back('first');
-         $this->prepareQuery();
+        $this->prepareQuery();
     }
 }
 

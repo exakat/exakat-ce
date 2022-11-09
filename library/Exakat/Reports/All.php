@@ -36,7 +36,7 @@ class All extends Reports {
                       );
         $reports = array_diff(self::$FORMATS, $omit);
 
-        foreach($reports as $reportName) {
+        foreach ($reports as $reportName) {
             try {
                 $report = self::getInstance($reportName);
             } catch (NoSuchReport $e) {
@@ -51,7 +51,7 @@ class All extends Reports {
 
     public function dependsOnAnalysis(): array {
         $themesToRun = array(array());
-        foreach(self::$FORMATS as $format) {
+        foreach (self::$FORMATS as $format) {
             $reportClass = "\Exakat\Reports\\$format";
             if (!class_exists($reportClass)) {
                 continue;

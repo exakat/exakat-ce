@@ -31,10 +31,10 @@ class SwitchWithoutDefault extends Analyzer {
         // match($x) { 4 => 1, };
         $this->atomIs(self::SWITCH_ALL)
              ->not(
-                $this->side()
-                     ->outIs('CASES')
-                     ->outIs('EXPRESSION')
-                     ->atomIs('Default')
+                 $this->side()
+                      ->outIs('CASES')
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Default')
              );
         $this->prepareQuery();
     }

@@ -23,17 +23,16 @@
 namespace Exakat\Reports\Helpers;
 
 class Pdff {
-    private $versions = array();
-    private $current = null;
-
-    public function __construct() {
-    }
+    private array  $versions = array();
+    private string $current;
 
     public function setVersion(string $s = '*') {
         $this->current = $s;
         if (!isset($this->versions[$this->current])) {
             $this->versions[$s] = new PdffVersion();
         }
+
+        return $this->versions[$s];
     }
 
     public function getVersion(string $s = '*') {
@@ -43,7 +42,7 @@ class Pdff {
     public function toArray(): array {
         $array = array('versions' => $this->versions);
 
-        foreach($array['versions'] as &$version) {
+        foreach ($array['versions'] as &$version) {
             $version = $version->toArray();
         }
         unset($version);
@@ -81,23 +80,27 @@ interface PdffHasParameter {
 }
 
 class PdffVersion {
-    private $namespaces = array();
-    private $current = null;
+    private array  $namespaces = array();
+    private string $current = '*';
 
     public function setNamespace(string $s = '*'): PdffNamespace {
         $this->current = mb_strtolower($s);
 
         if (!isset($this->namespaces[$this->current])) {
-            $this->namespaces[mb_strtolower($s)] = new PdffNamespace($s);
+            $this->namespaces[$this->current] = new PdffNamespace($s);
         }
 
-        return $this->namespaces[mb_strtolower($s)];
+        return $this->namespaces[$this->current];
+    }
+
+    public function getNamespace(): PdffNamespace {
+        return $this->namespaces[$this->current];
     }
 
     public function toArray(): array {
         $array = $this->namespaces;
 
-        foreach($array as &$namespace) {
+        foreach ($array as &$namespace) {
             $namespace = $namespace->toArray();
         }
         unset($namespace);
@@ -119,12 +122,16 @@ class PdffNamespace {
         $this->name       = $name;
     }
 
+    public function getName(): string {
+        return $this->name;
+    }
+
     public function addConstant(string $name, PdffConstant $constant) {
         $this->constants[$name] = $constant;
     }
 
     public function addFunction(string $name, PdffFunction $function) {
-        $this->functions[$name] = $function;
+        $this->functions[mb_strtolower($name)] = $function;
     }
 
     public function addClass(string $name, PdffClass $class) {
@@ -132,15 +139,15 @@ class PdffNamespace {
     }
 
     public function addInterface(string $name, PdffInterface $interface) {
-        $this->interfaces[$name] = $interface;
+        $this->interfaces[mb_strtolower($name)] = $interface;
     }
 
     public function addTrait(string $name, PdffTrait $trait) {
-        $this->traits[$name] = $trait;
+        $this->traits[mb_strtolower($name)] = $trait;
     }
 
     public function addEnum(string $name, PdffEnum $enum) {
-        $this->enums[$name] = $enum;
+        $this->enums[mb_strtolower($name)] = $enum;
     }
 
     public function toArray(): array {
@@ -148,10 +155,10 @@ class PdffNamespace {
             'name'       => $this->name,
         );
 
-        foreach(array('constants', 'functions', 'traits', 'classes', 'interfaces', 'enums') as $type) {
+        foreach (array('constants', 'functions', 'traits', 'classes', 'interfaces', 'enums') as $type) {
             $array[$type] = array();
 
-            foreach($this->$type as $name => $pdff) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -184,8 +191,8 @@ class PdffConstant implements PdffHasPhpdoc {
             'value'      => $this->value,
         );
 
-        foreach(array('phpdoc') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -231,8 +238,39 @@ class PdffClassConstant implements PdffHasAttribute, PdffHasPhpdoc {
             'attributes' => array(),
         );
 
-        foreach(array('phpdoc', 'attributes') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('phpdoc', 'attributes') as $type) {
+            foreach ($this->$type as $name => $pdff) {
+                $array[$type][$name] = $pdff->toArray();
+            }
+        }
+
+        return $array;
+    }
+}
+
+class PdffClassCase implements PdffHasPhpdoc {
+    private $name        = '';
+    private $value       = '';
+    private $phpdoc      = array();
+
+    public function __construct(string $name, string $value) {
+        $this->name       = $name;
+        $this->value      = $value;
+    }
+
+    public function addPhpdoc(PdffPhpdoc $phpdoc): void {
+        $this->phpdoc[] = $phpdoc;
+    }
+
+    public function toArray(): array {
+        $array = array(
+            'name'       => $this->name,
+            'value'      => $this->value,
+            'phpdoc'     => $this->phpdoc,
+        );
+
+        foreach (array('phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -297,8 +335,8 @@ class PdffFunction implements PdffHasAttribute, PdffHasTypehint, PdffHasPhpdoc, 
             'phpdoc'             => array(),
         );
 
-        foreach(array('attributes', 'parameters', 'returntypehints', 'phpdoc') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('attributes', 'parameters', 'returntypehints', 'phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -378,6 +416,7 @@ class PdffParameter implements PdffHasAttribute, PdffHasTypehint, PdffHasPhpdoc 
     private $variadic     = false;
     private $expression   = false;
     private $reference    = false;
+    private $hasDefault   = false;
     private $typehinttype = '';
 
     private $typehints    = array();
@@ -430,8 +469,8 @@ class PdffParameter implements PdffHasAttribute, PdffHasTypehint, PdffHasPhpdoc 
             'attributes'    => array(),
         );
 
-        foreach(array('typehints', 'attributes') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('typehints', 'attributes') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -476,8 +515,8 @@ class PdffInterface implements PdffHasMethod, PdffHasConstant, PdffHasPhpdoc {
             'methods'      => array(),
         );
 
-        foreach(array('extends', 'constants', 'methods', 'phpdoc') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('extends', 'constants', 'methods', 'phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -524,8 +563,8 @@ class PdffTrait implements PdffHasMethod, PdffHasProperty, PdffHasPhpdoc {
             'methods'      => array(),
         );
 
-        foreach(array('uses', 'properties', 'methods', 'phpdoc') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('uses', 'properties', 'methods', 'phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -536,14 +575,16 @@ class PdffTrait implements PdffHasMethod, PdffHasProperty, PdffHasPhpdoc {
 
 class PdffEnum implements PdffHasMethod, PdffHasConstant, PdffHasPhpdoc {
     private $name         = '';
+    private $typehint     = '';
 
     private $phpdoc       = array();
     private $constants    = array();
     private $methods      = array();
     private $cases        = array();
 
-    public function __construct(string $name) {
+    public function __construct(string $name, string $typehint = '') {
         $this->name       = $name;
+        $this->typehint   = $typehint;
     }
 
     public function addMethod(string $name, PdffMethod $method): void {
@@ -558,21 +599,22 @@ class PdffEnum implements PdffHasMethod, PdffHasConstant, PdffHasPhpdoc {
         $this->constants[$name] = $classConstant;
     }
 
-    public function addCase(string $name, PdffClassConstant $case): void {
+    public function addCase(string $name, PdffClassCase $case): void {
         $this->cases[$name] = $case;
     }
 
     public function toArray(): array {
         $array = array(
             'name'         => $this->name,
+            'typehint'     => $this->typehint,
             'phpdoc'       => array(),
             'constants'    => array(),
             'methods'      => array(),
             'cases'        => array(),
         );
 
-        foreach(array('methods', 'constants', 'cases', 'phpdoc') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('methods', 'constants', 'cases', 'phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -646,8 +688,8 @@ class PdffMethod implements PdffHasAttribute, PdffHasTypehint, PdffHasPhpdoc, Pd
             'returntypehints'    => array(),
         );
 
-        foreach(array('returntypehints', 'attributes', 'parameters', 'phpdoc') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('returntypehints', 'attributes', 'parameters', 'phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -660,6 +702,8 @@ class PdffProperty implements PdffHasTypehint, PdffHasPhpdoc, PdffHasAttribute {
     private $name         = '';
     private $var          = false;
     private $static       = false;
+    private $readonly     = false;
+    private $hasDefault   = false;
     private $expression   = false;
     private $visibility   = '';
     private $typehinttype = '';
@@ -708,8 +752,8 @@ class PdffProperty implements PdffHasTypehint, PdffHasPhpdoc, PdffHasAttribute {
             'attributes'      => array(),
         );
 
-        foreach(array('phpdoc', 'typehints', 'attributes') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('phpdoc', 'typehints', 'attributes') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }
@@ -722,20 +766,23 @@ class PdffClass implements PdffHasProperty, PdffHasMethod, PdffHasAttribute, Pdf
     private $name         = '';
     private $abstract     = false;
     private $final        = false;
+    private $readonly     = false;
     private $extends      = '';
 
     private $methods      = array();
     private $constants    = array();
     private $properties   = array();
     private $uses         = array();
+    private $usesOptions  = array(); // of strings
     private $attributes   = array();
     private $implements   = array();
     private $phpdoc       = array();
 
-    public function __construct(string $name, bool $abstract, bool $final, string $extends) {
+    public function __construct(string $name, bool $abstract, bool $final, bool $readonly, string $extends) {
         $this->name         = $name;
         $this->abstract     = $abstract;
         $this->final        = $final;
+        $this->readonly     = $readonly;
         $this->extends      = $extends;
     }
 
@@ -763,8 +810,9 @@ class PdffClass implements PdffHasProperty, PdffHasMethod, PdffHasAttribute, Pdf
         $this->implements[] = $implement;
     }
 
-    public function addUse(PdffExtends $use): void {
+    public function addUse(PdffExtends $use, array $options): void {
         $this->uses[] = $use;
+        $this->usesOptions = array_merge($this->usesOptions, $options);
     }
 
     public function toArray(): array {
@@ -772,17 +820,19 @@ class PdffClass implements PdffHasProperty, PdffHasMethod, PdffHasAttribute, Pdf
             'name'            => $this->name,
             'abstract'        => $this->abstract,
             'final'           => $this->final,
+            'readonly'        => $this->readonly,
             'extends'         => $this->extends,
             'constants'       => array(),
             'properties'      => array(),
-            'traits'          => array(),
+            'uses'            => array(),
+            'usesOptions'     => $this->usesOptions,
             'attributes'      => array(),
             'implements'      => array(),
             'phpdoc'          => array(),
         );
 
-        foreach(array('methods', 'constants', 'properties', 'attributes', 'uses', 'implements', 'phpdoc') as $type) {
-            foreach($this->$type as $name => $pdff) {
+        foreach (array('methods', 'constants', 'properties', 'attributes', 'uses', 'implements', 'phpdoc') as $type) {
+            foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
         }

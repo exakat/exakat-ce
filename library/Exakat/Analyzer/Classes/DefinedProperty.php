@@ -57,11 +57,11 @@ class DefinedProperty extends Analyzer {
              ->outIs('OVERWRITE')
              ->atomIs('Propertydefinition')
              ->not(
-                $this->side()
-                     ->inIs('PPP')
-                     ->is('visibility', 'private')
-                     ->inIs('PPP')
-                     ->atomIs('Class')
+                 $this->side()
+                      ->inIs('PPP')
+                      ->is('visibility', 'private')
+                      ->inIs('PPP')
+                      ->atomIs('Class')
              )
              ->back('first');
         $this->prepareQuery();

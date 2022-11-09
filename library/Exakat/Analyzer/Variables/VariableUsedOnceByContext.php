@@ -31,6 +31,7 @@ class VariableUsedOnceByContext extends Analyzer {
                      'Functions/VariableArguments',
                      'Variables/SelfTransform',
                      'Variables/Blind',
+                     'Complete/OverwrittenMethods',
                     );
     }
 
@@ -46,9 +47,10 @@ class VariableUsedOnceByContext extends Analyzer {
         // argument by function
         $this->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/VariableArguments')
+             ->hasNoOut('OVERWRITE')
              ->isNot('abstract', true)
              ->outIs(array('ARGUMENT', 'USE'))
-             ->outIs('NAME')
+             ->atomIsNot('Void')
              ->isUsed(0);
         $this->prepareQuery();
 
@@ -57,23 +59,23 @@ class VariableUsedOnceByContext extends Analyzer {
              ->outIs('DEFINITION')
              ->atomIs('Variabledefinition')
              ->filter(
-                $this->side()
-                     ->outIs('DEFINITION')
-                     ->atomIs(array('Variable', 'Variableobject', 'Variablearray', 'Parameter', 'String'))
-                     ->analyzerIsNot('Variables/SelfTransform')
-                     ->raw('count().is(eq(1))')
+                 $this->side()
+                      ->outIs('DEFINITION')
+                      ->atomIs(array('Variable', 'Variableobject', 'Variablearray', 'Parameter', 'String'))
+                      ->analyzerIsNot('Variables/SelfTransform')
+                      ->raw('count().is(eq(1))')
              )
              ->not(
-                $this->side()
-                     ->outIs('DEFINITION')
-                     ->atomIs(array('Variable', 'Variableobject', 'Variablearray'))
-                     ->analyzerIs('Variables/Blind')
+                 $this->side()
+                      ->outIs('DEFINITION')
+                      ->atomIs(array('Variable', 'Variableobject', 'Variablearray'))
+                      ->analyzerIs('Variables/Blind')
              )
              // This Variabledefinition is not for a static variable
              ->not(
-                $this->side()
-                     ->outIs('DEFINITION')
-                     ->hasIn('STATIC')
+                 $this->side()
+                      ->outIs('DEFINITION')
+                      ->hasIn('STATIC')
              )
              ->outIs('DEFINITION');
         $this->prepareQuery();

@@ -60,7 +60,6 @@ class SelfTransform extends Analyzer {
              ->outIs('LEFT')
              ->atomIs(self::CONTAINERS);
         $this->prepareQuery();
-
     }
 }
 

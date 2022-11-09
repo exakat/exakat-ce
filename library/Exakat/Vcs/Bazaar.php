@@ -25,15 +25,11 @@ namespace Exakat\Vcs;
 use Exakat\Exceptions\HelperException;
 
 class Bazaar extends Vcs {
-    private $executable = 'bzr';
-
-    public function __construct($destination, $project_root) {
-        parent::__construct($destination, $project_root);
-    }
+    private string $executable = 'bzr';
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");
-        if (strpos($res, 'Bazaar') === false) {
+        if (!str_contains($res, 'Bazaar')  ) {
             throw new HelperException('Bazar');
         }
     }
@@ -45,7 +41,7 @@ class Bazaar extends Vcs {
         $this->shell("cd {$this->destinationFull}; {$this->executable} branch $source code");
     }
 
-    public function update() {
+    public function update(): string {
         $this->check();
 
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} update 2>&1");
@@ -63,14 +59,14 @@ class Bazaar extends Vcs {
         return trim(substr($res, 13), " *\n");
     }
 
-    public function getRevision() {
+    public function getRevision(): array {
         $this->check();
 
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} version-info 2>&1 | grep revno");
         return trim(substr($res, 7), " *\n");
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = trim($this->shell("{$this->executable} --version 2>&1"));
@@ -95,7 +91,7 @@ class Bazaar extends Vcs {
         return $status;
     }
 
-    public function getDiffLines($r1, $r2): array {
+    public function getDiffLines(string $r1, string $r2): array {
         display("No support yet for line diff in Bazaar.\n");
         return array();
     }

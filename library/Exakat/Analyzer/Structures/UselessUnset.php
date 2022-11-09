@@ -77,9 +77,9 @@ class UselessUnset extends Analyzer {
              ->samePropertyAs('code', 'varname', self::CASE_SENSITIVE)
              ->inIsIE('OBJECT')
              ->not(
-                $this->side()
-                     ->outIs('OBJECT')
-                     ->atomIs('Member')
+                 $this->side()
+                      ->outIs('OBJECT')
+                      ->atomIs('Member')
              )
              ->back('result');
         $this->prepareQuery();
@@ -100,14 +100,14 @@ class UselessUnset extends Analyzer {
              ->samePropertyAs('code', 'varname', self::CASE_SENSITIVE)
              ->inIsIE('OBJECT')
              ->not(
-                $this->side()
-                     ->outIs('OBJECT')
-                     ->atomIs('Member')
+                 $this->side()
+                      ->outIs('OBJECT')
+                      ->atomIs('Member')
              )
              ->back('result');
         $this->prepareQuery();
 
-    // unset as operator
+        // unset as operator
         // unset on arguments, reference or value
         $this->atomIs('Cast')
              ->tokenIs('T_UNSET_CAST')

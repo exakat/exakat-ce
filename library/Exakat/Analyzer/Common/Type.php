@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class Type extends Analyzer {
-
     protected $type = null;
 
     public function analyze(): void {
@@ -52,7 +51,13 @@ g.V().hasLabel("{$this->type}")
        )
 .sideEffect{  file = it.get().value('fullcode');}
 
-.map{ ['fullcode':fullcode, 'file':file, 'line':line, 'namespace':theNamespace, 'class':theClass, 'function':theFunction ];}
+.map{ ['fullcode':fullcode, 
+       'file':file, 
+       'line':line, 
+       'namespace':theNamespace, 
+       'class':theClass, 
+       'function':theFunction,
+        ];}
 
 GREMLIN;
 

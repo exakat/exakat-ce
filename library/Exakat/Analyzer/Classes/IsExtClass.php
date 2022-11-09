@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Analyzer;
 
 class IsExtClass extends Analyzer {
-
     public function dependsOn(): array {
         return array('Classes/ClassUsage',
                     );

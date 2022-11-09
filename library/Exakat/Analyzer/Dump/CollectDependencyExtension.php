@@ -24,11 +24,11 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectDependencyExtension extends AnalyzerTable {
-    protected $analyzerName = 'dependenciesExtensions';
+    protected string $analyzerName = 'dependenciesExtensions';
 
-    protected $analyzerTable = 'dependenciesExtensions';
+    protected string $analyzerTable = 'dependenciesExtensions';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE dependenciesExtensions ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                                       origin STRING,
                                       extending STRING
@@ -38,7 +38,6 @@ SQL;
     public function analyze(): void {
         // class x
         $this->atomIs(array('Class', 'Interface'))
-             ->goToAllImplements(self::INCLUDE_SELF)
              ->outIs(array('EXTENDS', 'IMPLEMENTS'))
 
              ->hasNoIn('DEFINITION')

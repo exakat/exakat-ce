@@ -25,11 +25,11 @@ namespace Exakat\Analyzer\Dump;
 #use Exakat\Analyzer\Analyzer;
 
 class CollectClassesDependencies extends AnalyzerTable {
-    protected $analyzerName = 'classesDependencies';
+    protected string $analyzerName = 'classesDependencies';
 
-    protected $analyzerTable = 'classesDependencies';
+    protected string $analyzerTable = 'classesDependencies';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE classesDependencies ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                                    including STRING,
                                    including_name STRING,
@@ -52,7 +52,7 @@ SQL;
              ->back('first')
              ->savePropertyAs('fullnspath', 'calling')
 
-             ->raw('outE().hasLabel("EXTENDS", "IMPLEMENTS").sideEffect{ type = it.get().label().toLowerCase(); }.inV()')
+             ->raw('outE().hasLabel("EXTENDS", "IMPLEMENTS").not(has("extra", true)).sideEffect{ type = it.get().label().toLowerCase(); }.inV()')
              ->inIs('DEFINITION')
              ->atomIs(array('Class', 'Interface'), self::WITHOUT_CONSTANTS)
              ->raw('sideEffect{ called_type = it.get().label().toLowerCase(); }')
@@ -70,7 +70,7 @@ map{ ["calling":calling,
       "called_type":called_type, 
            ]; }
 GREMLIN
-);
+             );
         $this->prepareQuery();
 
         // Finding typehint
@@ -103,7 +103,7 @@ map{ ["calling":calling,
            ]; 
     }
 GREMLIN
-);
+             );
         $this->prepareQuery();
 
         // returntypes
@@ -135,7 +135,7 @@ map{ ["calling":calling,
       "called_type":called_type, 
            ]; }
 GREMLIN
-);
+             );
         $this->prepareQuery();
 
         // typehinted properties
@@ -166,7 +166,7 @@ map{ ["calling":calling,
       "called_type":called_type, 
            ]; }
 GREMLIN
-);
+             );
         $this->prepareQuery();
 
         // Finding trait use
@@ -177,7 +177,7 @@ GREMLIN
              ->savePropertyAs('fullcode', 'calling_name')
              ->back('first')
 
-             ->outIs('USE')
+             ->raw('outE().hasLabel("USE").not(has("extra", true)).inV()')
              ->outIs('USE')
 
              ->savePropertyAs('fullnspath', 'called')
@@ -193,7 +193,7 @@ map{ ["calling":calling,
       "called_type":"trait", 
            ]; }
 GREMLIN
-);
+             );
         $this->prepareQuery();
 
         // New
@@ -223,7 +223,7 @@ map{ ["calling":calling,
       "called_type":"class", 
            ]; }
 GREMLIN
-);
+             );
         $this->prepareQuery();
 
         // static calls (property, constant, method)
@@ -255,7 +255,7 @@ map{ ["calling":calling,
       "called_type":called_type, 
            ]; }
 GREMLIN
-);
+             );
         $this->prepareQuery();
 
         // Skipping normal method/property call : They actually depends on new

@@ -61,7 +61,7 @@ class TestCobble extends Tasks {
         $clean = new Clean(self::IS_SUBTASK);
         $clean->run();
 
-        $analyze = new Cobble(self::IS_SUBTASK);
+        $analyze = new Cobble();
         $analyze->run();
         unset($analyze);
 

@@ -24,22 +24,90 @@ namespace Exakat\Analyzer\Complete;
 
 class SetClassRemoteDefinitionWithInjection extends Complete {
     public function analyze(): void {
-        $this->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
-              ->outIs('DEFINITION')
-              ->inIs('TYPEHINT')
+        // function foo(J $j) { $j->method()
+        $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
+              ->as('parameter')
               ->outIs('NAME')
               ->outIs('DEFINITION')
-              ->atomIs('Variable', self::WITHOUT_CONSTANTS)
-              ->inIs('RIGHT')
-              ->atomIs('Assignation', self::WITHOUT_CONSTANTS)
-              ->outIs('LEFT')
-              ->atomIs('Member', self::WITHOUT_CONSTANTS)
-
+              ->inIs(array('OBJECT', 'CLASS'))
+              ->atomIs(array('Methodcall', 'Staticmethodcall'), self::WITHOUT_CONSTANTS)
+              ->as('call')
+              ->outIs('METHOD')
+              ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('lccode', 'name')
+              ->back('first')
+              ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
-              ->atomIs('Propertydefinition',  self::WITHOUT_CONSTANTS)
+              ->goToAllParents(self::INCLUDE_SELF)
+              ->outIs(array('METHOD', 'MAGICMETHOD'))
+              ->outIs('NAME')
+              ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
+              ->inIs('NAME')
+              ->addETo('DEFINITION', 'call');
+        $this->prepareQuery();
+
+        // function foo(J $j) { $j->p
+        $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
+              ->as('parameter')
+              ->outIs('NAME')
               ->outIs('DEFINITION')
+              ->inIs('OBJECT')
               ->atomIs('Member', self::WITHOUT_CONSTANTS)
-              ->addEFrom('DEFINITION', 'first');
+              ->as('call')
+              ->outIs('MEMBER')
+              ->atomIs('Name', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('code', 'name')
+              ->back('first')
+              ->outIs('TYPEHINT')
+              ->inIs('DEFINITION')
+              ->goToAllParents(self::INCLUDE_SELF)
+              ->outIs('PPP')
+              ->outIs('PPP')
+              ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->addETo('DEFINITION', 'call');
+        $this->prepareQuery();
+
+        // function foo(J $j) { $j::$p
+        $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
+              ->as('parameter')
+              ->outIs('NAME')
+              ->outIs('DEFINITION')
+              ->inIs('CLASS')
+              ->atomIs('Staticproperty', self::WITHOUT_CONSTANTS)
+              ->as('call')
+              ->outIs('MEMBER')
+              ->atomIs('Staticpropertyname', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('code', 'name')
+              ->back('first')
+              ->outIs('TYPEHINT')
+              ->inIs('DEFINITION')
+              ->goToAllParents(self::INCLUDE_SELF)
+              ->outIs('PPP')
+              ->outIs('PPP')
+              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->addETo('DEFINITION', 'call');
+        $this->prepareQuery();
+
+        // function foo(J $j) { $j::X
+        $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
+              ->as('parameter')
+              ->outIs('NAME')
+              ->outIs('DEFINITION')
+              ->inIs('CLASS')
+              ->atomIs('Staticconstant', self::WITHOUT_CONSTANTS)
+              ->as('call')
+              ->outIs('CONSTANT')
+              ->atomIs('Name', self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('code', 'name')
+              ->back('first')
+              ->outIs('TYPEHINT')
+              ->inIs('DEFINITION')
+              ->goToAllParents(self::INCLUDE_SELF)
+              ->outIs('CONST')
+              ->outIs('CONST')
+              ->outIs('NAME')
+              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
     }
 }

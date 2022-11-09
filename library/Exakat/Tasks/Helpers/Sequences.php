@@ -25,14 +25,14 @@ namespace Exakat\Tasks\Helpers;
 class Sequences {
     private const START_RANK = -1;
 
-    private $sequences           = array();
-    private $rank                = self::START_RANK;
-    private $elements            = array();
+    private array $sequences           = array();
+    private int   $rank                = self::START_RANK;
+    private array $elements            = array();
 
-    private $level               = 0;
+    private int $level                 = 0;
 
-    private $ranksPile           = array();
-    private $elementsPile        = array();
+    private array $ranksPile           = array();
+    private array $elementsPile        = array();
 
     public function start(Atom $sequence): void {
         ++$this->level;

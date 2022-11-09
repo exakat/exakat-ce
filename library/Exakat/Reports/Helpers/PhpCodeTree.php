@@ -26,17 +26,17 @@ namespace Exakat\Reports\Helpers;
 use Exakat\Dump\Dump;
 
 class PhpCodeTree {
-    private $dump           = null;
+    private Dump $dump           ;
 
-    public $namespaces      = array();
+    public array $namespaces      = array();
 
-    public $constants       = array();
-    public $functions       = array();
+    public array $constants       = array();
+    public array $functions       = array();
 
-    public $cits            = array();
-    public $classconstants  = array();
-    public $properties      = array();
-    public $methods         = array();
+    public array $cits            = array();
+    public array $classconstants  = array();
+    public array $properties      = array();
+    public array $methods         = array();
 
     public function __construct(Dump $dump) {
         $this->dump = $dump;
@@ -45,7 +45,7 @@ class PhpCodeTree {
     public function load(): void {
         // collect namespaces
         $res = $this->dump->fetchTable('namespaces');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $row['cits']                  = &$this->cits;
             $row['functions']             = &$this->functions;
             $row['constants']             = &$this->constants;
@@ -56,19 +56,19 @@ class PhpCodeTree {
 
         // collect constants
         $res = $this->dump->fetchTable('constants');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             array_collect_by($this->constants, $row['namespaceId'], $row);
         }
 
         // collect functions
         $res = $this->dump->fetchTableFunctions();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             array_collect_by($this->functions, $row['namespaceId'], $row);
         }
 
         // collect cit
         $res = $this->dump->fetchTableCit();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             $row['methods']         = &$this->methods;
             $row['properties']      = &$this->properties;
             $row['classconstants']  = &$this->classconstants;
@@ -78,19 +78,19 @@ class PhpCodeTree {
 
         // collect properties
         $res = $this->dump->fetchTable('properties');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             array_collect_by($this->properties, $row['citId'], $row);
         }
 
         // collect class constants
         $res = $this->dump->fetchTable('classconstants');
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             array_collect_by($this->classconstants, $row['citId'], $row);
         }
 
         // collect methods
         $res = $this->dump->fetchTableMethods();
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             array_collect_by($this->methods, $row['citId'], $row);
         }
     }
@@ -100,7 +100,7 @@ class PhpCodeTree {
             return;
         }
 
-        foreach($this->$what as &$items) {
+        foreach ($this->$what as &$items) {
             $items['map'] = array_map($closure, $items);
         }
     }
@@ -110,14 +110,14 @@ class PhpCodeTree {
             return;
         }
 
-        foreach($this->$what as &$items) {
+        foreach ($this->$what as &$items) {
             $items['reduced'] = array_reduce($items['map'], $closure, '');
         }
     }
 
-    public function get(string $what) {
+    public function get(string $what) : string {
         if (!property_exists($this, $what)) {
-            return;
+            return '';
         }
 
         return $this->$what[0]['reduced'];

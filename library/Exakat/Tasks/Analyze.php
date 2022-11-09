@@ -35,15 +35,16 @@ use Exakat\Exceptions\QueryException;
 use Exakat\Exceptions\MissingGremlin;
 use Exakat\Exceptions\DSLException;
 use ProgressBar\Manager as ProgressBar;
-use Exception;
+use Exakat\Phpexec;
 use Exakat\Log;
+use Exception;
 
 class Analyze extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
-    private $progressBar = null;
-    private $php = null;
-    private $analyzed = array();
+    private ProgressBar $progressBar;
+    private Phpexec $php;
+    private array $analyzed = array();
 
     public function run(): void {
         if (!$this->config->project->validate()) {
@@ -74,7 +75,7 @@ class Analyze extends Tasks {
                 $analyzersClass = array($this->config->program);
             }
 
-            foreach($analyzersClass as $analyzer) {
+            foreach ($analyzersClass as $analyzer) {
                 if (!$this->rulesets->getClass($analyzer)) {
                     throw new NoSuchAnalyzer($analyzer, $this->rulesets);
                 }
@@ -83,7 +84,6 @@ class Analyze extends Tasks {
             if (empty($analyzersClass)) {
                 throw new NeedsAnalyzerThema();
             }
-
         } elseif (!empty($this->config->project_rulesets)) {
             $ruleset = $this->config->project_rulesets;
 
@@ -91,15 +91,14 @@ class Analyze extends Tasks {
                 $all = $this->config->projectConfig ?? $this->config->exakatConfig;
 
                 $ruleset = array();
-                foreach($all->project_rulesets as $rule) {
-
+                foreach ($all->project_rulesets as $rule) {
                     if (empty($this->datastore->getHash(trim($rule, '"')))) {
                         $ruleset[] = $rule;
                     }
                 }
 
                 // drop the first one, as it may be already running
-                array_unshift($ruleset);
+                array_shift($ruleset);
                 if (empty($ruleset)) {
                     display('All needed ruleset are done. Aborting.');
                     die();
@@ -119,7 +118,7 @@ class Analyze extends Tasks {
 
             $this->logname = 'analyze.' . strtolower(str_replace(' ', '_', implode('-', $this->config->project_rulesets)));
             $this->log = new Log('analyze.' . strtolower(str_replace(' ', '_', implode('-', $this->config->project_rulesets))),
-                                 "{$this->config->projects_root}/projects/{$this->config->project}");
+                "{$this->config->projects_root}/projects/{$this->config->project}");
         } else {
             throw new NeedsAnalyzerThema();
         }
@@ -131,7 +130,7 @@ class Analyze extends Tasks {
 
         $analyzers = array();
         $dependencies = array();
-        foreach($analyzersClass as $analyzerClass) {
+        foreach ($analyzersClass as $analyzerClass) {
             $this->fetchAnalyzers($analyzerClass, $analyzers, $dependencies);
         }
 
@@ -140,11 +139,12 @@ class Analyze extends Tasks {
             display("Done\n");
             return;
         }
+
         if ($this->config->verbose && !$this->config->quiet) {
             $this->progressBar = new Progressbar(0, count($analyzerList) + 1, $this->config->screen_cols);
         }
 
-        foreach($analyzerList as $analyzerClass) {
+        foreach ($analyzerList as $analyzerClass) {
             if ($this->config->verbose && !$this->config->quiet) {
                 echo $this->progressBar->advance();
             }
@@ -195,7 +195,7 @@ class Analyze extends Tasks {
         } else {
             $dependencies[$analyzerClass] = $analyzers[$analyzerClass]->dependsOn();
             $diff = array_diff($dependencies[$analyzerClass], array_keys($analyzers));
-            foreach($diff as $d) {
+            foreach ($diff as $d) {
                 if (!isset($analyzers[$d])) {
                     $this->fetchAnalyzers($d, $analyzers, $dependencies);
                 }
@@ -244,15 +244,14 @@ class Analyze extends Tasks {
             display( "$analyzerClass running\n");
             try {
                 $analyzer->run();
-            } catch(DSLException $e) {
+            } catch (DSLException $e) {
                 $timer->end();
                 display( "$analyzerClass : DSL building exception\n");
                 display($e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
                 $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\terror : " . $e->getMessage());
                 $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
                 $this->checkAnalyzed();
-
-            } catch(QueryException $e) {
+            } catch (QueryException $e) {
                 $timer->end();
                 display("$analyzerClass : Query running exception\n");
                 display($e->getMessage());
@@ -260,12 +259,11 @@ class Analyze extends Tasks {
                 $counts = $this->gremlin->query('g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer->getInBaseName() . '").property("count", __.out("ANALYZED").count()).values("count")')->toInt();
                 $this->datastore->addRow('analyzed', array($analyzerClass => $counts ) );
                 $this->checkAnalyzed();
-
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 $timer->end();
                 display( "$analyzerClass : generic exception \n");
-                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\texception : " . get_class($e) . "\terror : " . $e->getMessage());
-                if (strpos($e->getMessage(), 'The server exceeded one of the timeout settings ') === false) {
+                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\texception : " . $e::class . "\terror : " . $e->getMessage());
+                if (!str_contains($e->getMessage(), 'The server exceeded one of the timeout settings ')  ) {
                     display($e->getMessage());
                     $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
                 } else {
@@ -303,7 +301,7 @@ g.V().hasLabel("Analysis").as("analyzer", "count").select("analyzer", "count").b
 GREMLIN;
         $res = $this->gremlin->query($query);
 
-        foreach($res as list('analyzer' => $analyzer, 'count' => $count)) {
+        foreach ($res as list('analyzer' => $analyzer, 'count' => $count)) {
             if ($count != -1) {
                 $this->analyzed[$analyzer] = $count;
             }

@@ -41,15 +41,15 @@ class AlteringForeachWithoutReference extends Analyzer {
              ->outIs('BLOCK')
              ->atomInsideNoDefinition('Array')
              ->not(
-                $this->side()
-                     ->inIs('CAST')
-                     ->atomIs('Cast')
-                     ->tokenIs('T_UNSET_CAST')
+                 $this->side()
+                      ->inIs('CAST')
+                      ->atomIs('Cast')
+                      ->tokenIs('T_UNSET_CAST')
              )
              ->not(
-                $this->side()
-                     ->inIs('ARGUMENT')
-                     ->atomIs('Unset')
+                 $this->side()
+                      ->inIs('ARGUMENT')
+                      ->atomIs('Unset')
              )
              ->is('isModified', true)
 

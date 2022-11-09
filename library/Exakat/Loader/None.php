@@ -27,13 +27,12 @@ use Exakat\Tasks\Helpers\Atom;
 use Sqlite3;
 
 class None extends Loader {
-    public function __construct(Sqlite3 $sqlite, Atom $id0) {}
+    public function __construct(Sqlite3 $sqlite, Atom $id0) {
+    }
 
     public function finalize(array $relicat): bool {
         return true;
     }
-
-
 }
 
 ?>

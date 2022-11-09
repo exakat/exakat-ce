@@ -47,7 +47,7 @@ class GoToOtherBranch extends DSL {
 
         }
 
-            return new Command('inE().hasLabel(within(***)).as("b1").outV()' . $as . '.outE().hasLabel(within(***)).as("b2").where("b1", neq("b2")).by(label).inV()',
+        return new Command('inE().hasLabel(within(***)).as("b1").outV()' . $as . '.outE().hasLabel(within(***)).as("b2").where("b1", neq("b2")).by(label).inV()',
             array($links, $links),
         );
     }

@@ -43,8 +43,8 @@ class Timer {
     public const MS     = 1000;
     public const MICROS = 1000000;
 
-    private $begin = self::UNSET;
-    private $end   = self::UNSET;
+    private float $begin = self::UNSET;
+    private float $end   = self::UNSET;
 
     public function __construct() {
         $this->begin = microtime(\TIME_AS_NUMBER);

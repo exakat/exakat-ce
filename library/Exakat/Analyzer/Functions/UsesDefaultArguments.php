@@ -32,9 +32,13 @@ class UsesDefaultArguments extends Analyzer {
         $functions = $this->methods->getFunctionsArgsInterval();
 
         $positions = array();
-        foreach($functions as $function) {
-            if ($function['args_min'] === $function['args_max']) { continue; }
-            if ($function['args_max'] === \MAX_ARGS) { continue; }
+        foreach ($functions as $function) {
+            if ($function['args_min'] === $function['args_max']) {
+                continue;
+            }
+            if ($function['args_max'] === \MAX_ARGS) {
+                continue;
+            }
             // Only test if the last is missing. This is sufficient
             $positions["\\$function[name]"] = $function['args_max'];
         }

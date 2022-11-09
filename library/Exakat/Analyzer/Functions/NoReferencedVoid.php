@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Functions;
 use Exakat\Analyzer\Analyzer;
 
 class NoReferencedVoid extends Analyzer {
-    protected $phpVersion = '9.0-';
+    protected string $phpVersion = '9.0-';
 
     public function analyze(): void {
         //function &test(): void {}

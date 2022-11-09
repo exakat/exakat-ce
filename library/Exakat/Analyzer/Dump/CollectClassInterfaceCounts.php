@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectClassInterfaceCounts extends AnalyzerHashHashResults {
-    protected $analyzerName = 'ClassInterfaces';
+    protected string $analyzerName = 'ClassInterfaces';
 
     public function analyze(): void {
         //class x implements i,j,k {}

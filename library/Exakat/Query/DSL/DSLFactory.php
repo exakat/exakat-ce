@@ -26,28 +26,30 @@ namespace Exakat\Query\DSL;
 use Exakat\Exceptions\UnknownDsl;
 use Exakat\GraphElements;
 use Exakat\Analyzer\Analyzer;
+use Exakat\Data\Dictionary;
+use Exakat\Datastore;
 
 class DSLFactory {
     public const VARIABLE_WRITE = true;
     public const VARIABLE_READ  = false;
 
-    public $availableAtoms         = array();
-    public $availableLinks         = array();
-    public $availableFunctioncalls = array();
-    private $availableVariables     = array(); // This one is per query
-    protected $availableLabels        = array(); // This one is per query
-    protected $ignoredcit             = array();
-    protected $ignoredfunctions       = array();
-    protected $ignoredconstants       = array();
-    protected $dictCode               = null;
-    protected $datastore              = null;
-    protected $linksDown              = '';
-    protected $dependsOn              = array();
-    protected $analyzerQuoted         = '';
-    protected $MAX_LOOPING            = Analyzer::MAX_LOOPING;
+    private   array $availableAtoms         = array();
+    private   array $availableLinks         = array();
+    private   array $availableFunctioncalls = array();
+    private   array $availableVariables     = array(); // This one is per query
+    protected array $availableLabels        = array(); // This one is per query
+    protected array $ignoredcit             = array();
+    protected array $ignoredfunctions       = array();
+    protected array $ignoredconstants       = array();
+    protected Dictionary $dictCode;
+    protected Datastore $datastore;
+    protected string $linksDown              = '';
+    protected array $dependsOn               = array();
+    protected string $analyzerQuoted         = '';
+    protected int $MAX_LOOPING               = Analyzer::MAX_LOOPING;
 
     public function __construct(string $analyzer,
-                                array $dependsOn = array()) {
+        array $dependsOn = array()) {
         $this->dependsOn = $dependsOn;
         $this->analyzerQuoted = $analyzer;
 
@@ -67,6 +69,7 @@ class DSLFactory {
                                           'Noresult',
                                           'Void',
                                           'Identifier',
+                                          'Scalartypehint',  // This one may be added by Complete/Returntype
                                           );
             $this->availableLinks = array('DEFINITION',
                                           'ANALYZED',
@@ -79,7 +82,7 @@ class DSLFactory {
                                           'TYPEHINT',
                                           );
 
-            foreach($data as $token){
+            foreach ($data as $token) {
                 if ($token === strtoupper($token)) {
                     $this->availableLinks[] = $token;
                 } else {
@@ -107,17 +110,17 @@ class DSLFactory {
         }
 
         $return = new $className($this,
-                              $this->availableAtoms,
-                              $this->availableLinks,
-                              $this->availableFunctioncalls,
-                              $this->availableVariables,
-                              $this->availableLabels,
-                              $this->ignoredcit,
-                              $this->ignoredfunctions,
-                              $this->ignoredconstants,
-                              $this->dependsOn,
-                              $this->analyzerQuoted
-                              );
+            $this->availableAtoms,
+            $this->availableLinks,
+            $this->availableFunctioncalls,
+            $this->availableVariables,
+            $this->availableLabels,
+            $this->ignoredcit,
+            $this->ignoredfunctions,
+            $this->ignoredconstants,
+            $this->dependsOn,
+            $this->analyzerQuoted
+        );
 
         $last = explode('\\', $return::class);
         $last = array_pop($last);

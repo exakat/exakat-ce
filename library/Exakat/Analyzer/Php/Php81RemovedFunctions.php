@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class Php81RemovedFunctions extends Analyzer {
-    protected $phpVersion = '8.1-';
+    protected string $phpVersion = '8.1-';
 
     public function analyze(): void {
         //image2wbmp()
@@ -49,13 +49,13 @@ class Php81RemovedFunctions extends Analyzer {
              ->savePropertyAs('fullcode', 'fnp')
              ->back('first')
              ->not(
-                $this->side()
-                     ->goToInstruction('Ifthen')
-                     ->outIs('CONDITION')
-                     ->functioncallIs('\\function_exists')
-                     ->outWithRank('ARGUMENT', 0)
-                     ->atomIs('String')
-                     ->noDelimiterIs('fnp')
+                 $this->side()
+                      ->goToInstruction('Ifthen')
+                      ->outIs('CONDITION')
+                      ->functioncallIs('\\function_exists')
+                      ->outWithRank('ARGUMENT', 0)
+                      ->atomIs('String')
+                      ->noDelimiterIs('fnp')
              );
         $this->prepareQuery();
     }

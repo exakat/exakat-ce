@@ -37,9 +37,9 @@ class ShouldChainException extends Analyzer {
              ->outIs('THROW')
              ->outIs('NEW')
              ->not(
-                $this->side()
-                     ->outIs('ARGUMENT')
-                     ->samePropertyAs('code', 'caught')
+                 $this->side()
+                      ->outIs('ARGUMENT')
+                      ->samePropertyAs('code', 'caught')
              )
              ->back('first');
         $this->prepareQuery();

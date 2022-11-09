@@ -29,7 +29,7 @@ class NotCompatibleWithType extends DSL {
     public const ALLOW_NULL = true;
 
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 2 :
                 list($types, $withNull) = func_get_args();
                 $withNull = in_array($withNull, array(self::ALLOW_NULL, self::DISALLOW_NULL), STRICT_COMPARISON) ? $withNull : self::DISALLOW_NULL;
@@ -95,6 +95,10 @@ __.sideEffect{ typehints = []; }
 
             case "\\\\null":
                 result = !($types in ["Null"]);
+                break;
+
+            case "\\\\never":
+                result = true; // never is compatible with everything
                 break;
 
             case "\\\\false":

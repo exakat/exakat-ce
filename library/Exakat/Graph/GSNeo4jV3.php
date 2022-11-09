@@ -29,16 +29,10 @@ use Brightzone\GremlinDriver\Connection;
 use Exakat\Helpers\Timer;
 
 class GSNeo4jV3 extends Graph {
-    public const CHECKED     = true;
-    public const UNCHECKED   = false;
-    public const UNAVAILABLE = 2;
+    public const GREMLIN_VERSIONS  = array('3.4', '3.5', '3.6');
+    private string $gremlinVersion = '3.6';
 
-    public const GREMLIN_VERSIONS = array('3.4', '3.5');
-    private $gremlinVersion = '3.4';
-
-    private $status     = self::UNCHECKED;
-
-    private $db         = null;
+    private Connection $db;
 
     public function getInfo(): array {
         $stats = array();
@@ -61,12 +55,15 @@ class GSNeo4jV3 extends Graph {
 
             $gremlinJar = glob("{$this->config->gsneo4jv3_folder}/lib/gremlin-core-*.jar");
             $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
-            //gremlin-core-3.4.10.jar
-            $gremlinVersion = substr($gremlinVersion, 13, -4);
+            preg_match('/gremlin-core-([0-9.]+)\.\d+.jar/', $gremlinVersion, $r);
+            $gremlinVersion = $r[1] ?? 'unknown gremlin version';
             $stats['gremlin version'] = $gremlinVersion;
+            $this->gremlinVersion = $gremlinVersion;
 
             $neo4jJar = glob("{$this->config->gsneo4jv3_folder}/ext/neo4j-gremlin/lib/neo4j-*.jar");
-            $neo4jJar = array_filter($neo4jJar, function ($x) { return preg_match('#/neo4j-\d\.\d\.\d\.jar#', $x); });
+            $neo4jJar = array_filter($neo4jJar, function (string $x) : string {
+                return preg_match('#/neo4j-\d\.\d\.\d\.jar#', $x);
+            });
             $neo4jVersion = basename(array_pop($neo4jJar) ?? '');
 
             //neo4j-2.3.3.jar
@@ -91,9 +88,12 @@ class GSNeo4jV3 extends Graph {
         $gremlinJar = glob("{$this->config->gsneo4jv3_folder}/lib/gremlin-core-*.jar");
         $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
         // 3.4/3.5
-        preg_match('/gremlin-core-(\d+\.\d+)\.\d+.jar/', $gremlinVersion, $r);
-        $this->gremlinVersion = $r[1] ?? 'gremlin-core not found';
-        if(!in_array($this->gremlinVersion, self::GREMLIN_VERSIONS, STRICT_COMPARISON)) {
+        preg_match('/gremlin-core-([0-9.]+)\.\d+.jar/', $gremlinVersion, $r);
+        $gremlinVersion = $r[1] ?? 'unknown gremlin version';
+        $stats['gremlin version'] = $gremlinVersion;
+        $this->gremlinVersion = $gremlinVersion;
+
+        if (!in_array($this->gremlinVersion, self::GREMLIN_VERSIONS, STRICT_COMPARISON)) {
             throw new UnknownGremlinVersion($this->gremlinVersion);
         }
 
@@ -142,11 +142,11 @@ class GSNeo4jV3 extends Graph {
 
     public function checkConnection(): bool {
         $res = @stream_socket_client("tcp://{$this->config->gsneo4jv3_host}:{$this->config->gsneo4jv3_port}",
-                                     $errno,
-                                     $errorMessage,
-                                     1,
-                                     STREAM_CLIENT_CONNECT
-                                     );
+            $errno,
+            $errorMessage,
+            1,
+            STREAM_CLIENT_CONNECT
+        );
 
         return is_resource($res);
     }
@@ -166,32 +166,34 @@ class GSNeo4jV3 extends Graph {
         $this->start();
     }
 
+    public function setConfigFile(): void {
+        if (!file_exists("{$this->config->gsneo4jv3_folder}/conf/gsneo4jv3.{$this->gremlinVersion}.yaml")) {
+            assert(file_exists("{$this->config->dir_root}/server/gsneo4jv3/gsneo4jv3.{$this->gremlinVersion}.yaml"),
+                "Missing gsneo4jv3.{$this->gremlinVersion}.yaml in server/gsneo4jv3");
+            copy( "{$this->config->dir_root}/server/gsneo4jv3/gsneo4jv3.{$this->gremlinVersion}.yaml",
+                "{$this->config->gsneo4jv3_folder}/conf/gsneo4jv3.{$this->gremlinVersion}.yaml");
+            copy( "{$this->config->dir_root}/server/gsneo4jv3/exakat.properties",
+                "{$this->config->gsneo4jv3_folder}/conf/exakat.properties");
+        }
+    }
+
     public function start(): void {
         if (!file_exists("{$this->config->gsneo4jv3_folder}/conf")) {
             throw new GremlinException('No graphdb found.');
         }
 
-        if (!file_exists("{$this->config->gsneo4jv3_folder}/conf/gsneo4jv3.{$this->gremlinVersion}.yaml")) {
-            assert(file_exists("{$this->config->dir_root}/server/gsneo4jv3/gsneo4jv3.{$this->gremlinVersion}.yaml"),
-                   "Missing gsneo4jv3.{$this->gremlinVersion}.yaml in server/gsneo4jv3");
-            copy( "{$this->config->dir_root}/server/gsneo4jv3/gsneo4jv3.{$this->gremlinVersion}.yaml",
-                  "{$this->config->gsneo4jv3_folder}/conf/gsneo4jv3.{$this->gremlinVersion}.yaml");
-            copy( "{$this->config->dir_root}/server/gsneo4jv3/exakat.properties",
-                  "{$this->config->gsneo4jv3_folder}/conf/exakat.properties");
-        }
+        $this->setConfigFile();
 
         if (in_array($this->gremlinVersion, self::GREMLIN_VERSIONS)) {
-            display("start gremlin server {$this->gremlinVersion}.x");
-            putenv("GREMLIN_YAML=conf/gsneo4jv3.{$this->gremlinVersion}.yaml");
-            putenv('PID_DIR=db');
-            exec("GREMLIN_YAML=conf/gsneo4jv3.{$this->gremlinVersion}.yaml; PID_DIR=db; cd {$this->config->gsneo4jv3_folder}; rm -rf db/neo4j; /bin/bash ./bin/gremlin-server.sh start > gremlin.log 2>&1 &");
+            display("start gremlin server {$this->gremlinVersion}.x GSNeo4jV3");
+            exec("cd {$this->config->gsneo4jv3_folder}; rm -rf db/neo4j; GREMLIN_YAML=conf/gsneo4jv3.{$this->gremlinVersion}.yaml /bin/bash ./bin/gremlin-server.sh start");
         }
         display('started gremlin server');
         $this->init();
         sleep(2);
 
         $timer = new Timer();
-        $round = -1;
+        $round = 0;
         $pid = false;
         do {
             $connexion = $this->checkConnection();
@@ -199,41 +201,34 @@ class GSNeo4jV3 extends Graph {
                 ++$round;
                 usleep(100000 * $round);
             }
-        } while ( !$connexion && $round < 20);
+        } while ( !$connexion && $round < 21);
         $timer->end();
 
         display("Restarted in $round rounds\n");
 
-        if (file_exists("{$this->config->gsneo4jv3_folder}/db/gremlin.pid")) {
-            $pid = trim(file_get_contents("{$this->config->gsneo4jv3_folder}/db/gremlin.pid"));
-        } elseif ( file_exists("{$this->config->gsneo4jv3_folder}/db/gsneo4jv3.pid")) {
-            $pid = trim(file_get_contents("{$this->config->gsneo4jv3_folder}/db/gsneo4jv3.pid"));
+        if (file_exists("{$this->config->gsneo4jv3_folder}/run/gremlin.pid")) {
+            $pid = trim(file_get_contents("{$this->config->gsneo4jv3_folder}/run/gremlin.pid"));
         } else {
             $pid = false;
         }
 
         $ms = number_format($timer->duration(Timer::MS), 2);
-        $pid = $pid === false ? 'Not yet' : $pid;
+        $pid = $pid === false ? 'Not found' : $pid;
         display("started [$pid] in $ms ms");
     }
 
     public function stop(): void {
-        if (file_exists("{$this->config->gsneo4jv3_folder}/db/gremlin.pid")) {
-            display('stop gremlin server ' . $this->gremlinVersion . '.x');
-            putenv('GREMLIN_YAML=conf/gsneo4jv3.' . $this->gremlinVersion . '.yaml');
-            putenv('PID_DIR=db');
-            shell_exec("GREMLIN_YAML=conf/gsneo4jv3.{$this->gremlinVersion}.yaml; PID_DIR=db; cd {$this->config->gsneo4jv3_folder}; /bin/bash ./bin/gremlin-server.sh stop; rm -rf db/gremlin.pid");
+        if (file_exists("{$this->config->gsneo4jv3_folder}/run/gremlin.pid")) {
+            display("Stopping gremlin server {$this->gremlinVersion}");
+            $res = shell_exec("cd {$this->config->gsneo4jv3_folder}; GREMLIN_YAML=conf/gsneo4jv3.{$this->gremlinVersion}.yaml ./bin/gremlin-server.sh stop");
+            if (preg_match('/\[(\d+)\]/', $res, $r)) {
+                display("Stopped gremlin server [$r[1]]");
+            } else {
+                display("Could not stop gremlin server : $res");
+            }
+        } else {
+            display('Gremlin server is not running');
         }
-    }
-
-    public function fixId($id) {
-        if ($this->initialId === null) {
-            $id = $this->query('g.addV("X").id()')->toInt();
-            $this->query('g.V(' . $id . ').drop()');
-
-            $this->initialId = $id + 1;
-        }
-        return $id - 1 + $this->initialId;
     }
 }
 

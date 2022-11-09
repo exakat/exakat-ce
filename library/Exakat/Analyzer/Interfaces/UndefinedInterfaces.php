@@ -28,6 +28,7 @@ use Exakat\Analyzer\Analyzer;
 class UndefinedInterfaces extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/VariableTypehint',
+                     'Complete/ReturntTypehint',
                     );
     }
 
@@ -65,6 +66,7 @@ class UndefinedInterfaces extends Analyzer {
 
         // types, (typeints or returntype)
         $this->atomIs(self::CONSTANTS_ALL)
+             ->isNot('extra', true)
              ->hasIn(self::TYPE_LINKS)
              ->atomIsNot(array('Self', 'Parent'))
              ->has('fullnspath')

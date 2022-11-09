@@ -47,18 +47,18 @@ class Mermaid {
         $this->options[$what][$name] = $value;
     }
 
-    public function __toString() {
+    public function __toString() : string {
         $atoms = array();
 
-        foreach($this->nodes as $id => $label) {
+        foreach ($this->nodes as $id => $label) {
             $options = $this->toStyle(array_merge($this->options['nodes'], $label));
             $atoms[] = 'N' . $id . "[\"$label[label]\"]";
         }
         $atoms = implode(PHP_EOL, $atoms);
 
         $links = array();
-        foreach($this->links as $origin => $destinations) {
-            foreach($destinations as $destination) {
+        foreach ($this->links as $origin => $destinations) {
+            foreach ($destinations as $destination) {
                 $links[] = 'N' . $origin . ' --> ' . 'N' . $destination;
             }
         }
@@ -94,7 +94,7 @@ HTML;
 
     private function toStyle(array $array = array()): string {
         $return = array();
-        foreach($array as $name => $value) {
+        foreach ($array as $name => $value) {
             $value = addslashes((string) $value);
             $return[] = "$name=\"$value\"";
         }

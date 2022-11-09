@@ -24,7 +24,7 @@
 namespace Exakat\Exceptions;
 
 class NoSuchFile extends \RuntimeException {
-    public function __construct($filename = '', $code = 0, \Exception $previous = null) {
+    public function __construct(string $filename = '', int $code = 0, \Exception $previous = null) {
         parent::__construct('No such file as "' . $filename . "\"\n", $code, $previous);
     }
 }

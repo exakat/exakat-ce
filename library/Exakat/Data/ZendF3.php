@@ -56,7 +56,7 @@ class ZendF3 {
         $res = $this->sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_NUM)) {
+        while ($row = $res->fetchArray(\SQLITE3_NUM)) {
             $return[] = $row[0];
         }
 
@@ -79,7 +79,7 @@ class ZendF3 {
         $res = $this->sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             array_collect_by($return, $row['release'], $row['class']);
         }
 
@@ -102,7 +102,7 @@ class ZendF3 {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             array_collect_by($return, $row['release'], $row['interface']);
         }
 
@@ -125,7 +125,7 @@ class ZendF3 {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             array_collect_by($return, $row['release'], $row['trait']);
         }
 
@@ -164,7 +164,7 @@ SQL;
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $type = $row['type'];
             unset($row['type']);
 
@@ -182,7 +182,6 @@ SQL;
 
         return $return;
     }
-
 }
 
 ?>

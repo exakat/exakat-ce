@@ -31,7 +31,7 @@ class Zip extends Vcs {
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version  2>&1");
-        if (strpos($res, 'Zip') === false) {
+        if (!str_contains($res, 'Zip')  ) {
             throw new HelperException('zip');
         }
 
@@ -60,7 +60,7 @@ class Zip extends Vcs {
         unlink($archiveFile);
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = $this->shell("{$this->executable} -v  2>&1");

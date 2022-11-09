@@ -32,8 +32,8 @@ class MethodUsage extends Analyzer {
     public function analyze(): void {
         $staticHash = array();
         $methodHash = array();
-        foreach($this->methodList as $class => $methods) {
-            foreach($methods as $details) {
+        foreach ($this->methodList as $class => $methods) {
+            foreach ($methods as $details) {
                 if (isset($staticHash[$class])) {
                     $staticHash[$class][] = $details->normal_name;
                 } else {
@@ -48,11 +48,11 @@ class MethodUsage extends Analyzer {
             }
         }
 
-        foreach($staticHash as &$methods) {
+        foreach ($staticHash as &$methods) {
             $methods = $this->dictCode->translate(array_unique($methods), Dictionary::CASE_INSENSITIVE);
         }
         unset($methods);
-        foreach($methodHash as &$methods) {
+        foreach ($methodHash as &$methods) {
             $methods = $this->dictCode->translate(array_unique($methods), Dictionary::CASE_INSENSITIVE);
         }
         unset($methods);

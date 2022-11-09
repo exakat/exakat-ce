@@ -27,6 +27,7 @@ use Exakat\Exceptions\DSLException;
 use Exakat\Tasks\Helpers\Atom;
 use Exakat\GraphElements;
 use Exakat\Analyzer\Analyzer;
+use Exakat\Data\Dictionary;
 
 abstract class DSL {
     public const VARIABLE_WRITE = true;
@@ -84,6 +85,7 @@ abstract class DSL {
                              'isExt',
                              'isStub',
                              'typehint',
+                             'isConst',
                              );
 
     protected const BOOLEAN_PROPERTY = array('abstract',
@@ -105,6 +107,7 @@ abstract class DSL {
                                              'isPhp',
                                              'isExt',
                                              'isStub',
+                                             'extra',
                                              );
 
     protected const INTEGER_PROPERTY = array('line',
@@ -116,38 +119,38 @@ abstract class DSL {
                                              'lccode',
                                              );
 
-    protected $dslfactory             = null;
-    protected $availableAtoms         = array();
-    protected $availableLinks         = array();
-    protected $availableFunctioncalls = array();
-    protected $availableVariables     = array(); // This one is per query
-    protected $availableLabels        = array(); // This one is per query
-    protected $dictCode               = null;
-    protected $ignoredcit             = null;
-    protected $ignoredfunctions       = null;
-    protected $ignoredconstants       = null;
-    protected $dependsOn              = array();
-    protected $analyzerQuoted         = '';
+    protected DSLFactory $dslfactory             ;
+    protected array      $availableAtoms         = array();
+    protected array      $availableLinks         = array();
+    protected array      $availableFunctioncalls = array();
+    protected array      $availableVariables     = array(); // This one is per query
+    protected array      $availableLabels        = array(); // This one is per query
+    protected Dictionary $dictCode               ;
+    protected array      $ignoredcit             = array();
+    protected array      $ignoredfunctions       = array();
+    protected array      $ignoredconstants       = array();
+    protected array      $dependsOn              = array();
+    protected string     $analyzerQuoted         = '';
 
-    protected static $linksDown     = '';
-    protected static $MAX_LOOPING   = Analyzer::MAX_LOOPING;
-    protected static $MAX_SEARCHING = Analyzer::MAX_SEARCHING;
-    protected static $TIME_LIMIT    = Analyzer::TIME_LIMIT;
-    protected static $ATOMS         = array();
-    protected static $LINKS         = array();
+    protected static string $linksDown     = '';
+    protected static int    $MAX_LOOPING   = Analyzer::MAX_LOOPING;
+    protected static int    $MAX_SEARCHING = Analyzer::MAX_SEARCHING;
+    protected static int    $TIME_LIMIT    = Analyzer::TIME_LIMIT;
+    protected static array  $ATOMS         = array();
+    protected static array  $LINKS         = array();
 
     public function __construct(DSLFactory $dslfactory,
-                                array $availableAtoms         = array(),
-                                array $availableLinks         = array(),
-                                array $availableFunctioncalls = array(),
-                                array &$availableVariables    = array(),
-                                array &$availableLabels       = array(),
-                                array $ignoredcit             = array(),
-                                array $ignoredfunctions       = array(),
-                                array $ignoredconstants       = array(),
-                                array $dependsOn              = array(),
-                                string $analyzerQuoted        = ''
-                                ) {
+        array $availableAtoms         = array(),
+        array $availableLinks         = array(),
+        array $availableFunctioncalls = array(),
+        array &$availableVariables    = array(),
+        array &$availableLabels       = array(),
+        array $ignoredcit             = array(),
+        array $ignoredfunctions       = array(),
+        array $ignoredconstants       = array(),
+        array $dependsOn              = array(),
+        string $analyzerQuoted        = ''
+    ) {
         $this->dslfactory             = $dslfactory;
         $this->dictCode               = exakat('dictionary');
         $this->availableAtoms         = $availableAtoms;
@@ -176,55 +179,60 @@ abstract class DSL {
 
     abstract public function run(): Command;
 
-    protected function normalizeAtoms($atoms): array {
+    protected function normalizeAtoms(string|array $atoms): array {
         $atoms = makeArray($atoms);
         return array_values(array_intersect($atoms, $this->availableAtoms));
     }
 
-    protected function normalizeLinks($links): array {
+    protected function normalizeLinks(string|array $links): array {
         $links = makeArray($links);
         return array_values(array_intersect($links, $this->availableLinks));
     }
 
-    protected function normalizeFunctioncalls($fullnspaths): array {
+    protected function normalizeFunctioncalls(string|array $fullnspaths): array {
         $fullnspaths = makeArray($fullnspaths);
         return array_values(array_intersect($fullnspaths, $this->availableFunctioncalls));
     }
 
-    protected function SorA($value): string {
+    protected function SorA(array|string $value): string {
         if (is_array($value)) {
             return makeList($value);
-        } elseif (is_string($value)) {
+        }
+
+        if (is_string($value)) {
             return '"' . $value . '"';
         }
-        assert(false, '$v is not a string or an array');
     }
 
-    protected function assertLabel($name, bool $read = self::LABEL_GO): bool {
+    protected function isLabel(string $name): bool {
+        return in_array($name, $this->availableLabels, STRICT_COMPARISON);
+    }
+
+    protected function assertLabel(string|array $name, bool $read = self::LABEL_GO): bool {
         if (is_array($name)) {
-            foreach($name as $n) {
+            foreach ($name as $n) {
                 $this->assertLabel($n, $read);
             }
             return true;
         }
 
         if ($read === self::LABEL_SET) {
-            assert(!in_array($name, $this->availableLabels), "Label '$name' is already set : " . join(', ', $this->availableLabels));
+            assert(!in_array($name, $this->availableLabels, STRICT_COMPARISON), "Label '$name' is already set : " . join(', ', $this->availableLabels));
             $this->availableLabels[] = $name;
         } else {
-            assert(in_array($name, $this->availableLabels), "Label '$name' is not set");
+            assert(in_array($name, $this->availableLabels, STRICT_COMPARISON), "Label '$name' is not set");
         }
         return true;
     }
 
     protected function isVariable(string $name): bool {
-        return in_array($name, $this->availableVariables);
+        return in_array($name, $this->availableVariables, STRICT_COMPARISON);
     }
 
     protected function assertVariable(string $name, bool $write = self::VARIABLE_READ): bool {
         if ($write === self::VARIABLE_WRITE) {
             assert(!$this->isVariable($name), "Variable '$name' is already taken : " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), true) . PHP_EOL . print_r($this, true));
-            assert(!in_array($name, self::PROPERTIES), "Don't use a property name as a variable ($name)");
+            assert(!in_array($name, self::PROPERTIES, STRICT_COMPARISON), "Don't use a property name as a variable ($name)");
             $this->availableVariables[] = $name;
         } else {
             assert($this->isVariable($name), "Variable '$name' is not defined");
@@ -232,22 +240,22 @@ abstract class DSL {
         return true;
     }
 
-    protected function assertLink($link): bool {
+    protected function assertLink(string|array $link): bool {
         if (is_string($link)) {
-            if(in_array($link, array('KEY', 'ELEMENT', 'PROPERTY')) ) {
+            if (in_array($link, array('KEY', 'ELEMENT', 'PROPERTY'), STRICT_COMPARISON) ) {
                 throw new DSLException("$link is no more", self::LEVELS_TO_ANALYSE);
             }
-            if($link !== strtoupper($link)) {
+            if ($link !== strtoupper($link)) {
                 throw new DSLException("Wrong format for LINK name : $link", self::LEVELS_TO_ANALYSE);
             }
-            if(preg_match('/[^A-Z]/', $link)) {
+            if (preg_match('/[^A-Z]/', $link)) {
                 throw new DSLException("Not a link : $link", self::LEVELS_TO_ANALYSE);
             }
-            assert(in_array($link, self::$LINKS), "No such link as '$link'");
+            assert(in_array($link, self::$LINKS, STRICT_COMPARISON), "No such link as '$link'");
         } elseif (is_array($link)) {
-            foreach($link as $l) {
+            foreach ($link as $l) {
                 $this->assertLink($l);
-                assert(in_array($l, self::$LINKS), "No such link as '$l'");
+                assert(in_array($l, self::$LINKS, STRICT_COMPARISON), "No such link as '$l'");
             }
         } else {
             assert(false, 'Unsupported type for link : ' . gettype($link));
@@ -255,12 +263,12 @@ abstract class DSL {
         return true;
     }
 
-    protected function assertTokens($token): bool {
+    protected function assertTokens(string|array $token): bool {
         if (is_string($token)) {
             assert(substr($token, 0, 2) === 'T_', "Wrong prefix for TOKEN name : $token");
             assert($token === strtoupper($token), "Wrong format for TOKEN name : $token");
         } elseif (is_array($token)) {
-            foreach($token as $t) {
+            foreach ($token as $t) {
                 assert(substr($t, 0, 2) === 'T_', "Wrong prefix for TOKEN name : $t");
                 assert($t === strtoupper($t), "Wrong format for TOKEN name : $t");
             }
@@ -270,14 +278,14 @@ abstract class DSL {
         return true;
     }
 
-    protected function assertAtom($atom): bool {
+    protected function assertAtom(string|array $atom): bool {
         if (is_string($atom)) {
             assert($atom === ucfirst(strtolower($atom)), "Wrong format for Atom name : $atom");
-            assert(in_array($atom, self::$ATOMS), "No such atom as '$atom'");
+            assert(in_array($atom, self::$ATOMS, STRICT_COMPARISON), "No such atom as '$atom'");
         } elseif (is_array($atom)) {
-            foreach($atom as $a) {
+            foreach ($atom as $a) {
                 assert($a === ucfirst(strtolower($a)), "Wrong format for Atom name : $a");
-                assert(in_array($a, self::$ATOMS), "No such atom as '$a'");
+                assert(in_array($a, self::$ATOMS, STRICT_COMPARISON), "No such atom as '$a'");
             }
         } else {
             assert(false, 'Unsupported type for atom : ' . gettype($atom));
@@ -286,12 +294,12 @@ abstract class DSL {
         return true;
     }
 
-    protected function assertAnalyzer($analyzer): bool {
+    protected function assertAnalyzer(string|array $analyzer): bool {
         if (is_string($analyzer)) {
             assert(preg_match('#^[A-Z]\w+/[A-Z]\w+$#', $analyzer) !== false, "Wrong format for Analyzer : $analyzer");
             assert(class_exists('\\Exakat\\Analyzer\\' . str_replace('/', '\\', $analyzer)), "No such analyzer as $analyzer");
         } elseif (is_array($analyzer)) {
-            foreach($analyzer as $a) {
+            foreach ($analyzer as $a) {
                 assert(preg_match('#^[A-Z]\W\w+/[A-Z]\W\w+$#', $a) !== false, "Wrong format for Analyzer : $a");
                 assert(class_exists('\\Exakat\\Analyzer\\' . str_replace('/', '\\', $a)), "No such analyzer as $a");
             }
@@ -302,18 +310,18 @@ abstract class DSL {
         return true;
     }
 
-    protected function isProperty($property): bool {
-        return property_exists(Atom::class, $property) || in_array($property, array('typehint', 'label', 'self', 'ignored_dir', 'virtual', 'analyzer', 'propagated', 'isPhp', 'isExt', 'isStub'));
+    protected function isProperty(string $property): bool {
+        return property_exists(Atom::class, $property) || in_array($property, array('typehint', 'label', 'self', 'ignored_dir', 'virtual', 'analyzer', 'propagated', 'isPhp', 'isExt', 'isStub', 'extra'), STRICT_COMPARISON);
     }
 
-    protected function assertProperty($property): bool {
+    protected function assertProperty(string|array $property): bool {
         if (is_string($property)) {
-            assert( ($property === mb_strtolower($property)) || in_array($property, array('noDelimiter', 'isRead', 'isModified', 'isPhp', 'isExt', 'isStub', 'rankName')) , 'Wrong format for property name : "' . $property . '"');
+            assert( ($property === mb_strtolower($property)) || in_array($property, array('noDelimiter', 'isRead', 'isModified', 'isPhp', 'isExt', 'isStub', 'rankName', 'isConst'), STRICT_COMPARISON) , 'Wrong format for property name : "' . $property . '"');
             assert($this->isProperty($property), 'No such property in Atom : "' . $property . '"');
         } elseif (is_array($property)) {
             $properties = $property;
-            foreach($properties as $property) {
-                assert( ($property === mb_strtolower($property)) || in_array($property, array('noDelimiter', 'isRead', 'isModified', 'isPhp', 'isExt', 'isStub', )), "Wrong format for property name : '$property'");
+            foreach ($properties as $property) {
+                assert( ($property === mb_strtolower($property)) || in_array($property, array('noDelimiter', 'isRead', 'isModified', 'isPhp', 'isExt', 'isStub', 'isConst'), STRICT_COMPARISON), "Wrong format for property name : '$property'");
                 assert($this->isProperty($property), "No such property in Atom : '$property'");
             }
         } else {
@@ -333,10 +341,10 @@ abstract class DSL {
         return $className;
     }
 
-    protected function tolowercase($code) {
+    protected function tolowercase(string|array $code) : string|array {
         if (is_array($code)) {
             $code = array_map('mb_strtolower', $code);
-        } elseif (is_scalar($code)) {
+        } elseif (is_string($code)) {
             $code = mb_strtolower($code);
         } else {
             assert(false, __METHOD__ . ' received an unprocessable object ' . gettype($code));
@@ -345,7 +353,7 @@ abstract class DSL {
         return $code;
     }
 
-    protected function makeLinks($links, string $direction = 'in'): string {
+    protected function makeLinks(array|string $links, string $direction = 'in'): string {
         if (empty($links)) {
             return '.out( )';
         }
@@ -353,7 +361,7 @@ abstract class DSL {
         $return = array();
 
         $links = makeArray($links);
-        foreach($links as $l) {
+        foreach ($links as $l) {
             if (empty($l)) {
                 $return[] = ".$direction( )";
             } elseif (is_array($l)) {
@@ -374,7 +382,7 @@ abstract class DSL {
             'Wrong number of argument for ' . $method . '. ' . $maxCount . ' is expected, ' . $actualCount . ' provided.');
     }
 
-    protected function protectValue($value): string {
+    protected function protectValue(string|array|bool|int|null $value): string {
         if (is_string($value)) {
             if ($this->isVariable($value)) {
                 return $value;
@@ -383,7 +391,7 @@ abstract class DSL {
             }
         } elseif (is_int($value)) {
             return (string) $value;
-        } elseif (is_null($value)) {
+        } elseif ($value === null) {
             return 'null';
         } elseif (is_bool($value)) {
             return $value ? 'true' : 'false';

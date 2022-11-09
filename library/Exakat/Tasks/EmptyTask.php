@@ -26,7 +26,6 @@ class EmptyTask extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
-
     }
 }
 

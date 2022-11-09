@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectParameterCounts extends AnalyzerHashHashResults {
-    protected $analyzerName = 'ParameterCounts';
+    protected string $analyzerName = 'ParameterCounts';
 
     public function analyze(): void {
         // foo($a, $b, ...$c) : 3 parameter

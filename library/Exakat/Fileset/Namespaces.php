@@ -27,7 +27,7 @@ class Namespaces extends Fileset {
     private array $namespaces    = array();
 
     public function __construct(array $namespaces) {
-        foreach(array_filter($namespaces) as $namespace) {
+        foreach (array_filter($namespaces) as $namespace) {
             if ($namespace[0] === '\\') {
                 $this->namespaces[] = mb_strtolower("$namespace*");
             } else {
@@ -47,7 +47,7 @@ class Namespaces extends Fileset {
     public function filterFile(array $result): bool {
         $namespace = $result['namespace'];
 
-        foreach($this->namespaces as $n) {
+        foreach ($this->namespaces as $n) {
             if (fnmatch($n, $namespace, FNM_NOESCAPE)) {
                 return true;
             }

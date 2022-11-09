@@ -31,7 +31,7 @@ class Favorites extends Reports {
         $analyzers = $this->rulesets->getRulesetsAnalyzers(array('Preferences'));
 
         $return = array();
-        foreach($analyzers as $analyzer) {
+        foreach ($analyzers as $analyzer) {
             $r = $this->dump->fetchHashAnalyzer($analyzer)->toArray();
 
             if (empty($r)) {

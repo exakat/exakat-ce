@@ -74,7 +74,6 @@ class Upgrade extends Tasks {
             echo 'This version may be updated from the current version ' , Exakat::VERSION , ' to ' , $version  , PHP_EOL;
 
             if ($this->config->update === true) {
-
                 echo '  Updating to version ' , $version , PHP_EOL;
                 preg_match('#<pre id="sha256"><a href="index.php\?file=exakat-' . $version . '.phar.sha256">(.*?)</pre>#', $html, $r);
                 $sha256 = strip_tags($r[1]);

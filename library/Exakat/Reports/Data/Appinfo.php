@@ -26,7 +26,7 @@ use Exakat\Analyzer\Analyzer;
 use Exakat\Reports\Reports;
 
 class Appinfo extends Data {
-        private $extensions = array(
+    private array $extensions = array(
                     'PHP' => array(
                             'Short tags'                    => 'Structures/ShortTags',
                             'Echo tags <?='                 => 'Php/EchoTagUsage',
@@ -54,7 +54,7 @@ class Appinfo extends Data {
                             'Coalesce'                      => 'Php/Coalesce',
                             'Coalesce Equal'                => 'Php/CoalesceEqual',
                             'Trailing Comma'                => 'Php/TrailingComma',
-                            'Trailing Comma In Use'         => 'Php/TrailingUseComma',
+                            'Trailing Comma In Use'         => 'Php/UseTrailingUseComma',
                             'PHP 8.0 Variable Syntax'       => 'Php/Php80VariableSyntax',
                             'Attributes'                    => 'Php/UseAttributes',
                             'Nested Attributes'             => 'Attributes/NestedAttributes',
@@ -150,8 +150,8 @@ class Appinfo extends Data {
                             'Never typehint'              => 'Php/NeverTypehintUsage',
                             'Mixed Typehint'              => 'Php/MixedUsage',
                             'PHP 8.0 Scalar Typehints'    => 'Php/Php80OnlyTypeHints',
-                            'PHP 8.0 Union Typehints'     => 'Php/Php80UnionTypehints',
-                            'PHP 8.1 Intersection Typehints' => 'Php/Php81IntersectionTypehints',
+                            'PHP 8.0 Union Typehints'     => 'Php/Php80UnionTypehint',
+                            'PHP 8.1 Intersection Typehints' => 'Php/Php81IntersectionTypehint',
                             'Static variables'            => 'Variables/StaticVariables',
 
                             'Function dereferencing'      => 'Structures/FunctionSubscripting',
@@ -170,8 +170,8 @@ class Appinfo extends Data {
                     ),
 
                     'Classes' => array(
-                            'Classes'                    => 'Classes/Classnames',
-                            'Anonymous Classes'          => 'Classes/Anonymous',
+                            'Classes'                    => 'Class',
+                            'Anonymous Classes'          => 'Classanonymous',
                             'Class aliases'              => 'Classes/ClassAliasUsage',
 
                             'Abstract classes'           => 'Classes/Abstractclass',
@@ -200,14 +200,14 @@ class Appinfo extends Data {
                             'Contravariance'             => 'Php/UseContravariance',
 
                             'Class overreach'            => 'Classes/ClassOverreach',
-                            'Null Safe Operator ?->'     => 'Php/NullSafeOperator',
+                            'Null Safe Operator ?->'     => 'Php/UseNullSafeOperator',
                             'PHP 4 constructor'          => 'Classes/OldStyleConstructor',
                             'Multiple class in one file' => 'Classes/MultipleClassesInFile',
                     ),
 
                     'Constants' => array(
                             'Constants'           => 'Constants/ConstantUsage',
-                            'Dynamically create'  => 'Constants/DynamicCreations',
+                            'Dynamically create'  => 'Constants/DynamicCreation',
                             'Case Insensitive'    => 'Constants/CaseInsensitiveConstants',
                             'Boolean'             => 'Boolean',
                             'Null'                => 'Null',
@@ -251,7 +251,6 @@ class Appinfo extends Data {
                      ),
 
                     'Crypto' => array(
-                            'Crypto/Hash'         => 'Php/CryptoHashUsage',
                             'Argon2'              => 'Php/Argon2Usage',
                             'ext/openssl'         => 'Extensions/Extopenssl',
                             'ext/libsodium'       => 'Extensions/Extlibsodium',
@@ -267,45 +266,51 @@ class Appinfo extends Data {
                      ),
 
                     'Languages' => array(
-                            'Json'             => 'Extensions/ExtJson',
+                            'Json'             => 'Extensions/Extjson',
 //                            'pack'             => 'Structures/FileUsage',
 //                            'SQL'             => 'Extensions/Extldap',
-                            'Regex'             => 'Extensions/ExtPcre',
-                            'Ereg'             => 'Extensions/ExtEreg',
+                            'Regex'             => 'Extensions/Extpcre',
+                            'Ereg'             => 'Extensions/Extereg',
                      ),
 
                     'Extensions' => array(
+                            'argon2'         => 'Php/Argon2Usage',
                             'ext/amqp'       => 'Extensions/Extamqp',
                             'ext/apache'     => 'Extensions/Extapache',
                             'ext/apc'        => 'Extensions/Extapc',
                             'ext/apcu'       => 'Extensions/Extapcu',
-                            'argon2'         => 'Php/Argon2Usage',
                             'ext/array'      => 'Extensions/Extarray',
                             'ext/ast'        => 'Extensions/Extast',
+                            'ext/async'      => 'Extensions/Extasync',
                             'ext/bcmath'     => 'Extensions/Extbcmath',
                             'ext/bzip2'      => 'Extensions/Extbzip2',
-                            'ext/cairo'      => 'Extensions/Extcairo',
                             'ext/calendar'   => 'Extensions/Extcalendar',
+                            'ext/cmark'      => 'Extensions/Extcmark',
                             'ext/com'        => 'Extensions/Extcom',
                             'ext/crypto'     => 'Extensions/Extcrypto',
+                            'ext/csv'        => 'Extensions/Extcsv',
                             'ext/ctype'      => 'Extensions/Extctype',
                             'ext/curl'       => 'Extensions/Extcurl',
                             'ext/cyrus'      => 'Extensions/Extcyrus',
                             'ext/date'       => 'Extensions/Extdate',
+                            'ext/db2'        => 'Extensions/Extdb2',
                             'ext/dba'        => 'Extensions/Extdba',
+                            'ext/decimal'    => 'Extensions/Extdecimal',
                             'ext/dio'        => 'Extensions/Extdio',
                             'ext/dom'        => 'Extensions/Extdom',
+                            'ext/ds'         => 'Extensions/Extds',
                             'ext/eaccelerator' => 'Extensions/Exteaccelerator',
+                            'ext/eio'        => 'Extensions/Exteio',
                             'ext/enchant'    => 'Extensions/Extenchant',
                             'ext/ereg'       => 'Extensions/Extereg',
-                            'ext/event'      => 'Extensions/Extevent',
                             'ext/ev'         => 'Extensions/Extev',
+                            'ext/event'      => 'Extensions/Extevent',
+                            'ext/excimer'    => 'Extensions/Extexcimer',
                             'ext/exif'       => 'Extensions/Extexif',
                             'ext/expect'     => 'Extensions/Extexpect',
+                            'ext/fam'        => 'Extensions/Extfam',
                             'ext/fann'       => 'Extensions/Extfann',
-                            'ext/fdf'        => 'Extensions/Extfdf',
                             'ext/ffi'        => 'Extensions/Extffi',
-                            'ext/ffmpeg'     => 'Extensions/Extffmpeg',
                             'ext/file'       => 'Extensions/Extfile',
                             'ext/fileinfo'   => 'Extensions/Extfileinfo',
                             'ext/filter'     => 'Extensions/Extfilter',
@@ -313,6 +318,7 @@ class Appinfo extends Data {
                             'ext/ftp'        => 'Extensions/Extftp',
                             'ext/gd'         => 'Extensions/Extgd',
                             'ext/gearman'    => 'Extensions/Extgearman',
+                            'ext/gender'     => 'Extensions/Extgender',
                             'ext/geoip'      => 'Extensions/Extgeoip',
                             'ext/gettext'    => 'Extensions/Extgettext',
                             'ext/gmagick'    => 'Extensions/Extgmagick',
@@ -320,10 +326,11 @@ class Appinfo extends Data {
                             'ext/gnupg'      => 'Extensions/Extgnupg',
                             'ext/grpc'       => 'Extensions/Extgrpc',
                             'ext/hash'       => 'Extensions/Exthash',
-                            'ext/php_http'   => 'Extensions/Exthttp',
+                            'ext/hrtime'     => 'Extensions/Exthrtime',
                             'ext/ibase'      => 'Extensions/Extibase',
                             'ext/iconv'      => 'Extensions/Exticonv',
                             'ext/igbinary'   => 'Extensions/Extigbinary',
+                            'ext/ice'        => 'Extensions/Extice',
                             'ext/iis'        => 'Extensions/Extiis',
                             'ext/imagick'    => 'Extensions/Extimagick',
                             'ext/imap'       => 'Extensions/Extimap',
@@ -331,12 +338,16 @@ class Appinfo extends Data {
                             'ext/inotify'    => 'Extensions/Extinotify',
                             'ext/intl'       => 'Extensions/Extintl',
                             'ext/json'       => 'Extensions/Extjson',
+                            'ext/judy'       => 'Extensions/Extjudy',
                             'ext/kdm5'       => 'Extensions/Extkdm5',
                             'ext/lapack'     => 'Extensions/Extlapack',
                             'ext/ldap'       => 'Extensions/Extldap',
                             'ext/leveldb'    => 'Extensions/Extleveldb',
                             'ext/libevent'   => 'Extensions/Extlibevent',
+                            'ext/libsodium'  => 'Extensions/Extlibsodium',
                             'ext/libxml'     => 'Extensions/Extlibxml',
+                            'ext/lua'        => 'Extensions/Extlua',
+                            'ext/lzf'        => 'Extensions/Extlzf',
                             'ext/mail'       => 'Extensions/Extmail',
                             'ext/mailparse'  => 'Extensions/Extmailparse',
                             'ext/math'       => 'Extensions/Extmath',
@@ -344,34 +355,49 @@ class Appinfo extends Data {
                             'ext/mcrypt'     => 'Extensions/Extmcrypt',
                             'ext/memcache'   => 'Extensions/Extmemcache',
                             'ext/memcached'  => 'Extensions/Extmemcached',
+                            'ext/mhash'      => 'Extensions/Extmhash',
                             'ext/ming'       => 'Extensions/Extming',
                             'ext/mongo'      => 'Extensions/Extmongo',
+                            'ext/mongodb'    => 'Extensions/Extmongodb',
+                            'ext/msgpack'    => 'Extensions/Extmsgpack',
                             'ext/mssql'      => 'Extensions/Extmssql',
                             'ext/mysql'      => 'Extensions/Extmysql',
                             'ext/mysqli'     => 'Extensions/Extmysqli',
+                            'ext/ncurses'    => 'Extensions/Extncurses',
+                            'ext/newt'       => 'Extensions/Extnewt',
+                            'ext/nsapi'      => 'Extensions/Extnsapi',
                             'ext/ob'         => 'Extensions/Extob',
                             'ext/oci8'       => 'Extensions/Extoci8',
                             'ext/odbc'       => 'Extensions/Extodbc',
                             'ext/opcache'    => 'Extensions/Extopcache',
                             'ext/opencensus' => 'Extensions/Extopencensus',
                             'ext/openssl'    => 'Extensions/Extopenssl',
+                            'ext/parle'      => 'Extensions/Extparle',
                             'ext/parsekit'   => 'Extensions/Extparsekit',
                             'ext/password'   => 'Extensions/Extpassword',
-                            'ext/pcov'       => 'Extensions/Extpcov',
                             'ext/pcntl'      => 'Extensions/Extpcntl',
+                            'ext/pcov'       => 'Extensions/Extpcov',
                             'ext/pcre'       => 'Extensions/Extpcre',
                             'ext/pdo'        => 'Extensions/Extpdo',
                             'ext/pgsql'      => 'Extensions/Extpgsql',
                             'ext/phalcon'    => 'Extensions/Extphalcon',
                             'ext/phar'       => 'Extensions/Extphar',
+                            'ext/php_http'   => 'Extensions/Exthttp',
+                            'ext/pkcs11'     => 'Extensions/Extpkcs11',
                             'ext/posix'      => 'Extensions/Extposix',
                             'ext/proctitle'  => 'Extensions/Extproctitle',
+                            'ext/protobuf'   => 'Extensions/Extprotobuf',
                             'ext/pspell'     => 'Extensions/Extpspell',
+                            'ext/psr'        => 'Extensions/Extpsr',
+                            'ext/rar'        => 'Extensions/Extrar',
+                            'ext/rdkafka'    => 'Extensions/Extrdkafka',
                             'ext/readline'   => 'Extensions/Extreadline',
                             'ext/recode'     => 'Extensions/Extrecode',
                             'ext/redis'      => 'Extensions/Extredis',
                             'ext/reflexion'  => 'Extensions/Extreflection',
                             'ext/runkit'     => 'Extensions/Extrunkit',
+                            'ext/sdl'        => 'Extensions/Extsdl',
+                            'ext/seaslog'    => 'Extensions/Extseaslog',
                             'ext/sem'        => 'Extensions/Extsem',
                             'ext/session'    => 'Extensions/Extsession',
                             'ext/shmop'      => 'Extensions/Extshmop',
@@ -381,26 +407,34 @@ class Appinfo extends Data {
                             'ext/sockets'    => 'Extensions/Extsockets',
                             'ext/sphinx'     => 'Extensions/Extsphinx',
                             'ext/spl'        => 'Extensions/Extspl',
+                            'ext/spx'        => 'Extensions/Extspx',
                             'ext/sqlite'     => 'Extensions/Extsqlite',
                             'ext/sqlite3'    => 'Extensions/Extsqlite3',
                             'ext/sqlsrv'     => 'Extensions/Extsqlsrv',
                             'ext/ssh2'       => 'Extensions/Extssh2',
                             'ext/standard'   => 'Extensions/Extstandard',
                             'ext/stats'      => 'Extensions/Extstats',
+                            'ext/stomp'      => 'Extensions/Extstomp',
+                            'ext/string'     => 'Extensions/Extstring',
+                            'ext/suhosin'    => 'Extensions/Extsuhosin',
                             'ext/svm'        => 'Extensions/Extsvm',
+                            'ext/swoole'     => 'Extensions/Extswoole',
+                            'ext/taint'      => 'Extensions/Exttaint',
                             'ext/tidy'       => 'Extensions/Exttidy',
                             'ext/tokenizer'  => 'Extensions/Exttokenizer',
+                            'ext/tokyotyrant'=> 'Extensions/Exttokyotyrant',
                             'ext/trader'     => 'Extensions/Exttrader',
                             'ext/uopz'       => 'Extensions/Extuopz',
                             'ext/uuid'       => 'Extensions/Extuuid',
                             'ext/v8js'       => 'Extensions/Extv8js',
                             'ext/varnish'    => 'Extensions/Extvarnish',
                             'ext/vips'       => 'Extensions/Extvips',
+                            'ext/wasm'       => 'Extensions/Extwasm',
                             'ext/wddx'       => 'Extensions/Extwddx',
                             'ext/weakref'    => 'Extensions/Extweakref',
                             'ext/wikidiff2'  => 'Extensions/Extwikidiff2',
                             'ext/wincache'   => 'Extensions/Extwincache',
-                            'ext/xcache'     => 'Extensions/Extxcache',
+                            'ext/xattr'      => 'Extensions/Extxattr',
                             'ext/xdebug'     => 'Extensions/Extxdebug',
                             'ext/xdiff'      => 'Extensions/Extxdiff',
                             'ext/xhprof'     => 'Extensions/Extxhprof',
@@ -411,44 +445,59 @@ class Appinfo extends Data {
                             'ext/xsl'        => 'Extensions/Extxsl',
                             'ext/xxtea'      => 'Extensions/Extxxtea',
                             'ext/yaml'       => 'Extensions/Extyaml',
-                            'ext/yis'        => 'Extensions/Extyis',
+                            'ext/yar'        => 'Extensions/Extyar',
                             'ext/zendmonitor'=> 'Extensions/Extzendmonitor',
                             'ext/zip'        => 'Extensions/Extzip',
                             'ext/zlib'       => 'Extensions/Extzlib',
                             'ext/zmq'        => 'Extensions/Extzmq',
-        //                          'ext/skeleton'   => 'Extensions/Extskeleton',
+                            'ext/zookeeper'  => 'Extensions/Extzookeeper',
+       //                          'ext/skeleton'   => 'Extensions/Extskeleton',
                     ),
 
                     'Frameworks' => array(
-                            'Cake PHP'             => 'Cakephp/CakePHPUsed',
+//                            'Cake PHP'             => 'Cakephp/CakePHPUsed',
                             'Codeigniter'          => 'Vendors/Codeigniter',
+                            'Concrete5'            => 'Vendors/Concrete5',
                             'Drupal'               => 'Vendors/Drupal',
                             'Ez'                   => 'Vendors/Ez',
                             'Fuel'                 => 'Vendors/Fuel',
                             'Joomla'               => 'Vendors/Joomla',
                             'Laravel'              => 'Vendors/Laravel',
                             'Phalcon'              => 'Vendors/Phalcon',
+                            'Sylius'               => 'Vendors/Sylius',
                             'Symfony'              => 'Vendors/Symfony',
-                            'Wordpress'            => 'ZendF/ZendClasses',
-                            'Yii'                  => 'Vendors/Yii',
-                            'Zend Framework'       => 'ZendF/ZendClasses',
+                            'Typo3'                => 'Vendors/Typo3',
+                            'Wordpress'            => 'Vendors/Wordpress',
+//                            'Yii'                  => 'Vendors/Yii',
+//                            'Zend Framework'       => 'ZendF/ZendClasses',
                     )
                 );
 
-        public function originals() {
-            return $this->extensions;
-        }
+    public function originals(): array {
+        return $this->extensions;
+    }
 
-        public function prepare() {
-            // collecting information for Extensions
-            $themed = array_merge(...array_values($this->extensions));
-            $res = $this->dump->fetchAnalysersCounts($themed);
-            $sources = $res->toHash('analyzer', 'count');
+    public function prepare(): void {
+        // collecting information for Extensions
+        $themed = array_merge(...array_values($this->extensions));
+        $res = $this->dump->fetchAnalysersCounts($themed);
+        $sources = $res->toHash('analyzer', 'count');
 
-            foreach($this->extensions as $section => $hash) {
-                $this->values[$section] = array();
+        $res = $this->dump->fetchTable('atomsCounts');
+        $atoms   = $res->toHash('atom', 'count');
 
-                foreach($hash as $name => $ext) {
+        $sources = array_merge($sources, $atoms);
+
+        foreach ($this->extensions as $section => $hash) {
+            $this->values[$section] = array();
+
+            foreach ($hash as $name => $ext) {
+                if (!isset($sources[$ext]) &&
+                        !str_contains($ext, '/')  ) {
+                    $this->values[$section][$name] = Reports::NO;
+                    continue;
+                }
+
                 if (!isset($sources[$ext])) {
                     $this->values[$section][$name] = Reports::NOT_RUN;
                     continue;
@@ -479,7 +528,7 @@ class Appinfo extends Data {
                         return $list[$ka] === Reports::YES ? -1 : 1;
                     }
 
-                    return $kb <=> $ka;
+                    return $ka <=> $kb;
                 });
             }
         }
@@ -495,7 +544,7 @@ class Appinfo extends Data {
         // Special case for the encodings : one tick each.
         $res = $this->dump->fetchTable('stringEncodings');
         // sort
-        foreach($res->toArray() as $row) {
+        foreach ($res->toArray() as $row) {
             if (empty($row['encoding'])) {
                 $this->values['Strings']['Unknown encoding'] = Reports::YES;
             } elseif (empty($row['block'])) {
@@ -504,8 +553,6 @@ class Appinfo extends Data {
                 $this->values['Strings'][$row['encoding'] . ' (' . $row['block'] . ')' ] = Reports::YES;
             }
         }
-
-        return true;
     }
 }
 

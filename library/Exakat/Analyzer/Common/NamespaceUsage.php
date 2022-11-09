@@ -26,9 +26,9 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class NamespaceUsage extends Analyzer {
-    protected $namespaces = array();
+    protected array $namespaces = array();
 
-    public function setNamespaces($namespaces) {
+    public function setNamespaces(array $namespaces) {
         $this->namespaces = $namespaces;
     }
 

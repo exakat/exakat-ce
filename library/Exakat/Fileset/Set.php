@@ -27,7 +27,7 @@ class Set extends Fileset {
     private array $filesets   = array();
 
     public function __construct(array $filesets) {
-        foreach($filesets as $fileset) {
+        foreach ($filesets as $fileset) {
             $this->filesets[$fileset] = array('/a/fooA.php');
         }
     }
@@ -36,17 +36,18 @@ class Set extends Fileset {
         $this->files = array_intersect(array_merge(...array_values($this->filesets)), $files);
         $this->ignored = array_diff($files, $this->files);
     }
-
-    public function setFiles(array $files) {
-        foreach($files as $file) {
-            $f = basename($file);
-            if (isset($this->names[mb_strtolower($f)])) {
-                $this->ignored[$file] = "Ignored file ($file)";
-            } else {
-                $this->files[] = $file;
+    /*
+        public function setFiles(array $files) {
+            foreach($files as $file) {
+                $f = basename($file);
+                if (isset($this->names[mb_strtolower($f)])) {
+                    $this->ignored[$file] = "Ignored file ($file)";
+                } else {
+                    $this->files[] = $file;
+                }
             }
         }
-    }
+        */
 }
 
 ?>

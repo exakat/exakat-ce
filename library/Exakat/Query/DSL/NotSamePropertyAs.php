@@ -24,17 +24,27 @@
 namespace Exakat\Query\DSL;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Exceptions\WrongNumberOfArguments;
 
 class NotSamePropertyAs extends DSL {
     public function run(): Command {
-        if (func_num_args() === 2) {
-            list($property, $name) = func_get_args();
-            $caseSensitive = Analyzer::CASE_SENSITIVE;
-        } else {
-            list($property, $name, $caseSensitive) = func_get_args();
+        switch (func_num_args()) {
+            case 2:
+                list($property, $name) = func_get_args();
+                $caseSensitive = Analyzer::CASE_SENSITIVE;
+                break;
+
+            case 3:
+                list($property, $name, $caseSensitive) = func_get_args();
+                break;
+
+            default:
+                throw new WrongNumberOfArguments(__METHOD__, func_num_args(), 2);
         }
 
-        assert($this->assertProperty($property));
+        if ($property !== SavePropertyAs::ATOM) {
+            $this->assertProperty($property);
+        }
         assert($this->assertVariable($name));
 
         switch ($property) {
@@ -45,6 +55,9 @@ class NotSamePropertyAs extends DSL {
                 return new Command("filter{ it.get().id() != $name }");
 
             case 'self':
+                assert(false, 'Dont use self with property');
+
+            case SavePropertyAs::ATOM :
                 return new Command("filter{ it.get() != $name }");
 
             case 'reference':

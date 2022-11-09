@@ -28,7 +28,7 @@ class IgnoreDirs extends Fileset {
     private array $includeDirs   = array();
 
     public function __construct(array $ignoreDirs, array $includeDirs) {
-        foreach(array_filter($ignoreDirs) as $ignore) {
+        foreach (array_filter($ignoreDirs) as $ignore) {
             if ($ignore[0] === '/') {
                 $this->ignoreDirs[] = "$ignore*";
             } else {
@@ -36,7 +36,7 @@ class IgnoreDirs extends Fileset {
             }
         }
 
-        foreach(array_filter($includeDirs) as $include) {
+        foreach (array_filter($includeDirs) as $include) {
             if ($include[0] === '/') {
                 $this->includeDirs[] = "$include*";
             } else {
@@ -46,9 +46,9 @@ class IgnoreDirs extends Fileset {
     }
 
     public function setFiles(array $files) {
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $found = false;
-            foreach($this->ignoreDirs as $ignore) {
+            foreach ($this->ignoreDirs as $ignore) {
                 if (fnmatch($ignore, $file)) {
                     $found = true;
                     break 1;
@@ -56,7 +56,7 @@ class IgnoreDirs extends Fileset {
             }
 
             if ($found) {
-                foreach($this->includeDirs as $include) {
+                foreach ($this->includeDirs as $include) {
                     if (fnmatch($include, $file)) {
                         $found = false;
                         break 1;

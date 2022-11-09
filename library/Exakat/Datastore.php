@@ -22,21 +22,23 @@
 
 namespace Exakat;
 
+use Exakat\Config;
 use Exakat\Exceptions\WrongNumberOfColsForAHash;
 use Exakat\Exceptions\NoStructureForTable;
+use \Sqlite3;
 
 class Datastore {
-    private $sqliteRead  = null;
-    private $sqliteWrite = null;
-    private $config      = null;
-
     public const CREATE = 1;
     public const REUSE = 2;
     public const TIMEOUT_WRITE = 5000;
     public const TIMEOUT_READ = 6000;
 
-    public function __construct() {
-        $this->config = exakat('config');
+    private Sqlite3 $sqliteRead;
+    private Sqlite3$sqliteWrite;
+    private Config $config;
+
+    public function __construct(Config $config) {
+        $this->config = $config;
     }
 
     public function create(): void {
@@ -78,7 +80,6 @@ class Datastore {
         $this->cleanTable('ignoredConstants');
 
         $this->sqliteWrite->close();
-        $this->sqliteWrite = null;
 
         $this->reuse();
     }
@@ -196,6 +197,7 @@ class Datastore {
             $query = "SELECT * FROM $table";
             $res = $this->sqliteRead->query($query);
         } catch (\Exception $e) {
+        	
         }
         $return = array();
 
@@ -213,15 +215,17 @@ class Datastore {
         try {
             $res = $this->sqliteRead->query($query);
         } catch (\Throwable $e) {
+        	$res = null;
             // This also catch when the datastore is not available
         }
 
-        $return = array();
+		if ($res === null) {
+			return array();
+		}
 
-        if (isset($res)) {
-            while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
-                $return[] = $row[$col];
-            }
+        $return = array();
+        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+            $return[] = $row[$col];
         }
 
         return $return;
@@ -254,11 +258,15 @@ class Datastore {
     }
 
     public function getAllHash(string $table = 'hash'): array {
-        $query = "SELECT key, value FROM $table";
-        $stmt = $this->sqliteRead->prepare($query);
-        $res = $stmt->execute();
+    	try {
+	        $query = "SELECT key, value FROM $table";
+    	    $stmt = $this->sqliteRead->prepare($query);
+        	$res = $stmt->execute();
+        } catch(\Exception $e) {
+        	$res = null;
+        }
 
-        if ($res === false) {
+        if (empty($res)) {
             return array();
         }
 
@@ -287,7 +295,7 @@ class Datastore {
         return $return;
     }
 
-    public function addRowAnalyzer(string $analyzer, $key, string $value = ''): bool {
+    public function addRowAnalyzer(string $analyzer, array|string $key, string $value = ''): bool {
         if (is_array($key)) {
             foreach($key as &$v) {
                 $v['analyzer'] = $analyzer;

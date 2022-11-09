@@ -46,19 +46,19 @@ class NoNullForNative extends Analyzer {
         $functions = array();
         $allMethods   = array();
 
-        foreach($acceptNull as $position => $list) {
-            foreach($list as $function) {
-                 if (strpos($function, '::') === false) {
-                     $functions[$position][] = $function;
-                 } else {
-                     list($class, $method) = explode('::', $function);
-                     $allMethods[$class][$position][] = $method;
-                 }
+        foreach ($acceptNull as $position => $list) {
+            foreach ($list as $function) {
+                if (!str_contains($function, '::')  ) {
+                    $functions[$position][] = $function;
+                } else {
+                    list($class, $method) = explode('::', $function);
+                    $allMethods[$class][$position][] = $method;
+                }
             }
         }
 
         // echo substr('123', null, 1);
-        foreach($functions as $position => $fnp) {
+        foreach ($functions as $position => $fnp) {
             // NULL literal
             $this->atomIs('Functioncall')
                  ->is('isPhp', true)
@@ -100,13 +100,13 @@ class NoNullForNative extends Analyzer {
                  ->inIs('NAME')
                  // check is it tested for null
                  ->not(
-                    $this->side()
-                         ->outIs('NAME')
-                         ->outIs('DEFINITION')
-                         ->inIs(array('LEFT', 'RIGHT'))
-                         ->atomIs('Comparison') // operator is not important
-                         ->outIs(array('LEFT', 'RIGHT'))
-                         ->atomIs('Null')
+                     $this->side()
+                          ->outIs('NAME')
+                          ->outIs('DEFINITION')
+                          ->inIs(array('LEFT', 'RIGHT'))
+                          ->atomIs('Comparison') // operator is not important
+                          ->outIs(array('LEFT', 'RIGHT'))
+                          ->atomIs('Null')
                  )
                  ->isNullable()
                  ->back('first');
@@ -125,8 +125,8 @@ class NoNullForNative extends Analyzer {
             $this->prepareQuery();
         }
 
-        foreach($allMethods as $class => $methods) {
-            foreach($methods as $position => $name) {
+        foreach ($allMethods as $class => $methods) {
+            foreach ($methods as $position => $name) {
                 $this->atomIs('Methodcall')
                      ->outIs('OBJECT')
                      ->inIs('DEFINITION')
@@ -148,8 +148,6 @@ class NoNullForNative extends Analyzer {
         }
 
         // custom function which may return null with type
-
-
     }
 }
 

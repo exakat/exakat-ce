@@ -29,7 +29,7 @@ class IsMissingOrNull extends DSL {
         return new Command(<<<'GREMLIN'
  where( __.out("DEFAULT").hasLabel("Void", "Null").not(__.in("RIGHT") ))
 GREMLIN
-);
+        );
     }
 }
 ?>

@@ -35,8 +35,8 @@ class Catalog extends Tasks {
         // List of analysis
         $rulesets = $this->rulesets->listAllRulesets();
         sort($rulesets);
-        $rulesets = array_map( function ($x) {
-            if (strpos($x, ' ') !== false) {
+        $rulesets = array_map( function (string $x): string {
+            if (str_contains($x, ' ')  ) {
                 $x = '"' . $x . '"';
             }
             return $x;
@@ -46,7 +46,7 @@ class Catalog extends Tasks {
         // List of reports
         $r = Reports::$FORMATS;
         $reports = array();
-        foreach($r as $report) {
+        foreach ($r as $report) {
             try {
                 Reports::getInstance($report);
                 $reports[] = $report;
@@ -69,7 +69,7 @@ class Catalog extends Tasks {
         } else {
             $display = '';
 
-            foreach($data as $section => $list) {
+            foreach ($data as $section => $list) {
                 $display .= count($list) . " $section : \n";
                 $display .= '   ' . implode("\n   ", $list) . "\n";
             }

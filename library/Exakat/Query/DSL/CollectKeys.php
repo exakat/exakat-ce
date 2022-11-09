@@ -40,7 +40,7 @@ class CollectKeys extends DSL {
       .fold() 
     )
 GREMLIN
-);
+        );
         return $command;
     }
 }

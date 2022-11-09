@@ -27,7 +27,7 @@ use Exakat\Analyzer\Analyzer;
 
 class GoToAllChildren extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1:
                 list($self) = func_get_args();
                 if (!in_array($self, array(Analyzer::INCLUDE_SELF, Analyzer::EXCLUDE_SELF), STRICT_COMPARISON)) {
@@ -39,31 +39,19 @@ class GoToAllChildren extends DSL {
                 $self = Analyzer::INCLUDE_SELF;
         }
 
-        $MAX_LOOPING = self::$MAX_LOOPING;
-
         if ($self === Analyzer::EXCLUDE_SELF) {
-            $command = new Command(<<<GREMLIN
- as("gotoallchildren")
-.repeat( __.out("DEFINITION")
-           .in("EXTENDS", "IMPLEMENTS")
-           .simplePath().from("gotoallchildren")
-          )
-          .emit( )
-          .times($MAX_LOOPING)
+            $command = new Command(<<<'GREMLIN'
+out("DEFINITION").in("EXTENDS", "IMPLEMENTS") 
 GREMLIN
-);
+            );
             return $command;
         } else {
-            $command = new Command(<<<GREMLIN
- as("gotoallchildren")
-.emit( )
-.repeat( __.out("DEFINITION")
-           .in("EXTENDS", "IMPLEMENTS")
-           .simplePath().from("gotoallchildren")
-          )
-          .times($MAX_LOOPING)
+            $command = new Command(<<<'GREMLIN'
+union(__.out("DEFINITION").in("EXTENDS", "IMPLEMENTS"),
+      __.identity()
+      )
 GREMLIN
-);
+            );
             return $command;
         }
     }

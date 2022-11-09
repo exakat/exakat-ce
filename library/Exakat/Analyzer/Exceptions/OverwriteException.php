@@ -49,7 +49,7 @@ not(
         )
 )
 GREMLIN
-)
+             )
              ->back('first');
         $this->prepareQuery();
     }

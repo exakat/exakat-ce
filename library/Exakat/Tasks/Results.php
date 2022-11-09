@@ -61,7 +61,7 @@ class Results extends Tasks {
                 $analyzersClass = array($this->config->program);
             }
 
-            foreach($analyzersClass as $analyzer) {
+            foreach ($analyzersClass as $analyzer) {
                 if (!$this->rulesets->getClass($analyzer)) {
                     throw new NoSuchAnalyzer($analyzer, $this->rulesets);
                 }
@@ -94,7 +94,7 @@ GREMLIN;
         } elseif ($this->config->style === 'ALL') {
             $results = array();
 
-            foreach($analyzersClass as $oneAnalyzerClass) {
+            foreach ($analyzersClass as $oneAnalyzerClass) {
                 $analyzer =  $this->rulesets->getInstance($oneAnalyzerClass, null, $this->config);
                 $results[] = $analyzer->getDump();
             }
@@ -105,7 +105,7 @@ GREMLIN;
             $vertices = $this->gremlin->query($queryTemplate)->results;
 
             $return = array();
-            foreach($vertices as $values) {
+            foreach ($vertices as $values) {
                 $return[] = array($values);
             }
         } elseif ($this->config->style === 'COUNTED') {
@@ -113,7 +113,7 @@ GREMLIN;
             $vertices = $this->gremlin->query($queryTemplate)->results;
 
             $return = array();
-            foreach($vertices[0] as $k => $values) {
+            foreach ($vertices[0] as $k => $values) {
                 $return[$k] = $values;
             }
         }
@@ -122,7 +122,7 @@ GREMLIN;
             $text = json_encode($return);
         } elseif ($this->config->csv === true) {
             $text = array(array('Code', 'File', 'Namespace', 'Class', 'Function'));
-            foreach($return as $k => $v) {
+            foreach ($return as $k => $v) {
                 if (is_array($v)) {
                     $text[] = $v;
                 } else {
@@ -131,7 +131,7 @@ GREMLIN;
             }
         } elseif ($this->config->html === true || $this->config->odt === true) {
             $text = '';
-            foreach($return as $k => $r) {
+            foreach ($return as $k => $r) {
                 if ($this->config->style === 'COUNTED') {
                     $text .= "+ $k => $r\n";
                 } else {
@@ -146,7 +146,7 @@ GREMLIN;
         } else {
             // count also for $this->config->text == 1
             $text = '';
-            foreach($return as $k => $v) {
+            foreach ($return as $k => $v) {
                 if ($this->config->style === 'COUNTED') {
                     $text .= "$k => $v\n";
                 } else {
@@ -187,7 +187,7 @@ GREMLIN;
             if ($this->config->format === 'CSV') {
                 $csvFile = fopen($name, 'w');
                 if (is_resource($csvFile)) {
-                    foreach($text as $t) {
+                    foreach ($text as $t) {
                         fputcsv($csvFile, $t);
                     }
                     fclose($csvFile);

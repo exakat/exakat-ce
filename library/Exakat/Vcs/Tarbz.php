@@ -37,7 +37,7 @@ class Tarbz extends Vcs {
         }
 
         $res = $this->shell("{$this->executableBzip2} --help 2>&1");
-        if (strpos($res, 'bzip2') === false) {
+        if (!str_contains($res, 'bzip2')  ) {
             throw new HelperException('bzip2');
         }
 
@@ -69,7 +69,7 @@ class Tarbz extends Vcs {
         unlink($archiveFile);
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = trim($this->shell("{$this->executableTar} --version 2>&1"));

@@ -40,7 +40,7 @@ where( __.out("BLOCK", "CODE").out("EXPRESSION")
          .hasLabel("Usenamespace").out("USE")
          .filter{ (possibleAlias =~ "^" + it.get().value("fullnspath").replace("\\", "\\\\") ).getCount() > 0} )
 GREMLIN
-)
+             )
              ->back('first');
         $this->prepareQuery();
     }

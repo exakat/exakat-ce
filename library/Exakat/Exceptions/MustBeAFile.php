@@ -24,8 +24,7 @@
 namespace Exakat\Exceptions;
 
 class MustBeAFile extends \Exception {
-    public function __construct($message = '', $code = 0, \Exception $previous = null) {
-
+    public function __construct(string $message = '', int $code = 0, \Exception $previous = null) {
         parent::__construct("$message must be a file, or use -d option. \nAborting.\n", $code, $previous);
     }
 }

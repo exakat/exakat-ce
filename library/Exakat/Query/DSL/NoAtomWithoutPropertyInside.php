@@ -33,7 +33,7 @@ class NoAtomWithoutPropertyInside extends DSL {
         $MAX_LOOPING = self::$MAX_LOOPING;
         $linksDown = self::$linksDown;
 
-$gremlin = <<<GREMLIN
+        $gremlin = <<<GREMLIN
 not(
     where( __.emit( ).repeat( __.out($linksDown).not(hasLabel("Closure", "Classanonymous", "Closure", "Function", "Trait", "Interface")) )
                      .times($MAX_LOOPING)
@@ -44,7 +44,7 @@ not(
     )
 GREMLIN;
         return new Command($gremlin,
-                           array(makeArray($atoms), makeArray($values) ) );
+            array(makeArray($atoms), makeArray($values) ) );
     }
 }
 ?>

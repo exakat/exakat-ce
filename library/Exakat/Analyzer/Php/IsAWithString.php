@@ -27,7 +27,6 @@ use Exakat\Analyzer\Analyzer;
 class IsAWithString extends Analyzer {
     public function dependsOn(): array {
         return array('Variables/IsLocalConstant',
-                     'Complete/CreateDefaultValues',
                      'Complete/PropagateCalls',
                     );
     }

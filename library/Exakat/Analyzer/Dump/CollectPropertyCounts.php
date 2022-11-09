@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectPropertyCounts extends AnalyzerHashHashResults {
-    protected $analyzerName = 'CIT property counts';
+    protected string $analyzerName = 'CIT property counts';
 
     public function analyze(): void {
         // foo() {$t ; }

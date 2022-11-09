@@ -39,14 +39,14 @@ class StrposCompare extends Analyzer {
              ->codeIs(array('0', "''", '""', 'null', 'false'))
              ->back('first')
              ->not(
-                $this->side()
-                     ->fullnspathIs('\preg_match')
-                     ->outWithRank('ARGUMENT', 0)
-                     ->not(
-                        $this->side()
-                             ->outIs('CONCAT')
-                             ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
-                     )
+                 $this->side()
+                      ->fullnspathIs('\preg_match')
+                      ->outWithRank('ARGUMENT', 0)
+                      ->not(
+                          $this->side()
+                               ->outIs('CONCAT')
+                               ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+                      )
              );
         $this->prepareQuery();
 
@@ -59,14 +59,14 @@ class StrposCompare extends Analyzer {
              ->codeIs(array('0', "''", '""', 'null', 'false'))
              ->back('first')
              ->not(
-                $this->side()
-                     ->fullnspathIs('\preg_match')
-                     ->outWithRank('ARGUMENT', 0)
-                     ->not(
-                        $this->side()
-                             ->outIs('CONCAT')
-                             ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
-                     )
+                 $this->side()
+                      ->fullnspathIs('\preg_match')
+                      ->outWithRank('ARGUMENT', 0)
+                      ->not(
+                          $this->side()
+                               ->outIs('CONCAT')
+                               ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+                      )
              );
         $this->prepareQuery();
 
@@ -77,14 +77,14 @@ class StrposCompare extends Analyzer {
              ->atomIs(array('Ifthen', 'While', 'Dowhile'))
              ->back('first')
              ->not(
-                $this->side()
-                     ->fullnspathIs('\preg_match')
-                     ->outWithRank('ARGUMENT', 0)
-                     ->not(
-                        $this->side()
-                             ->outIs('CONCAT')
-                             ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
-                     )
+                 $this->side()
+                      ->fullnspathIs('\preg_match')
+                      ->outWithRank('ARGUMENT', 0)
+                      ->not(
+                          $this->side()
+                               ->outIs('CONCAT')
+                               ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+                      )
              );
         $this->prepareQuery();
 
@@ -97,14 +97,14 @@ class StrposCompare extends Analyzer {
              ->atomIs(array('Ifthen', 'While', 'Dowhile'))
              ->back('first')
              ->not(
-                $this->side()
-                     ->fullnspathIs('\preg_match')
-                     ->outWithRank('ARGUMENT', 0)
-                     ->not(
-                        $this->side()
-                             ->outIs('CONCAT')
-                             ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
-                     )
+                 $this->side()
+                      ->fullnspathIs('\preg_match')
+                      ->outWithRank('ARGUMENT', 0)
+                      ->not(
+                          $this->side()
+                               ->outIs('CONCAT')
+                               ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+                      )
              );
         $this->prepareQuery();
 
@@ -124,14 +124,14 @@ class StrposCompare extends Analyzer {
              ->atomIs(array('Ifthen', 'While', 'Dowhile'))
              ->back('first')
              ->not(
-                $this->side()
-                     ->fullnspathIs('\preg_match')
-                     ->outWithRank('ARGUMENT', 0)
-                     ->not(
-                        $this->side()
-                             ->outIs('CONCAT')
-                             ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
-                     )
+                 $this->side()
+                      ->fullnspathIs('\preg_match')
+                      ->outWithRank('ARGUMENT', 0)
+                      ->not(
+                          $this->side()
+                               ->outIs('CONCAT')
+                               ->atomIs(array('Variable', 'Array', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+                      )
              );
         $this->prepareQuery();
     }

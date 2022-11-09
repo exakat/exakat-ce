@@ -27,7 +27,14 @@ use Exakat\Data\Methods;
 use Exakat\Query\DSL\FollowParAs;
 
 class WrongTypeForNativeFunction extends Analyzer {
+    public function dependsOn(): array {
+        return array('Complete/VariableTypehint',
+                    );
+    }
+
     public function analyze(): void {
+        // @todo : case for union and intersection types
+
         $types = array('float'  => array('Integer', 'Float'),
                        'int'    => array('Integer'),
                        'string' => self::STRINGS_LITERALS,
@@ -43,29 +50,31 @@ class WrongTypeForNativeFunction extends Analyzer {
                       );
 
         $returntypes = array();
-        foreach($types as $type => $atoms) {
+        foreach ($types as $type => $atoms) {
             $returntypes[$type] = $this->methods->getFunctionsByReturnType($type, Methods::LOOSE);
         }
         $returntypes['null'] = $this->methods->getFunctionsByReturnType('null', Methods::LOOSE);
         $returntypes['false'] = $this->methods->getFunctionsByReturnType('false', Methods::LOOSE);
 
         $returnOtherTypes = array();
-        foreach($returntypes as $type => $functions) {
+        foreach ($returntypes as $type => $functions) {
             $r2 = $returntypes;
             unset($r2[$type]);
 
             $returnOtherTypes[$type] = array_unique(array_merge(...array_values($r2)));
         }
 
-        foreach($types as $type => $atoms) {
+        foreach ($types as $type => $atoms) {
             $ini = $this->methods->getFunctionsByArgType($type, Methods::STRICT);
 
             if (empty($ini)) {
                 continue;
             }
 
-            foreach($ini as $rank => $functions) {
-                if (empty($functions)) { continue; }
+            foreach ($ini as $rank => $functions) {
+                if (empty($functions)) {
+                    continue;
+                }
 
                 // class x { string $id; function foo() { array_map($this->id, '') ; }
                 $this->atomFunctionIs($functions)
@@ -77,9 +86,9 @@ class WrongTypeForNativeFunction extends Analyzer {
                      ->inIs('PPP')
                      ->collectTypehints('typehints')
                      ->not(
-                        $this->side()
-                             ->outIs('TYPEHINT')
-                             ->atomIs('Void')
+                         $this->side()
+                              ->outIs('TYPEHINT')
+                              ->atomIs('Void')
                      )
                      ->raw('filter{!("\\\\' . $type . '" in typehints);}')
                      ->back('first');
@@ -91,13 +100,13 @@ class WrongTypeForNativeFunction extends Analyzer {
                      ->outWithRank('ARGUMENT', (int) $rank)
                      ->atomIs('Variable')
                      ->inIs('DEFINITION')
-                     ->inIs('NAME')
-                     ->collectTypehints('typehints')
+                     ->hasOut('TYPEHINT')
                      ->not(
-                        $this->side()
-                             ->outIs('TYPEHINT')
-                             ->atomIs('Void')
+                         $this->side()
+                              ->outIs('TYPEHINT')
+                              ->atomIs('Void')
                      )
+                     ->collectTypehints('typehints')
                      ->raw('filter{!("\\\\' . $type . '" in typehints);}')
                      ->back('first');
                 $this->prepareQuery();
@@ -111,9 +120,9 @@ class WrongTypeForNativeFunction extends Analyzer {
                      ->as('results')
                      ->atomIsNot($atoms, self::WITH_CONSTANTS)
                      ->not(
-                        $this->side()
-                             ->atomIs('Cast')
-                             ->tokenIs($castTypes[$type])
+                         $this->side()
+                              ->atomIs('Cast')
+                              ->tokenIs($castTypes[$type])
                      )
                      ->back('results')
                      ->atomIsNot(array_merge(self::CALLS, self::CONTAINERS, array('Void', 'Identifier', 'Nsname', 'Staticconstant', 'Coalesce', 'Ternary')))
@@ -133,20 +142,20 @@ class WrongTypeForNativeFunction extends Analyzer {
 
                      // Special case for false, inside a ?:
                      ->not(
-                        $this->side()
-                             ->fullnspathIs($returntypes['bool'])
-                             ->inIs('CONDITION')
-                             ->atomIs('Ternary')
-                             ->outIs('THEN')
-                             ->atomIs('Void')
+                         $this->side()
+                              ->fullnspathIs($returntypes['bool'])
+                              ->inIs('CONDITION')
+                              ->atomIs('Ternary')
+                              ->outIs('THEN')
+                              ->atomIs('Void')
                      )
 
                      // Special case for null, inside a ??
                      ->not(
-                        $this->side()
-                             ->fullnspathIs($returntypes['null'])
-                             ->inIs('LEFT')
-                             ->atomIs('Coalesce')
+                         $this->side()
+                              ->fullnspathIs($returntypes['null'])
+                              ->inIs('LEFT')
+                              ->atomIs('Coalesce')
                      )
                      ->back('results')
                      ->atomIsNot(array_merge(self::CONTAINERS, array('Void', 'Identifier', 'Nsname')))
@@ -160,6 +169,7 @@ class WrongTypeForNativeFunction extends Analyzer {
                      ->outWithRank('ARGUMENT', (int) $rank)
                      ->atomIs(self::CALLS, self::WITH_VARIABLES)
                      ->inIs('DEFINITION')
+                     ->atomIs(self::FUNCTIONS_ALL)
                      ->outIs('RETURNTYPE')
                      ->atomIsNot('Void')
                      ->fullnspathIsNot('\\' . $type)

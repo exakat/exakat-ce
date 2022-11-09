@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Functions;
 use Exakat\Analyzer\Analyzer;
 
 class AliasesUsage extends Analyzer {
-
     public function analyze(): void {
         // sizeof();
         $ini = $this->load('aliases', 'alias');

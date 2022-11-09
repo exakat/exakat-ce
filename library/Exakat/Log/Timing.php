@@ -23,9 +23,9 @@
 namespace Exakat\Log;
 
 class Timing extends Log {
-    private $start = null;
-    private $begin = null;
-    private $end   = null;
+    private float $start;
+    private float $begin;
+    private float $end;
 
     public function __construct(string $name = '') {
         assert(!empty($name), 'Cannot use an empty-named timing log');

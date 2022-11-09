@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class Deprecated extends Analyzer {
-
     public function analyze(): void {
         $ini = (object) $this->loadIni('deprecated.ini');
 
@@ -51,7 +50,7 @@ filter{
     name in ***;
 }
 GREMLIN
-, $functions);
+                 , $functions);
         $this->prepareQuery();
     }
 }

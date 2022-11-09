@@ -23,7 +23,7 @@
 namespace Exakat\Analyzer\Dump;
 
 class CollectNativeCallsPerExpressions extends AnalyzerHashHashResults {
-    protected $analyzerName = 'NativeCallPerExpression';
+    protected string $analyzerName = 'NativeCallPerExpression';
 
     public function analyze(): void {
         $MAX_LOOPING = self::MAX_LOOPING;
@@ -38,7 +38,7 @@ groupCount("m").by( __.emit( ).repeat( __.out({$this->linksDown}).not(hasLabel("
       .count()
 ).cap("m")
 GREMLIN
-);
+              );
         $this->prepareQuery();
     }
 }

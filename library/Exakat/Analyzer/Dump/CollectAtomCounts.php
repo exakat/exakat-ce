@@ -25,11 +25,11 @@ namespace Exakat\Analyzer\Dump;
 #use Exakat\Analyzer\Analyzer;
 
 class CollectAtomCounts extends AnalyzerTable {
-    protected $analyzerName = 'atomsCounts';
+    protected string $analyzerName = 'atomsCounts';
 
-    protected $analyzerTable = 'atomsCounts';
+    protected string $analyzerTable = 'atomsCounts';
 
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE atomsCounts (id INTEGER PRIMARY KEY AUTOINCREMENT,
                           atom STRING,
                           count INTEGER
@@ -38,7 +38,6 @@ SQL;
 
 
     public function analyze(): void {
-
         $query = <<<'GREMLIN'
 g.V().groupCount("b").by(label).cap("b").select("b").map{ x = []; for(key in it.get().keySet()) { x.add(["atom":key, "count":it.get().getAt(key)]);}; x }[0];
 GREMLIN;

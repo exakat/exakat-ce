@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectParameterNames extends AnalyzerHashHashResults {
-    protected $analyzerName = 'ParameterNames';
+    protected string $analyzerName = 'ParameterNames';
 
     public function analyze(): void {
         // foo($a, $b, ...$c) : 3 parameter

@@ -28,6 +28,7 @@ class CreateMagicProperty extends Complete {
                      'Complete/SetClassRemoteDefinitionWithTypehint',
                      'Complete/CreateDefaultValues',
                      'Complete/SetClassRemoteDefinitionWithLocalNew',
+                     'Complete/VariableTypehint',
                     );
     }
 
@@ -38,40 +39,39 @@ class CreateMagicProperty extends Complete {
         // link to __get
         $this->atomIs('Member', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Propertydefinition')
              )
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('OVERWRITE')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('OVERWRITE')
+                      ->atomIs('Propertydefinition')
              )
              ->outIs('OBJECT')
              ->atomIs(array('Variableobject', 'This'), self::WITHOUT_CONSTANTS)
              ->inIs('DEFINITION') // Good enough for This
              ->optional(          // For arguments
-                $this->side()
-                     ->inIs('NAME')
-                     ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
-                     ->outIs('TYPEHINT')
-                     ->inIs('DEFINITION')
+                 $this->side()
+                      ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
+                      ->outIs('TYPEHINT')
+                      ->inIs('DEFINITION')
              )
              ->optional(  // for local variables
-                $this->side()
-                     ->outIs('DEFAULT')
-                     ->atomIs('New')
-                     ->outIs('NEW')
-                     ->inIs('DEFINITION')
+                 $this->side()
+                      ->outIs('DEFAULT')
+                      ->atomIs('New')
+                      ->outIs('NEW')
+                      ->inIs('DEFINITION')
              )
 
             // In case we are in an interface
              ->optional(
-                $this->side()
-                     ->atomIs('Interface', self::WITHOUT_CONSTANTS)
-                     ->outIs('DEFINITION')
-                     ->inIs('IMPLEMENTS')
+                 $this->side()
+                      ->atomIs('Interface', self::WITHOUT_CONSTANTS)
+                      ->outIs('DEFINITION')
+                      ->inIs('IMPLEMENTS')
              )
 
              ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -87,33 +87,32 @@ class CreateMagicProperty extends Complete {
         $this->atomIs('Member', self::WITHOUT_CONSTANTS)
              ->is('isModified', true)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Propertydefinition')
              )
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('OVERWRITE')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('OVERWRITE')
+                      ->atomIs('Propertydefinition')
              )
              ->outIs('OBJECT')
              ->atomIs(array('Variableobject', 'This'), self::WITHOUT_CONSTANTS)
              ->inIs('DEFINITION') // Good enough for This
              ->optional(          // For arguments
-                $this->side()
-                     ->inIs('NAME')
-                     ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
-                     ->outIs('TYPEHINT')
-                     ->inIs('DEFINITION')
+                 $this->side()
+                      ->atomIs('Parameter', self::WITHOUT_CONSTANTS)
+                      ->outIs('TYPEHINT')
+                      ->inIs('DEFINITION')
              )
 
             // In case we are in an interface
              ->optional(
-                $this->side()
-                     ->atomIs('Interface', self::WITHOUT_CONSTANTS)
-                     ->outIs('DEFINITION')
-                     ->inIs('IMPLEMENTS')
+                 $this->side()
+                      ->atomIs('Interface', self::WITHOUT_CONSTANTS)
+                      ->outIs('DEFINITION')
+                      ->inIs('IMPLEMENTS')
              )
 
              ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -128,15 +127,15 @@ class CreateMagicProperty extends Complete {
         // links to __isset
         $this->atomIs('Member', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Propertydefinition')
              )
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('OVERWRITE')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('OVERWRITE')
+                      ->atomIs('Propertydefinition')
              )
              ->inIs('ARGUMENT')
              ->atomIs('Isset')
@@ -145,10 +144,9 @@ class CreateMagicProperty extends Complete {
              ->outIs('OBJECT')
              ->atomIs(array('Variableobject', 'This'), self::WITHOUT_CONSTANTS)
              ->optional(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->inIs('NAME')
-                     ->outIs('TYPEHINT')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('TYPEHINT')
              )
              ->inIs('DEFINITION')
              ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -163,15 +161,15 @@ class CreateMagicProperty extends Complete {
         // links to __unset
         $this->atomIs('Member', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Propertydefinition')
              )
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('OVERWRITE')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('OVERWRITE')
+                      ->atomIs('Propertydefinition')
              )
              ->inIs('ARGUMENT')
              ->atomIs('Unset')
@@ -180,10 +178,9 @@ class CreateMagicProperty extends Complete {
              ->outIs('OBJECT')
              ->atomIs(array('Variableobject', 'This'), self::WITHOUT_CONSTANTS)
              ->optional(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->inIs('NAME')
-                     ->outIs('TYPEHINT')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('TYPEHINT')
              )
              ->inIs('DEFINITION')
              ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -198,15 +195,15 @@ class CreateMagicProperty extends Complete {
         // links to __unset
         $this->atomIs('Member', self::WITHOUT_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Propertydefinition')
              )
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('OVERWRITE')
-                     ->atomIs('Propertydefinition')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('OVERWRITE')
+                      ->atomIs('Propertydefinition')
              )
              ->inIs('CAST')
              ->atomIs('Cast')
@@ -216,10 +213,9 @@ class CreateMagicProperty extends Complete {
               ->outIs('OBJECT')
              ->atomIs(array('Variableobject', 'This'), self::WITHOUT_CONSTANTS)
              ->optional(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->inIs('NAME')
-                     ->outIs('TYPEHINT')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->outIs('TYPEHINT')
              )
              ->inIs('DEFINITION')
              ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -246,6 +242,21 @@ class CreateMagicProperty extends Complete {
              ->outIs('DEFINITION')
              ->inIs('NAME')
              ->atomIs('Functioncall')
+             ->addEFrom('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // links to __string
+        $this->atomIs('Magicmethod', self::WITHOUT_CONSTANTS)
+             ->outIs('NAME')
+             ->codeIs('__toString', self::TRANSLATE, self::CASE_INSENSITIVE)
+             ->back('first')
+
+             ->inIs('MAGICMETHOD')
+             ->outIs('DEFINITION')
+             ->inIs('TYPEHINT')
+             ->outIsIE('PPP') // for properties
+             ->outIs('DEFINITION')
+             ->hasIn('CONCAT')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
 

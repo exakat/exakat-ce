@@ -23,30 +23,32 @@
 
 namespace Exakat\Query\DSL;
 
-
 class SavePropertyAs extends DSL {
+    public const ATOM = 'whole';
+
     public function run(): Command {
         assert(func_num_args() <= 2, __METHOD__ . ' should get 2 arguments max, ' . func_num_args() . ' provided.');
 
         if (func_num_args() === 1) {
-            $property = 'whole';
+            $property = self::ATOM;
             list($name) = func_get_args();
         } else {
             list($property, $name) = func_get_args();
-            if ($property !== 'whole') {
+            if ($property !== self::ATOM) {
                 $this->assertProperty($property);
             }
         }
 
         $this->assertVariable($name, self::VARIABLE_WRITE);
 
-        if ($property === 'whole') {
+        if ($property === self::ATOM) {
             return new Command('sideEffect{ ' . $name . ' = it.get(); }');
         } elseif ($property === 'label') {
             return new Command('sideEffect{ ' . $name . ' = it.get().label(); }');
         } elseif ($property === 'id') {
             return new Command('sideEffect{ ' . $name . ' = it.get().id(); }');
         } elseif ($property === 'self') {
+            assert(false, 'Dont use self anymore for properties');
             return new Command('sideEffect{ ' . $name . ' = it.get(); }');
         } elseif (in_array($property, array('reference'), \STRICT_COMPARISON) ) {
             return new Command('sideEffect{ if (it.get().properties("' . $property . '").any()) { ' . $name . ' = it.get().value("' . $property . '");} else { ' . $name . ' = false; }}');

@@ -36,7 +36,7 @@ class Diplomat extends Emissary {
     public function __construct() {
         parent::__construct();
 
-        foreach(array('74', '80', '81') as $shortVersion) {
+        foreach (array('74', '80', '81') as $shortVersion) {
             $this->compatibilities[$shortVersion] = "Compatibility PHP $shortVersion[0].$shortVersion[1]";
         }
 

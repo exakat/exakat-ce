@@ -26,7 +26,8 @@ use Exakat\Query\DSL\FollowParAs;
 
 class CreateDefaultValues extends Complete {
     public function dependsOn(): array {
-        return array( 'Complete/OverwrittenProperties',
+        return array('Complete/OverwrittenProperties',
+                     'Variables/Selftransform',
                     );
     }
 
@@ -42,40 +43,29 @@ class CreateDefaultValues extends Complete {
              ->back('first')
 
              ->outIs('DEFINITION')
+             ->analyzerIsNot('Variables/SelfTransform')
              ->inIs('LEFT')
              ->atomIs('Assignation', self::WITHOUT_CONSTANTS)
              ->codeIs(array('=', '??='), self::TRANSLATE, self::CASE_SENSITIVE) // can't accept .=, +=, etc.
 
              // doesn't use self : $a = $a + 1 is not a default value
-             ->not(
-                $this->side()
-                     ->outIs('RIGHT')
-                     ->atomInsideNoDefinition(self::VARIABLES_ALL)
-                     ->inIs('DEFINITION')
-                     ->inIsIE('NAME')
-                     ->samePropertyAs('fullcode', 'left')
-                     ->back('first')
-                     ->atomIs(array('Variabledefinition',
-                                    'Parametername',
-                                    ), self::WITHOUT_CONSTANTS)
-             )
              ->outIs('RIGHT')
-             ->followParAs(FollowParAs::FOLLOW_NONE)
+             ->followParAs(FollowParAs::FOLLOW_PARAS_ONLY)
 
              // 'Variableobject', 'Variablearray' are never on the right side of an assignation (not directly)
              ->not(
-                $this->side()
-                     ->atomIs('Variable')
-                     ->inIs('DEFINITION')
-                     ->inIsIE('NAME')
-                     ->raw('is(eq("first"))')
+                 $this->side()
+                      ->atomIs('Variable')
+                      ->inIs('DEFINITION')
+                      ->raw('is(eq("first"))')
              )
 
-             // avoid multiple definitions of DEFAULT (although, but why ?)
              ->not(
-                $this->side()
-                     ->inIs('DEFAULT')
+                 $this->side()
+                      ->inIs('DEFAULT')
+                      ->raw('where(eq("first"))')
              )
+
              ->addEFrom('DEFAULT', 'first');
         $this->prepareQuery();
 
@@ -109,9 +99,9 @@ class CreateDefaultValues extends Complete {
              ->outIs('CASE')
              ->atomIs(array('Integer', 'String'), self::WITH_CONSTANTS)
              ->not(
-                $this->side()
-                     ->inIs('DEFAULT')
-                     ->raw('is(neq("first"))')
+                 $this->side()
+                      ->inIs('DEFAULT')
+                      ->raw('is(neq("first"))')
              )
              ->addEFrom('DEFAULT', 'first');
         $this->prepareQuery();
@@ -126,9 +116,9 @@ class CreateDefaultValues extends Complete {
              ->inIs('OVERWRITE')
              ->outIs('DEFAULT')
              ->not(
-                $this->side()
-                     ->inIs('DEFAULT')
-                     ->raw('is(neq("first"))')
+                 $this->side()
+                      ->inIs('DEFAULT')
+                      ->raw('is(neq("first"))')
              )
              ->atomIsNot('Void')
              ->addEFrom('DEFAULT', 'first');
@@ -142,7 +132,6 @@ class CreateDefaultValues extends Complete {
              ->outIs('DEFAULT')
              ->addEFrom('DEFAULT', 'first');
         $this->prepareQuery();
-
     }
 }
 

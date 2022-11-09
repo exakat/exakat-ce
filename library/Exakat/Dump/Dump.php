@@ -9,14 +9,14 @@ abstract class Dump {
     public const READ  = 1;
     public const INIT  = 0;
 
-    protected $project          = null;
-    protected $phpexcutable     = null;
-    protected $sqlite           = null;
-    protected $sqliteFileFinal    = '';
-    protected $sqliteFile         = null;
-    protected $sqliteFilePrevious = null;
+    protected string  $project				= '';
+    protected string  $phpexcutable			= '';
+    protected Sqlite3 $sqlite				;
+    protected string  $sqliteFileFinal		= '';
+    protected string  $sqliteFile			= '';
+    protected string  $sqliteFilePrevious 	= '';
 
-    protected $tablesList = array();
+    protected array   $tablesList			= array();
 
     public function __construct(string $path, int $init = self::READ, string $project = '', string $phpexecutable = '') {
         $this->sqliteFileFinal    = $path;
@@ -44,7 +44,7 @@ abstract class Dump {
 
     private function reuse(): void {
         copy($this->sqliteFileFinal, $this->sqliteFile);
-        $this->sqlite = new \Sqlite3($this->sqliteFile, \SQLITE3_OPEN_READWRITE);
+        $this->sqlite = new Sqlite3($this->sqliteFile, \SQLITE3_OPEN_READWRITE);
         $this->sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
 
         $this->initTablesList();
@@ -63,7 +63,7 @@ abstract class Dump {
             display('Removing old .dump.sqlite');
         }
 
-        $this->sqlite = new \Sqlite3($this->sqliteFileFinal,  \SQLITE3_OPEN_READONLY);
+        $this->sqlite = new Sqlite3($this->sqliteFileFinal,  \SQLITE3_OPEN_READONLY);
         $this->sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
 
         $this->initTablesList();
@@ -71,7 +71,7 @@ abstract class Dump {
 
     protected function initTablesList(): void {
         $res = $this->sqlite->query("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%'");
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $this->tablesList[] = $row['name'];
         }
     }
@@ -121,8 +121,8 @@ abstract class Dump {
         }
 
         $chunks = array_chunk($toDump, SQLITE_CHUNK_SIZE);
-        foreach($chunks as $chunk) {
-            foreach($chunk as &$c) {
+        foreach ($chunks as $chunk) {
+            foreach ($chunk as &$c) {
                 assert(count($c) === 8, 'Wrong column count for results : ' . print_r($c, true));
                 $c = array_map(array($this->sqlite, 'escapeString'), $c);
                 $c = '(NULL, \'' . implode('\', \'', $c) . '\')';
@@ -137,7 +137,7 @@ abstract class Dump {
         $return = array_count_values($return);
 
         $query = array();
-        foreach($return as $k => $v) {
+        foreach ($return as $k => $v) {
             $query[] = "(NULL, '$k', $v)";
         }
 
@@ -149,8 +149,8 @@ abstract class Dump {
 
     public function addEmptyResults(array $toDump): void {
         $chunks = array_chunk($toDump, SQLITE_CHUNK_SIZE);
-        foreach($chunks as $chunk) {
-            foreach($chunk as &$c) {
+        foreach ($chunks as $chunk) {
+            foreach ($chunk as &$c) {
                 $c = "(NULL, '" . $c . "', 0)";
             }
             unset($c);
@@ -170,7 +170,7 @@ abstract class Dump {
         $query = "SELECT name, sql FROM datastore.sqlite_master WHERE type='table' AND name in ('" . implode("', '", $tables) . "');";
         $existingTables = $this->sqlite->query($query);
 
-        while($table = $existingTables->fetchArray(\SQLITE3_ASSOC)) {
+        while ($table = $existingTables->fetchArray(\SQLITE3_ASSOC)) {
             $createTable = $table['sql'];
             $createTable = str_replace('CREATE TABLE ', 'CREATE TABLE IF NOT EXISTS ', $createTable);
 
@@ -195,7 +195,7 @@ abstract class Dump {
     public function storeInTable(string $table, Iterable $results): int {
         $values = array();
         $total  = 0;
-        foreach($results as $change) {
+        foreach ($results as $change) {
             $first = array_shift($change);
             $values[] = '(' . (empty($first) ? 'null' : $first) . ',' . makeList(array_map(array($this->sqlite, 'escapeString'), $change), "'" ) . ')';
             // str_replace is an ugly hack for id, which should be null.
@@ -204,7 +204,7 @@ abstract class Dump {
 
         if (!empty($values)) {
             $chunks = array_chunk($values, SQLITE_CHUNK_SIZE);
-            foreach($chunks as $chunk) {
+            foreach ($chunks as $chunk) {
                 $query = 'REPLACE INTO ' . $table . ' VALUES ' . implode(', ', $chunk);
                 $this->sqlite->query($query);
             }
@@ -215,7 +215,7 @@ abstract class Dump {
 
     public function storeQueries(array $queries): int {
         $this->sqlite->lastErrorCode();
-        foreach($queries as $query) {
+        foreach ($queries as $query) {
             $res = $this->sqlite->query($query);
             if ($this->sqlite->lastErrorCode()) {
                 print  $query . PHP_EOL . PHP_EOL;

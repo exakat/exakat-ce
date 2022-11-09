@@ -28,9 +28,9 @@ use Exakat\Exceptions\NoSuchProject;
 class Clean extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
-    protected $logname = self::LOG_NONE;
+    protected string $logname = self::LOG_NONE;
 
-    private $filesToErase = array('Flat-html.html',
+    private array $filesToErase = array('Flat-html.html',
                                   'Flat-markdown.md',
                                   'Flat-sqlite.sqlite',
                                   'Flat-text.txt',
@@ -62,7 +62,7 @@ class Clean extends Tasks {
                                  );
 
     public function run(): void {
-        if ($this->config->project === 'default') {
+        if ($this->config->project->isDefault()) {
             throw new ProjectNeeded();
         }
 
@@ -75,7 +75,7 @@ class Clean extends Tasks {
         $dirsToErase = array('report',
                              'diplomat',
                              );
-        foreach($dirsToErase as $dir) {
+        foreach ($dirsToErase as $dir) {
             $dirPath = "{$this->config->project_dir}/$dir";
             if (file_exists($dirPath)) {
                 display("removing $dir");
@@ -94,7 +94,7 @@ class Clean extends Tasks {
         }
 
         $total = 0;
-        foreach($this->filesToErase as $file) {
+        foreach ($this->filesToErase as $file) {
             $filePath = "{$this->config->project_dir}/$file";
             if (file_exists($filePath)) {
                 display("removing $file");

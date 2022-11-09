@@ -66,7 +66,6 @@ class TimestampDifference extends Analyzer {
         $this->prepareQuery();
 
         // Note : date('U') is the exact call to date.
-
     }
 }
 

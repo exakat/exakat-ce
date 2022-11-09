@@ -30,8 +30,8 @@ use Symfony\Component\Yaml\Exception\ParseError;
 
 class DotExakatYamlConfig extends Config {
     public const YAML_FILE = '.exakat.yml';
-    private $dotExakatYaml = '';
-    private $rulesets = array();
+    private string $dotExakatYaml = '';
+    private array  $rulesets = array();
 
     public function __construct(Project $project, string $projects_root) {
         if ($project->isDefault()) {
@@ -76,7 +76,7 @@ class DotExakatYamlConfig extends Config {
         }
 
         // removing empty values in the INI file
-        foreach($tmp_config as &$value) {
+        foreach ($tmp_config as &$value) {
             if (is_array($value) && empty($value[0])) {
                 unset($value[0]);
             }
@@ -84,7 +84,7 @@ class DotExakatYamlConfig extends Config {
         unset($value);
 
         $other_php_versions = array();
-        foreach(Configuration::PHP_VERSIONS as $version) {
+        foreach (Configuration::PHP_VERSIONS as $version) {
             $phpVersion = "php$version";
             if (empty($this->config->{$phpVersion})) {
                 continue;
@@ -135,7 +135,7 @@ class DotExakatYamlConfig extends Config {
                            'ignore_rules'        => array(),
                         );
 
-        foreach(array_keys($defaults) as $name) {
+        foreach (array_keys($defaults) as $name) {
             if (!empty($tmp_config[$name])) {
                 $this->config[$name] = $tmp_config[$name];
             }
@@ -159,7 +159,7 @@ class DotExakatYamlConfig extends Config {
         if (isset($this->config['other_php_versions'])) {
             if (is_string($this->config['other_php_versions'])) {
                 $this->config['other_php_versions'] = listToArray($this->config['other_php_versions']);
-                foreach($this->config['other_php_versions'] as &$version) {
+                foreach ($this->config['other_php_versions'] as &$version) {
                     $version = str_replace('.', '', trim($version));
                 }
                 unset($version);
@@ -177,7 +177,7 @@ class DotExakatYamlConfig extends Config {
         if (isset($this->config['project_reports'])) {
             if (is_string($this->config['project_reports'])) {
                 $this->config['project_reports'] = listToArray($this->config['project_reports']);
-                foreach($this->config['project_reports'] as &$ext) {
+                foreach ($this->config['project_reports'] as &$ext) {
                     $ext = trim($ext);
                 }
                 unset($ext);
@@ -187,7 +187,7 @@ class DotExakatYamlConfig extends Config {
         if (isset($this->config['project_rulesets'])) {
             if (is_string($this->config['project_rulesets'])) {
                 $this->config['project_rulesets'] = listToArray($this->config['project_rulesets']);
-                foreach($this->config['project_rulesets'] as &$ext) {
+                foreach ($this->config['project_rulesets'] as &$ext) {
                     $ext = trim($ext);
                 }
                 unset($ext);
@@ -206,7 +206,7 @@ class DotExakatYamlConfig extends Config {
             unset($this->config['rulesets']);
         }
 
-        foreach($tmp_config as $name => $tmp) {
+        foreach ($tmp_config as $name => $tmp) {
             if (class_exists('Exakat\\Analyzer\\' . str_replace('/', '\\', $name))) {
                 $this->config[$name] = $tmp;
                 unset($tmp_config[$name]);
@@ -282,19 +282,19 @@ class DotExakatYamlConfig extends Config {
 
         $default = array();
         $iniFiles = glob("$dir_root/human/en/*/*.ini");
-        foreach($iniFiles as $file) {
+        foreach ($iniFiles as $file) {
             $ini = parse_ini_file($file, \INI_PROCESS_SECTIONS);
             if (isset($ini['parameter1'])) {
                 $default[basename(dirname($file)) . '/' . basename($file, '.ini')][$ini['parameter1']['name']] = $ini['parameter1']['default'] ?? '';
             }
         }
 
-        foreach($this->config as $key => $value) {
-            if (strpos($key, '/') === false) {
+        foreach ($this->config as $key => $value) {
+            if (!str_contains($key, '/')  ) {
                 continue;
             }
 
-            foreach($value as $name => $values) {
+            foreach ($value as $name => $values) {
                 if (isset($default[$key])) {
                     $default[$key][$name] = $values;
                 }
@@ -318,7 +318,6 @@ class DotExakatYamlConfig extends Config {
 
         return Yaml::dump($configIni);
     }
-
 }
 
 ?>

@@ -88,29 +88,6 @@ class OverwrittenMethods extends Complete {
              ->addEFrom('OVERWRITE', 'first');
         $this->prepareQuery();
 
-        // class x {use t}
-        $this->atomIs('Virtualmethod', self::WITHOUT_CONSTANTS)
-             ->hasNoOut('OVERWRITE')
-             ->savePropertyAs('lccode', 'name')
-             ->goToClass()
-             ->as('class')
-
-             ->outIs('USE')
-             ->hasNoOut('BLOCK')
-             ->back('class')
-
-             ->goToAllParentsTraits(self::EXCLUDE_SELF)
-             ->outIs(array('METHOD', 'MAGICMETHOD'))
-             ->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS) // No virtualmethod here
-             ->as('origin')
-             ->outIs('NAME')
-             ->hasNoOut('METHOD')
-             ->samePropertyAs('code', 'name',  self::CASE_INSENSITIVE)
-             ->back('origin')
-             ->dedup(array('first', 'origin'))
-             ->addEFrom('OVERWRITE', 'first');
-        $this->prepareQuery();
-
         // This must be second, so it will skip more specific configuration above
         // class x { protected function foo()  {}}
         // class xx extends x { protected function foo()  {}}
@@ -120,7 +97,7 @@ class OverwrittenMethods extends Complete {
              ->savePropertyAs('lccode', 'name')
              ->goToClass()
              ->as('theClass')
-             ->goToAllParents(self::EXCLUDE_SELF)
+             ->goToAllParentsTraits(self::EXCLUDE_SELF)
              ->outIs(array('METHOD', 'MAGICMETHOD'))
              ->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS) // No virtualmethod here
              ->as('origin')
@@ -138,14 +115,15 @@ class OverwrittenMethods extends Complete {
              ->outIs('NAME')
              ->savePropertyAs('lccode', 'name')
              ->goToInterface()
-             ->goToAllImplements(self::EXCLUDE_SELF)
+             ->outIs('DEFINITION')
+             ->inIs(array('EXTENDS', 'IMPLEMENTS'))
              ->outIs(array('METHOD', 'MAGICMETHOD'))
              ->outIs('NAME')
              ->samePropertyAs('code', 'name',  self::CASE_INSENSITIVE)
              ->inIs('NAME')
              ->as('origin')
              ->dedup(array('first', 'origin'))
-             ->addEFrom('OVERWRITE', 'first');
+             ->addETo('OVERWRITE', 'first');
         $this->prepareQuery();
 
         // relay virtualmethods definitions to the methodcalls

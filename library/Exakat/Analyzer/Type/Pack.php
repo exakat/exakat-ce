@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Type;
 use Exakat\Analyzer\Analyzer;
 
 class Pack extends Analyzer {
-    protected $analyzerName = 'Pack';
+    protected string $analyzerName = 'Pack';
 
     public function dependsOn(): array {
         return array('Variables/IsLocalConstant',

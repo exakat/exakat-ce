@@ -40,7 +40,7 @@ class NoAnalyzerInside extends DSL {
         $MAX_LOOPING = self::$MAX_LOOPING;
         $linksDown = self::$linksDown;
 
-$gremlin = <<<GREMLIN
+        $gremlin = <<<GREMLIN
 not( 
     where( __.emit( ).repeat( __.out({$linksDown}) ).times($MAX_LOOPING)
              .hasLabel(within(***))
@@ -49,7 +49,7 @@ not(
 )
 GREMLIN;
         return new Command($gremlin,
-                           array($diff, makeArray($analyzer)));
+            array($diff, makeArray($analyzer)));
     }
 }
 ?>

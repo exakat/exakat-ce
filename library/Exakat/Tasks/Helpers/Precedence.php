@@ -1,4 +1,4 @@
-<?php declare (strict_types = 1);
+<?php declare(strict_types = 1);
 /*
  * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
@@ -45,24 +45,25 @@ class Precedence {
 
                         'T_INC'                         => 4,
                         'T_DEC'                         => 4,
-                        'T_ARRAY_CAST'                  => 4,
-                        'T_BOOL_CAST'                   => 4,
-                        'T_DOUBLE_CAST'                 => 4,
-                        'T_INT_CAST'                    => 4,
-                        'T_OBJECT_CAST'                 => 4,
-                        'T_STRING_CAST'                 => 4,
-                        'T_UNSET_CAST'                  => 4,
-                        'T_AT'                          => 4,
 
-                        'T_INSTANCEOF'                  => 5,
+                        'T_SLASH'                       => 5,
+                        'T_STAR'                        => 5,
+                        'T_PERCENTAGE'                  => 5,
 
-                        'T_TILDE'                       => 6,
-                        'T_BANG'                        => 6,
-                        'T_REFERENCE'                   => 6, // Special for reference's usage of &
+                        'T_ARRAY_CAST'                  => 6,
+                        'T_BOOL_CAST'                   => 6,
+                        'T_DOUBLE_CAST'                 => 6,
+                        'T_INT_CAST'                    => 6,
+                        'T_OBJECT_CAST'                 => 6,
+                        'T_STRING_CAST'                 => 6,
+                        'T_UNSET_CAST'                  => 6,
+                        'T_AT'                          => 6,
 
-                        'T_SLASH'                       => 10,
-                        'T_STAR'                        => 10,
-                        'T_PERCENTAGE'                  => 10,
+                        'T_INSTANCEOF'                  => 7,
+
+                        'T_TILDE'                       => 8,
+                        'T_BANG'                        => 8,
+                        'T_REFERENCE'                   => 8, // Special for reference's usage of &
 
                         'T_PLUS'                        => 18,
                         'T_MINUS'                       => 18,
@@ -153,7 +154,7 @@ class Precedence {
     private static $cache = array();
 
     public function __construct(string $phpVersion) {
-        foreach($this->definitions as $name => $priority) {
+        foreach ($this->definitions as $name => $priority) {
             // Skip unknown tokens from other versions
             if (defined("$phpVersion::$name")) {
                 $this->precedence[constant("$phpVersion::$name")] = $priority;
@@ -164,9 +165,9 @@ class Precedence {
             $this->precedence[constant("$phpVersion::T_DOT")] = 21;
         }
 
-        foreach($this->precedence as $k1 => $p1) {
+        foreach ($this->precedence as $k1 => $p1) {
             self::$cache[$k1] = array();
-            foreach($this->precedence as $k2 => $p2) {
+            foreach ($this->precedence as $k2 => $p2) {
                 if ($p1 <= $p2 && $k1 !== $k2) {
                     self::$cache[$k1][] = $k2;
                 }
@@ -174,7 +175,7 @@ class Precedence {
         }
     }
 
-    public function get($token, bool $itself = self::WITHOUT_SELF): array {
+    public function get(string|int $token, bool $itself = self::WITHOUT_SELF): array {
         if (!isset(self::$cache[$token])) {
             throw new NoPrecedence($token);
         }

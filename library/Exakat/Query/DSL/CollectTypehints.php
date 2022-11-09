@@ -40,7 +40,7 @@ class CollectTypehints extends DSL {
       .fold() 
     )
 GREMLIN
-);
+        );
         return $command;
     }
 }

@@ -25,7 +25,7 @@ namespace Exakat\Analyzer;
 
 
 class RulesetsIgnore implements RulesetsInterface {
-    private $ignoreList      = array();
+    private array $ignoreList      = array();
 
     public function __construct(array $list) {
         // No check on existence : if don't exist, it is already ignored.
@@ -79,6 +79,5 @@ class RulesetsIgnore implements RulesetsInterface {
     public function getAnalyzerInExtension(string $name): array {
         return array();
     }
-
 }
 ?>

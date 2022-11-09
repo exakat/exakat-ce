@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Common\ConstantUsage;
 
 class Php81RemovedConstant extends ConstantUsage {
-    protected $phpVersion = '8.1-';
+    protected string $phpVersion = '8.1-';
 
     public function analyze(): void {
         $this->constants = array('\MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH',

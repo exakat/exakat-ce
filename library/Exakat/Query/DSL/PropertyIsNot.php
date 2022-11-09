@@ -57,7 +57,7 @@ filter{
     }
 }
 GREMLIN
-, array());
+                , array());
         } elseif (is_array($code)) {
             return new Command('filter{ !("' . $property . '" in it.get().keys()) || !(it.get().value("' . $property . '")' . $caseSensitive . ' in ***); }', array($code));
         } else {

@@ -57,10 +57,10 @@ class Stat extends Tasks {
         }
     }
 
-    private function table_encode($stats) {
+    private function table_encode(array $stats): string {
         $html = '<html><body>';
 
-        foreach($stats as $name => $value) {
+        foreach ($stats as $name => $value) {
             $html .= "<tr><td>$name</td><td>$value</td></tr>\n";
         }
 
@@ -68,11 +68,11 @@ class Stat extends Tasks {
         return $html;
     }
 
-    private function text_encode($stats) {
+    private function text_encode(array $stats): string {
         $html = "Statistics for the whole server\n\n";
 
-        foreach($stats as $name => $value) {
-            $html .= "$name : $value\n";
+        foreach ($stats as $name => $value) {
+            $html .= "$name : " . $value->toString() . "\n";
         }
 
         $html .= "\n";

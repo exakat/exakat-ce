@@ -34,14 +34,14 @@ class ScalarAreNotArrays extends Analyzer {
     }
 
     public function analyze(): void {
+        // @todo : handle ArrayAccess for objects
+        // @todo : handle & and | properly
+
         // With typehint
         // function foo(int $x) { echo $x[2]; }
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
-             ->outIs('TYPEHINT')
-             ->fullnspathIs(array('\\int', '\\bool', '\\float', '\\null'))
-             ->inIs('TYPEHINT')
-             ->outIs('NAME')
+             ->hasTypehint(array('\\int', '\\bool', '\\float', '\\null'))
              ->outIs('DEFINITION')
              ->atomIs('Variablearray')
              ->inIs('VARIABLE');
@@ -55,7 +55,6 @@ class ScalarAreNotArrays extends Analyzer {
              ->outIs('DEFAULT')
              ->atomIs(array('Boolean', 'Integer', 'Float', 'Null'))
              ->inIs('DEFAULT')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->atomIs('Variablearray')
              ->inIs('VARIABLE')
@@ -84,7 +83,6 @@ class ScalarAreNotArrays extends Analyzer {
              ->outIs('DEFAULT')
              ->fullnspathIs(array('\\int', '\\bool', '\\float', '\\null'))
              ->inIs('DEFAULT')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->atomIs('Variablearray')
              ->inIs('VARIABLE')
@@ -98,7 +96,6 @@ class ScalarAreNotArrays extends Analyzer {
              ->atomIs(array('Boolean', 'Integer', 'Float', 'Null'))
              ->goToParameterDefinition()
 
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->atomIs('Variablearray')
              ->inIs('VARIABLE')

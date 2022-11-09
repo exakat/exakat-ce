@@ -23,17 +23,18 @@
 namespace Exakat\Tasks\Helpers;
 
 use Exakat\Config;
+use Exakat\Reports\Reports;
 use Exakat\Exceptions\NoSuchReport;
 
 class ReportConfig {
-    private $name        = 'None';
-    private $format      = 'None';
-    private $config      = null;
-    private $rulesets    = array();
-    private $options     = array();
-    private $destination = null;
+    private string $name        = 'None';
+    private string $format      = 'None';
+    private Config $config      ;
+    private array  $rulesets    = array();
+    private array  $options     = array();
+    private string $destination = '';
 
-    public function __construct($config, Config $exakat_config) {
+    public function __construct(array|string $config, Config $exakat_config) {
         if (is_array($config)) {
             $this->name = key($config);
             $config = array_pop($config);
@@ -45,22 +46,24 @@ class ReportConfig {
             $this->name       .= " ($config[format])";
             $this->format      = $config['format'];
             if (!class_exists($this->getFormatClass())) {
-                throw new NoSuchReport($this->format);
+                throw new NoSuchReport($this->format, Reports::getSuggestion($config['format']));
             }
 
-            // Check for array of string
+            // @todo : Check for array of string
             $this->rulesets    = $config['rulesets'] ?? array();
             $this->rulesets    = makeArray($this->rulesets);
             $this->destination = $config['file']     ?? constant("\Exakat\Reports\\$config[format]::FILE_FILENAME");
         } elseif (is_string($config)) {
             $this->format      = $config;
             if (!class_exists($this->getFormatClass())) {
-                throw new NoSuchReport($this->format);
+                throw new NoSuchReport($this->format, Reports::getSuggestion($config));
             }
 
             $this->name        = $config;
             $this->rulesets    = $exakat_config->project_rulesets ?? array();
-            $this->options     = $exakat_config->$config ?? array();
+            assert($exakat_config->$config === null || is_array($exakat_config->$config), "'$config' is a boolean!!");
+            $reportName = 'Reports/' . $config;
+            $this->options     = $exakat_config->$reportName ?? array();
             $this->destination = $exakat_config->file ?: constant("\Exakat\Reports\\$config::FILE_FILENAME");
         } else {
             throw new NoSuchReport($config);

@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CyclomaticComplexity extends AnalyzerHashResults {
-    protected $analyzerName = 'CyclomaticComplexity';
+    protected string $analyzerName = 'CyclomaticComplexity';
 
     public function analyze(): void {
         $MAX_LOOPING = self::MAX_LOOPING;
@@ -47,7 +47,7 @@ project("cc").by(
     ).count()
 ).select("first","cc").by("fullnspath").by()
 GREMLIN
-);
+              );
 
         $this->prepareQuery();
     }

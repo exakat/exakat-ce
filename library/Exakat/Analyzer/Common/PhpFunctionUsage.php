@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class PhpFunctionUsage extends Analyzer {
+abstract class PhpFunctionUsage extends Analyzer {
     protected $functions = array();
 
     public function dependsOn(): array {
@@ -45,13 +45,13 @@ class PhpFunctionUsage extends Analyzer {
                       ->fullnspathIsNot($functions)
              )
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->inIs('DEFINITION')
-                             ->analyzerIs('Functions/ConditionedFunctions')
-                             ->analyzerIs('Functions/RedeclaredPhpFunction')
-                     )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->inIs('DEFINITION')
+                               ->analyzerIs('Functions/ConditionedFunctions')
+                               ->analyzerIs('Functions/RedeclaredPhpFunction')
+                      )
              );
         $this->prepareQuery();
     }

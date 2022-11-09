@@ -59,7 +59,6 @@ class RestrictGlobalUsage extends Analyzer {
              ->atomIs('Assignation')
              ->codeIs('=');
         $this->prepareQuery();
-
     }
 }
 

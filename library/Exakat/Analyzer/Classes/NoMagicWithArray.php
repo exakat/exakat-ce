@@ -37,11 +37,11 @@ class NoMagicWithArray extends Analyzer {
              ->outIs(array('VARIABLE', 'APPEND'))
              ->atomIs('Member')
              ->filter(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs('Magicmethod')
-                     ->outIs('NAME')
-                     ->codeIs('__set', self::TRANSLATE, self::CASE_INSENSITIVE)
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs('Magicmethod')
+                      ->outIs('NAME')
+                      ->codeIs('__set', self::TRANSLATE, self::CASE_INSENSITIVE)
              )
              ->back('first');
         $this->prepareQuery();

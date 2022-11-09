@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectLocalVariableCounts extends AnalyzerHashHashResults {
-    protected $analyzerName = 'Local Variable Counts';
+    protected string $analyzerName = 'Local Variable Counts';
 
     public function analyze(): void {
         // foo() {$t ; }
@@ -39,7 +39,7 @@ groupCount("m").by(
       )
       .count()).cap("m")
 GREMLIN
-);
+             );
 
         $this->prepareQuery();
     }

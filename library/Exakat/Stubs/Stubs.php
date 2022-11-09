@@ -26,8 +26,8 @@ class Stubs {
     private array  $stubs       = array();
     private string $stubsDir    = '';
 
-    public function __construct(string $stubsDir   = '',
-                                array $stubsFiles = array()) {
+    public function __construct(string $stubsDir	= '',
+        array $stubsFiles	= array()) {
         $this->stubsDir = $stubsDir;
 
         if (empty($stubsDir)) {
@@ -37,7 +37,7 @@ class Stubs {
         }
 
         $all = array_merge($files, $stubsFiles);
-        foreach($all as $file) {
+        foreach ($all as $file) {
             if ($file[0] !== '/') {
                 $file = $stubsDir . '/' . $file;
             }
@@ -52,10 +52,22 @@ class Stubs {
             if (substr($file, -5) === '.json' ) {
                 $this->stubs[] = new StubJson($file);
             } elseif (substr($file, -5) === '.pdff' ) {
-                $this->stubs[] = new PdffReader($file);
+                $this->stubs[basename($file, '.pdff')] = new PdffReader($file);
             }
             // @todo : Format manuel?
         }
+    }
+
+    public function list(): array {
+        return array_keys($this->stubs);
+    }
+
+    public function get(string $name): StubsInterface {
+        if (!isset($this->stubs[$name])) {
+            throw new \Exception('No such stub as ' . $name);
+        }
+
+        return $this->stubs[$name];
     }
 
     public function __call(string $name, array $args): array {
@@ -67,9 +79,9 @@ class Stubs {
         // Check on $name values
         $return = array();
 
-        foreach($this->stubs as $stub) {
+        foreach ($this->stubs as $stub) {
             assert(method_exists($stub, $name), "No such method as $name for Definition file");
-            $return[] = $stub->$name();
+            $return[] = $stub->$name(...$args);
         }
 
         return array_merge(...$return);

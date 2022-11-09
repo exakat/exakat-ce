@@ -25,7 +25,6 @@ namespace Exakat\Tasks;
 use Exakat\Exakat;
 use Exakat\Config;
 use Exakat\Phpexec;
-use Exakat\Project;
 use Exakat\Graph\Graph;
 use Exakat\Exceptions\NoPhpBinary;
 use Exakat\Exceptions\HelperException;
@@ -36,9 +35,9 @@ use Symfony\Component\Yaml\Yaml as Symfony_Yaml;
 class Doctor extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
-    protected $logname = self::LOG_NONE;
+    protected string $logname = self::LOG_NONE;
 
-    private $reportList = array();
+    private array $reportList = array();
 
     public function __construct() {
         $this->config  = exakat('config');
@@ -48,10 +47,10 @@ class Doctor extends Tasks {
 
     public function run(): void {
         $stats = array_merge($this->checkPreRequisite(),
-                             $this->checkAutoInstall());
+            $this->checkAutoInstall());
 
         $phpBinaries = array('php' . str_replace('.', '', substr(PHP_VERSION, 0, 3)) => PHP_BINARY);
-        foreach(Config::PHP_VERSIONS as $shortVersion) {
+        foreach (Config::PHP_VERSIONS as $shortVersion) {
             $configName = "php$shortVersion";
             if (!empty($this->config->$configName)) {
                 $phpBinaries[$configName] = $this->config->$configName;
@@ -59,7 +58,7 @@ class Doctor extends Tasks {
         }
 
         $stats = array_merge($stats,
-                             $this->checkPHPs($phpBinaries));
+            $this->checkPHPs($phpBinaries));
 
         if ($this->config->verbose === true) {
             $stats = array_merge($stats, $this->checkOptional());
@@ -92,9 +91,9 @@ class Doctor extends Tasks {
         }
 
         $doctor = '';
-        foreach($stats as $section => $details) {
+        foreach ($stats as $section => $details) {
             $doctor .= $section . ' : ' . PHP_EOL;
-            foreach($details as $k => $v) {
+            foreach ($details as $k => $v) {
                 $doctor .= '    ' . substr("$k                          ", 0, 20) . ' : ' . $v . PHP_EOL;
             }
             $doctor .= PHP_EOL;
@@ -113,9 +112,9 @@ class Doctor extends Tasks {
         $stats['exakat']['exakat.ini']  = $this->config->configFiles;
         $stats['exakat']['graphdb']     = $this->config->graphdb;
         $reportList = array();
-        foreach($this->config->project_reports as $project_report) {
+        foreach ($this->config->project_reports as $project_report) {
             try {
-                $reportConfig = new ReportConfig($project_report, $this->config);
+                $reportConfig = new ReportConfig('Reports/' . $project_report, $this->config);
             } catch (NoSuchReport $e) {
                 display($e->getMessage());
                 continue;
@@ -174,11 +173,9 @@ class Doctor extends Tasks {
         $stats['java']['$JAVA_HOME'] = getenv('JAVA_HOME') ? getenv('JAVA_HOME') : '<none>';
         $stats['java']['$JAVA_OPTIONS'] = getenv('JAVA_OPTIONS') ?? ' (set $JAVA_OPTIONS="-Xms32m -Xmx****m", with **** = RAM in Mb. The more the better.';
 
-        $stats['tinkergraph']   = Graph::getConnexion('Tinkergraph')->getInfo();
-        $stats['tinkergraphv3'] = Graph::getConnexion('TinkergraphV3')->getInfo();
-        $stats['gsneo4j']       = Graph::getConnexion('GSNeo4j')->getInfo();
-        $stats['gsneo4jv3']     = Graph::getConnexion('GSNeo4jV3')->getInfo();
-        $stats['nogremlin']     = Graph::getConnexion('NoGremlin')->getInfo();
+        $stats['tinkergraphv3'] = Graph::getConnexion($this->config, 'TinkergraphV3')->getInfo();
+        $stats['gsneo4jv3']     = Graph::getConnexion($this->config, 'GSNeo4jV3')->getInfo();
+        $stats['nogremlin']     = Graph::getConnexion($this->config, 'NoGremlin')->getInfo();
 
         if ($this->config->project !== null) {
             $stats['project']['name']             = $this->config->project_name;
@@ -225,8 +222,8 @@ class Doctor extends Tasks {
             }
 
             $ini = str_replace(array('{VERSION}', '{VERSION_PATH}',   '{GRAPHDB}', ";$graphdb", '{GRAPHDB}_path', ),
-                               array( $version,    $this->config->php, $graphdb,    $graphdb,    $folder),
-                               $ini);
+                array( $version,    $this->config->php, $graphdb,    $graphdb,    $folder),
+                $ini);
 
             file_put_contents("{$this->config->projects_root}/config/exakat.ini", $ini);
         }
@@ -253,14 +250,13 @@ class Doctor extends Tasks {
         // projects
         if (file_exists('./projects') &&
             !file_exists("{$this->config->projects_root}/projects/test")) {
-
             $i = 0;
             do {
                 ++$i;
                 $id = random_int(0, PHP_INT_MAX);
             } while (file_exists("{$this->config->projects_root}/projects/test$id") && $i < 100);
 
-            shell_exec('php exakat init -p test'.$id.'');
+            shell_exec('php exakat init -p test' . $id . '');
 
             rename("{$this->config->projects_root}/projects/test$id", "{$this->config->projects_root}/projects/test");
             unset($init);
@@ -281,8 +277,14 @@ class Doctor extends Tasks {
             $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->gsneo4j_folder}");
         } elseif ($graphdb === 'tinkergraph') {
             $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->tinkergraph_folder}");
+        } elseif ($graphdb === 'gsneo4jv3') {
+            $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->tinkergraph_folder}");
+        } elseif ($graphdb === 'tinkergraphv3') {
+            $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->tinkergraph_folder}");
         } elseif ($graphdb === 'nogremlin') {
             // Nothing to do
+        } else {
+            assert(false, "No preprocessing for $graphdb");
         }
     }
 
@@ -309,20 +311,13 @@ class Doctor extends Tasks {
             return;
         }
 
-        if (!copy("{$this->config->dir_root}/server/gsneo4j/gsneo4j{$version}.yaml",
-             "$path/conf/gsneo4j.yaml")) {
-            display("Error while copying gsneo4j{$version}.yaml config file to tinkergraph.");
-        }
-        if (!copy("{$this->config->dir_root}/server/tinkergraph/tinkergraph{$version}.yaml",
-             "$path/tinkergraph.yaml")) {
-            display("Error while copying tinkergraph{$version}.yaml config file to tinkergraph.");
-        }
+        exakat('graphdb')->setConfigFile();
     }
 
     private function checkPHPs(array $config): array {
         $stats = array();
 
-        foreach(Config::PHP_VERSIONS as $shortVersion) {
+        foreach (Config::PHP_VERSIONS as $shortVersion) {
             $configVersion = "php$shortVersion";
             $version = "$shortVersion[0].$shortVersion[1]";
             if (isset($config[$configVersion])) {
@@ -349,7 +344,7 @@ class Doctor extends Tasks {
                            'SevenZ'    => '7z',
                           );
 
-        foreach($optionals as $class => $section) {
+        foreach ($optionals as $class => $section) {
             try {
                 $fullClass = "\Exakat\Vcs\\$class";
                 $vcs = new $fullClass($this->config->project, $this->config->code_dir);

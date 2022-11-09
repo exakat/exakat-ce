@@ -56,14 +56,16 @@ class IsModified extends Plugin {
                 if (isset($extras['INDEX']) && in_array($extras['INDEX']->atom, $this->variables)) {
                     $extras['INDEX']->isModified = true;
                 }
-                if (!empty(array_filter($extras, function ($x) { return (int) $x->reference; }))) {
+                if (!empty(array_filter($extras, function (AtomInterface $x) {
+                    return (int) $x->reference;
+                }))) {
                     $extras['SOURCE']->isModified = true;
                 }
                 break;
 
             case 'List' :
             case 'Unset' :
-                foreach($extras as $extra) {
+                foreach ($extras as $extra) {
                     if (in_array($extra->atom, $this->variables)) {
                         $extra->isModified = true;
                     }
@@ -94,8 +96,7 @@ class IsModified extends Plugin {
                 break;
 
             default :
-//                print $atom->atom.PHP_EOL;
-        }
+            }
     }
 }
 

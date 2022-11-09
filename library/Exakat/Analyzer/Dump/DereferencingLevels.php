@@ -24,15 +24,15 @@ namespace Exakat\Analyzer\Dump;
 
 
 class DereferencingLevels extends AnalyzerHashAnalyzer {
-    protected $analyzerName = 'Dereferencing Levels';
+    protected string $analyzerName = 'Dereferencing Levels';
 
     public function analyze(): void {
         //$a->b->c()::d()->e::F (only -> and ::)
         $this->atomIs(array('Member', 'Staticproperty', 'Methodcall', 'Staticmethodcall', 'Staticconstant'))
              ->not(
-                $this->side()
-                     ->inIsIE(array('RIGHT', 'CODE'))
-                     ->hasIn(array('VARIABLE', 'OBJECT'))
+                 $this->side()
+                      ->inIsIE(array('RIGHT', 'CODE'))
+                      ->hasIn(array('VARIABLE', 'OBJECT'))
              )
              ->processDereferencing(0)
              ->raw('map{levels}');
@@ -40,7 +40,7 @@ class DereferencingLevels extends AnalyzerHashAnalyzer {
 
         $counts = array_count_values($results->toArray());
 
-        foreach($counts as $key => $value) {
+        foreach ($counts as $key => $value) {
             $this->analyzerValues[] = array($this->shortAnalyzer, $key, $value);
         }
         $this->prepareQuery();

@@ -35,7 +35,7 @@ not(
                                .out("IMPLEMENTS").has("fullnspath", within(***)) ) 
 )
 GREMLIN
-, array($fullnspath));
+            , array($fullnspath));
     }
 }
 ?>

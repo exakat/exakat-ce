@@ -37,12 +37,12 @@ class DontEchoError extends Analyzer {
              ->outIs('ARGUMENT')
              ->atomIs('Functioncall')
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->outIs('NAME')
-                             ->atomIs(array('Array', 'Variable', 'Member', 'Staticproperty', 'Methodcall', 'Staticmethodcall'))
-                     )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->outIs('NAME')
+                               ->atomIs(array('Array', 'Variable', 'Member', 'Staticproperty', 'Methodcall', 'Staticmethodcall'))
+                      )
              )
              ->has('fullnspath')
              ->fullnspathIs($errorMessageFunctions)
@@ -128,7 +128,6 @@ class DontEchoError extends Analyzer {
              ->is('boolean', true)
              ->back('first');
         $this->prepareQuery();
-
     }
 }
 

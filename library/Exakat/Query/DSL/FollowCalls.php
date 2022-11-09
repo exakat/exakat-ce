@@ -26,15 +26,14 @@ namespace Exakat\Query\DSL;
 
 class FollowCalls extends DSL {
     public function run(): Command {
-
         $TIME_LIMIT = self::$TIME_LIMIT;
 
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1:
                 $loopings = (int) func_get_arg(0);
                 break;
 
-           default:
+            default:
                 $loopings = self::$MAX_LOOPING;
                 break;
         }
@@ -53,7 +52,7 @@ emit().repeat(
       .where("a", eq("b") ).by("rank")
 ).times($loopings)
 GREMLIN
-);
+        );
     }
 }
 ?>

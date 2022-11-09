@@ -38,14 +38,14 @@ use Exakat\Helpers\Timer;
 class Dump extends Tasks {
     public const CONCURENCE = self::DUMP;
 
-    private $files = array();
-
-    protected $logname = self::LOG_NONE;
-
-    private $linksDown = '';
-    private $dump      = null;
-
     public const WAITING_LOOP = 1000;
+
+    private array $files = array();
+
+    protected string $logname = self::LOG_NONE;
+
+    private string $linksDown = '';
+    private DumpDb $dump;
 
     private int $argumentsId     = 0;
     private int $methodCount     = 0;
@@ -62,7 +62,7 @@ class Dump extends Tasks {
         parent::__construct($subTask);
 
         $this->log = new Log('dump',
-                             $this->config->project_dir);
+            $this->config->project_dir);
 
         $this->linksDown = GraphElements::linksAsList();
     }
@@ -86,9 +86,9 @@ class Dump extends Tasks {
 
         $projectInGraph = $projectInGraph[0];
 
-// TODO
+        // TODO
 //        $this->sqliteFilePrevious = $this->config->dump_previous;
-// also baseline
+        // also baseline
 
         // move this to .dump.sqlite then rename at the end, or any imtermediate time
         // Mention that some are not yet arrived in the snitch
@@ -111,7 +111,7 @@ class Dump extends Tasks {
         $datastore = new \Sqlite3($this->config->datastore, \SQLITE3_OPEN_READONLY);
         $datastore->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
         $res = $datastore->query('SELECT * FROM analyzed');
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $counts[$row['analyzer']] = (int) $row['counts'];
         }
         $this->log->log('count analyzed : ' . count($counts) . "\n");
@@ -138,21 +138,22 @@ class Dump extends Tasks {
                 $this->collectHashAnalyzer();
 
                 if ($missing === 0) {
-                    $this->storeToDumpArray('themas', array_map(function (string $x) { return array('', $x); }, $ruleset));
+                    $this->storeToDumpArray('themas', array_map(function (string $x) {
+                        return array('', $x);
+                    }, $ruleset));
                     $rulesets = array();
                 }
             }
-
         } elseif (!empty($this->config->program)) {
             $analyzer = $this->config->program;
-            if(is_array($analyzer)) {
+            if (is_array($analyzer)) {
                 $rulesets = $analyzer;
             } else {
                 $rulesets = array($analyzer);
             }
 
             $rulesets = array_unique($rulesets);
-            foreach($rulesets as $id => $ruleset) {
+            foreach ($rulesets as $id => $ruleset) {
                 if (!$this->rulesets->getClass($ruleset)) {
                     display('No such analyzer as ' . $ruleset . '. Omitting.');
                     unset($rulesets[$id]);
@@ -165,7 +166,7 @@ class Dump extends Tasks {
 
             display('Processing ' . count($rulesets) . ' analyzer' . (count($rulesets) > 1 ? 's' : '') . ' : ' . implode(', ', $rulesets));
 
-            if(count($rulesets) > 1) {
+            if (count($rulesets) > 1) {
                 $this->processResultsList($rulesets, $counts);
                 $this->expandRulesets();
                 $this->collectHashAnalyzer();
@@ -179,7 +180,6 @@ class Dump extends Tasks {
                     display("$analyzer is not run yet.");
                 }
             }
-
         } else {
             $rulesets = array();
         }
@@ -195,7 +195,7 @@ class Dump extends Tasks {
         $sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
 
         $values = array();
-        foreach($finalMark as $key => $value) {
+        foreach ($finalMark as $key => $value) {
             $values[] = "(null, '$key', '$value')";
         }
 
@@ -221,7 +221,7 @@ class Dump extends Tasks {
         $diff = array_intersect($specials, $analyzers);
         if (!empty($diff)) {
             $this->dump->removeResults($diff);
-            foreach($diff as $d) {
+            foreach ($diff as $d) {
                 $this->processResults($d, $counts[$d] ?? -3);
             }
             $analyzers = array_diff($analyzers, $diff);
@@ -240,10 +240,10 @@ class Dump extends Tasks {
             return substr($s, 0, 9) !== 'Complete/' &&
                    (substr($s, 0, 5) !== 'Dump/'     ||
                     $s === 'Dump/CouldBeAConstant')
-                   ;
+            ;
         });
         // Remove analysis that are not exported via dump
-        foreach($analyzers as $id => $analyzer) {
+        foreach ($analyzers as $id => $analyzer) {
             $a = $this->rulesets->getInstance($analyzer);
             if ($a instanceof AnalyzerDump) {
                 unset($analyzers[$id]);
@@ -254,7 +254,7 @@ class Dump extends Tasks {
 
             if (!empty($this->config->{$analyzer}['ignore_dirs'])) {
                 $ignore_dirs[$analyzer] = is_array( $this->config->{$analyzer}['ignore_dirs']) ? $this->config->{$analyzer}['ignore_dirs'] : array($this->config->{$analyzer}['ignore_dirs']);
-                foreach($ignore_dirs[$analyzer] as &$ignore) {
+                foreach ($ignore_dirs[$analyzer] as &$ignore) {
                     if ($ignore[0] === '/') {
                         $ignore = "/$ignore.*/";
                     } else {
@@ -265,8 +265,8 @@ class Dump extends Tasks {
             }
 
             if (isset($this->config->{$analyzer}['ignore_namespaces'])) {
-                $ignore_namespaces[$analyzer] = $ignore_namespaces[$analyzer] ?? array();
-                foreach($this->config->{$analyzer}['ignore_namespaces'] as $ignore) {
+                $ignore_namespaces[$analyzer] ??= array();
+                foreach ($this->config->{$analyzer}['ignore_namespaces'] as $ignore) {
                     if ($ignore[0] === '/') {
                         $ignore_namespaces[$analyzer][] = '/' . addslashes($ignore) . '.*/i';
                     } else {
@@ -278,10 +278,10 @@ class Dump extends Tasks {
         $this->dump->removeResults($analyzers);
         $filters = array_merge(...$filters);
 
-        $chunks = array_chunk($analyzers, 100);
+        $chunks = array_chunk($analyzers, 50);
         // Gremlin only accepts chunks of 255 maximum
 
-        foreach($chunks as $id => $chunk) {
+        foreach ($chunks as $id => $chunk) {
             $query = $this->newQuery('processMultipleResults ' . $id);
             $query->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS)
                   ->is('analyzer', $chunk)
@@ -304,9 +304,9 @@ where( __.until( hasLabel("Project") ).repeat(
        ).fold()
 )
 GREMLIN
-)
+            )
             ->getVariable(array('fullcode_', 'file', 'ligne', 'theNamespace', 'theClass', 'theFunction', 'analyzer'),
-                          array('fullcode',  'file', 'line' , 'namespace',    'class',    'function',    'analyzer'));
+                array('fullcode',  'file', 'line' , 'namespace',    'class',    'function',    'analyzer'));
             $query->prepareRawQuery();
             try {
                 $res = $this->gremlin->query($query->getQuery(), $query->getArguments())->toArray();
@@ -318,14 +318,14 @@ GREMLIN
             }
 
             $toDump = array();
-            foreach($res as $result) {
+            foreach ($res as $result) {
                 if (empty($result)) {
                     continue;
                 }
 
-                foreach($filters as $filter) {
+                foreach ($filters as $filter) {
                     if (!$filter->filterFile($result)) {
-                        display ('Skipping ' . $result['file'] . ' (' . get_class($filter) . ') ' . PHP_EOL);
+                        display ('Skipping ' . $result['file'] . ' (' . $filter::class . ') ' . PHP_EOL);
                         --$counts[$result['analyzer']];
                         continue 2;
                     }
@@ -357,7 +357,7 @@ GREMLIN
 
         $error = 0;
         $emptyResults = $skipAnalysis;
-        foreach($analyzers as $class) {
+        foreach ($analyzers as $class) {
             if (!isset($counts[$class]) || $counts[$class] < 0) {
                 $emptyResults[] = $class;
                 continue;
@@ -380,10 +380,14 @@ GREMLIN
     }
 
     private function processResults(string $class, int $count): void {
+        if ($this->config->project->isDefault()) {
+            throw new ProjectNeeded();
+        }
+
         $this->log->log( "$class : $count\n");
         // No need to go further
         if ($count <= 0) {
-            $saved = $this->dump->addEmptyResults(array($class));
+            $this->dump->addEmptyResults(array($class));
             return;
         }
 
@@ -394,7 +398,7 @@ GREMLIN
         $severity = $docs->getDocs($class)['severity'];
 
         $toDump = array();
-        foreach($res as $result) {
+        foreach ($res as $result) {
             if (empty($result)) {
                 continue;
             }
@@ -440,7 +444,6 @@ GREMLIN
     }
 
     private function collectStructures(): void {
-
         $this->dump->cleanTable('phpdoc');
         $this->dump->cleanTable('attributes');
         $this->dump->cleanTable('typehints');
@@ -462,14 +465,14 @@ GREMLIN
               ->collectOut('attributes', 'ATTRIBUTE')
 
               ->raw(<<<GREMLIN
- where(__.out("EXTENDS").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ extendList = it.get().value("fullnspath"); }.fold() )
-.where(__.out("IMPLEMENTS").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ implementList.push( it.get().value("fullnspath"));}.fold() )
-.where(__.out("USE").hasLabel("Usetrait").out("USE").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
-.where(__.out("USE").hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
+ where(__.outE().hasLabel("EXTENDS").not(has("extra", true)).outV().optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ extendList = it.get().value("fullnspath"); }.fold() )
+.where(__.outE().hasLabel("IMPLEMENTS").not(has("extra", true)).outV().optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ implementList.push( it.get().value("fullnspath"));}.fold() )
+.where(__.outE().hasLabel("USE").not(has("extra", true)).inV().hasLabel("Usetrait").out("USE").optional(__.out("DEFINITION").where(__.in("USE"))).sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
+.where(__.outE().hasLabel("USE").not(has("extra", true)).inV().hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
 .where(__.out("METHOD", "MAGICMETHOD", "USE", "PPP", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where(__.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV() ).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 GREMLIN
-             )->selectMap(array(
+              )->selectMap(array(
          'id'             => '""',
          'fullnspath'     => 'it.get().value("fullnspath")',
          'name'           => 'it.get().vertices(OUT, "NAME").next().value("fullcode")',
@@ -477,6 +480,7 @@ GREMLIN
          'type'           => '"class"',
          'abstract'       => 'it.get().properties("abstract").any()',
          'final'          => 'it.get().properties("final").any()',
+         'readonly'       => 'it.get().properties("readonly").any()',
          'phpdoc'         => 'phpdoc',
          'begin'          => 'lines.min()',
          'end'            => 'lines.max()',
@@ -487,7 +491,7 @@ GREMLIN
          'uses'           => 'useList.unique()',
          'usesOptions'    => 'usesOptions.join(";")',
          'attributes'     => 'attributes',
-             ));
+              ));
 
         $query->prepareRawQuery();
         $classes = $this->gremlin->query($query->getQuery(), $query->getArguments());
@@ -502,7 +506,7 @@ GREMLIN
         $cit_extends    = array();
         $cit_use        = array();
 
-        foreach($classes as $row) {
+        foreach ($classes as $row) {
             $namespace = preg_replace('#\\\\[^\\\\]*?$#is', '', $row['fullnspath']) . '\\';
 
             if (isset($namespacesId[$namespace])) {
@@ -518,7 +522,7 @@ GREMLIN
                                                                 );
 
             if (!empty($row['attributes'])) {
-                foreach($row['attributes'] as $attribute) {
+                foreach ($row['attributes'] as $attribute) {
                     $toAttributes[] = array(0,
                                             'class',
                                             $this->citCount,
@@ -527,7 +531,7 @@ GREMLIN
             }
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'class',
                                         $this->citCount,
@@ -559,7 +563,7 @@ GREMLIN
               ->collectOut('phpdoc',     'PHPDOC')
 
               ->raw(<<<GREMLIN
- where(__.out("EXTENDS").sideEffect{ extendList.add(it.get().value("fullnspath")); }.fold() )
+ where(__.outE().hasLabel("EXTENDS").not(has("extra", true)).outV().sideEffect{ extendList.add(it.get().value("fullnspath")); }.fold() )
 .where( __.out("METHOD", "MAGICMETHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 GREMLIN
@@ -572,6 +576,7 @@ GREMLIN
          'type'       => '"interface"',
          'abstract'   => '0',
          'final'      => '0',
+         'readonly'   => '0',
          'phpdoc'     => 'phpdoc',
          'begin'      => 'lines.min()',
          'end'        => 'lines.max()',
@@ -584,7 +589,7 @@ GREMLIN
         $interfaces = $this->gremlin->query($query->getQuery(), $query->getArguments());
 
         $total      = 0;
-        foreach($interfaces as $row) {
+        foreach ($interfaces as $row) {
             $namespace = preg_replace('#\\\\[^\\\\]*?$#is', '', $row['fullnspath']) . '\\';
 
             if (isset($namespacesId[$namespace])) {
@@ -601,7 +606,7 @@ GREMLIN
             $row['extends'] = '';
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'interface',
                                         $this->citCount,
@@ -625,17 +630,18 @@ GREMLIN
               ->initVariable('lines',       '[it.get().value("line")]')
               ->initVariable('file',        '""')
               ->initVariable('type',        '""')
+              ->initVariable('typehints',   '""')
 
               ->collectOut('phpdoc',     'PHPDOC')
               ->collectOut('attributes', 'ATTRIBUTE')
 
               ->raw(<<<GREMLIN
- where(__.out("EXTENDS").sideEffect{ extendList.add(it.get().value("fullnspath")); }.fold() )
+ where(__.outE().hasLabel("EXTENDS").not(has("extra", true)).outV().sideEffect{ extendList.add(it.get().value("fullnspath")); }.fold() )
 .where( __.out("METHOD", "MAGICMETHOD", "CONST").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
-.where(__.out("TYPEHINT").sideEffect{ type = it.get().value("fullcode"); }.fold() )
+.where(__.out("TYPEHINT").sideEffect{ typehints = it.get().value("fullcode"); }.fold() )
 GREMLIN
-             )
+              )
              ->selectMap(array(
          'id'         => '""',
          'fullnspath' => 'it.get().value("fullnspath")',
@@ -644,21 +650,21 @@ GREMLIN
          'type'       => '"enum"',
          'abstract'   => '0',
          'final'      => '0',
+         'readonly'   => '0',
          'phpdoc'     => 'phpdoc',
          'begin'      => 'lines.min()',
          'end'        => 'lines.max()',
          'file'       => 'file',
          'line'       => 'it.get().value("line")',
-         'extends'    => 'type',
-         'attributes' => 'attributes',
-             ));
+         'extends'    => 'typehints',
+         'attributes' => 'attributes'
+              ));
 
         $query->prepareRawQuery();
         $enumerations = $this->gremlin->query($query->getQuery(), $query->getArguments());
 
         $total = 0;
-        $toAttributes   = array();
-        foreach($enumerations as $row) {
+        foreach ($enumerations as $row) {
             $namespace = preg_replace('#\\\\[^\\\\]*?$#is', '', $row['fullnspath']) . '\\';
 
             if (isset($namespacesId[$namespace])) {
@@ -668,7 +674,7 @@ GREMLIN
             }
 
             if (!empty($row['attributes'])) {
-                foreach($row['attributes'] as $attribute) {
+                foreach ($row['attributes'] as $attribute) {
                     $toAttributes[] = array(0,
                                             'enum',
                                             $this->citCount,
@@ -677,7 +683,7 @@ GREMLIN
             }
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'enum',
                                         $this->citCount,
@@ -709,36 +715,37 @@ GREMLIN
               ->collectOut('phpdoc',     'PHPDOC')
 
               ->raw(<<<GREMLIN
- where(__.out("USE").hasLabel("Usetrait").out("USE").sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
-.where(__.out("USE").hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
+ where(__.outE().hasLabel("USE").not(has("extra", true)).outV().hasLabel("Usetrait").out("USE").sideEffect{ useList.push( it.get().value("fullnspath"));}.fold() )
+.where(__.outE().hasLabel("USE").not(has("extra", true)).outV().hasLabel("Usetrait").out("BLOCK").out("EXPRESSION").sideEffect{ usesOptions.push( it.get().value("fullcode"));}.fold() )
 .where( __.out("METHOD", "MAGICMETHOD", "CONST", "USE", "PPP").emit().repeat( __.out($this->linksDown)).times($MAX_LOOPING).has("line").sideEffect{ lines.add(it.get().value("line")); }.fold())
 .where( __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File")).hasLabel("File").sideEffect{ file = it.get().value("fullcode"); }.fold() )
 GREMLIN
-)           ->selectMap(array(
-         'id'          => '""',
-         'fullnspath'  => 'it.get().value("fullnspath")',
-         'name'        => 'it.get().vertices(OUT, "NAME").next().value("fullcode")',
-         'namespace'   => '1',
-         'type'        => '"trait"',
-         'abstract'    => '0',
-         'final'       => '0',
-         'phpdoc'      => 'phpdoc',
-         'begin'       => 'lines.min()',
-         'end'         => 'lines.max()',
-         'file'        => 'file',
-         'line'        => 'it.get().value("line")',
-         'extends'     => '""',
-         'implements'  => '[]',
-         'uses'        => 'useList.unique()',
-         'usesOptions' => 'usesOptions.join(";")',
-));
+              )           ->selectMap(array(
+                       'id'          => '""',
+                       'fullnspath'  => 'it.get().value("fullnspath")',
+                       'name'        => 'it.get().vertices(OUT, "NAME").next().value("fullcode")',
+                       'namespace'   => '1',
+                       'type'        => '"trait"',
+                       'abstract'    => '0',
+                       'final'       => '0',
+                       'readonly'    => '0',
+                       'phpdoc'      => 'phpdoc',
+                       'begin'       => 'lines.min()',
+                       'end'         => 'lines.max()',
+                       'file'        => 'file',
+                       'line'        => 'it.get().value("line")',
+                       'extends'     => '""',
+                       'implements'  => '[]',
+                       'uses'        => 'useList.unique()',
+                       'usesOptions' => 'usesOptions.join(";")',
+              ));
 
 
         $query->prepareRawQuery();
         $traits = $this->gremlin->query($query->getQuery(), $query->getArguments());
 
         $total = 0;
-        foreach($traits as $row) {
+        foreach ($traits as $row) {
             $namespace = preg_replace('#\\\\[^\\\\]*?$#is', '', $row['fullnspath']) . '\\';
 
             if (isset($namespacesId[$namespace])) {
@@ -755,7 +762,7 @@ GREMLIN
                                                                 );
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'trait',
                                         $this->citCount,
@@ -778,7 +785,7 @@ GREMLIN
         display("$total traits\n");
 
         if (!empty($cit)) {
-            foreach($cit as &$aCit) {
+            foreach ($cit as &$aCit) {
                 if (empty($aCit['extends'])) {
                     continue;
                 }
@@ -793,15 +800,15 @@ GREMLIN
             $this->storeToDumpArray('cit', $cit);
 
             $toDump = array();
-            foreach($cit_implements as $id => $impl) {
-                foreach($impl as $implements) {
+            foreach ($cit_implements as $id => $impl) {
+                foreach ($impl as $implements) {
                     $citIds = preg_grep('/^\d+' . preg_quote(mb_strtolower($implements)) . '$/', array_keys($citId));
 
                     if (empty($citIds)) {
                         $toDump[] = array('', $citId[$id], $implements, 'implements', '');
                     } else {
                         // Here, we are missing the one that are not found
-                        foreach($citIds as $c) {
+                        foreach ($citIds as $c) {
                             $toDump[] = array('', $citId[$id], $citId[$c], 'implements', '');
                         }
                     }
@@ -812,10 +819,10 @@ GREMLIN
             display("$total implements \n");
 
             $toDump = array();
-            foreach($cit_use as $id => $use1) {
+            foreach ($cit_use as $id => $use1) {
                 $options = $use1['options'];
 
-                foreach($use1['uses'] as $uses) {
+                foreach ($use1['uses'] as $uses) {
                     $citIds = preg_grep('/^\d+\\\\' . addslashes(mb_strtolower($uses)) . '$/', array_keys($citId));
 
                     if (empty($citIds)) {
@@ -827,7 +834,7 @@ GREMLIN
                                           );
                     } else {
                         // Here, we are missing the one that are not found
-                        foreach($citIds as $c) {
+                        foreach ($citIds as $c) {
                             $toDump[] = array('',
                                               $citId[$id],
                                               $uses,
@@ -845,8 +852,8 @@ GREMLIN
             display("$total uses\n");
 
             $toDump = array();
-            foreach($cit_extends as $id => $extend) {
-                foreach($extend as $extends) {
+            foreach ($cit_extends as $id => $extend) {
+                foreach ($extend as $extends) {
                     $citIds = preg_grep('/^\d+' . preg_quote(mb_strtolower($extends)) . '$/', array_keys($citId));
 
                     if (empty($citIds)) {
@@ -858,7 +865,7 @@ GREMLIN
                                           );
                     } else {
                         // Here, we are missing the one that are not found
-                        foreach($citIds as $c) {
+                        foreach ($citIds as $c) {
                             $toDump[] = array('',
                                               $citId[$id],
                                               $citId[$c],
@@ -885,7 +892,7 @@ GREMLIN
             __.hasLabel("Method", "Magicmethod")
      )
 GREMLIN
-)
+              )
              ->initVariable('returntype',       '[]')
              ->initVariable('returntype_fnp',   '[]')
              ->initVariable('returntype_type',  'it.get().value("typehint")')
@@ -922,25 +929,25 @@ GREMLIN
         }
       ) 
 GREMLIN
-)
+             )
             ->selectMap(array(
-         'signature'       => 'signature',
-         'name'            => 'name',
-         'abstract'        => 'it.get().properties("abstract").any()',
-         'final'           => 'it.get().properties("final").any()',
-         'static'          => 'it.get().properties("static").any()',
-         'reference'       => 'it.get().properties("reference").any()',
-         'returntype'      => 'returntype',
-         'returntype_fnp'  => 'returntype_fnp',
-         'returntype_type' => 'returntype_type',
-         'visibility'      => 'it.get().value("visibility")',
-         'class'           => 'classe',
-         'phpdoc'          => 'phpdoc',
-         'begin'           => 'lines.min()',
-         'end'             => 'lines.max()',
-         'classline'       => 'classline',
-         'attributes'      => 'attributes',
-            ));
+                      'signature'       => 'signature',
+                      'name'            => 'name',
+                      'abstract'        => 'it.get().properties("abstract").any()',
+                      'final'           => 'it.get().properties("final").any()',
+                      'static'          => 'it.get().properties("static").any()',
+                      'reference'       => 'it.get().properties("reference").any()',
+                      'returntype'      => 'returntype',
+                      'returntype_fnp'  => 'returntype_fnp',
+                      'returntype_type' => 'returntype_type',
+                      'visibility'      => 'it.get().value("visibility")',
+                      'class'           => 'classe',
+                      'phpdoc'          => 'phpdoc',
+                      'begin'           => 'lines.min()',
+                      'end'             => 'lines.max()',
+                      'classline'       => 'classline',
+                      'attributes'      => 'attributes',
+                         ));
 
         $query->prepareRawQuery();
         $methods = $this->gremlin->query($query->getQuery(), $query->getArguments());
@@ -949,7 +956,7 @@ GREMLIN
         $toAttributes  = array();
         $toTypehints   = array();
         $toPhpdoc      = array();
-        foreach($methods as $row) {
+        foreach ($methods as $row) {
             $row['visibility'] = $row['visibility'] === 'none' ? '' : $row['visibility'];
 
             if (!isset($citId[$row['classline'] . $row['class']])) {
@@ -978,7 +985,7 @@ GREMLIN
             ++$total;
 
             if (!empty($row['attributes'])) {
-                foreach($row['attributes'] as $attribute) {
+                foreach ($row['attributes'] as $attribute) {
                     $toAttributes[] = array(0,
                                             'method',
                                             $this->methodCount,
@@ -987,7 +994,7 @@ GREMLIN
             }
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'method',
                                         $this->methodCount,
@@ -997,7 +1004,7 @@ GREMLIN
             }
 
             if (!empty($row['returntype'])) {
-                foreach($row['returntype'] as $id => $typehint) {
+                foreach ($row['returntype'] as $id => $typehint) {
                     $toTypehints[] = array(0,
                                            'method',
                                             $this->methodCount,
@@ -1006,7 +1013,6 @@ GREMLIN
                                            );
                 }
             }
-
         }
         $this->dump->cleanTable('methods');
         $this->storeToDumpArray('attributes', $toAttributes);
@@ -1022,7 +1028,7 @@ GREMLIN
               ->raw(<<<'GREMLIN'
 where( __.out('NAME').sideEffect{ methode = it.get().value("fullcode").toString().toLowerCase() }.fold())
 GREMLIN
-)
+              )
              ->inIs(array('METHOD', 'MAGICMETHOD'))
              ->atomIs(array('Class', 'Interface', 'Trait'), Analyzer::WITHOUT_CONSTANTS)
              ->savePropertyAs('fullnspath', 'classe')
@@ -1045,25 +1051,25 @@ GREMLIN
  where( __.out('TYPEHINT').not(hasLabel('Void')).not(__.in('DEFAULT')).sideEffect{ typehint_hints.add(it.get().value("fullcode")); typehint_fnp.add(it.get().value("fullnspath"));}.fold())
 .where( __.out('DEFAULT').not(where(__.in("RIGHT"))).sideEffect{ init = it.get().value("fullcode"); if (it.get().label() in ["Integer", "Null", "Float", "Boolean", "String", "Heredoc"]) { hasDefault = 1; } else { hasDefault = 1; expression = 1; }}.fold())
 GREMLIN
-)
+             )
               ->selectMap(array(
-         'name'          => 'name[0]',
-         'rank'          => 'it.get().value("rank")',
-         'variadic'      => 'it.get().properties("variadic").any()',
-         'reference'     => 'it.get().properties("reference").any()',
-         'classe'        => 'classe',
-         'methode'       => 'methode',
-         'line'          => 'ligne',
-         'classline'     => 'classline',
-         'init'          => 'init',
-         'expression'    => 'expression',
-         'hasDefault'    => 'hasDefault',
-         'typehint'      => 'typehint_hints',
-         'typehint_fnp'  => 'typehint_fnp',
-         'typehint_type' => 'typehint_type',
-         'phpdoc'        => 'phpdoc',
-         'attributes'    => 'attributes',
-));
+                      'name'          => 'name[0]',
+                      'rank'          => 'it.get().value("rank")',
+                      'variadic'      => 'it.get().properties("variadic").any()',
+                      'reference'     => 'it.get().properties("reference").any()',
+                      'classe'        => 'classe',
+                      'methode'       => 'methode',
+                      'line'          => 'ligne',
+                      'classline'     => 'classline',
+                      'init'          => 'init',
+                      'expression'    => 'expression',
+                      'hasDefault'    => 'hasDefault',
+                      'typehint'      => 'typehint_hints',
+                      'typehint_fnp'  => 'typehint_fnp',
+                      'typehint_type' => 'typehint_type',
+                      'phpdoc'        => 'phpdoc',
+                      'attributes'    => 'attributes',
+             ));
 
 
         $query->prepareRawQuery();
@@ -1072,7 +1078,7 @@ GREMLIN
         $toDump       = array();
         $toAttributes = array();
         $toTypehints  = array();
-        foreach($result->toArray() as $row) {
+        foreach ($result->toArray() as $row) {
             assert(isset($this->methodIds[$row['classe'] . '::' . mb_strtolower($row['methode'])]));
             $toDump[] = array(++$this->argumentsId,
                               $row['name'],
@@ -1089,7 +1095,7 @@ GREMLIN
             );
 
             if (!empty($row['attributes'])) {
-                foreach($row['attributes'] as $attribute) {
+                foreach ($row['attributes'] as $attribute) {
                     $toAttributes[] = array(0,
                                             'argument',
                                             $this->argumentsId,
@@ -1098,7 +1104,7 @@ GREMLIN
             }
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'argument',
                                         $this->argumentsId,
@@ -1108,7 +1114,7 @@ GREMLIN
             }
 
             if (!empty($row['typehint'])) {
-                foreach($row['typehint'] as $id => $typehint) {
+                foreach ($row['typehint'] as $id => $typehint) {
                     $toTypehints[] = array(0,
                                            'argument',
                                             $this->argumentsId,
@@ -1128,15 +1134,10 @@ GREMLIN
         $query = $this->newQuery('Properties');
         $query->atomIs('Propertydefinition', Analyzer::WITHOUT_CONSTANTS)
               ->_as('property')
-              ->raw(<<<'GREMLIN'
- sideEffect{ 
-     b = it.get().value("fullcode").tokenize(' = ');
-     name = b[0];
-}
-
-GREMLIN
-)
-              ->initVariable('hasDefault',     '0')
+              ->outIs('NAME')
+              ->savePropertyAs('fullcode', 'name')
+              ->inIs('NAME')
+              ->initVariable('hasDefault', '0')
               ->raw(<<<'GREMLIN'
       where( __.out('DEFAULT').hasLabel('Void').sideEffect{ hasDefault = 0;}.fold())
      .where( __.out('DEFAULT').not(where(__.in("RIGHT"))).not(__.hasLabel('Void')).sideEffect{ hasDefault = 1; init = it.get().value("fullcode"); if (it.get().label() in ["Integer", "Null", "Float", "Boolean", "String", "Heredoc"]) { expression = 0; } else { expression = 1;  }}.fold())
@@ -1186,7 +1187,7 @@ GREMLIN)
                     'typehint_fnp'  => 'typehint_fnp',
                     'typehint_type' => 'typehint_type',
                     )
-                );
+              );
 
         $query->prepareRawQuery();
         $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
@@ -1194,7 +1195,7 @@ GREMLIN)
         $toDump        = array();
         $toPhpdoc      = array();
         $toTypehints   = array();
-        foreach($result->toArray() as $row) {
+        foreach ($result->toArray() as $row) {
             $row['visibility'] = $row['visibility'] === 'none' ? '' : $row['visibility'];
 
             // If we haven't found any definition for this class, just ignore it.
@@ -1222,7 +1223,7 @@ GREMLIN)
             );
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'property',
                                         $this->propertyCount,
@@ -1232,7 +1233,7 @@ GREMLIN)
             }
 
             if (!empty($row['typehint'])) {
-                foreach($row['typehint'] as $id => $typehint) {
+                foreach ($row['typehint'] as $id => $typehint) {
                     $toTypehints[] = array(0,
                                            'property',
                                            $this->propertyCount,
@@ -1280,7 +1281,7 @@ GREMLIN)
         $toDump          = array();
         $toAttributes    = array();
         $toPhpdoc        = array();
-        foreach($classConstants as $row) {
+        foreach ($classConstants as $row) {
             $row['visibility'] = $row['visibility'] === 'none' ? '' : $row['visibility'];
 
             // If we haven't found any definition for this class, just ignore it.
@@ -1301,7 +1302,7 @@ GREMLIN)
             );
 
             if (!empty($row['attributes'])) {
-                foreach($row['attributes'] as $attribute) {
+                foreach ($row['attributes'] as $attribute) {
                     $toAttributes[] = array(0,
                                             'classconstant',
                                             $this->classConstCount,
@@ -1310,7 +1311,7 @@ GREMLIN)
             }
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'classconstant',
                                         $this->classConstCount,
@@ -1352,7 +1353,7 @@ GREMLIN)
 
         $toDump     = array();
         $toPhpdoc   = array();
-        foreach($cases as $row) {
+        foreach ($cases as $row) {
             // If we haven't found any definition for this class, just ignore it.
             if (!isset($citId[$row['classline'] . $row['class']])) {
                 print 'Ignoring ' . $row['classline'] . $row['class'] . PHP_EOL;
@@ -1372,7 +1373,7 @@ GREMLIN)
             );
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'enumcase',
                                         $this->classConstCount,
@@ -1403,26 +1404,26 @@ GREMLIN)
            .fold() 
 )
 GREMLIN
-)
-              ->filter(
-                $query->side()
-                     ->outIs('NAME')
-                     ->is('constant', true)
-                     ->savePropertyAs('fullcode', 'name')
               )
               ->filter(
-                $query->side()
-                     ->outIs('VALUE')
-                     ->is('constant', true)
-                     ->savePropertyAs('fullcode', 'v')
-                     ->raw(<<<'GREMLIN'
+                  $query->side()
+                       ->outIs('NAME')
+                       ->is('constant', true)
+                       ->savePropertyAs('fullcode', 'name')
+              )
+              ->filter(
+                  $query->side()
+                       ->outIs('VALUE')
+                       ->is('constant', true)
+                       ->savePropertyAs('fullcode', 'v')
+                       ->raw(<<<'GREMLIN'
  sideEffect{ if (it.get().label() in ["Integer", "Null", "Float", "Boolean", "String", "Heredoc"]) { 
     expression = 0; 
  } else { 
     expression = 1; 
 }}
 GREMLIN
-)
+                       )
               )
              ->selectMap(array('name'       => 'name',
                                'value'      => 'v',
@@ -1437,7 +1438,7 @@ GREMLIN
 
         $toDump       = array();
         $toPhpdoc     = array();
-        foreach($result->toArray() as $row) {
+        foreach ($result->toArray() as $row) {
             if (isset($namespacesId[$row['namespace'] . '\\'])) {
                 $namespaceId = $namespacesId[$row['namespace'] . '\\'];
             } else {
@@ -1454,7 +1455,7 @@ GREMLIN
             );
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'const',
                                         $this->constantCount,
@@ -1483,22 +1484,22 @@ GREMLIN
            .fold() 
 )
 GREMLIN
-)
+              )
               ->hasNoIn('CONST') // Not class or interface
               ->outIs('CONST')
               ->atomIs('Constant', Analyzer::WITHOUT_CONSTANTS)
               ->filter(
-                $query->side()
-                     ->outIs('NAME')
-                     ->is('constant', true)
-                     ->savePropertyAs('fullcode', 'name')
+                  $query->side()
+                       ->outIs('NAME')
+                       ->is('constant', true)
+                       ->savePropertyAs('fullcode', 'name')
               )
               ->filter(
-                $query->side()
-                     ->outIs('VALUE')
-                     ->is('constant', true)
-                     ->savePropertyAs('fullcode', 'v')
-                     ->raw('sideEffect{ if (it.get().label() in ["Integer", "Null", "Float", "Boolean", "String", "Heredoc"]) { expression = 0; } else { expression = 1; }}')
+                  $query->side()
+                       ->outIs('VALUE')
+                       ->is('constant', true)
+                       ->savePropertyAs('fullcode', 'v')
+                       ->raw('sideEffect{ if (it.get().label() in ["Integer", "Null", "Float", "Boolean", "String", "Heredoc"]) { expression = 0; } else { expression = 1; }}')
               )
 
               ->selectMap(array('name'       => 'name',
@@ -1514,7 +1515,7 @@ GREMLIN
 
         $toDump   = array();
         $toPhpdoc = array();
-        foreach($result->toArray() as $row) {
+        foreach ($result->toArray() as $row) {
             $toDump[] = array(++$this->constantCount,
                               $row['name'],
                               $namespacesId[$row['namespace'] . '\\'] ?? 1,
@@ -1525,7 +1526,7 @@ GREMLIN
                             );
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'const',
                                         $this->constantCount,
@@ -1567,10 +1568,10 @@ GREMLIN
  )
 .where( __.out('RETURNTYPE').not(hasLabel('Void')).sideEffect{ returntype.add(it.get().value("fullcode"));returntype_fnp.add(it.get().value("fullnspath"));}.fold())
 GREMLIN
-)
-              ->raw(<<<'GREMLIN'
+              )
+              ->raw(<<<GREMLIN
  where( 
-    __.in().emit().repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File"))
+    __.in().emit().repeat( __.in({$this->linksDown})).until(hasLabel("File"))
            .coalesce( 
                 __.hasLabel("File").sideEffect{ file = it.get().value("fullcode"); },
                 __.hasLabel("Namespace").sideEffect{ namespace = it.get().value("fullnspath"); }
@@ -1578,23 +1579,24 @@ GREMLIN
            .fold() 
 )
 GREMLIN
-)
+              )
+
               ->selectMap(array(
-      'name'             => 'name[0]',
-      'type'             => 'it.get().label().toString().toLowerCase()',
-      'line'             => 'it.get().value("line")',
-      'file'             => 'file',
-      'namespace'        => 'namespace',
-      'fullnspath'       => 'x_fullnspath',
-      'reference'        => 'x_reference',
-      'returntype'       => 'returntype',
-      'returntype_fnp'   => 'returntype_fnp',
-      'returntype_type'  => 'returntype_type',
-      'begin'            => 'lines.min()',
-      'end'              => 'lines.max()',
-      'phpdoc'           => 'phpdoc',
-      'attributes'       => 'attributes',
-));
+                    'name'             => 'name[0]',
+                    'type'             => 'it.get().label().toString().toLowerCase()',
+                    'line'             => 'it.get().value("line")',
+                    'file'             => 'file',
+                    'namespace'        => 'namespace',
+                    'fullnspath'       => 'x_fullnspath',
+                    'reference'        => 'x_reference',
+                    'returntype'       => 'returntype',
+                    'returntype_fnp'   => 'returntype_fnp',
+                    'returntype_type'  => 'returntype_type',
+                    'begin'            => 'lines.min()',
+                    'end'              => 'lines.max()',
+                    'phpdoc'           => 'phpdoc',
+                    'attributes'       => 'attributes',
+              ));
         $query->prepareRawQuery();
         $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
 
@@ -1603,13 +1605,13 @@ GREMLIN
         $toTypehints  = array();
         $toPhpdoc     = array();
         $unique       = array();
-        foreach($result->toArray() as $row) {
+        foreach ($result->toArray() as $row) {
             if (isset($unique[$row['name'] . $row['line']])) {
                 continue;  // Skipping double definitions until we can differentiate them.
             }
             $unique[$row['name'] . $row['line']] = 1;
 
-            if (strpos($row['fullnspath'], '@') === false) {
+            if (!str_contains($row['fullnspath'], '@')  ) {
                 $this->methodIds[$row['fullnspath']] = ++$this->methodCount;
                 $n = $row['namespace'];
                 if ($n[-1] !== '\\') {
@@ -1637,7 +1639,7 @@ GREMLIN
                               );
 
             if (!empty($row['attributes'])) {
-                foreach($row['attributes'] as $attribute) {
+                foreach ($row['attributes'] as $attribute) {
                     $toAttributes[] = array(0,
                                             $row['type'],
                                             $this->methodCount,
@@ -1646,7 +1648,7 @@ GREMLIN
             }
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'function',
                                         $this->methodCount,
@@ -1656,7 +1658,7 @@ GREMLIN
             }
 
             if (!empty($row['returntype'])) {
-                foreach($row['returntype'] as $id => $typehint) {
+                foreach ($row['returntype'] as $id => $typehint) {
                     $toTypehints[] = array(0,
                                            'function',
                                            $this->methodCount,
@@ -1708,24 +1710,24 @@ where( __.sideEffect{ fonction = it.get().label().toString().toLowerCase();
 .where( __.out('DEFAULT').hasLabel('Void').sideEffect{ hasDefault = 0;}.fold())
 .where( __.out('DEFAULT').not(where(__.in("RIGHT"))).not(hasLabel('Void')).sideEffect{ hasDefault = 1;}.sideEffect{ init = it.get().value("fullcode"); if (! it.get().label() in ["Integer", "Null", "Float", "Boolean", "String", "Heredoc"]) { expression = 1;  }}.fold())
 GREMLIN
-)
+              )
         ->selectMap(array(
-         'name'          => 'name',
-         'fullnspath'    => 'fullnspath',
-         'rank'          => 'it.get().value("rank")',
-         'variadic'      => 'it.get().properties("variadic").any()',
-         'reference'     => 'it.get().properties("reference").any()',
-         'line'          => 'it.get().value("line")',
-         'function'      => 'fonction',
-         'init'          => 'init',
-         'expression'    => 'expression',
-         'hasDefault'    => 'hasDefault',
-         'typehint'      => 'typehint_hints',
-         'typehint_fnp'  => 'typehint_fnp',
-         'typehint_type' => 'typehint_type',
-         'phpdoc'        => 'phpdoc',
-         'attributes'    => 'attributes',
-        ));
+                       'name'          => 'name',
+                       'fullnspath'    => 'fullnspath',
+                       'rank'          => 'it.get().value("rank")',
+                       'variadic'      => 'it.get().properties("variadic").any()',
+                       'reference'     => 'it.get().properties("reference").any()',
+                       'line'          => 'it.get().value("line")',
+                       'function'      => 'fonction',
+                       'init'          => 'init',
+                       'expression'    => 'expression',
+                       'hasDefault'    => 'hasDefault',
+                       'typehint'      => 'typehint_hints',
+                       'typehint_fnp'  => 'typehint_fnp',
+                       'typehint_type' => 'typehint_type',
+                       'phpdoc'        => 'phpdoc',
+                       'attributes'    => 'attributes',
+                      ));
 
         $query->prepareRawQuery();
         $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
@@ -1734,7 +1736,7 @@ GREMLIN
         $toPhpdoc     = array();
         $toAttributes = array();
         $toTypehints  = array();
-        foreach($result->toArray() as $row) {
+        foreach ($result->toArray() as $row) {
             // Those were skipped in the previous loop
             if (!isset($this->methodIds[$row['fullnspath']])) {
                 continue;
@@ -1755,7 +1757,7 @@ GREMLIN
             );
 
             if (!empty($row['attributes'])) {
-                foreach($row['attributes'] as $attribute) {
+                foreach ($row['attributes'] as $attribute) {
                     $toAttributes[] = array(0,
                                             'argument',
                                             $this->argumentsId,
@@ -1764,7 +1766,7 @@ GREMLIN
             }
 
             if (!empty($row['phpdoc'])) {
-                foreach($row['phpdoc'] as $phpdoc) {
+                foreach ($row['phpdoc'] as $phpdoc) {
                     $toPhpdoc[] = array(0,
                                         'function',
                                         $this->argumentsId,
@@ -1774,7 +1776,7 @@ GREMLIN
             }
 
             if (!empty($row['typehint'])) {
-                foreach($row['typehint'] as $id => $typehint) {
+                foreach ($row['typehint'] as $id => $typehint) {
                     $toTypehints[] = array(0,
                                            'argument',
                                            $this->argumentsId,
@@ -1806,7 +1808,10 @@ GREMLIN
         $this->dump->storeInTable('namespaces', $namespaces);
 
         $namespacesId = $this->dump->fetchTable('namespaces');
-        $namespacesId->map(function (array $x): array { $x['namespace'] = mb_strtolower($x['namespace']); return $x; });
+        $namespacesId->map(function (array $x): array {
+            $x['namespace'] = mb_strtolower($x['namespace']);
+            return $x;
+        });
         return $namespacesId->toHash('namespace', 'id');
     }
 
@@ -1819,7 +1824,7 @@ GREMLIN
         $index = $result->toArray()[0] ?? array();
 
         $toDump = array();
-        foreach($index as $number => $count) {
+        foreach ($index as $number => $count) {
             $toDump[] = array('',
                               $name,
                               $number,
@@ -2000,7 +2005,7 @@ GREMLIN
         $this->storeToDumpArray('hash', $toDump);
     }
 
-    public function checkRulesets($ruleset, array $analyzers): void {
+    public function checkRulesets(string $ruleset, array $analyzers): void {
         $sqliteFile = $this->config->dump;
 
         $sqlite = new \Sqlite3($sqliteFile);
@@ -2009,7 +2014,7 @@ GREMLIN
         $query = 'SELECT analyzer FROM resultsCounts WHERE analyzer IN (' . makeList($analyzers) . ')';
         $ran = array();
         $res = $sqlite->query($query);
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $ran[] = $row['analyzer'];
         }
 
@@ -2030,11 +2035,13 @@ GREMLIN
         $rulesets = array_diff($rulesets, $ran);
 
         $add = array();
-        foreach($rulesets as $ruleset) {
+        foreach ($rulesets as $ruleset) {
             $analyzerList = $this->rulesets->getRulesetsAnalyzers(array($ruleset));
 
             $diff = array_diff($analyzerList, $analyzers);
-            $diff = array_filter($diff, function (string $x): bool { return (substr($x, 0, 5) !== 'Dump/') && (substr($x, 0, 9) !== 'Complete/');  });
+            $diff = array_filter($diff, function (string $x): bool {
+                return (substr($x, 0, 5) !== 'Dump/') && (substr($x, 0, 9) !== 'Complete/');
+            });
             if (empty($diff)) {
                 $add[] = array('', $ruleset);
             }
@@ -2085,7 +2092,7 @@ GREMLIN
         $dumps = glob($this->config->tmp_dir . '/dump-*.php');
         display('Loading ' . count($dumps) . ' dumped SQL files');
 
-        foreach($dumps as $dump) {
+        foreach ($dumps as $dump) {
             include $dump;
 
             $this->dump->storeQueries($queries);

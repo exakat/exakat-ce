@@ -44,8 +44,8 @@ handles ' and " when they are around the string (or, by default, none)
 */
 
 class SelectorParser {
-    private $line = '';
-    private $parsed = null;
+    private string $line = '';
+    private Node $parsed;
 
     public function __construct(string $line) {
         $this->line = $line;
@@ -58,17 +58,17 @@ class SelectorParser {
 
         $previous = null;
         $above = null;
-        foreach($r as $R) {
+        foreach ($r as $R) {
             $node = new Node($R[3], $R[2]);
 
             $pattern = array();
-            if (strpos($R[2], '>>') !== false) {
+            if (str_contains($R[2], '>>')  ) {
                 $previous->setProperty($R[3], $node);
                 $above = $previous;
-            } elseif (strpos($R[2], '>') !== false) {
+            } elseif (str_contains($R[2], '>')  ) {
                 $previous->setProperty($R[3], $node);
                 $above = $previous;
-            } elseif (strpos($R[2], ',') !== false) {
+            } elseif (str_contains($R[2], ',')  ) {
                 $above->setProperty($R[3], $node);
             } else {
                 $this->parsed->setProperty($R[3], $node);
@@ -76,7 +76,7 @@ class SelectorParser {
 
             if (!empty($R[4])) {
                 preg_match_all('/\s*(.+?)\s*=\s*([^,]+)\s*,?/', substr($R[4], 1, -1), $r2, PREG_SET_ORDER);
-                foreach($r2 as $R2) {
+                foreach ($r2 as $R2) {
                     $node->setProperty($R2[1], $R2[2]);
                 }
             }
@@ -91,10 +91,10 @@ class SelectorParser {
         return $this->parsed;
     }
 
-/*
-main => [a, b]
-properties => [p => value|null, ]
-*/
+    /*
+    main => [a, b]
+    properties => [p => value|null, ]
+    */
 }
 
 class Node {
@@ -108,7 +108,7 @@ class Node {
         $this->inside = $inside;
     }
 
-    public function setProperty($name, $value) {
+    public function setProperty(string $name, mixed $value) : void {
         if ($name === 'link') {
             $this->link = $value;
         } else {
@@ -116,15 +116,15 @@ class Node {
         }
     }
 
-    public function getProperty($name, $value) {
+    public function getProperty(string $name) : mixed {
         return $this->properties[$name];
     }
 
-    public function getInside() {
+    public function getInside() : string {
         return $this->inside;
     }
 
-    public function getAtom() {
+    public function getAtom() : string {
         return $this->atom;
     }
 
@@ -132,7 +132,7 @@ class Node {
         return $this->link;
     }
 
-    public function issetProperty($name): bool {
+    public function issetProperty(string $name): bool {
         return isset($this->properties[$name]);
     }
 
@@ -144,7 +144,7 @@ class Node {
         $r = array('inside' => $this->inside,
                   );
 
-        foreach($this->properties as $name => $property) {
+        foreach ($this->properties as $name => $property) {
             if ($property instanceof Node) {
                 $r[$name] = $property->toArray();
             } else {

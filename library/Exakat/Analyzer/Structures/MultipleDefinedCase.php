@@ -30,13 +30,13 @@ class MultipleDefinedCase extends Analyzer {
         // Check that fullcode is the same or not for integers
         $this->atomIs(self::SWITCH_ALL)
              ->filter(
-                $this->side()
-                     ->outIs('CASES')
-                     ->outIs('EXPRESSION')
-                     ->atomIs('Case')
-                     ->outIs('CASE')
-                     ->atomIs(array('Integer', 'Null', 'Boolean'), self::WITH_CONSTANTS)
-                     ->raw('groupCount().by("intval").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
+                 $this->side()
+                      ->outIs('CASES')
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Case')
+                      ->outIs('CASE')
+                      ->atomIs(array('Integer', 'Null', 'Boolean'), self::WITH_CONSTANTS)
+                      ->raw('groupCount().by("intval").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
              );
         $this->prepareQuery();
 
@@ -44,14 +44,14 @@ class MultipleDefinedCase extends Analyzer {
         $this->atomIs(self::SWITCH_ALL)
              ->analyzerIsNot('self')
              ->filter(
-                $this->side()
-                     ->outIs('CASES')
-                     ->outIs('EXPRESSION')
-                     ->atomIs('Case')
-                     ->outIs('CASE')
-                     ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
-                     ->has('noDelimiter')
-                     ->raw('groupCount().by("noDelimiter").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
+                 $this->side()
+                      ->outIs('CASES')
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Case')
+                      ->outIs('CASE')
+                      ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+                      ->has('noDelimiter')
+                      ->raw('groupCount().by("noDelimiter").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
              );
         $this->prepareQuery();
 
@@ -59,13 +59,13 @@ class MultipleDefinedCase extends Analyzer {
         $this->atomIs(self::SWITCH_ALL)
              ->analyzerIsNot('self')
              ->filter(
-                $this->side()
-                     ->outIs('CASES')
-                     ->outIs('EXPRESSION')
-                     ->atomIs('Case')
-                     ->outIs('CASE')
-                     ->atomIs(array('Nsname', 'Identifier'), self::WITHOUT_CONSTANTS)
-                     ->raw('groupCount().by("fullnspath").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
+                 $this->side()
+                      ->outIs('CASES')
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Case')
+                      ->outIs('CASE')
+                      ->atomIs(array('Nsname', 'Identifier'), self::WITHOUT_CONSTANTS)
+                      ->raw('groupCount().by("fullnspath").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
              );
         $this->prepareQuery();
 
@@ -73,13 +73,13 @@ class MultipleDefinedCase extends Analyzer {
         $this->atomIs(self::SWITCH_ALL)
              ->analyzerIsNot('self')
              ->filter(
-                $this->side()
-                     ->outIs('CASES')
-                     ->outIs('EXPRESSION')
-                     ->atomIs('Case')
-                     ->outIs('CASE')
-                     ->atomIsNot(array('Nsname', 'Identifier', 'Integer', 'Null', 'Boolean', 'String', 'Concatenation', 'Heredoc' ), self::WITHOUT_CONSTANTS)
-                     ->raw('groupCount().by("fullcode").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
+                 $this->side()
+                      ->outIs('CASES')
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Case')
+                      ->outIs('CASE')
+                      ->atomIsNot(array('Nsname', 'Identifier', 'Integer', 'Null', 'Boolean', 'String', 'Concatenation', 'Heredoc' ), self::WITHOUT_CONSTANTS)
+                      ->raw('groupCount().by("fullcode").map{ it.get().findAll{ it.value > 1}.size()}.is(gte(1))')
              );
         $this->prepareQuery();
 

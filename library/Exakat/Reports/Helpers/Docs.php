@@ -27,9 +27,9 @@ use Exakat\Autoload\AutoloadExt;
 use Exakat\Autoload\AutoloadDev;
 
 class Docs {
-    private $pathToIni = null;
-    private $ext       = null;
-    private $dev       = null;
+    private string      $pathToIni;
+    private AutoloadExt $ext;
+    private AutoloadDev $dev;
 
     private static $docs = null;
 
@@ -39,7 +39,7 @@ class Docs {
         $this->dev = $dev;
     }
 
-    public function getDocs(string $analyzer, string $property = null) {
+    public function getDocs(string $analyzer, string $property = null) : mixed {
         if (isset(self::$docs[$analyzer])) {
             if (isset(self::$docs[$analyzer][$property])) {
                 return self::$docs[$analyzer][$property];
@@ -61,8 +61,10 @@ class Docs {
         assert($ini['exakatSince'] !== null, "No exakatSince documentation for '$analyzer'.");
 
         $ini['parameter'] = array();
-        $ranks = array_filter(array_keys($ini), function (string $s) { return preg_match('/^parameter\d+$/', $s) ?? false;});
-        foreach($ranks as $rank) {
+        $ranks = array_filter(array_keys($ini), function (string $s) {
+            return preg_match('/^parameter\d+$/', $s) ?? false;
+        });
+        foreach ($ranks as $rank) {
             $ini['parameter'][] = $ini[$rank];
             unset($ini[$rank]);
         }

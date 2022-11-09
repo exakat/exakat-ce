@@ -55,7 +55,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->as('call')
               ->outIs('MEMBER')
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('lccode', 'name')
+              ->savePropertyAs('code', 'name')
               ->back('first')
               ->inIs('PPP')
               ->outIs('TYPEHINT')
@@ -63,7 +63,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
-              ->samePropertyAs('propertyname', 'name', self::CASE_INSENSITIVE)
+              ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
 
@@ -76,7 +76,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->as('call')
               ->outIs('CONSTANT')
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('lccode', 'name')
+              ->savePropertyAs('code', 'name')
               ->back('first')
               ->inIs('PPP')
               ->outIs('TYPEHINT')
@@ -84,6 +84,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs('CONST')
               ->outIs('CONST')
+              ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();

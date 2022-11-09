@@ -29,10 +29,10 @@ class Command {
     public const SACK_HASH    = '{ [:] }{it.clone()}';
     public const SACK_INTEGER = '{ 0 }';
 
-    private static $id = 0;
-    public $gremlin    = '';
-    public $arguments  = array();
-    private $sack      = self::SACK_NONE;
+    private static $id         = 0;
+    public string  $gremlin    = '';
+    public array   $arguments  = array();
+    private string $sack       = self::SACK_NONE;
 
     public function __construct(string $command, array $args = array()) {
         $c = substr_count($command, '***');
@@ -40,7 +40,7 @@ class Command {
         assert($c === count($args), "Wrong number of arguments for Command : $c placeholders, " . count($args) . " provided. ($command)\n" . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), true));
 
         $arguments = array();
-        foreach($args as $arg) {
+        foreach ($args as $arg) {
             ++self::$id;
             $arguments['arg' . self::$id] = $arg;
         }
@@ -58,7 +58,7 @@ class Command {
                                         self::SACK_HASH,
                                         self::SACK_INTEGER,
                                         ), \STRICT_COMPARISON),
-              'Sack must be one of the allowed constant : "' . $default . '" provided');
+            'Sack must be one of the allowed constant : "' . $default . '" provided');
 
         $this->sack = $default;
     }

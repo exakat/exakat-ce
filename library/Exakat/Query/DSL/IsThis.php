@@ -30,13 +30,13 @@ class IsThis extends DSL {
 or( __.hasLabel("This"),
 
     // Typehinted variable
-    __.hasLabel("Variableobject", "Variable").in("DEFINITION").in("NAME").as("definition").out("TYPEHINT").in("DEFINITION").as("typehint").select("definition").in("ARGUMENT").in("METHOD", "MAGICMETHOD").as("classe").where("typehint", eq("classe") ),
+    __.hasLabel("Variableobject", "Variable").in("DEFINITION").as("definition").out("TYPEHINT").in("DEFINITION").as("typehint").select("definition").in("ARGUMENT").in("METHOD", "MAGICMETHOD").as("classe").where("typehint", eq("classe") ),
 
     // Typehinted property
     __.hasLabel("Member").in("DEFINITION").in("PPP").as("definition").out("TYPEHINT").in("DEFINITION").as("typehint").select("definition").in("PPP").as("classe").where("typehint", eq("classe") )
   )
 GREMLIN
-);
+        );
     }
 }
 ?>

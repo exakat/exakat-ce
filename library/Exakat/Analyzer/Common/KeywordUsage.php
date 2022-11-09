@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class KeywordUsage extends Analyzer {
-    protected $keyword = '';
+    protected string $keyword = '';
 
     public function analyze(): void {
         if (empty($this->keyword)) {
@@ -33,7 +33,7 @@ class KeywordUsage extends Analyzer {
         }
 
         // class, trait, interface
-        $this->atomIs(array('Class', 'Trait', 'Interface'))
+        $this->atomIs(self::CIT)
              ->outIs('NAME')
              ->codeIs($this->keyword, self::TRANSLATE, self::CASE_INSENSITIVE)
              ->back('first');

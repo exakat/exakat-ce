@@ -26,7 +26,7 @@ namespace Exakat\Tasks;
 class CleanDb extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
-    protected $logname = self::LOG_NONE;
+    protected string $logname = self::LOG_NONE;
 
     public function run(): void {
         if ($this->config->quick === true) {
@@ -35,10 +35,11 @@ class CleanDb extends Tasks {
             } catch (\Exception $e) {
                 $this->manageServer();
             }
+
             return;
         }
 
-         if (self::$semaphore === null) {
+        if (self::$semaphore === self::NO_SEMAPHORE) {
             $this->manageServer();
             return;
         }
@@ -58,10 +59,8 @@ class CleanDb extends Tasks {
         } elseif ($this->config->start === true) {
             display('Start gremlin server');
             $this->gremlin->start();
-        } elseif ($this->config->restart === true) {
-            display('Restart gremlin server');
-            $this->gremlin->clean();
         } else {
+            // also the case of config->restart
             display('Restart gremlin server');
             $this->gremlin->clean();
         }

@@ -28,12 +28,20 @@ use Symfony\Component\Yaml\Yaml as Symfony_Yaml;
 abstract class Config {
     public const NOT_LOADED = null;
 
-    protected $config  = array();
-    protected $options = array();
+    protected array  $config  = array();
+    protected array  $options = array();
 
-    protected $ignore_dirs;
-    protected $include_dirs;
-
+    protected array  $ignore_dirs         = array();
+    protected array  $include_dirs        = array();
+    protected array  $ignore_rules        = array();
+    protected array  $stubs               = array();
+    protected array  $file_extensions     = array();
+    protected string $project_name        = '';
+    protected string $project_url         = '';
+    protected string $project_vcs         = '';
+    protected string $project_description = '';
+    protected string $project_branch      = '';
+    protected string $project_tag         = '';
     protected Project $project;
 
     abstract public function loadConfig(Project $project): ?string ;
@@ -42,9 +50,9 @@ abstract class Config {
         return $this->config;
     }
 
-    public function get(string $index) {
+    public function get(string $index) : mixed {
         if (!isset($this->config[$index])) {
-            print "No such config as $index in " . get_class(static::class) . PHP_EOL;
+            print 'No such config as ' . $index . ' in ' . static::class . PHP_EOL;
             return null;
         }
         return $this->config[$index];
@@ -58,14 +66,14 @@ abstract class Config {
         $ini[] = '';
 
         $ini[] = ';Ignored dirs and files, relative to code source root.';
-        foreach($this->ignore_dirs as $ignore_dir) {
+        foreach ($this->ignore_dirs as $ignore_dir) {
             $ini[] = "ignore_dirs[] = \"$ignore_dir\"";
         }
         $ini[] = '';
 
         $ini[] = ';Included dirs or files, relative to code source root. Default to all.';
         $ini[] = ';Those are added after ignoring directories';
-        foreach($this->include_dirs as $include_dir) {
+        foreach ($this->include_dirs as $include_dir) {
             $ini[] = "include_dirs[] = \"$include_dir\"";
         }
         $ini[] = '';
@@ -78,15 +86,14 @@ abstract class Config {
         if (empty($this->stubs)) {
             $ini[] = "stub[] = '';";
         } else {
-            foreach($this->stubs as $stub) {
+            foreach ($this->stubs as $stub) {
                 $ini[] = "stub[] = \"$stub\"";
             }
-
         }
         $ini[] = '';
 
         $ini[] = ';Ignored rules';
-        foreach($this->ignore_rules as $ignore_rule) {
+        foreach ($this->ignore_rules as $ignore_rule) {
             $ini[] = "ignore_rules[] = \"$ignore_rule\"";
         }
         $ini[] = '';
@@ -101,13 +108,13 @@ abstract class Config {
         $ini[] = '';
 
         $parameters = preg_grep('#^[A-Z][^/]+/[A-Z].+$#', array_keys($this->options));
-        foreach($parameters as $parameter) {
+        foreach ($parameters as $parameter) {
             $class = "\Exakat\Analyzer\\" . str_replace('/', '\\', $parameter);
             if (!class_exists($class)) {
                 continue;
             }
             $ini[] = "[$parameter]";
-            foreach($this->options[$parameter] as $name => $value) {
+            foreach ($this->options[$parameter] as $name => $value) {
                 if (!property_exists($class, $name)) {
                     continue;
                 }
@@ -135,13 +142,13 @@ abstract class Config {
                       );
 
         $parameters = preg_grep('#^[A-Z][^/]+/[A-Z].+$#', array_keys($this->options));
-        foreach($parameters as $parameter) {
+        foreach ($parameters as $parameter) {
             $class = "\Exakat\Analyzer\\" . str_replace('/', '\\', $parameter);
             if (!class_exists($class)) {
                 continue;
             }
             $yaml[$parameter] = array();
-            foreach($this->options[$parameter] as $name => $value) {
+            foreach ($this->options[$parameter] as $name => $value) {
                 if (!property_exists($class, $name)) {
                     continue;
                 }
@@ -153,8 +160,10 @@ abstract class Config {
     }
 
     protected function cleanFileExtensions(array $extensions): array {
-        $filter = function ($s) {
-            if (!is_string($s)) { return ''; }
+        $filter = function (?string $s) : string {
+            if (!is_string($s)) {
+                return '';
+            }
             return trim($s, '. ');
         };
         $extensions = array_map($filter, $extensions);
@@ -164,8 +173,10 @@ abstract class Config {
     }
 
     protected function cleanProjectReports(array $reports): array {
-        $filter = function ($s) {
-            if (!is_string($s)) { return ''; }
+        $filter = function (mixed $s) : string {
+            if (!is_string($s)) {
+                return '';
+            }
             return trim($s, '. -/');
         };
         $reports = array_map($filter, $reports);

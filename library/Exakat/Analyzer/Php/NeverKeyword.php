@@ -25,9 +25,9 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Common\KeywordUsage;
 
 class NeverKeyword extends KeywordUsage {
-    protected $phpVersion = '8.1-';
+    protected string $phpVersion = '8.1-';
 
-    protected $keyword = 'never';
+    protected string $keyword = 'never';
 }
 
 ?>

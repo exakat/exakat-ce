@@ -24,6 +24,7 @@ namespace Exakat\Analyzer\Interfaces;
 
 use Exakat\Analyzer\Analyzer;
 use Exakat\Query\DSL\CollectMethods;
+use Exakat\Data\Dictionary;
 
 class IsNotImplemented extends Analyzer {
     public function analyze(): void {
@@ -39,9 +40,23 @@ class IsNotImplemented extends Analyzer {
              ->raw('filter{interfaceMethods.size() > classMethods.size() || !classMethods.containsAll(interfaceMethods);}');
         $this->prepareQuery();
 
-        // todo : check for cross over interfaces
-        // warning : methods may be spread over multiple classes
-        // interface i { i1, i2} class a { function i1()} class b implement i { function i2()}
+        $list = $this->readStubs('getInterfaceMethodsNameAndCount');
+        foreach ($list as &$l) {
+            $l = $this->dictCode->translate(array_column($l, 'name'), Dictionary::CASE_INSENSITIVE);
+        }
+        unset($l);
+        $list = array_filter($list);
+
+        $this->atomIs('Class')
+             ->outIs('IMPLEMENTS')
+             ->isAnyOf(array('isPhp', 'isStub', 'isExt'), true)
+             ->fullnspathIs(array_keys($list))
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->back('first')
+             ->isNot('abstract', true)
+             ->collectMethods('classMethods', CollectMethods::METHOD_CONCRETE)
+             ->raw('filter{x = ***; x[fqn].size() > classMethods.size() || x[fqn].intersect(classMethods).size() != x[fqn].size();}',$list);
+        $this->prepareQuery();
     }
 }
 

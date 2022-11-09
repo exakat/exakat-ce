@@ -50,7 +50,7 @@ where(
       .filter{ levels != [];}
 ).filter{ levels.size() >= $minimumSize && levels.sum() / levels.size() >= $indentationThreshold}
 GREMLIN
-);
+        );
 
         return $command;
     }

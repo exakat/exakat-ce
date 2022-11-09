@@ -45,6 +45,5 @@ interface RulesetsInterface {
     public function getSuggestionClass(string $name): array;
 
     public function getAnalyzerInExtension(string $name): array;
-
 }
 ?>

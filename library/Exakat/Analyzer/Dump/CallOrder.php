@@ -23,12 +23,12 @@
 namespace Exakat\Analyzer\Dump;
 
 class CallOrder extends AnalyzerTable {
-    protected $analyzerName = 'callOrder';
+    protected string $analyzerName = 'callOrder';
 
-    protected $analyzerTable = 'callOrder';
+    protected string $analyzerTable = 'callOrder';
 
     // Store inclusionss of files within each other
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE callOrder ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                          calling STRING,
                          callingName STRING,

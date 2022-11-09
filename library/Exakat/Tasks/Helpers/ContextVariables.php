@@ -39,8 +39,6 @@ class ContextVariables {
     public function exists(string $name): bool {
         return isset($this->list[$name]);
     }
-
-
 }
 
 ?>

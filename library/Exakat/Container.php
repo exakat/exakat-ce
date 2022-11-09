@@ -29,21 +29,23 @@ use Exakat\Exceptions\NoPhpBinary;
 use Exakat\Graph\Graph;
 use Exakat\Reports\Helpers\Docs;
 use Exakat\Stubs\Stubs;
+use Exakat\Config;
 
 class Container {
-    private $verbose        = 0;
+    private bool $verbose    = false;
 
-    private $config         = null;
-    private $graphdb        = null;
-    private $datastore      = null;
-    private $dictionary     = null;
-    private $docs           = null;
-    private $methods        = null;
-    private $rulesets       = null;
-    private $php            = null;
-    private $stubs          = null;
-    private $phpCore        = null;
-    private $phpExtensions  = null;
+    private Config     	$config			;
+    private Graph      	$graphdb		;
+    private Datastore  	$datastore		;
+    private Dictionary 	$dictionary		;
+    private Docs		$docs			;
+    private Methods    	$methods		;
+    private Rulesets	$rulesets		;
+    private Phpexec		$php			;
+    private Stubs		$stubs		 	;
+    private Stubs		$phpCore	 	;
+    private Stubs		$phpExtensions	;
+    private array		$inited			= array();
 
     public function init(array $argv = array()): void {
         $this->config = new Config($argv);
@@ -51,23 +53,24 @@ class Container {
         $this->verbose = $this->config->verbose;
     }
 
-    public function __get(string $what) {
+    public function __get(string $what) : mixed {
         assert(property_exists($this, $what), "No such property in the container : '$what'\n");
 
-        if ($this->$what === null) {
+        if (!isset($this->$what)) {
             $this->$what();
+            $this->inited[$what] = 1;
         }
 
         return $this->$what;
     }
 
     private function graphdb(): void {
-        $this->graphdb    = Graph::getConnexion();
+        $this->graphdb    = Graph::getConnexion($this->config, $this->config->gremlin);
         $this->graphdb->init();
     }
 
     private function datastore(): void {
-        $this->datastore  = new Datastore();
+        $this->datastore  = new Datastore($this->config);
     }
 
     private function dictionary(): void {

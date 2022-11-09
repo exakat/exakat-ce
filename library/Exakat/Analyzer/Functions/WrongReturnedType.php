@@ -39,32 +39,28 @@ class WrongReturnedType extends Analyzer {
     }
 
     public function analyze(): void {
-    // @todo Generator, Iterator, Traversable, or iterable
-    // @todo : missing support for return typehint from functions (custom and natives)
-    // @todo : support union and intersection types
+        // @todo Generator, Iterator, Traversable, or iterable
+        // @todo : missing support for return typehint from functions (custom and natives)
+        // @todo : support union and intersection types
 
         // function foo() : A { return new A;}
         $this->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/IsGenerator')
+             ->is('typehint', array('one', 'or'))
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
-             ->savePropertyAs('fullnspath', 'fqn')
              ->back('first')
+             ->collectTypehints('returned')
+
              ->outIs('RETURNED')
              ->as('results')
 
              ->outIs('NEW')
-             ->notSamePropertyAs('fullnspath', 'fqn')
-             /*
-             ->not(
-                 $this->side()
-                      ->inIs('DEFINITION')
-                      ->goToAllImplements(self::INCLUDE_SELF)
-                      ->samePropertyAs('fullnspath', 'fqn')
-             )*/
+             ->savePropertyAs('fullnspath', 'fqn')
+             ->raw('filter{ !(fqn in returned);}')
              ->back('results')
              ->inIs('RETURN');
-            $this->prepareQuery();
+        $this->prepareQuery();
 
         // function foo() : A { return new A;}
         $this->atomIs(self::FUNCTIONS_ALL)
@@ -87,7 +83,6 @@ class WrongReturnedType extends Analyzer {
              ->as('results')
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIsIE('NAME')
              ->outIs('TYPEHINT')
              ->atomIs('Void')
              ->inIs('TYPEHINT')
@@ -137,7 +132,6 @@ class WrongReturnedType extends Analyzer {
              ->as('results')
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIs('NAME')
              ->outIs('TYPEHINT')
              ->notSamePropertyAs('fullnspath', 'fqn')
              ->back('results')
@@ -150,9 +144,9 @@ class WrongReturnedType extends Analyzer {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/IsGenerator')
              ->not(
-                $this->side()
-                     ->outIs('RETURNTYPE')
-                     ->atomIs(array('Identifier', 'Nsname', 'Void'))
+                 $this->side()
+                      ->outIs('RETURNTYPE')
+                      ->atomIs(array('Identifier', 'Nsname', 'Void'))
              )
              ->collectTypehints('types')
              ->outIs('RETURNED')
@@ -161,8 +155,8 @@ class WrongReturnedType extends Analyzer {
              ->followParAs(FollowParAs::FOLLOW_NONE)
              ->atomIsNot(array('Variable', 'Staticproperty', 'Member', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
              ->optional(
-                $this->side()
-                     ->atomIs(array('Identifier', 'Nsname'), self::WITH_CONSTANTS)
+                 $this->side()
+                      ->atomIs(array('Identifier', 'Nsname'), self::WITH_CONSTANTS)
              )
              ->checkTypeWithAtom('types')
              ->back('results')
@@ -203,7 +197,6 @@ class WrongReturnedType extends Analyzer {
              ->as('results')
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIs('NAME')
              ->outIs('TYPEHINT')
              ->notSamePropertyAs('fullnspath', 'fqn')
              ->back('results')

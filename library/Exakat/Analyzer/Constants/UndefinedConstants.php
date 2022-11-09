@@ -44,19 +44,19 @@ class UndefinedConstants extends Analyzer {
                                    ))
              // skipping "$a::$b"
              ->not(
-                $this->side()
-                     ->outIs('CONCAT')
-                     ->atomIs(array('Variable', 'Member'))
+                 $this->side()
+                      ->outIs('CONCAT')
+                      ->atomIs(array('Variable', 'Member'))
              )
 
              ->not(
-                $this->side()
-                     ->atomIs('String')
-                     ->hasIn('ARGUMENT')
-                     ->is('rank', 0)
-                     ->inIs('ARGUMENT')
-                     ->atomIs('Functioncall')
-                     ->fullnspathIs('\\defined')
+                 $this->side()
+                      ->atomIs('String')
+                      ->hasIn('ARGUMENT')
+                      ->is('rank', 0)
+                      ->inIs('ARGUMENT')
+                      ->atomIs('Functioncall')
+                      ->fullnspathIs('\\defined')
              )
 
              ->isNot('isPhp', true)

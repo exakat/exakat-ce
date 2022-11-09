@@ -23,7 +23,7 @@
 namespace Exakat\Analyzer\Dump;
 
 class CollectMbstringEncodings extends AnalyzerArrayHashResults {
-    protected $analyzerName = 'Mbstring Encodings';
+    protected string $analyzerName = 'Mbstring Encodings';
 
     public function analyze(): void {
         // mb_stotolower('PHP', 'utf-8');
@@ -37,7 +37,7 @@ class CollectMbstringEncodings extends AnalyzerArrayHashResults {
         $stats = array_count_values($encodings);
 
         $valuesSQL = array();
-        foreach($stats as $name => $count) {
+        foreach ($stats as $name => $count) {
             $valuesSQL[] = array($name, $count);
         }
 

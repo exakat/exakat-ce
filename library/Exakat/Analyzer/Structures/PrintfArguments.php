@@ -51,9 +51,9 @@ REGEX;
         $this->atomFunctionIs(array('\\printf', '\\sprintf'))
              ->savePropertyAs('count', 'c')
              ->filter(
-                $this->side()
-                     ->outIs('ARGUMENT')
-                     ->is('variadic', true)
+                 $this->side()
+                      ->outIs('ARGUMENT')
+                      ->is('variadic', true)
              )
              ->outWithRank('ARGUMENT', 0)
              ->atomIs('String', self::WITH_CONSTANTS)
@@ -66,7 +66,7 @@ $countParameters
     c - 1 > d.size();
 }
 GREMLIN
-)
+             )
              ->back('first');
         $this->prepareQuery();
 
@@ -74,9 +74,9 @@ GREMLIN
         $this->atomFunctionIs(array('\\printf', '\\sprintf'))
              ->savePropertyAs('count', 'c')
              ->not(
-                $this->side()
-                     ->outIs('ARGUMENT')
-                     ->is('variadic', true)
+                 $this->side()
+                      ->outIs('ARGUMENT')
+                      ->is('variadic', true)
              )
              ->outWithRank('ARGUMENT', 0)
              ->atomIs('String', self::WITH_CONSTANTS)
@@ -89,7 +89,7 @@ $countParameters
     c - 1 != d.size();
 }
 GREMLIN
-)
+             )
              ->back('first');
         $this->prepareQuery();
 
@@ -111,7 +111,7 @@ $countParameters
     c + 0 != d.size();
 }
 GREMLIN
-)
+             )
              ->back('first');
         $this->prepareQuery();
     }

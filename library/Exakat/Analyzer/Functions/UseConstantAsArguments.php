@@ -31,8 +31,8 @@ class UseConstantAsArguments extends Analyzer {
 
         //alternative : one of the constants or nothing
         $positionsWithConstants = array();
-        foreach($functions->alternative as $position => $functionsList) {
-            foreach(array_keys((array) $functionsList) as $function) {
+        foreach ($functions->alternative as $position => $functionsList) {
+            foreach (array_keys((array) $functionsList) as $function) {
                 $fqn = makeFullNsPath($function);
 
                 array_collect_by($positionsWithConstants, $fqn, (int) $position);
@@ -50,7 +50,7 @@ class UseConstantAsArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-       // unwanted guests
+        // unwanted guests
         $this->atomFunctionIs(array_keys($positionsWithConstants))
              ->analyzerIsNot('self')
              ->savePropertyAs('fullnspath', 'fqn')
@@ -60,9 +60,9 @@ class UseConstantAsArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-        foreach($functions->alternative as $position => $functionsList) {
+        foreach ($functions->alternative as $position => $functionsList) {
             $constantsWithPosition = array();
-            foreach($functionsList as $function => $constants) {
+            foreach ($functionsList as $function => $constants) {
                 $fqn = makeFullNsPath($function);
 
                 $constantsWithPosition[$fqn] = makeFullNsPath($constants, \FNP_CONSTANT);
@@ -100,8 +100,8 @@ class UseConstantAsArguments extends Analyzer {
         /////////////////////////////////////////////////////////////////////////////
         // combinaison : several constants may be combined with a logical operator
         $positionsWithConstants = array();
-        foreach($functions->combinaison as $position => $functionsList) {
-            foreach((array) $functionsList as $function => $constants) {
+        foreach ($functions->combinaison as $position => $functionsList) {
+            foreach ((array) $functionsList as $function => $constants) {
                 $fqn = makeFullNsPath($function);
 
                 $positionsWithConstants[$fqn] = array((int) $position);
@@ -131,17 +131,17 @@ class UseConstantAsArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-       // unwanted guests
-       $this->atomFunctionIs(array_keys($positionsWithConstants))
+        // unwanted guests
+        $this->atomFunctionIs(array_keys($positionsWithConstants))
             ->analyzerIsNot('self')
             ->savePropertyAs('fullnspath', 'fqn')
             ->outIs('ARGUMENT')
             ->isHash('rank', $positionsWithConstants, 'fqn')
             ->atomIs(array('Boolean', 'Null', 'Float'))
             ->back('first');
-       $this->prepareQuery();
+        $this->prepareQuery();
 
-       $this->atomFunctionIs(array_keys($positionsWithConstants))
+        $this->atomFunctionIs(array_keys($positionsWithConstants))
             ->analyzerIsNot('self')
             ->savePropertyAs('fullnspath', 'fqn')
             ->outWithRank('ARGUMENT', 0)
@@ -149,14 +149,14 @@ class UseConstantAsArguments extends Analyzer {
             ->atomIs('Integer')
             ->codeIsNot(array('0', '-1'))
             ->back('first');
-       $this->prepareQuery();
+        $this->prepareQuery();
 
         // combinaison : several constants may be combined with a logical operator
-        foreach($functions->combinaison as $position => $functionsList) {
+        foreach ($functions->combinaison as $position => $functionsList) {
             $position = (int) $position;
 
             $constantsWithPosition = array();
-            foreach($functionsList as $function => $constants) {
+            foreach ($functionsList as $function => $constants) {
                 $fqn = makeFullNsPath($function);
 
                 $constantsWithPosition[$fqn] = makeFullNsPath($constants, \FNP_CONSTANT);

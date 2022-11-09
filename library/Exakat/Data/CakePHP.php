@@ -50,7 +50,7 @@ class CakePHP {
         $res = $this->sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_NUM)) {
+        while ($row = $res->fetchArray(\SQLITE3_NUM)) {
             $return[] = $row[0];
         }
 
@@ -73,7 +73,7 @@ class CakePHP {
         $res = $this->sqlite->query($query);
 
         $return = array();
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['release']])) {
                 $return[$row['release']][] = $row['class'];
             } else {
@@ -100,7 +100,7 @@ class CakePHP {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['release']])) {
                 $return[$row['release']][] = $row['interface'];
             } else {
@@ -127,7 +127,7 @@ class CakePHP {
         $res = $this->sqlite->query($query);
         $return = array();
 
-        while($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             if (isset($return[$row['release']])) {
                 $return[$row['release']][] = $row['trait'];
             } else {
@@ -137,7 +137,6 @@ class CakePHP {
 
         return $return;
     }
-
 }
 
 ?>

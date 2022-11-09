@@ -39,13 +39,13 @@ class WrongOptionalParameter extends Analyzer {
             // with typehint, but nullable (so, optional)
             // valid since PHP 8.0
              ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot(array('Void', 'Null'))
-                     ->inIs('TYPEHINT')
-                     ->outIs('DEFAULT')
-                     ->atomIs('Null')
-                     ->hasNoIn('RIGHT')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIsNot(array('Void', 'Null'))
+                      ->inIs('TYPEHINT')
+                      ->outIs('DEFAULT')
+                      ->atomIs('Null')
+                      ->hasNoIn('RIGHT')
              )
 
              ->nextSibling('ARGUMENT')
@@ -72,14 +72,14 @@ class WrongOptionalParameter extends Analyzer {
             // with typehint, but nullable (so, optional)
             // valid since PHP 8.0
              ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot(array('Void', 'Null'))
-                     ->inIs('TYPEHINT')
-                     ->outIs('PPP')
-                     ->outIs('DEFAULT')
-                     ->atomIs('Null')
-                     ->hasNoIn('RIGHT')
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIsNot(array('Void', 'Null'))
+                      ->inIs('TYPEHINT')
+                      ->outIs('PPP')
+                      ->outIs('DEFAULT')
+                      ->atomIs('Null')
+                      ->hasNoIn('RIGHT')
              )
 
              ->nextSibling('ARGUMENT')

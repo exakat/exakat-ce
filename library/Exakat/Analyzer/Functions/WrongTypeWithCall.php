@@ -67,9 +67,9 @@ class WrongTypeWithCall extends Analyzer {
              ->savePropertyAs('rank', 'ranked')
              ->isNot('variadic', true)
              ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot(array('Scalartypehint', 'Null'))
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIsNot(array('Scalartypehint', 'Null'))
              )
              ->back('first')
 
@@ -91,9 +91,9 @@ class WrongTypeWithCall extends Analyzer {
              ->savePropertyAs('rank', 'ranked')
              ->isNot('variadic', true)
              ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot(array('Identifier', 'Nsname', 'Null'))
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIsNot(array('Identifier', 'Nsname', 'Null'))
              )
              ->collectTypehints('typehints' )
              ->savePropertyAs('typehint', 't')
@@ -118,9 +118,9 @@ class WrongTypeWithCall extends Analyzer {
              ->savePropertyAs('rank', 'ranked')
              ->isNot('variadic', true)
              ->not(
-                $this->side()
-                     ->outIs('TYPEHINT')
-                     ->atomIsNot(array('Identifier', 'Nsname', 'Null'))
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIsNot(array('Identifier', 'Nsname', 'Null'))
              )
              ->back('first')
 

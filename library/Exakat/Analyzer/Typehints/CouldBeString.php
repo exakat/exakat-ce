@@ -25,7 +25,6 @@ namespace Exakat\Analyzer\Typehints;
 use Exakat\Query\DSL\FollowParAs;
 
 class CouldBeString extends CouldBeType {
-
     public function analyze(): void {
         $stringAtoms = self::STRINGS_LITERALS;
         $stringFnp = array('\\string');
@@ -108,7 +107,6 @@ class CouldBeString extends CouldBeType {
              ->outIs('ARGUMENT')
              ->as('result')
              ->analyzerIsNot('self')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->hasIn('CONCAT')
              ->back('result');
@@ -119,7 +117,6 @@ class CouldBeString extends CouldBeType {
              ->outIs('ARGUMENT')
              ->as('result')
              ->analyzerIsNot('self')
-             ->outIs('NAME')
              ->outIs('DEFINITION')
              ->inIs('INDEX')
              ->atomIs('Array')

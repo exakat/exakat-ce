@@ -61,7 +61,7 @@ coalesce( __.hasLabel(within(["Identifier", "Nsname", "Staticconstant"])).in("DE
           __.hasLabel(within(["Variable"])).in("DEFINITION").hasLabel('Variabledefinition', 'Staticdefinition').out("DEFAULT"),
           
           // literal value, passed as an argument (Method, closure, function)
-          __.hasLabel(within(["Variable"])).in("DEFINITION").in("NAME").hasLabel('Parameter').sideEffect{ rank = it.get().value('rank');}.in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD")).out("ARGUMENT").filter{ rank == it.get().value('rank');},
+          __.hasLabel(within(["Variable"])).in("DEFINITION").hasLabel('Parameter').sideEffect{ rank = it.get().value('rank');}.in("ARGUMENT").out("DEFINITION").optional(__.out("METHOD")).out("ARGUMENT").filter{ rank == it.get().value('rank');},
 
           // literal value, passed as an argument
           __.hasLabel(within(["Ternary"])).out("THEN", "ELSE").not(hasLabel('Void')),

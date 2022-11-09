@@ -31,8 +31,8 @@ class Filenames extends Fileset {
         $this->names = array_flip($names['files']);
     }
 
-    public function setFiles(array $files) {
-        foreach($files as $file) {
+    public function setFiles(array $files): void {
+        foreach ($files as $file) {
             $f = basename($file);
             if (isset($this->names[mb_strtolower($f)])) {
                 $this->ignored[$file] = "Ignored file ($file)";

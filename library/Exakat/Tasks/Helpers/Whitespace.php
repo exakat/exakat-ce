@@ -23,34 +23,34 @@
 namespace Exakat\Tasks\Helpers;
 
 class Whitespace {
-    public $closing               = null;
-    public $opening               = null;
-    public $operator              = null;
-    public $else                  = null;
-    public $separators            = array();
-    public $toblock               = null;
-    public $as                    = null;
-    public $toargs                = null;
-    public $endargs               = null;
-    public $totype                = null;
+    public string $closing              ;
+    public string $opening              ;
+    public string $operator             ;
+    public string $else                 ;
+    public array  $separators           = array();
+    public string $toblock              ;
+    public string $as                   ;
+    public string $toargs               ;
+    public string $endargs              ;
+    public string $totype               ;
 
-    public $toextends             = null;
-    public $toextendsseparator    = null;
-    public $toimplements          = null;
-    public $toimplementsseparator = null;
+    public string $toextends            ;
+    public array  $toextendsseparator    = array();
+    public string $toimplements         ;
+    public array  $toimplementsseparator = array();
 
-    public $touse                 = null;
-    public $touseseparators       = null;
+    public string $touse                ;
+    public array  $touseseparators       = array();
 
-    public $bodyseparator         = null;
+    public array  $bodyseparator         = array();
 
-    public $abstract              = null;
-    public $final                 = null;
-    public $variadic              = null;
-    public $reference             = null;
+    public string $abstract             ;
+    public bool|string $final           ;
+    public string $variadic             ;
+    public string $reference            ;
 
-    public $visibility            = null;
-    public $static                = null;
+    public string $visibility           ;
+    public string $static               ;
 
     public function __construct(string $ws = '') {
         $this->closing = $ws;
@@ -58,17 +58,19 @@ class Whitespace {
 
     public function toJson(): string {
         $json = (array) $this;
-        $json = array_filter($json, function ($x) { return $x !== null; });
+        $json = array_filter($json, function (mixed $x): bool {
+            return $x !== null;
+        });
         if (empty($json['separators'])) {
             unset($json['separators']);
         }
 
-        foreach($json as &$entry) {
+        foreach ($json as &$entry) {
             if (is_string($entry) && !mb_check_encoding($entry, 'UTF-8')) {
-                $entry = utf8_encode($entry);
+                $entry =  mb_convert_encoding($entry, 'UTF-8', 'ISO-8859-1');
             } elseif (is_array($entry)) {
-                foreach($entry as &$entry2) {
-                    $entry2 = utf8_encode($entry2);
+                foreach ($entry as &$entry2) {
+                    $entry2 = mb_convert_encoding($entry2, 'UTF-8', 'ISO-8859-1');
                 }
                 unset($entry2);
             }

@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class FossilizedMethods extends AnalyzerHashResults {
-    protected $analyzerName = 'FossilizedMethods';
+    protected string $analyzerName = 'FossilizedMethods';
 
     public function dependsOn(): array {
         return array('Complete/OverwrittenMethods',
@@ -37,10 +37,11 @@ class FossilizedMethods extends AnalyzerHashResults {
              ->hasNoOut('OVERWRITE')
              ->hasIn('OVERWRITE')
              ->raw(<<<GREMLIN
-project("fm").by( __.emit().repeat(__.in("OVERWRITE") ).times($MAX_LOOPING).count())
-.select('first', 'fm').by('fullcode').by()
+ project("fm").by( __.emit().repeat(__.in("OVERWRITE") ).times($MAX_LOOPING).not(hasLabel("Virtualmethod")).count())
+.select("fm").as("b").where(is(gt(1)))
+.select("first", "b").by("fullcode").by()
 GREMLIN
-);
+             );
         $this->prepareQuery();
     }
 }

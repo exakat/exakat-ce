@@ -58,12 +58,12 @@ class Initproject extends Tasks {
         }
 
         display("Initializing {$this->config->project}" . (!empty($repositoryURL) ? " with $repositoryURL" : '') );
-        $this->initProject($this->config->project, $repositoryURL ?: '');
+        $this->init($this->config->project, $repositoryURL ?: '');
 
         display('Done');
     }
 
-    private function initProject(Project $project, string $repositoryURL): void {
+    private function init(Project $project, string $repositoryURL): void {
         $finalPath = "{$this->config->projects_root}/projects/$project";
 
         if (file_exists($finalPath)) {
@@ -102,7 +102,7 @@ class Initproject extends Tasks {
             $vcsClass = Vcs::getVcs($this->config);
             $vcs = new $vcsClass($dotProject, "$tmpPath/code");
 
-            switch($vcs->getName()) {
+            switch ($vcs->getName()) {
                 case 'symlink' :
                     $projectName = basename($repositoryURL);
                     break;
@@ -206,11 +206,15 @@ class Initproject extends Tasks {
 
         shell_exec("chmod -R g+w $tmpPath");
 
-        if (!empty($this->config->branch)){
+        if (!empty($this->config->branch)) {
             $vcs->setBranch($this->config->branch);
         }
 
-        if (!empty($this->config->tag)){
+        if (!empty($this->config->version)) {
+            $vcs->setVersion($this->config->version);
+        }
+
+        if (!empty($this->config->tag)) {
             $vcs->setTag($this->config->tag);
         }
 
@@ -225,7 +229,7 @@ class Initproject extends Tasks {
             $errorMessage = $e->getMessage();
             $this->datastore->addRow('hash', array('init error' => $errorMessage,
                                                    'inited'     => date('r')));
-            print "An error prevented code initialization: no code was loaded.\n.Error : $errorMessage'\n";
+            print "An error prevented code initialization: no code was loaded.\n.Error : $errorMessage\n";
 
             file_put_contents("{$this->config->project_dir}/config.ini", $projectConfig->getConfig($this->config->dir_root));
 

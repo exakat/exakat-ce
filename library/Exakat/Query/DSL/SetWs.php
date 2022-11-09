@@ -33,7 +33,7 @@ class SetWs extends DSL {
         // @todo : remove a piece of code (j["closing"].remove())
         $code = array();
         $arguments = array();
-        foreach($values as $name => $value) {
+        foreach ($values as $name => $value) {
             $code[] = "j[\"$name\"] = ***;";
             $arguments[] = $value;
         }

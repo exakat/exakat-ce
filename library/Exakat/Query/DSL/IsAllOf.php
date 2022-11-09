@@ -30,29 +30,30 @@ class IsAllOf extends DSL {
         list($properties, $value) = func_get_args();
 
         assert(is_array($properties), 'Property argument should be an array. ' . gettype($properties) . " was provided\n");
-        foreach($properties as $property) {
+        foreach ($properties as $property) {
             $this->assertProperty($property);
         }
 
         $command = array();
         if ($value === null) {
-            foreach($properties as $property) {
+            foreach ($properties as $property) {
                 $command[] = 'has("' . $property . '", null)';
             }
-/*        } elseif (in_array($property, self::BOOLEAN_PROPERTY, \STRICT_COMPARISON)) {
-            $value = $value === true ? 'true' : 'false';
+            /*        } elseif (in_array($property, self::BOOLEAN_PROPERTY, \STRICT_COMPARISON)) {
+                        $value = $value === true ? 'true' : 'false';
 
-            return new Command('filter{ if ( it.get().properties("' . $property . '").any()) { ' . $value . ' == it.get().value("' . $property . '")} else {' . $value . ' == false; }; }');
-        */} elseif ($value === true) {
-            foreach($properties as $property) {
+                        return new Command('filter{ if ( it.get().properties("' . $property . '").any()) { ' . $value . ' == it.get().value("' . $property . '")} else {' . $value . ' == false; }; }');
+                    */
+        } elseif ($value === true) {
+            foreach ($properties as $property) {
                 $command[] = 'has("' . $property . '", true)';
             }
         } elseif ($value === false) {
-            foreach($properties as $property) {
+            foreach ($properties as $property) {
                 $command[] = 'has("' . $property . '", false)';
             }
         } elseif (is_int($value)) {
-            foreach($properties as $property) {
+            foreach ($properties as $property) {
                 $command[] = 'has("' . $property . '", ' . $value . ')';
             }
         } elseif (is_string($value)) {

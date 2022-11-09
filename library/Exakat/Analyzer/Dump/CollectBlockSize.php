@@ -24,12 +24,12 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectBlockSize extends AnalyzerTable {
-    protected $analyzerName = 'blockSize';
+    protected string $analyzerName = 'blockSize';
 
-    protected $analyzerTable = 'blockSize';
+    protected string $analyzerTable = 'blockSize';
 
     // Store inclusionss of files within each other
-    protected $analyzerSQLTable = <<<'SQL'
+    protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE blockSize (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                             type STRING,
                             size STRING
@@ -50,7 +50,7 @@ sideEffect{ x = it.get().value("line"); y = x;}
      )
      .map{ [ "type": l, "size": y - x]};
 GREMLIN
-);
+              );
         $this->prepareQuery();
     }
 }

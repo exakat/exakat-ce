@@ -49,7 +49,7 @@ map{
 }
 
 GREMLIN
-);
+             );
         $regexSimple = $this->rawQuery();
 
         $this->atomFunctionIs($functionList)
@@ -57,17 +57,17 @@ GREMLIN
              ->atomIs(array('String', 'Concatenation'), self::WITH_CONSTANTS)
              ->hasOut('CONCAT')
              ->not(
-                $this->side()
-                     ->filter(
-                        $this->side()
-                             ->outWithRank('ARGUMENT', 0)
-                             ->atomIs(array('String', 'Identifier', 'Nsname', 'Staticconstant'))
-                     )
+                 $this->side()
+                      ->filter(
+                          $this->side()
+                               ->outWithRank('ARGUMENT', 0)
+                               ->atomIs(array('String', 'Identifier', 'Nsname', 'Staticconstant'))
+                      )
              )
              ->not(
-                $this->side()
-                     ->outIs('CONCAT')
-                     ->outIs('CONCAT')
+                 $this->side()
+                      ->outIs('CONCAT')
+                      ->outIs('CONCAT')
              )
              ->raw(<<<'GREMLIN'
  where( 
@@ -92,13 +92,13 @@ GREMLIN
 )
 .map{[liste.join(''), it.get().value('fullcode')]};
 GREMLIN
-);
+             );
         $regexComplex = $this->rawQuery();
 
         $regexList = array_merge($regexSimple->toArray(), $regexComplex->toArray());
 
         $invalid = array();
-        foreach($regexList as list($regex, $fullcode)) {
+        foreach ($regexList as list($regex, $fullcode)) {
             // @ is important here : we want preg_match to fail silently.
             if (false === @preg_match($regex, '')) {
                 $invalid[] = $fullcode;

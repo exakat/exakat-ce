@@ -27,6 +27,7 @@ use Exakat\Query\Query;
 
 class HasNoOut extends DSL {
     public function run(): Command {
+        $this->assertArguments(1, func_num_args(), __METHOD__);
         list($links) = func_get_args();
 
         assert($this->assertLink($links));

@@ -24,7 +24,7 @@ namespace Exakat\Log;
 
 class Log {
     private $file = null;
-    private $name = null;
+    private string $name = '';
 
     public function __construct(string $name = '') {
         $this->name = $name;

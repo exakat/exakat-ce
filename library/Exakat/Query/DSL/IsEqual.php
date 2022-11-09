@@ -26,46 +26,48 @@ namespace Exakat\Query\DSL;
 
 class IsEqual extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 2:
                 list($value1, $value2) = func_get_args();
 
-                $g1 = $this->makeGremlin($value1);
-                $g2 = $this->makeGremlin($value2);
+                // @todo : this only works with variables and it should also go away
+                $this->assertVariable($value1);
+                $this->assertVariable($value2);
 
-                return new Command("filter{ {$g1} == {$g2};}");
+                return new Command("filter{ $value1 == $value2; }");
 
             case 1:
                 list($value1) = func_get_args();
 
-                $g1 = $this->makeGremlin($value1);
-
-                return new Command("is(eq($g1))");
+                return $this->makeCommand($value1);
 
             default:
                 assert(false, 'Wrong number of argument for ' . __METHOD__ . '. 2 or 1 are expected, ' . func_num_args() . ' provided');
         }
     }
 
-    private function makeGremlin($value): string {
+    private function makeCommand(int|string $value): Command {
         // It is an integer
         if (is_int($value)) {
-            return (string) $value;
+            return new Command('is(eq(' . (string) $value . '))');
         }
 
         // It is a gremlin variable
         if ($this->isVariable($value)) {
-            assert($this->assertVariable($value));
-            return $value;
+            return new Command('is(eq(' . $value . '))');
+        }
+
+        // It is a label
+        if ($this->isLabel($value)) {
+            return new Command('where(eq("' . $value . '"))');
         }
 
         // It is a gremlin property
         if ($this->isProperty($value)) {
-            assert($this->assertProperty($value));
-            return " it.get().value(\"{$value}\").toLong()";
+            assert(false, 'This is not supported with properties yet');
         }
 
-        assert(false, $value . ' must be an integer, atom property or gremlin variable in ' . __METHOD__);
+        assert(false, $value . ' must be an integer, label, atom property or gremlin variable in ' . __METHOD__);
     }
 }
 ?>

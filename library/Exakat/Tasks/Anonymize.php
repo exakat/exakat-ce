@@ -40,7 +40,6 @@ class Anonymize extends Tasks {
     private $strings = 'A';
 
     public function run(): void {
-
         if (($file = $this->config->file) === 'stdout') {
             $dir = $this->config->dirname;
             if (!empty($dir)) {
@@ -58,7 +57,7 @@ class Anonymize extends Tasks {
                     rmdirRecursive($dir . '.anon');
                 }
                 mkdir($dir . '.anon', 0755);
-                foreach($files as $file) {
+                foreach ($files as $file) {
                     if ($this->checkCompilation($file)) {
                         ++$this->strings;
                         $total += (int) $this->processFile($file, $dir . '.anon/' . $this->strings . '.php');
@@ -86,7 +85,7 @@ class Anonymize extends Tasks {
                     rmdirRecursive($dir . '.anon');
                 }
                 mkdir($dir . '.anon', 0755);
-                foreach($files as $file) {
+                foreach ($files as $file) {
                     if ($this->checkCompilation($path . $file)) {
                         ++$this->strings;
                         $total += (int) $this->processFile($path . $file, $dir . '.anon/' . $this->strings . '.php');
@@ -131,21 +130,21 @@ class Anonymize extends Tasks {
                         'T_BAD_CHARACTER',
                         'T_SPACESHIP',
                         );
-        foreach($checks as $check) {
+        foreach ($checks as $check) {
             if (!defined($check)) {
                 define($check, 1);
             }
         }
 
         $php = '';
-        foreach($tokens as $t) {
+        foreach ($tokens as $t) {
             if (!is_array($t)) {
                 $php .= $t;
 
                 continue;
             }
 
-            switch($t[0]) {
+            switch ($t[0]) {
                 case T_LNUMBER:  // integers
                     if (isset($this->lnumberValues[$t[1]])) {
                         $t[1] = $this->lnumberValues[$t[1]];
@@ -186,7 +185,9 @@ class Anonymize extends Tasks {
                     break;
                 case T_STRING:
                 case T_NUM_STRING:
-                    if (strtolower($t[1]) == 'null') { break ; }
+                    if (strtolower($t[1]) == 'null') {
+                        break ;
+                    }
                     // otherwise, fall through!
                 case T_ENCAPSED_AND_WHITESPACE :
                     ++$this->strings;
@@ -389,8 +390,8 @@ class Anonymize extends Tasks {
                     echo token_name($t[0]), " is unknown token (Token : $t[0] '$t[1]', line $t[2])\n";
             }
 
-                $php .= $t[1];
-            }
+            $php .= $t[1];
+        }
 
         if ($anonFile === null) {
             $anonFile = $file . '.anon';

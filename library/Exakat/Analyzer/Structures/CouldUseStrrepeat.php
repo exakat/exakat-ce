@@ -39,9 +39,9 @@ class CouldUseStrrepeat extends Analyzer {
              ->inIs('BLOCK')
              ->atomIs(array('For', 'Foreach'))
              ->not(
-                $this->side()
-                     ->outIs('VALUE')
-                     ->is('reference', true)
+                 $this->side()
+                      ->outIs('VALUE')
+                      ->is('reference', true)
              )
              ->back('first');
         $this->prepareQuery();

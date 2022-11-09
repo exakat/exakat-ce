@@ -34,8 +34,10 @@ class Perfile extends Reports {
         $titleCache    = array();
         $maxLine       = 0;
         $maxTitle      = 0;
-        foreach($analysisResults->toArray() as $row) {
-            if ($row['line'] === -1) { continue; }
+        foreach ($analysisResults->toArray() as $row) {
+            if ($row['line'] === -1) {
+                continue;
+            }
             $this->count();
             if (!isset($titleCache[$row['analyzer']])) {
                 $titleCache[$row['analyzer']] = $this->docs->getDocs($row['analyzer'], 'name');
@@ -55,7 +57,7 @@ class Perfile extends Reports {
         $text = '';
         $line = strlen((string) $maxLine) + $maxTitle + 10;
 
-        foreach($perfile as &$file) {
+        foreach ($perfile as &$file) {
             sort($file);
         }
         unset($file);
@@ -63,7 +65,7 @@ class Perfile extends Reports {
         // sort by path
         ksort($perfile);
 
-        foreach($perfile as $file => $issues) {
+        foreach ($perfile as $file => $issues) {
             $text .= str_repeat('-', $line) . "\n" .
                      " line  $file\n" .
                      str_repeat('-', $line) . "\n" .

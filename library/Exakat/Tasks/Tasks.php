@@ -26,26 +26,31 @@ use Exakat\Config;
 use Exakat\Exceptions\AnotherProcessIsRunning;
 use Exakat\Exceptions\ProjectTooLarge;
 use Exakat\Log;
+use Exakat\Graph\Graph;
+use Exakat\Datastore;
+use Exakat\Analyzer\Rulesets;
 
 abstract class Tasks {
-    protected $log        = null;
-    protected $logname    = self::LOG_AUTONAMING;
-    protected $datastore  = null;
+    protected Log       $log        ;
+    protected string    $logname    = self::LOG_AUTONAMING;
+    protected Datastore $datastore  ;
 
-    protected $gremlin    = null;
-    protected $config     = null;
+    protected Graph  $gremlin    ;
+    protected Config $config     ;
 
-    protected $is_subtask   = self::IS_NOT_SUBTASK;
+    protected bool $is_subtask   = self::IS_NOT_SUBTASK;
 
-    protected static $semaphore      = null;
-    protected static $semaphorePort  = null;
+    protected static $semaphore      = self::NO_SEMAPHORE;
+    protected static int $semaphorePort  = self::NO_PORT;
 
-    protected $rulesets = null;
+    protected Rulesets $rulesets;
 
-    private $snitch = null;
-    private $pid = 0;
-    private $path = '';
+    private ?string $snitch = null;
+    private int     $pid = 0;
+    private string  $path = '';
 
+    public const  NO_PORT      = -1;
+    public const  NO_SEMAPHORE = 0;
     public const  NONE    = 1;
     public const  ANYTIME = 2;
     public const  DUMP    = 3;
@@ -55,7 +60,7 @@ abstract class Tasks {
     public const IS_SUBTASK     = true;
     public const IS_NOT_SUBTASK = false;
 
-    public const LOG_NONE = null;
+    public const LOG_NONE       = 'none';
     public const LOG_AUTONAMING = '';
 
     public function __construct(bool $subTask = self::IS_NOT_SUBTASK) {
@@ -65,10 +70,10 @@ abstract class Tasks {
         $this->datastore->reuse();
         $this->is_subtask = $subTask;
 
-        assert(defined('static::CONCURENCE'), get_class($this) . " is missing CONCURENCE\n");
+        assert(defined('static::CONCURENCE'), static::class . " is missing CONCURENCE\n");
 
         if (static::CONCURENCE !== self::ANYTIME && $subTask === self::IS_NOT_SUBTASK) {
-            if (self::$semaphore === null) {
+            if (self::$semaphore === self::NO_SEMAPHORE) {
                 if (static::CONCURENCE === self::QUEUE) {
                     self::$semaphorePort = $this->config->concurencyCheck;
                 } elseif (static::CONCURENCE === self::SERVER) {
@@ -88,20 +93,19 @@ abstract class Tasks {
         }
 
         if ($this->logname === self::LOG_AUTONAMING) {
-            $a = get_class($this);
-            $this->logname = strtolower(substr($a, strrpos($a, '\\') + 1));
+            $this->logname = strtolower(substr(static::class, strrpos(static::class, '\\') + 1));
         }
 
         if ($this->logname !== self::LOG_NONE) {
             $this->log = new Log($this->logname,
-                                 "{$this->config->projects_root}/projects/{$this->config->project}");
+                "{$this->config->projects_root}/projects/{$this->config->project}");
         }
 
         if ($this->config->inside_code === Config::INSIDE_CODE ||
             $this->config->project !== 'default') {
-                if (!file_exists($this->config->tmp_dir) &&
+            if (!file_exists($this->config->tmp_dir) &&
                      file_exists(dirname($this->config->tmp_dir)) ) {
-                    mkdir($this->config->tmp_dir, 0700);
+                mkdir($this->config->tmp_dir, 0700);
             }
         } elseif (!file_exists("{$this->config->projects_root}/projects/")) {
             mkdir("{$this->config->projects_root}/projects/", 0700);
@@ -115,12 +119,12 @@ abstract class Tasks {
     }
 
     public function __destruct() {
-        if (static::CONCURENCE !== self::ANYTIME       &&
-            $this->is_subtask === self::IS_NOT_SUBTASK &&
-            !empty(self::$semaphore)) {
+        if (static::CONCURENCE !== self::ANYTIME        &&
+            $this->is_subtask  === self::IS_NOT_SUBTASK &&
+            self::$semaphore   !== self::NO_SEMAPHORE     ) {
             fclose(self::$semaphore);
-            self::$semaphore = null;
-            self::$semaphorePort = -1;
+            self::$semaphore = self::NO_SEMAPHORE;
+            self::$semaphorePort = self::NO_PORT;
         }
     }
 
@@ -137,14 +141,14 @@ abstract class Tasks {
 
     protected function cleanLogForProject(): void {
         $logs = glob("{$this->config->log_dir}/*");
-        foreach($logs as $log) {
+        foreach ($logs as $log) {
             unlink($log);
         }
     }
 
     protected function addSnitch(array $values = array()): void {
         if ($this->snitch === null) {
-            $this->snitch = str_replace('Exakat\\Tasks\\', '', get_class($this));
+            $this->snitch = str_replace('Exakat\\Tasks\\', '', static::class);
             $this->pid = getmypid();
             $this->path = "{$this->config->tmp_dir}/{$this->snitch}.json";
         }

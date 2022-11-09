@@ -37,20 +37,22 @@ class CallbackNeedsReturn extends Analyzer {
 
         // Excluding some functions that don't REQUIRE return
         $ini->functions0 = array_diff($ini->functions0,
-                                      array('\forward_static_call_array',
-                                            '\forward_static_call',
-                                            '\register_shutdown_function',
-                                            '\register_tick_function',
-                                            '\spl_autoload_register',
-                                            )
-                                      );
+            array('\forward_static_call_array',
+                  '\forward_static_call',
+                  '\register_shutdown_function',
+                  '\register_tick_function',
+                  '\spl_autoload_register',
+                  )
+        );
 
         $returningFunctions = $this->methods->getFunctionsByReturn();
         $voidReturningFunctions = array_merge($returningFunctions['void'],
-                                              array_map(function ($x) { return trim($x, '\\');}, $returningFunctions['void'])
-                                             );
+            array_map(function (string $x) : string {
+                return trim($x, '\\');
+            }, $returningFunctions['void'])
+        );
 
-        foreach($ini as $position => $functions) {
+        foreach ($ini as $position => $functions) {
             $rank = substr($position, 9);
             if ($rank[0] === '_') {
                 list(, $rank) = explode('_', $position);
@@ -61,29 +63,29 @@ class CallbackNeedsReturn extends Analyzer {
                  ->outWithRank('ARGUMENT', $rank)
                  ->atomIs(array('Closure', 'String', 'Arrayliteral', 'Arrowfunction', 'Concatenation'), self::WITH_CONSTANTS)
                  ->optional(
-                    $this->side()
-                         ->inIs('DEFINITION')
+                     $this->side()
+                          ->inIs('DEFINITION')
                  )
                  ->not(
-                    $this->side()
-                         ->outIs('TYPEHINT')
-                         ->fullnspathIs('\\void')
+                     $this->side()
+                          ->outIs('TYPEHINT')
+                          ->fullnspathIs('\\void')
                  )
                 ->not(
                     $this->side()
                          ->filter(
-                            $this->side()
-                                 ->outIs(array('ARGUMENT', 'USE'))
-                                 ->is('reference', true)
+                             $this->side()
+                                  ->outIs(array('ARGUMENT', 'USE'))
+                                  ->is('reference', true)
                          )
-                 )
+                )
                  ->not(
-                    $this->side()
-                         ->filter(
-                            $this->side()
-                                 ->outIs('ARGUMENT')
-                                 ->is('reference', true)
-                         )
+                     $this->side()
+                          ->filter(
+                              $this->side()
+                                   ->outIs('ARGUMENT')
+                                   ->is('reference', true)
+                          )
                  )
                  ->atomIs(self::FUNCTIONS_ALL)
                  ->outIs('BLOCK')

@@ -57,10 +57,10 @@ class NonStaticMethodsCalledStatic extends Analyzer {
 
              // The child must be below the parent, then it is an external class
              ->filter(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->goToAllParents(self::EXCLUDE_SELF)
-                     ->samePropertyAs('fullnspath', 'fnqOrigin')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->goToAllParents(self::EXCLUDE_SELF)
+                      ->samePropertyAs('fullnspath', 'fnqOrigin')
              )
              ->back('first')
 
@@ -80,10 +80,10 @@ class NonStaticMethodsCalledStatic extends Analyzer {
 
              // The child must be below the parent, then it is an external class
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->goToAllParents(self::INCLUDE_SELF)
-                     ->samePropertyAs('fullnspath', 'fnqOrigin')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->goToAllParents(self::INCLUDE_SELF)
+                      ->samePropertyAs('fullnspath', 'fnqOrigin')
              )
              ->back('first')
 
@@ -94,10 +94,10 @@ class NonStaticMethodsCalledStatic extends Analyzer {
              ->savePropertyAs('fullnspath', 'fnp')
              ->back('first')
              ->not(
-                $this->side()
-                     ->goToClass()
-                     ->goToAllParents(self::EXCLUDE_SELF)
-                     ->samePropertyAs('fullnspath', 'fnp')
+                 $this->side()
+                      ->goToClass()
+                      ->goToAllParents(self::EXCLUDE_SELF)
+                      ->samePropertyAs('fullnspath', 'fnp')
              );
         $this->prepareQuery();
 

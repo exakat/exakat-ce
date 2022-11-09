@@ -31,7 +31,7 @@ use Exakat\Vcs\Vcs;
 class Update extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
-    protected $logname = self::LOG_NONE;
+    protected string $logname = self::LOG_NONE;
 
     public function run(): void {
         $project = $this->config->project;
@@ -88,16 +88,16 @@ class Update extends Tasks {
         // clean all previous sql caches
         $files = glob("{$this->config->project_dir}/.exakat/dump-*.php");
         display('Removing ' . count($files) . " dump-*.php files\n");
-        foreach($files as $file) {
+        foreach ($files as $file) {
             unlink($file);
         }
 
-        $this->update($this->config);
+        $this->updateCode($this->config);
     }
 
-    private function update(Config $updateConfig): void {
+    private function updateCode(Config $updateConfig): void {
         $vcs = Vcs::getVcs($updateConfig);
-        $vcs = new $vcs($updateConfig->project, $updateConfig->code_dir);
+        $vcs = new $vcs((string) $updateConfig->project, $updateConfig->code_dir);
 
         display("Code update $updateConfig->project with " . $vcs->getName());
         $new = $vcs->update();

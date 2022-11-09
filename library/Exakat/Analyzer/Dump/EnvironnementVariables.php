@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class EnvironnementVariables extends AnalyzerHashHashResults {
-    protected $analyzerName = 'Environment Variables via Function';
+    protected string $analyzerName = 'Environment Variables via Function';
 
     public function analyze(): void {
         //$_ENV['name']
@@ -36,7 +36,7 @@ class EnvironnementVariables extends AnalyzerHashHashResults {
               ->raw(<<<'GREMLIN'
 groupCount("m").by("noDelimiter").cap("m")
 GREMLIN
-);
+              );
         $this->analyzerName = 'Environment Variables';
         $this->prepareQuery();
 
@@ -47,7 +47,7 @@ GREMLIN
               ->raw(<<<'GREMLIN'
 groupCount("m").by("noDelimiter").cap("m")
 GREMLIN
-);
+              );
     }
 }
 

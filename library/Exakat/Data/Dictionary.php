@@ -22,14 +22,15 @@
 
 namespace Exakat\Data;
 
+use Exakat\Datastore;
 
 class Dictionary {
     public const CASE_SENSITIVE   = true;
     public const CASE_INSENSITIVE = false;
 
-    private $datastore  = null;
-    private $dictionary = array();
-    private $lcindex    = array();
+    private Datastore $datastore;
+    private array $dictionary = array();
+    private array $lcindex    = array();
 
     public function __construct() {
         $this->datastore = exakat('datastore');
@@ -37,7 +38,7 @@ class Dictionary {
 
     private function init(): void {
         $this->dictionary = $this->datastore->getAllHash('dictionary');
-        foreach(array_keys($this->dictionary) as $key) {
+        foreach (array_keys($this->dictionary) as $key) {
             $this->lcindex[mb_strtolower((string) $key)] = 1;
         }
     }
@@ -49,12 +50,16 @@ class Dictionary {
         $return = array();
 
         if ($case === self::CASE_SENSITIVE) {
-            $caseClosure = function (string $x) { return $x; };
+            $caseClosure = function (string $x) {
+                return $x;
+            };
         } else {
-            $caseClosure = function (string $x) { return mb_strtolower($x); };
+            $caseClosure = function (string $x) {
+                return mb_strtolower($x);
+            };
         }
 
-        foreach($code as $c) {
+        foreach ($code as $c) {
             $d = $caseClosure($c);
             if (isset($this->dictionary[$d])) {
                 $return[] = $this->dictionary[$d];
@@ -70,7 +75,7 @@ class Dictionary {
         }
 
         $return = array();
-        foreach($code as $c) {
+        foreach ($code as $c) {
             $d = array_search($c, $this->dictionary);
             if ($d !== false) {
                 $return[$c] = $d;
@@ -84,7 +89,7 @@ class Dictionary {
         $keys = preg_grep($regex, array_keys($this->dictionary));
 
         $return = array();
-        foreach($keys as $k) {
+        foreach ($keys as $k) {
             $return[] = $this->dictionary[$k];
         }
 
@@ -96,7 +101,7 @@ class Dictionary {
 
         $reverse = array_flip($this->dictionary);
 
-        foreach($code as $c) {
+        foreach ($code as $c) {
             if (isset($reverse[$c])) {
                 $return[] = $reverse[$c];
             }
@@ -109,11 +114,17 @@ class Dictionary {
         $return = array();
 
         if (preg_match('/ > (\d+)/', $length, $r)) {
-            $closure = function (string $s) use ($r) { return strlen($s) > $r[1]; };
+            $closure = function (string $s) use ($r) {
+                return strlen($s) > $r[1];
+            };
         } elseif (preg_match('/ == (\d+)/', $length, $r)) {
-            $closure = function (string $s) use ($r) { return strlen($s) === (int) $r[1]; };
+            $closure = function (string $s) use ($r) {
+                return strlen($s) === (int) $r[1];
+            };
         } elseif (preg_match('/ < (\d+)/', $length, $r)) {
-            $closure = function (string $s) use ($r) { return strlen($s) < $r[1]; };
+            $closure = function (string $s) use ($r) {
+                return strlen($s) < $r[1];
+            };
         } else {
             assert(false, "codeLength didn't understand $length");
         }
@@ -124,14 +135,16 @@ class Dictionary {
     }
 
     public function staticMethodStrings(): array {
-        $doublecolon = array_filter($this->dictionary, function ($x) { return strlen($x) > 6 &&
-                                                                              strpos($x,' ') === false &&
-                                                                              strpos($x,'::') !== false &&
-                                                                              mb_strtolower($x) === $x;},
-                                                                              ARRAY_FILTER_USE_KEY );
+        $doublecolon = array_filter($this->dictionary, function (string $x): bool {
+            return strlen($x) > 6 &&
+                       !str_contains($x,' ')   &&
+                       str_contains($x,'::')   &&
+                       mb_strtolower($x) === $x;
+        },
+            ARRAY_FILTER_USE_KEY );
 
         $return = array();
-        foreach($doublecolon as $key => $value) {
+        foreach ($doublecolon as $key => $value) {
             // how can this regex fail ?
             if (preg_match('/^[\'"](.+?)::(.+?)/', $key, $r)) {
                 $return['\\' . $r[1]] = $value;

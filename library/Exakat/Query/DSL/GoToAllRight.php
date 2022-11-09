@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class GoToAllRight extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1:
                 list($atom) = func_get_args();
                 break;

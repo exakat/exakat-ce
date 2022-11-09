@@ -28,22 +28,21 @@ use Exakat\Analyzer\Analyzer;
 use Exakat\Query\DSL\DSLFactory;
 use Exakat\Query\DSL\Command;
 use Exakat\Project;
+use Exakat\Phpexec;
 
 class Query2 extends Query {
-
     private const SACK = '.withSack(["m":[], "processed":0, "total":0])';
 
-    private $id         = null;
-    private $project    = null;
-    private $analyzer   = null;
-    private $php        = null;
+    private int     $id;
+    private Project $project;
+    private string  $analyzer;
 
-    private $commands         = array();
-    private $arguments        = array();
-    private $query            = null;
-    private $queryFactory     = null;
-    private $sides            = array();
-    private $stopped          = self::QUERY_RUNNING;
+    private array 	    $commands         = array();
+    private array 	    $arguments        = array();
+    private ?string     $query			  = null;
+    private DSLFactory  $queryFactory;
+    private array       $sides            = array();
+    private bool        $stopped          = self::QUERY_RUNNING;
 
     public function __construct(int $id, Project $project, string $analyzer, array $dependsOn = array()) {
         $this->id        = $id;
@@ -122,7 +121,7 @@ class Query2 extends Query {
         }
 
         if (count($this->commands) === 1 && empty($this->sides)) {
-            switch(strtolower($name)) {
+            switch (strtolower($name)) {
                 case 'atomis' :
                 case 'atomfunctionis' :
                     $this->_as('first');
@@ -145,7 +144,7 @@ class Query2 extends Query {
                 default :
                     if ($this->commands[0]->gremlin === self::STOP_QUERY) {
                         $this->_as('first');
-                        // Keep going
+                    // Keep going
                     } else {
                         assert(false, 'No gremlin optimization : gremlin query "' . $name . '" in analyzer should have use g.V. ! ' . $this->commands[0]->gremlin);
                     }
@@ -180,7 +179,7 @@ class Query2 extends Query {
             return false;
         }
 
-        foreach($commands as $id => $command) {
+        foreach ($commands as $id => $command) {
             if ($command === self::NO_QUERY) {
                 unset($commands[$id], $arguments[$id]);
             }
@@ -211,7 +210,7 @@ class Query2 extends Query {
             return ;
         }
 
-        foreach($commands as $id => $command) {
+        foreach ($commands as $id => $command) {
             if ($command === self::NO_QUERY) {
                 unset($commands[$id], $arguments[$id]);
             }
@@ -250,8 +249,8 @@ class Query2 extends Query {
         die(__METHOD__);
     }
 
-    private function prepareSack(array $commands) {
-        foreach($commands as $command) {
+    private function prepareSack(array $commands) : string {
+        foreach ($commands as $command) {
             if ($command->getSack() === Command::SACK_NONE) {
                 continue;
             }
@@ -268,7 +267,7 @@ class Query2 extends Query {
         }
 
         $return = array();
-        foreach($sack as $name => $init) {
+        foreach ($sack as $name => $init) {
             $return[] = "\"$name\":" . trim((string) $init, ' {}');
         }
 

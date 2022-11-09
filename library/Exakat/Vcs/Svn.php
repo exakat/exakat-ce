@@ -25,16 +25,16 @@ namespace Exakat\Vcs;
 use Exakat\Exceptions\HelperException;
 
 class Svn extends Vcs {
-    private $info = array();
-    private $executable = 'svn';
+    private array $info = array();
+    private string $executable = 'svn';
 
-    public function __construct($destination, $project_root) {
+    public function __construct(string $destination, string $project_root) {
         parent::__construct($destination, $project_root);
     }
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");
-        if (strpos($res, 'svn') === false) {
+        if (!str_contains($res, 'svn')  ) {
             throw new HelperException('SVN');
         }
     }
@@ -47,7 +47,7 @@ class Svn extends Vcs {
         $this->shell("cd {$codePath}; {$this->executable} checkout --quiet $source code");
     }
 
-    public function update() {
+    public function update(): string {
         $this->check();
 
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} update");
@@ -84,7 +84,7 @@ class Svn extends Vcs {
         return $this->info['Relative URL'] ?? 'trunk';
     }
 
-    public function getRevision() {
+    public function getRevision(): string {
         if (empty($this->info)) {
             $this->getInfo();
         }
@@ -92,7 +92,7 @@ class Svn extends Vcs {
         return $this->info['Revision'] ?? 'No Revision';
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = trim($this->shell("{$this->executable} --version 2>&1"));
@@ -116,7 +116,7 @@ class Svn extends Vcs {
         return $status;
     }
 
-    public function getDiffLines($r1, $r2): array {
+    public function getDiffLines(string $r1, string $r2): array {
         display("No support for line diff in SVN.\n");
         return array();
     }

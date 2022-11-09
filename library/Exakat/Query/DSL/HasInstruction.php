@@ -47,7 +47,7 @@ where(
 __.repeat( __.in({$linksDown}) ).until(hasLabel("File")).emit( ).hasLabel(within(***))
     )
 GREMLIN
-, array($diff) );
+            , array($diff) );
     }
 }
 ?>

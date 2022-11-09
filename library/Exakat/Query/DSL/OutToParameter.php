@@ -29,7 +29,7 @@ class OutToParameter extends DSL {
         $this->assertArguments(1, func_num_args(), __METHOD__);
         list($rank) = func_get_args();
 
-//out("ARGUMENT").sideEffect{ it.get().value("rank") == $rank || (it.get().value("rank") < $rank && ("variadic" in it.get().keys()) && it.get().value("variadic") == true);}
+        //out("ARGUMENT").sideEffect{ it.get().value("rank") == $rank || (it.get().value("rank") < $rank && ("variadic" in it.get().keys()) && it.get().value("variadic") == true);}
 
         $query = <<<GREMLIN
 out("ARGUMENT").filter{ it.get().value("rank") == $rank || (it.get().value("rank") < $rank && ("variadic" in it.get().keys()) && it.get().value("variadic") == true);}

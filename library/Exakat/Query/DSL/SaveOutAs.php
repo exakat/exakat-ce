@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class SaveOutAs extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 3:
                 list($name, $out, $sort) = func_get_args();
                 break 1;

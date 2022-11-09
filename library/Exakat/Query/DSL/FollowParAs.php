@@ -31,11 +31,10 @@ class FollowParAs extends DSL {
     public const FOLLOW_PARAS_ONLY = 2;
 
     public function run(): Command {
-
         $this->assertArguments(1, func_num_args(), __METHOD__);
         list($out) = func_get_args();
 
-        switch($out) {
+        switch ($out) {
             case self::FOLLOW_ALL:
                 $out    = 'out(' . self::$linksDown . ').';
                 $labels = '';
@@ -81,7 +80,7 @@ class FollowParAs extends DSL {
 .not(hasLabel("Parenthesis" $labels))
 .not(hasLabel("Assignation").has("token", "T_EQUAL"))
 GREMLIN
-);
+        );
     }
 }
 ?>

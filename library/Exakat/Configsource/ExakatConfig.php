@@ -28,27 +28,17 @@ use Exakat\Config as MainConfig;
 use Exakat\Exceptions\NoPhpBinary;
 
 class ExakatConfig extends Config {
-    private $projects_root = '';
+    private string $projects_root = '';
 
-    private $gremlins = array( 'tinkergraph'   => 'Tinkergraph',
-                               'tinkergraphv3' => 'TinkergraphV3',
-                               'gsneo4j'       => 'GSNeo4j',
-                               'gsneo4jv3'     => 'GSNeo4jV3',
-                               'janusgraph'    => 'Janusgraph',
-                               'nogremlin'     => 'NoGremlin',
-                               'orientdb'      => 'Orientdb',
-                               'bitsy'         => 'Bitsy',
-                               );
+    private array $gremlins = array( 'tinkergraphv3' => 'TinkergraphV3',
+                              		 'gsneo4jv3'     => 'GSNeo4jV3',
+                              		 'nogremlin'     => 'NoGremlin',
+                              		 );
 
-    private $loaders = array( 'tinkergraph'   => 'SplitGraphson',
-                              'tinkergraphv3' => 'SplitGraphson',
-                              'gsneo4j'       => 'SplitGraphson',
-                              'gsneo4jv3'     => 'SplitGraphson',
-                              'janusgraph'    => 'SplitGraphson',
-                              'orientdb'      => 'SplitGraphson',
-                              'bitsy'         => 'SplitGraphson',
-                              'nogremlin'     => 'None',
-                              );
+    private array $loaders = array( 'tinkergraphv3' => 'SplitGraphsonId',
+                         		     'gsneo4jv3'     => 'SplitGraphsonId',
+                         		     'nogremlin'     => 'None',
+                         		     );
 
     // todo : list the authorized values here.
 
@@ -59,9 +49,9 @@ class ExakatConfig extends Config {
     public function loadConfig(Project $project): ?string {
         // Default values
         $inis =  array(
-                    array('graphdb'            => 'gsneo4jv3',
-                          'gremlin'            => $this->gremlins['gsneo4jv3'],
-                          'loader'             => $this->loaders['gsneo4jv3'],
+                    array('graphdb'            => 'tinkergraphv3',
+                          'gremlin'            => $this->gremlins['tinkergraphv3'],
+                          'loader'             => $this->loaders['tinkergraphv3'],
                           'other_php_versions' => array(),
                           'transit_key'        => '',
                        )
@@ -75,7 +65,7 @@ class ExakatConfig extends Config {
 
         // Attempt each init path, and stop at the first file we find
         $ini = null;
-        foreach($configFiles as $configFile) {
+        foreach ($configFiles as $configFile) {
             if (file_exists($configFile)) {
                 // overwrite existing with the new, keep the default values
                 $ini = @parse_ini_file($configFile);
@@ -106,7 +96,7 @@ class ExakatConfig extends Config {
             $this->config['graphdb'] = 'nogremlin';
         }
 
-        foreach(array_keys($this->gremlins) as $gdb) {
+        foreach (array_keys($this->gremlins) as $gdb) {
             $folder = "{$gdb}_folder";
             if (isset($this->config[$folder])) {
                 if ($this->config[$folder][0] !== '/') {
@@ -129,7 +119,7 @@ class ExakatConfig extends Config {
             }
         }
 
-        foreach(MainConfig::PHP_VERSIONS as $version) {
+        foreach (MainConfig::PHP_VERSIONS as $version) {
             if (empty($this->config["php$version"])) {
                 continue;
             }
@@ -160,7 +150,7 @@ class ExakatConfig extends Config {
         if (isset($this->config['stubs'])) {
             $stubs = array(array());
             $this->config['stubs'] = makeArray($this->config['stubs']);
-            foreach($this->config['stubs'] as $stub) {
+            foreach ($this->config['stubs'] as $stub) {
                 $path = realpath($stub);
 
                 if ($path === false) {
@@ -182,7 +172,9 @@ class ExakatConfig extends Config {
                 if (is_dir($path)) {
                     chdir($path);
                     $allFiles = rglob('.');
-                    $allFiles = array_map(function (string $path) use ($stub): string { return $stub . ltrim($path, '.'); }, $allFiles);
+                    $allFiles = array_map(function (string $path) use ($stub): string {
+                        return $stub . ltrim($path, '.');
+                    }, $allFiles);
                     chdir($currentDir);
 
                     $stubs[$stub] = $allFiles;
@@ -196,7 +188,7 @@ class ExakatConfig extends Config {
         return str_replace($currentDir, '.', $configFile);
     }
 
-    public function __get(string $name) {
+    public function __get(string $name) : mixed {
         if (isset($this->config[$name])) {
             return $this->config[$name];
         } else {
@@ -205,7 +197,6 @@ class ExakatConfig extends Config {
 
         return $return;
     }
-
 }
 
 ?>

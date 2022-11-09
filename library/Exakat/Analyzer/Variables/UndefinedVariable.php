@@ -38,30 +38,30 @@ class UndefinedVariable extends Analyzer {
              // not from eval or include
              // Not from extract
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_ALL)
-                     ->analyzerIs('Functions/DynamicCode')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_ALL)
+                      ->analyzerIs('Functions/DynamicCode')
              )
 
              // Not from foreach
              ->not(
-                $this->side()
-                     ->outIs('DEFINITION')
-                     ->inIs('VALUE')
-                     ->atomIs('Foreach')
+                 $this->side()
+                      ->outIs('DEFINITION')
+                      ->inIs('VALUE')
+                      ->atomIs('Foreach')
              )
              ->filter(
-                $this->side()
-                     ->outIs('DEFINITION')
-                     ->atomIs('Variable')
-                     ->is('isRead', true)
+                 $this->side()
+                      ->outIs('DEFINITION')
+                      ->atomIs('Variable')
+                      ->is('isRead', true)
              )
              ->not(
-                $this->side()
-                     ->outIs('DEFINITION')
-                     ->atomIs('Variable')
-                     ->is('isModified', true)
+                 $this->side()
+                      ->outIs('DEFINITION')
+                      ->atomIs('Variable')
+                      ->is('isModified', true)
              )
 
              ->outIs('DEFINITION');
@@ -72,10 +72,10 @@ class UndefinedVariable extends Analyzer {
              // not from eval or include
              // Not from extract
              ->not(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->atomIs(self::FUNCTIONS_ALL)
-                     ->analyzerIs('Functions/DynamicCode')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(self::FUNCTIONS_ALL)
+                      ->analyzerIs('Functions/DynamicCode')
              )
 
              ->filter(

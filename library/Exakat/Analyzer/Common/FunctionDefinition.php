@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Common;
 
 use Exakat\Analyzer\Analyzer;
 
-class FunctionDefinition extends Analyzer {
+abstract class FunctionDefinition extends Analyzer {
     protected $functions = array();
 
     public function analyze(): void {
@@ -34,16 +34,16 @@ class FunctionDefinition extends Analyzer {
         $this->atomIs('Function')
              ->fullnspathIs($fullnspath)
              ->not(
-                $this->side()
-                     ->inIs('EXPRESSION')
-                     ->inIs(array('THEN', 'ELSE'))
-                     ->atomIs('Ifthen')
-                     ->outIs('CONDITION')
-                     ->filter(
-                        $this->side()
-                             ->atomInside('Functioncall')
-                             ->fullnspathIs('\\function_exists')
-                     )
+                 $this->side()
+                      ->inIs('EXPRESSION')
+                      ->inIs(array('THEN', 'ELSE'))
+                      ->atomIs('Ifthen')
+                      ->outIs('CONDITION')
+                      ->filter(
+                          $this->side()
+                               ->atomInside('Functioncall')
+                               ->fullnspathIs('\\function_exists')
+                      )
              );
         $this->prepareQuery();
     }

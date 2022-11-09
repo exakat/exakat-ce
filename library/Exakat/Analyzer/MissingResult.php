@@ -24,13 +24,13 @@
 namespace Exakat\Analyzer;
 
 class MissingResult {
-    private $fullcode = '';
+    private string $fullcode = '';
 
     public function __construct(string $fullcode) {
         $this->fullcode = $fullcode;
     }
 
-    public function toAddV() {
+    public function toAddV() : string {
         return <<<GREMLIN
  property(T.label, "Result")
 .property("fullcode", "{$this->fullcode}")

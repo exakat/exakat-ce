@@ -24,8 +24,14 @@
 namespace Exakat\Exceptions;
 
 class NoSuchReport extends \RuntimeException {
-    public function __construct(string $report = '') {
-        parent::__construct("No such report as '$report'\n");
+    public function __construct(string $report = '', array $reports = array()) {
+        $exception = "No such report as '$report'\n";
+
+        if (!empty($reports)) {
+            $exception .= 'You can try : ' . implode(', ', array_unique($reports)) . PHP_EOL;
+        }
+
+        parent::__construct($exception);
     }
 }
 

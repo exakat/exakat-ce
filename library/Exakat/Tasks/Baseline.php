@@ -55,7 +55,7 @@ class Baseline extends Tasks {
         }
     }
 
-    private function list() {
+    private function list(): void {
         if (!file_exists($this->config->project_dir)) {
             throw new NoSuchProject($this->config->project);
         }
@@ -66,7 +66,7 @@ class Baseline extends Tasks {
         print PHP_EOL;
         printf(self::FORMAT, '#', 'Name', 'Date');
         print str_repeat('-', 40) . PHP_EOL;
-        foreach($list as $l) {
+        foreach ($list as $l) {
             if (preg_match('/^dump-(\d+)-(.*?)$/', basename($l, '.sqlite'), $r) ) {
                 list(, $id, $name) = $r;
             } else {
@@ -80,12 +80,12 @@ class Baseline extends Tasks {
         print PHP_EOL . 'Total : ' . count($list) . ' baseline' . (count($list) > 1 ? 's' : '') . PHP_EOL;
     }
 
-    private function remove() {
+    private function remove(): void {
         $baselineStash = new BaselineStash($this->config);
         $baselineStash->removeBaseline($this->config->baseline_id);
     }
 
-    private function save() {
+    private function save(): void {
         $baselineStash = new BaselineStash($this->config);
         $baselineStash->copyPrevious($this->config->dump, $this->config->baseline_set);
         display('Save current audit to ' . $this->config->baseline_set);

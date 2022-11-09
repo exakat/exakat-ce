@@ -24,43 +24,55 @@
 namespace Exakat\Query\DSL;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Exceptions\WrongNumberOfArguments;
 
 class SamePropertyAs extends DSL {
     public function run(): Command {
-        if (func_num_args() === 2) {
-            list($property, $name) = func_get_args();
-            $caseSensitive = Analyzer::CASE_SENSITIVE;
-        } else {
-            list($property, $name, $caseSensitive) = func_get_args();
+        switch (func_num_args()) {
+            case 2:
+                list($property, $name) = func_get_args();
+                $caseSensitive = Analyzer::CASE_SENSITIVE;
+                break;
+
+            case 3:
+                list($property, $name, $caseSensitive) = func_get_args();
+                break;
+
+            default:
+                throw new WrongNumberOfArguments(__METHOD__, func_num_args(), 2);
         }
 
-        $this->assertProperty($property);
+        if ($property !== SavePropertyAs::ATOM) {
+            $this->assertProperty($property);
+        }
         $this->assertVariable($name);
 
         if ($property === 'label') {
-            return new Command('filter{ it.get().label() == ' . $name . '}');
+            return new Command('has("' . $property . '").filter{ it.get().label() == ' . $name . '}');
         } elseif ($property === 'id') {
-            return new Command('filter{ it.get().id() == ' . $name . '}');
+            return new Command('has("' . $property . '").filter{ it.get().id() == ' . $name . '}');
         } elseif ($property === 'self') {
-            return new Command('filter{ it.get() == ' . $name . '}');
+            assert(false, 'Dont use self with property');
+        } elseif ($property === SavePropertyAs::ATOM) {
+            return new Command('has("' . $property . '").filter{ it.get() == ' . $name . '}');
         } elseif (in_array($property, self::BOOLEAN_PROPERTY, \STRICT_COMPARISON)) {
-            return new Command('filter{ if ( it.get().properties("' . $property . '").any()) { ' . $name . ' == it.get().value("' . $property . '")} else {' . $name . ' == false; }; }');
+            return new Command('has("' . $property . '").filter{ if ( it.get().properties("' . $property . '").any()) { ' . $name . ' == it.get().value("' . $property . '")} else {' . $name . ' == false; }; }');
         } elseif ($property === 'intval') {
-            return new Command('has("intval").filter{ it.get().value("intval") == ' . $name . '}');
+            return new Command('has("' . $property . '").has("intval").filter{ it.get().value("intval") == ' . $name . '}');
         } elseif (in_array($property, array('reference'), \STRICT_COMPARISON) ) {
-            return new Command('filter{ if (it.get().properties("' . $property . '").any()) { ' . $name . ' == it.get().value("' . $property . '");} else { ' . $name . ' == false; }}');
+            return new Command('has("' . $property . '").filter{ if (it.get().properties("' . $property . '").any()) { ' . $name . ' == it.get().value("' . $property . '");} else { ' . $name . ' == false; }}');
         } elseif ($property === 'code' || $property === 'lccode') {
             if ($caseSensitive === Analyzer::CASE_SENSITIVE) {
-                return new Command('filter{ it.get().value("code") == ' . $name . '}');
+                return new Command('has("' . $property . '").filter{ it.get().value("code") == ' . $name . '}');
             } else {
-                return new Command('filter{ it.get().value("lccode") == ' . $name . '}');
+                return new Command('has("' . $property . '").filter{ it.get().value("lccode") == ' . $name . '}');
             }
         } elseif (in_array($property, self::INTEGER_PROPERTY, \STRICT_COMPARISON)) {
-            return new Command('filter{ it.get().value("' . $property . '") == ' . $name . '}');
+            return new Command('has("' . $property . '").filter{ it.get().value("' . $property . '") == ' . $name . '}');
         } else {
             $caseSensitive = $caseSensitive === Analyzer::CASE_SENSITIVE ? '' : '.toLowerCase()';
 
-            return new Command('filter{ it.get().value("' . $property . '")' . $caseSensitive . ' == ' . $name . $caseSensitive . '}');
+            return new Command('has("' . $property . '").filter{ it.get().value("' . $property . '")' . $caseSensitive . ' == ' . $name . $caseSensitive . '}');
         }
     }
 }

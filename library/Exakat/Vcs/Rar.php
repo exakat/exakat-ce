@@ -27,13 +27,13 @@ use Exakat\Exceptions\HelperException;
 class Rar extends Vcs {
     private $executable = 'unrar';
 
-    public function __construct($destination, $project_root) {
+    public function __construct(string $destination, string $project_root) {
         parent::__construct($destination, $project_root);
     }
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} 2>&1");
-        if (strpos($res, 'UNRAR') === false) {
+        if (!str_contains($res, 'UNRAR')  ) {
             throw new HelperException('rar');
         }
 
@@ -54,7 +54,7 @@ class Rar extends Vcs {
         unlink($archiveFile);
     }
 
-    public function getInstallationInfo() {
+    public function getInstallationInfo(): array {
         $stats = array();
 
         $res = $this->shell("{$this->executable} 2>&1");

@@ -61,7 +61,6 @@ class NoGremlin extends Graph {
         return array('installed' => 'Always',
                     );
     }
-
 }
 
 ?>

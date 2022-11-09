@@ -35,7 +35,6 @@ class Help extends Tasks {
 Check all commands : http://exakat.readthedocs.io/en/latest/Commands.html
 
 HELP;
-
     }
 }
 

@@ -111,8 +111,6 @@ class IsStubStructure extends Analyzer {
              ->raw('filter{ fnp + "::\$" + name in ***; }', $stubProperties)
 
              ->back('first')
-// This is not needed
-//             ->raw('sideEffect{ it.get().property("fullnspath", fnp + "::" + name); }')
              ->property(static::PROPERTY, true);
         $this->prepareQuery();
 
@@ -135,14 +133,11 @@ class IsStubStructure extends Analyzer {
              ->raw('filter{ fnp + "::\$" + name in ***; }', $stubStaticProperties)
 
              ->back('first')
-// This is not needed
-//             ->raw('sideEffect{ it.get().property("fullnspath", fnp + "::" + name); }')
              ->property(static::PROPERTY, true);
         $this->prepareQuery();
 
         // avec le typage parameter/return/property
         // methods
-        // static methods
         $this->atomIs('Methodcall')
              ->isNot('isStub', true)
              ->isNot('isPhp', true)
@@ -163,38 +158,87 @@ class IsStubStructure extends Analyzer {
              ->raw('filter{ fnp + "::" + name.toLowerCase() in ***; }', $stubMethods)
 
              ->back('first')
-// This is not needed
-//             ->raw('sideEffect{ it.get().property("fullnspath", fnp + "::" + name); }')
              ->property(static::PROPERTY, true);
         $this->prepareQuery();
 
-        //static properties
-        $this->atomIs('Staticmethodcall')
-             ->isNot('isStub', true)
-             ->isNot('isPhp', true)
-             ->isNot('isExt', true)
-             ->hasNoIn('DEFINITION')
-
-             ->outIs('METHOD')
-             ->outIs('NAME')
-             ->tokenIs('T_STRING')
-             ->savePropertyAs('fullcode', 'name')
-             ->back('first')
-
-             ->outIs('CLASS')
-             ->atomIs(array('Variableobject', 'Member', 'Staticproperty', 'Methodcall', 'Functioncall', 'Staticmethodcall')) // @todo remote or not?
-             ->goToTypehint() // @todo :  also covers returntypehint ?
+        // methods defined in a stub trait
+        // methods
+        // Warning : methods may also be renamed with use exprssion.
+        $this->atomIs(self::CLASSES_ALL)
+             ->outIs('USE')
+             ->outIs('USE')
              ->is(static::PROPERTY, true)
-             ->savePropertyAs('fullnspath', 'fnp')
-             ->raw('filter{ fnp + "::" + name.toLowerCase() in ***; }', $stubStaticMethods)
+             ->values('fullnspath')
+             ->unique();
+        $list = $this->rawquery()->toArray();
 
-             ->back('first')
-// This is not needed
-//             ->raw('sideEffect{ it.get().property("fullnspath", fnp + "::" + name); }')
-             ->property(static::PROPERTY, true);
-        $this->prepareQuery();
+        $traitsMethods = array_values(array_filter($stubMethods, function (string $a) use ($list): bool {
+            list($a ) = explode('::', $a, 2);
+            return in_array($a, $list);
+        }));
+        if (!empty($traitsMethods)) {
+            $this->atomIs('Methodcall')
+                 ->isNot('isStub', true)
+                 ->isNot('isPhp', true)
+                 ->isNot('isExt', true)
+                 ->hasNoIn('DEFINITION')
 
+                 ->outIs('METHOD')
+                 ->outIs('NAME')
+                 ->tokenIs('T_STRING')
+                 ->savePropertyAs('fullcode', 'name')
+                 ->back('first')
 
+                 ->outIs('OBJECT')
+                 ->atomIs(array('Variableobject', 'Member', 'Staticproperty', 'Methodcall', 'Functioncall', 'Staticmethodcall')) // @todo remote or not?
+                 ->goToTypehint() // @todo :  also covers returntypehint ?
+                 ->inIs('DEFINITION')
+                 ->goToAllParentsTraits(self::INCLUDE_SELF)
+                 ->isNot(static::PROPERTY, true)
+                 ->outIs('USE')
+                 ->outIs('USE')
+                 ->is(static::PROPERTY, true)
+                 ->savePropertyAs('fullnspath', 'fnp')
+                 ->raw('filter{ fnp + "::" + name.toLowerCase() in ***; }', $traitsMethods)
+
+                 ->back('first')
+                 ->property(static::PROPERTY, true);
+            $this->prepareQuery();
+        }
+        // @todo : methods defined in an abstract stub class
+
+        //static methodcall
+        $traitsStaticMethods = array_values(array_filter($stubStaticMethods, function (string $a) use ($list): bool {
+            list($a ) = explode('::', $a, 2);
+            return in_array($a, $list);
+        }));
+        if (!empty($traitsStaticMethods)) {
+            $this->atomIs('Staticmethodcall')
+                ->isNot('isStub', true)
+                ->isNot('isPhp', true)
+                ->isNot('isExt', true)
+                ->hasNoIn('DEFINITION')
+
+                ->outIs('METHOD')
+                ->outIs('NAME')
+                ->tokenIs('T_STRING')
+                ->savePropertyAs('fullcode', 'name')
+                ->back('first')
+
+                ->outIs('CLASS')
+                ->inIs('DEFINITION')
+                ->goToAllParentsTraits(self::INCLUDE_SELF)
+                ->isNot(static::PROPERTY, true)
+                ->outIs('USE')
+                ->outIs('USE')
+                ->is(static::PROPERTY, true)
+                ->savePropertyAs('fullnspath', 'fnp')
+                ->raw('filter{ fnp + "::" + name.toLowerCase() in ***; }', $traitsStaticMethods)
+
+                ->back('first')
+                ->property(static::PROPERTY, true);
+            $this->prepareQuery();
+        }
     }
 }
 

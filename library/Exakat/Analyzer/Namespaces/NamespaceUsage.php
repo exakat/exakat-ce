@@ -26,7 +26,6 @@ namespace Exakat\Analyzer\Namespaces;
 use Exakat\Analyzer\Analyzer;
 
 class NamespaceUsage extends Analyzer {
-
     public function analyze(): void {
         $this->atomIs('Namespace');
         $this->prepareQuery();

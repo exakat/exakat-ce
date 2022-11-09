@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class IsLess extends DSL {
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 2:
                 list($value1, $value2) = func_get_args();
 
@@ -46,7 +46,7 @@ class IsLess extends DSL {
         }
     }
 
-    private function makeGremlin($value): string {
+    private function makeGremlin(int|string $value): string {
         // It is an integer
         if (is_int($value)) {
             return (string) $value;

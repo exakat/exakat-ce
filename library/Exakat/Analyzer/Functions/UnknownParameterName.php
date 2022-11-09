@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Functions;
 use Exakat\Analyzer\Analyzer;
 
 class UnknownParameterName extends Analyzer {
-    protected $phpVersion = '8.0+';
+    protected string $phpVersion = '8.0+';
 
     public function dependsOn(): array {
         return array('Complete/PropagateCalls',
@@ -52,9 +52,9 @@ class UnknownParameterName extends Analyzer {
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
              ->is('variadic', true)
              ->not(
-                $this->side()
-                     ->outIs('ARGUMENT')
-                     ->atomIsNot(array('Keyvalue', 'Void'))
+                 $this->side()
+                      ->outIs('ARGUMENT')
+                      ->atomIsNot(array('Keyvalue', 'Void'))
              )
              ->collectKeys('index', 'noDelimiter')
              ->raw('filter{ index.collect{"\\$" + it;}.minus(args) != [];}');

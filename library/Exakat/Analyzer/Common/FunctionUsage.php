@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class FunctionUsage extends Analyzer {
-    protected $functions = array();
+    protected array $functions = array();
 
     public function analyze(): void {
         $functions =  makeFullNsPath($this->functions);

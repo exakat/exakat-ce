@@ -58,15 +58,19 @@ class FollowClosureDefinition extends Complete {
              ->outIs('NAME')
              ->atomIs('Variable')
              ->inIs('DEFINITION')
-             ->inIs('NAME')
              ->atomIs('Parameter')
              ->goToParameterUsage()
-             ->atomIs(array('Closure', 'Arrowfunction'), self::WITH_VARIABLES)
+             ->optional(
+                 $this->side()
+                      ->atomIs('Callable')
+                      ->inIs('DEFINITION')
+             )
+             ->atomIs(array('Closure', 'Arrowfunction', 'Function'), self::WITH_VARIABLES)
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // First class Callable
-        // immediate usage
+        // immediate usage goo(...)($a)
         $this->atomIs('Callable', self::WITHOUT_CONSTANTS)
              ->tokenIs(array('T_STRING', 'T_NS_SEPARATOR'))
 
@@ -75,12 +79,13 @@ class FollowClosureDefinition extends Complete {
              ->back('first')
 
              ->inIs('NAME')
+             ->inIsIE('CODE')  // parenthesis
              ->atomIs('Functioncall', self::WITHOUT_CONSTANTS)
              ->hasNoIn('DEFINITION')
              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 
-        // local usage
+        // local usage $a = goo(...); $a();
         $this->atomIs('Callable', self::WITHOUT_CONSTANTS)
              ->tokenIs(array('T_STRING', 'T_NS_SEPARATOR'))
 
@@ -99,6 +104,7 @@ class FollowClosureDefinition extends Complete {
         $this->prepareQuery();
 
         // On a method $o->b()
+        // @todo add test
         $this->atomIs('Callable', self::WITHOUT_CONSTANTS)
              ->tokenIs('T_OBJECT_OPERATOR') // T_NULLSAFE_OBJECT_OPERATOR is not possible
 
@@ -131,6 +137,7 @@ class FollowClosureDefinition extends Complete {
         $this->prepareQuery();
 
         // On a static method A::b()
+        // @todo add test
         $this->atomIs('Callable', self::WITHOUT_CONSTANTS)
              ->tokenIs('T_DOUBLE_COLON')
 
@@ -158,8 +165,10 @@ class FollowClosureDefinition extends Complete {
              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 
-        // more complex structures are missing ;
+        // @todo : more complex structures are missing ;
         // argument, properties, etc.
+
+        // @todo : handle PDFF : where shall we put the definition of the fullnspath? Propagate isPHP...
     }
 }
 

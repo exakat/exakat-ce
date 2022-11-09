@@ -25,10 +25,10 @@ namespace Exakat\Analyzer\Complete;
 class PhpNativeReference extends Complete {
     public function analyze(): void {
         // PHP functions that are using references
-        $functions = $this->methods->getFunctionsReferenceArgs();
+        $functions = $this->readStubs('getFunctionsReferenceArgs');
 
         $references = array();
-        foreach($functions as $function) {
+        foreach ($functions as $function) {
             array_collect_by($references, makeFullNsPath($function['function']), $function['position']);
         }
 

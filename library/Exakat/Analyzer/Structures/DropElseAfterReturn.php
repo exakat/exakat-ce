@@ -39,7 +39,7 @@ not(
     )
 )
 GREMLIN
-)
+             )
              ->outIs('THEN')
              ->outIs('EXPRESSION')
              ->atomIs('Return')
@@ -62,7 +62,7 @@ not(
     )
 )
 GREMLIN
-)
+             )
              ->outIs('ELSE')
              ->outIs('EXPRESSION')
              ->atomIs('Return')

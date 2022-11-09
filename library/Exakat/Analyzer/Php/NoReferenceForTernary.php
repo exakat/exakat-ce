@@ -55,7 +55,6 @@ class NoReferenceForTernary extends Analyzer {
              ->as('results')
              ->back('first')
              ->inIs('DEFINITION')
-             ->inIs('NAME')
              ->is('reference', true)
              ->back('results');
         $this->prepareQuery();

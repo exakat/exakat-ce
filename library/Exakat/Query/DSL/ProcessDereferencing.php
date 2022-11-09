@@ -38,7 +38,7 @@ __.sideEffect{levels=0;}
 
 )
 GREMLIN
-);
+        );
 
         return $command;
     }

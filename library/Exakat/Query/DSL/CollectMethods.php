@@ -30,7 +30,7 @@ class CollectMethods extends DSL {
     public const METHOD_CONCRETE = 3;
 
     public function run(): Command {
-        switch(func_num_args()) {
+        switch (func_num_args()) {
             case 1 :
                 $variable = func_get_arg(0);
                 $methods = self::METHOD_ALL;
@@ -47,7 +47,7 @@ class CollectMethods extends DSL {
 
         $this->assertVariable($variable, self::VARIABLE_WRITE);
 
-        switch($methods) {
+        switch ($methods) {
             default:
             case self::METHOD_ALL:
                 $final = "{$variable} = {$variable}.keySet();";
@@ -76,9 +76,22 @@ class CollectMethods extends DSL {
           .out("NAME")
           .fold() 
         )
+    .where( 
+        __.out("USE").out("USE").in("DEFINITION")
+          .out("METHOD", "MAGICMETHOD")
+          .sideEffect{ if({$variable}[it.get().value("lccode")] == null) { {$variable}[it.get().value("lccode")] = it.get().properties("abstract").any(); } }
+          .out("NAME")
+          .fold() 
+        )
     .where(
-        __
-        .repeat(out("EXTENDS").in("DEFINITION")).emit()
+        __.out("EXTENDS").in("DEFINITION")
+          .where( 
+              __.out("USE").out("USE").in("DEFINITION")
+                .out("METHOD", "MAGICMETHOD")
+                .sideEffect{ if({$variable}[it.get().value("lccode")] == null) { {$variable}[it.get().value("lccode")] = it.get().properties("abstract").any(); } }
+                .out("NAME")
+                .fold() 
+            )
         .where( 
             __
               .out("METHOD", "MAGICMETHOD")
@@ -91,7 +104,7 @@ class CollectMethods extends DSL {
 )
 .sideEffect{ $final }
 GREMLIN
-);
+        );
         return $command;
     }
 }

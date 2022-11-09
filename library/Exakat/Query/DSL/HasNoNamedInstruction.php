@@ -42,7 +42,7 @@ not(
           ) 
     )
 GREMLIN
-;
+        ;
 
         return new Command($gremlin, array(makeArray($atom), $name));
     }

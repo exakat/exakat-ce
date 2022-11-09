@@ -24,7 +24,7 @@ namespace Exakat\Analyzer\Dump;
 
 
 class CollectMethodCounts extends AnalyzerHashHashResults {
-    protected $analyzerName = 'CIT method counts';
+    protected string $analyzerName = 'CIT method counts';
 
     public function analyze(): void {
         // class x {function foo() {} }
