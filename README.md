@@ -11,7 +11,7 @@ Copy-paste the following code in your terminal. This was tester on OSX and Linux
 ```bash
 mkdir exakat
 cd exakat
-curl -o exakat.phar https://www.exakat.io/versions/index.php?file=latest
+curl -o exakat.phar "https://www.exakat.io/versions/index.php?file=latest"
 curl -o apache-tinkerpop-gremlin-server-3.4.12-bin.zip https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-3.4.12-bin.zip
 unzip apache-tinkerpop-gremlin-server-3.4.12-bin.zip
 mv apache-tinkerpop-gremlin-server-3.4.12 tinkergraph
