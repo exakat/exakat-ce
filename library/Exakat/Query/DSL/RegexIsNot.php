@@ -30,7 +30,10 @@ class RegexIsNot extends DSL {
         assert(func_num_args() === 2, 'Wrong number of argument for ' . __METHOD__ . '. 2 are expected, ' . func_num_args() . ' provided');
         list($property, $regex) = func_get_args();
 
-        $this->assertProperty($property);
+        assert($this->assertProperty($property));
+        if (empty($this->normalizeProperties($property))) {
+            return Query::STOP_QUERY;
+        }
 
         if ($property === 'code') {
             $values = $this->dictCode->grep($regex);
@@ -42,9 +45,16 @@ class RegexIsNot extends DSL {
             return new Command('not( has("code", within(***) ) )', array($values));
         }
 
-        return new Command(<<<GREMLIN
+        if (str_contains($regex, ' + ')) {
+            return new Command(<<<GREMLIN
 has("$property")
-.filter{ !(it.get().value("$property") =~ "$regex" ).asBoolean() }
+.filter{ !(it.get().value("$property") =~ "$regex").asBoolean(); }
+GREMLIN
+            );
+        } else {
+        }
+        return new Command(<<<GREMLIN
+has("$property", TextP.notRegex("$regex"))
 GREMLIN
         );
     }

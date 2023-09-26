@@ -24,48 +24,67 @@ namespace Exakat\Analyzer\Complete;
 
 use Exakat\Analyzer\Analyzer;
 use Exakat\Query\DSL\SavePropertyAs;
+use Exakat\Data\Methods;
 
 class VariableTypehint extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/CreateDefaultValues',
-        			 'Variables/SelfTransform',
+                     'Complete/SetClassRemoteDefinitionWithLocalNew',
                     );
     }
 
     public function analyze(): void {
-    	// @todo : make this a while 
-    	// by counting the added types, and stopping when this count is 0
-    	$this->findTypes();
-    	$this->findTypes();
+        // @todo : trun this into a while loop to make sure the data are actually propagated far enough
+        // by counting the added types, and stopping when this count is 0
+        // $a = 0; $b = $a; $c = $b; ....
+        $this->findTypes();
+        $this->findTypes();
     }
-    
-    private function findTypes() : void {
+
+    private function findTypes(): void {
         // @todo extends to global variables
         // @todo handles multiple typehints when TYPEHINT are extra=true
+        // @todo : handle the case of copies from one typed value to the next one.
 
         $atoms = array('Variabledefinition', 'Propertydefinition');
         // adding integer typehint
         $this->atomIs($atoms)
              ->hasNoTypehint()
+             /*
+             ->not(
+             	$this->side()
+             	     ->outIs('DEFINITION')
+             	     ->hasIn('GLOBAL')
+             )
+             */
              // only one default
              ->filter(
                  $this->side()
                       ->outIs('DEFAULT')
                       ->atomIsNot('Void')
                       // Skips self transforming variables
-                      ->not(
-                      	$this->side()
-                      		 ->inIs('RIGHT')
-                      		 ->outIs('LEFT')
-                      		 ->analyzerIs('Variables/SelfTransform')
-                      )
                       // removes multiple assignations when they are of the same type
-                      ->raw('dedup().by(label)')
-                      ->raw('count().is(eq(1))')
+                      ->raw('groupCount().by(choose(label())
+			     .option("Integer",         constant("int"))
+//			     .option("Addition",        constant("int"))
+			     .option("Multiplication",  constant("int"))
+			     .option("Power",           constant("int"))
+			     .option("Null",            constant("null"))
+			     .option("String",          constant("string"))
+			     .option("Heredoc",         constant("string"))
+			     .option("Magicconstant",   constant("string"))
+			     .option("Concatenation",   constant("string"))
+			     .option("Arrayliteral",    constant("array"))
+			     .option("Boolean",         constant("bool"))
+			     .option("Comparison",      constant("bool"))
+			     .option("New",             constant("object"))
+			     .option("Float",           constant("float"))
+			     ).unfold().count().is(eq(1))')
              )
 
              ->outIs('DEFAULT')
-             ->atomIs(array('Integer', 'Null', 'String', 'Magicconstant', 'Heredoc', 'Arrayliteral', 'Boolean', 'Float'), self::WITH_CONSTANTS)
+             //'Addition', removed, to handle array addition also
+             ->atomIs(array('Integer', 'Null', 'String', 'Magicconstant', 'Heredoc', 'Arrayliteral', 'Boolean', 'Float', 'Concatenation', 'Multiplication',  'Power'), self::WITH_CONSTANTS)
              ->savePropertyAs('label', 'atomValue')
              ->back('first')
              ->initVariable('fnp', "''")
@@ -73,13 +92,19 @@ class VariableTypehint extends Analyzer {
         sideEffect{ 
             fnp = "DEFAULT VALUE";
             switch(atomValue) {
-                case 'Integer'       : fnp = "\\int";        break;
-                case 'Null'          : fnp = "\\null";       break;
-                case 'String'        : fnp = "\\string";     break;
-                case 'Heredoc'       : fnp = "\\string";     break;
-                case 'Magicconstant' : fnp = "\\string";     break;
-                case 'Arrayliteral'  : fnp = "\\array";      break;
-                case 'Boolean'       : fnp = "\\bool";       break;
+                case 'Integer'        : fnp = "\\int";        break;
+                case 'Addition'       : fnp = "\\int";        break;
+                case 'Multiplication' : fnp = "\\int";        break;
+                case 'Power'          : fnp = "\\int";        break;
+                case 'Null'           : fnp = "\\null";       break;
+                case 'String'         : fnp = "\\string";     break;
+                case 'Heredoc'        : fnp = "\\string";     break;
+                case 'Magicconstant'  : fnp = "\\string";     break;
+                case 'Concatenation'  : fnp = "\\string";     break;
+                case 'Arrayliteral'   : fnp = "\\array";      break;
+                case 'Boolean'        : fnp = "\\bool";       break;
+                case 'Comparison'     : fnp = "\\bool";       break;
+                case 'Float'          : fnp = "\\float";        break;
                 default : 
                     fnp = "DEFAULT TYPE";break;
             }
@@ -97,7 +122,71 @@ GREMLIN
 
              ->addEFrom('TYPEHINT', 'first')
              ->back('first')
-             ->setProperty('typehint', '"one"')
+             ->setProperty('typehint', 'one')
+             ->sideEffect(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIs('Void')
+                      ->dropIn('TYPEHINT')
+             );
+        $this->prepareQuery();
+
+        // adding cast values (except object)
+        $this->atomIs($atoms)
+             ->hasNoTypehint()
+             // only one default
+             ->filter(
+                 $this->side()
+                      ->outIs('DEFAULT')
+                      ->atomIsNot('Void')
+                      ->count()
+                      ->isEqual(1)
+             )
+
+             ->outIs('DEFAULT')
+             ->atomIs(array('Cast'), self::WITH_CONSTANTS)
+             ->tokenIsNot(array('T_UNSET_CAST', 'T_OBJECT_CAST'))
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->addAtom('Scalartypehint', array(
+                             'fullcode'   => 'fnp',
+                             'fullnspath' => 'fnp',
+                             'ws'         => '{"closing":" "}',
+                             'rank'       => 0,
+                             'line'       => 0,
+                             'extra'      => true,
+                          ))
+             ->addEFrom('TYPEHINT', 'first')
+             ->back('first')
+             ->setProperty('typehint', 'one')
+             ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
+        $this->prepareQuery();
+
+        // adding cast values (except object)
+        $this->atomIs($atoms)
+             ->hasNoTypehint()
+             // only one default
+             ->filter(
+                 $this->side()
+                      ->outIs('DEFAULT')
+                      ->atomIsNot('Void')
+                      ->count()
+                      ->isEqual(1)
+             )
+
+             ->outIs('DEFAULT')
+             ->atomIs(array('Cast'), self::WITH_CONSTANTS)
+             ->tokenIs('T_OBJECT_CAST')
+             ->addAtom('Scalartypehint', array(
+                             'fullcode'   => 'Stdclass',
+                             'fullnspath' => '\\stdclass',
+                             'ws'         => '{"closing":" "}',
+                             'rank'       => 0,
+                             'line'       => 0,
+                             'extra'      => true,
+                          ))
+             ->addEFrom('TYPEHINT', 'first')
+             ->back('first')
+             ->setProperty('typehint', 'one')
              ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
         $this->prepareQuery();
 
@@ -109,18 +198,65 @@ GREMLIN
                  $this->side()
                       ->outIs('DEFAULT')
                       ->atomIsNot('Void')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
 
              ->outIs('DEFAULT')
              ->atomIs(array('Functioncall', 'Methodcall', 'Staticmethodcall'), self::WITH_CONSTANTS)
              ->inIs('DEFINITION')
              ->outIs('RETURNTYPE')
+             ->atomIsNot('Void')
              ->duplicateNode()
              ->addEFrom('TYPEHINT', 'first')
              ->back('first')
+             ->setProperty('typehint', 'one')
              ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
         $this->prepareQuery();
+
+        // adding returned type from methodcall
+        $types = array('string' => '\\\\string',
+                  'int'    => '\\\\int',
+                  'bool'   => '\\\\bool',
+                  'float'  => '\\\\float',
+                  'array'  => '\\\\array',
+                 );
+        foreach ($types as $type => $fullnspath) {
+            $returntypes    = $this->readStubs('getFunctionsByReturnType', array($type,  Methods::LOOSE));
+
+            $this->atomIs($atoms)
+                 ->hasNoTypehint()
+                 // only one default
+                 ->filter(
+                     $this->side()
+                          ->outIs('DEFAULT')
+                          ->atomIsNot('Void')
+                          ->count()
+                          ->isEqual(1)
+                 )
+
+                 ->outIs('DEFAULT')
+                 ->atomIs(array('Functioncall', 'Methodcall', 'Staticmethodcall'), self::WITH_CONSTANTS)
+                 ->fullnspathIs($returntypes)
+                 ->addAtom('Identifier', array(
+                    'ws'         => '{"closing":" "}',
+                    'rank'       => 0,
+                    'line'       => 0,
+                    'extra'      => true,
+                 ))
+                 ->raw(<<<GREMLIN
+sideEffect{
+    it.get().property("fullcode",   "$fullnspath");
+    it.get().property("fullnspath", "$fullnspath");
+}
+GREMLIN
+                 )
+              ->as('typehint')
+              ->addEFrom('TYPEHINT', 'first')
+              ->back('first')
+              ->setProperty('typehint', 'one');
+            $this->prepareQuery();
+        }
 
         // @todo : handle PDFF's return type
 
@@ -133,7 +269,8 @@ GREMLIN
                  $this->side()
                       ->outIs('DEFAULT')
                       ->atomIsNot('Void')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
 
              ->outIs('DEFAULT')
@@ -169,8 +306,9 @@ GREMLIN
              ->back('typehint')
              // if the definition is available, make a link to it
              ->raw('sideEffect( select("theClass").in("DEFINITION").hasLabel("Class").addE("DEFINITION").to("typehint"))')
-             ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )') // remove types for PPP and Propertydefinition
-             ->back('first');
+             ->raw('sideEffect( __.select("first").out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )') // remove types for PPP and Propertydefinition
+             ->back('first')
+             ->setProperty('typehint', 'one');
         $this->prepareQuery();
 
         // adding property typehint from parameter type
@@ -182,7 +320,8 @@ GREMLIN
                  $this->side()
                       ->outIs('DEFAULT')
                       ->atomIsNot('Void')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
 
              ->outIs('DEFAULT')
@@ -213,6 +352,7 @@ GREMLIN
              ->as('typehint')
              ->addEFrom('TYPEHINT', 'first')
              ->back('first')
+             ->setProperty('typehint', 'one')
              // if the definition is available, make a link to it
              ->raw('sideEffect( select("theClass").in("DEFINITION").hasLabel("Class").addE("DEFINITION").to("typehint"))')
              ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
@@ -227,7 +367,8 @@ GREMLIN
                  $this->side()
                       ->outIs('DEFAULT')
                       ->atomIsNot('Void')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
 
              ->outIs('DEFAULT')
@@ -256,6 +397,7 @@ GREMLIN
              )
              ->addEFrom('TYPEHINT', 'first')
              ->back('first')
+             ->setProperty('typehint', 'one')
              ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
         $this->prepareQuery();
 
@@ -268,7 +410,8 @@ GREMLIN
                  $this->side()
                       ->outIs('DEFAULT')
                       ->atomIsNot('Void')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
 
              ->outIs('DEFAULT')
@@ -299,6 +442,7 @@ GREMLIN
              )
              ->addEFrom('TYPEHINT', 'first')
              ->back('first')
+             ->setProperty('typehint', 'one')
              ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
         $this->prepareQuery();
 
@@ -331,10 +475,11 @@ GREMLIN
              )
              ->addEFrom('TYPEHINT', 'first')
              ->back('first')
+             ->setProperty('typehint', 'one')
              ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
         $this->prepareQuery();
 
-        // adding type via clone
+        // adding type via clone of local default
         $this->atomIs($atoms)
              ->hasNoTypehint()
 
@@ -364,8 +509,52 @@ GREMLIN
              ->back('typehint')
              ->addEFrom('DEFINITION', 'theClass')
              ->back('first')
+             ->setProperty('typehint', 'one')
              ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
         $this->prepareQuery();
+
+        // adding type via clone via typehint
+        $this->atomIs($atoms)
+             ->hasNoTypehint()
+
+             ->outIs('DEFAULT')
+             ->atomIs('Clone')
+             ->outIs('CLONE')
+             ->goToTypehint()
+             ->inIs('DEFINITION')
+             ->has('fullnspath')
+             ->savePropertyAs(SavePropertyAs::ATOM, 'definition')
+             ->as('theClass')
+             ->back('first')
+             ->addAtom('Identifier', array(
+                'ws'         => '{"closing":" "}',
+                'rank'       => 0,
+                'line'       => 0,
+                'extra'      => true,
+             ))
+             ->as('typehint')
+             ->raw(<<<'GREMLIN'
+sideEffect{
+    it.get().property("fullcode",   definition.value("fullnspath"));
+    it.get().property("fullnspath", definition.value("fullnspath"));
+}
+GREMLIN
+             )
+             ->addEFrom('TYPEHINT', 'first')
+             ->back('typehint')
+             ->addEFrom('DEFINITION', 'theClass')
+             ->back('first')
+             ->setProperty('typehint', 'one')
+             ->raw('sideEffect( __.out("TYPEHINT").hasLabel("Void").inE("TYPEHINT").drop() )'); // remove types for PPP and Propertydefinition
+        $this->prepareQuery();
+
+        /*
+                // Case of global variables
+                $this->atomIs('Virtualglobal')
+                     ->hasNoTypehint()
+                     ->dedup();
+                $this->prepareQuery();
+                */
     }
 }
 

@@ -23,6 +23,7 @@ declare(strict_types = 1);
 
 namespace Exakat\Analyzer;
 
+use const STRICT_COMPARISON;
 
 class RulesetsExtra implements RulesetsInterface {
     private array $extra_rulesets  = array();
@@ -52,7 +53,7 @@ class RulesetsExtra implements RulesetsInterface {
     public function getRulesetForAnalyzer(string $analyzer = ''): array {
         $return = array();
         foreach ($this->extra_rulesets as $ruleset => $analyzers) {
-            if (in_array($analyzer, $analyzers)) {
+            if (in_array($analyzer, $analyzers, STRICT_COMPARISON)) {
                 $return[] = $ruleset;
             }
         }
@@ -150,7 +151,7 @@ class RulesetsExtra implements RulesetsInterface {
     }
 
     public function getSuggestionClass(string $name): array {
-        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name) : bool {
+        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name): bool {
             $l = levenshtein($c, $name);
 
             return $l < 8;

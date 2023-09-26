@@ -24,9 +24,9 @@
 namespace Exakat\Data;
 
 class Collector {
-    private $dictionary = array();
-    private $last       = array();
-    private $count = 0;
+    private array $dictionary = array();
+    private array $last       = array();
+    private int   $count = 0;
 
     public function get(string $v): int {
         if (isset($this->dictionary[$v])) {

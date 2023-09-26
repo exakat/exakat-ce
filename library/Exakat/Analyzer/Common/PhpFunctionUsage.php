@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class PhpFunctionUsage extends Analyzer {
-    protected $functions = array();
+    protected array $functions = array();
 
     public function dependsOn(): array {
         return array('Functions/ConditionedFunctions',
@@ -35,6 +35,10 @@ abstract class PhpFunctionUsage extends Analyzer {
     }
 
     public function analyze(): void {
+        if (empty($this->functions)) {
+            return;
+        }
+
         $functions =  makeFullNsPath($this->functions);
 
         $this->atomFunctionIs($functions)

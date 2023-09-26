@@ -28,9 +28,7 @@ use Exakat\Analyzer\Analyzer;
 class UndefinedConstants extends Analyzer {
     public function dependsOn(): array {
         return array('Constants/ConstantUsage',
-                     'Constants/IsExtConstant',
                      'Constants/CustomConstantUsage',
-                     'Complete/SetStringMethodDefinition'
                     );
     }
 
@@ -39,14 +37,13 @@ class UndefinedConstants extends Analyzer {
         $this->analyzerIs('Constants/ConstantUsage')
              ->atomIsNot(array('Boolean', 'Null'))
              ->hasNoIn(array('AS', 'TYPEHINT', 'RETURNTYPE', 'GOTOLABEL', 'GOTO'))
-             ->analyzerIsNot(array('Constants/CustomConstantUsage',
-                                   'Constants/IsExtConstant',
-                                   ))
+             ->analyzerIsNot(array('Constants/CustomConstantUsage'))
+
              // skipping "$a::$b"
              ->not(
                  $this->side()
                       ->outIs('CONCAT')
-                      ->atomIs(array('Variable', 'Member'))
+                      ->atomIs(array('Variable', 'Member', 'Array'))
              )
 
              ->not(
@@ -63,6 +60,7 @@ class UndefinedConstants extends Analyzer {
              ->isNot('isExt', true)
              ->isNot('isStub', true)
              ->isNotIgnored()
+
              ->hasNoIn('DEFINITION');
         $this->prepareQuery();
     }

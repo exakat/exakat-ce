@@ -23,10 +23,13 @@
 namespace Exakat\Analyzer\Complete;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Stubs\Stubs;
+use const STRICT_COMPARISON;
 
 class IsStubStructure extends Analyzer {
     protected const PROPERTY = 'isStub';
     protected const PDFF     = 'stubs';
+    protected Stubs $stubs;
 
     public function dependsOn(): array {
         return array('Complete/VariableTypehint',
@@ -34,14 +37,21 @@ class IsStubStructure extends Analyzer {
     }
 
     public function analyze(): void {
-        $stubs = exakat(static::PDFF);
-        $stubClassConstants   = $stubs->getClassConstantList();
-        $stubProperties       = $stubs->getClassPropertyList();
-        $stubStaticProperties = $stubs->getClassStaticPropertyList();
-        $stubMethods          = $stubs->getClassMethodList();
-        $stubStaticMethods    = $stubs->getClassStaticMethodList();
+        $this->stubs = new Stubs(dirname($this->config->ext_root) . '/stubs/',
+            $this->config->stubs,
+        );
+        $this->_analyze();
+    }
+
+    protected function _analyze(): void {
+        $stubClassConstants   = $this->stubs->getClassConstantList();
+        $stubProperties   	  = $this->stubs->getClassPropertyList();
+        $stubStaticProperties = $this->stubs->getClassStaticPropertyList();
+        $stubMethods   	  	  = $this->stubs->getClassMethodList();
+        $stubStaticMethods	  = $this->stubs->getClassStaticMethodList();
 
         // Adding FNP for static extended/implemented structures
+        // A::Const
         $this->atomIs('Staticconstant')
              ->isNot('isStub', true)
              ->isNot('isPhp', true)
@@ -53,17 +63,46 @@ class IsStubStructure extends Analyzer {
              ->back('first')
 
              ->outIs('CLASS')
+             ->atomIs(array('Identifier', 'Nsname'))
              ->inIs('DEFINITION')
              ->goToAllParents(self::INCLUDE_SELF)
 
              ->outIs(array('EXTENDS', 'IMPLEMENTS'))
              ->is(static::PROPERTY, true)
              ->savePropertyAs('fullnspath', 'fnp')
-             ->raw('filter{ fnp + "::" + name in ***; }', $stubClassConstants)
+             ->makeConstantFnp('constantFnp', 'fnp', 'name')
+             ->sameVariableAs('constantFnp', $stubClassConstants)
 
              ->back('first')
              ->property(static::PROPERTY, true)
-             ->raw('sideEffect{ it.get().property("fullnspath", fnp + "::" + name); }');
+             ->setProperty('fullnspath', 'constantFnp');
+        $this->prepareQuery();
+
+        // A $a; $a::Const
+        $this->atomIs('Staticconstant')
+             ->isNot('isStub', true)
+             ->isNot('isPhp', true)
+             ->isNot('isExt', true)
+             ->hasNoIn('DEFINITION')
+
+             ->outIs('CONSTANT')
+             ->savePropertyAs('fullcode', 'name')
+             ->back('first')
+
+             ->outIs('CLASS')
+             ->atomIs(array('Variable')) // Array?
+             ->optional(
+                 $this->side()
+                      ->goToTypehint()
+             )
+
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->makeConstantFnp('constantFnp', 'fnp', 'name')
+             ->sameVariableAs('constantFnp', $stubClassConstants)
+
+             ->back('first')
+             ->property(static::PROPERTY, true)
+             ->setProperty('fullnspath', 'constantFnp');
         $this->prepareQuery();
 
         // Adding FNP for typehinted parameter/properties
@@ -82,12 +121,17 @@ class IsStubStructure extends Analyzer {
              ->goToTypehint() // @todo :  also covers returntypehint ?
              ->is(static::PROPERTY, true)
              ->savePropertyAs('fullnspath', 'fnp')
-             ->raw('filter{ fnp + "::" + name in ***; }', $stubClassConstants)
+             ->makeConstantFnp('constantFnp', 'fnp', 'name')
+             ->sameVariableAs('constantFnp', $stubClassConstants)
 
              ->back('first')
              ->property(static::PROPERTY, true)
-             ->raw('sideEffect{ it.get().property("fullnspath", fnp + "::" + name); }');
+             ->setProperty('fullnspath', 'constantFnp');
         $this->prepareQuery();
+
+        //		$classConstants = $this->readStubs('getClassConstantList');
+        //		print_r($classConstants);die();
+        // @todo :  support constants in stubs, like class A { const B; } foo() : A; foo()::B
 
         ////////////////////////////////////////////////////////////
         //properties (normal)
@@ -174,7 +218,7 @@ class IsStubStructure extends Analyzer {
 
         $traitsMethods = array_values(array_filter($stubMethods, function (string $a) use ($list): bool {
             list($a ) = explode('::', $a, 2);
-            return in_array($a, $list);
+            return in_array($a, $list, STRICT_COMPARISON);
         }));
         if (!empty($traitsMethods)) {
             $this->atomIs('Methodcall')
@@ -234,6 +278,53 @@ class IsStubStructure extends Analyzer {
                 ->is(static::PROPERTY, true)
                 ->savePropertyAs('fullnspath', 'fnp')
                 ->raw('filter{ fnp + "::" + name.toLowerCase() in ***; }', $traitsStaticMethods)
+
+                ->back('first')
+                ->property(static::PROPERTY, true);
+            $this->prepareQuery();
+        }
+
+        //normal methodcall
+        if (!empty($stubMethods)) {
+            $this->atomIs('Methodcall')
+                ->isNot('isStub', true)
+                ->isNot('isPhp', true)
+                ->isNot('isExt', true)
+                ->hasNoIn('DEFINITION')
+
+                ->outIs('METHOD')
+                ->outIs('NAME')
+                ->tokenIs('T_STRING')
+                ->savePropertyAs('fullcode', 'name')
+                ->back('first')
+
+                ->outIs('OBJECT')
+                ->goToTypehint()  // @todo : cas des types multiples? OR, AND, DNF...
+                ->savePropertyAs('fullnspath', 'fnp')
+                ->raw('filter{ fnp + "::" + name.toLowerCase() in ***; }', $stubMethods)
+
+                ->back('first')
+                ->property(static::PROPERTY, true);
+            $this->prepareQuery();
+        }
+
+        //normal property
+        if (!empty($stubProperties)) {
+            $this->atomIs('Member')
+                ->isNot('isStub', true)
+                ->isNot('isPhp', true)
+                ->isNot('isExt', true)
+                ->hasNoIn('DEFINITION')
+
+                ->outIs('MEMBER')
+                ->tokenIs('T_STRING')
+                ->savePropertyAs('fullcode', 'name')
+                ->back('first')
+
+                ->outIs('OBJECT')
+                ->goToTypehint()  // @todo : cas des types multiples? OR, AND, DNF...
+                ->savePropertyAs('fullnspath', 'fnp')
+                ->raw('filter{ fnp + "::\\$" + name in ***; }', $stubProperties)
 
                 ->back('first')
                 ->property(static::PROPERTY, true);

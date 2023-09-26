@@ -30,18 +30,24 @@ use Exakat\Helpers\Timer;
 
 class TinkergraphV3 extends Graph {
     private const SUPPORTED_VERSIONS = array('3.4', '3.5', '3.6');
+    public const CONFIG_PREFIX     = 'tinkergraphv3';
+
     private string $gremlinVersion = '3.6';
 
     private Connection $db;
 
     public function init(): void {
-        if (!file_exists("{$this->config->tinkergraphv3_folder}/lib/")) {
+        $this->host   = $this->config->tinkergraphv3_host;
+        $this->port   = $this->config->tinkergraphv3_port;
+        $this->folder = $this->config->tinkergraphv3_folder;
+
+        if (!file_exists("{$this->folder}/lib/")) {
             // No local production, just skip init.
             $this->status = self::UNAVAILABLE;
             return;
         }
 
-        $gremlinJar = glob("{$this->config->tinkergraphv3_folder}/lib/gremlin-core-*.jar");
+        $gremlinJar = glob("{$this->folder}/lib/gremlin-core-*.jar");
         $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
         //gremlin-core-3.4.10.jar
         preg_match('/gremlin-core-([0-9.]+)\.\d+.jar/', $gremlinVersion, $r);
@@ -53,8 +59,8 @@ class TinkergraphV3 extends Graph {
             throw new UnknownGremlinVersion($this->gremlinVersion);
         }
 
-        $this->db = new Connection(array( 'host'     => $this->config->tinkergraphv3_host,
-                                          'port'     => $this->config->tinkergraphv3_port,
+        $this->db = new Connection(array( 'host'     => $this->host,
+                                          'port'     => $this->port,
                                           'graph'    => 'graph',
                                           'emptySet' => true,
                                    ) );
@@ -65,16 +71,16 @@ class TinkergraphV3 extends Graph {
     public function getInfo(): array {
         $stats = array();
 
-        if (empty($this->config->tinkergraphv3_folder)) {
+        if (empty($this->folder)) {
             $stats['configured'] = 'No tinkergraph configured in config/exakat.ini.';
-        } elseif (!file_exists($this->config->tinkergraphv3_folder)) {
-            $stats['installed'] = 'No (folder : ' . $this->config->tinkergraphv3_folder . ')';
+        } elseif (!file_exists($this->folder)) {
+            $stats['installed'] = 'No (folder : ' . $this->folder . ')';
         } else {
-            $stats['installed'] = 'Yes (folder : ' . $this->config->tinkergraphv3_folder . ')';
+            $stats['installed'] = 'Yes (folder : ' . $this->folder . ')';
             $stats['host'] = $this->config->tinkergraphv3_host;
             $stats['port'] = $this->config->tinkergraphv3_port;
 
-            $gremlinJar = glob("{$this->config->tinkergraphv3_folder}/lib/gremlin-core-*.jar");
+            $gremlinJar = glob("{$this->folder}/lib/gremlin-core-*.jar");
             $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
             //example : gremlin-core-3.2.5.jar
             $gremlinVersion = substr($gremlinVersion, 13, -4);
@@ -105,7 +111,14 @@ class TinkergraphV3 extends Graph {
             $this->db->message->bindValue($name, $value);
         }
 
-        $result = $this->db->send($query);
+        $attempts = 0;
+        do {
+            try {
+                $result = $this->db->send($query);
+            } catch (ServerException $e) {
+                ++$attempts;
+            }
+        } while (!isset($result) && $attempts < 3);
 
         return new GraphResults($result);
     }
@@ -146,14 +159,14 @@ class TinkergraphV3 extends Graph {
     }
 
     public function setConfigFile(): void {
-        if (!file_exists("{$this->config->tinkergraphv3_folder}/conf/tinkergraphv3.{$this->gremlinVersion}.yaml")) {
+        if (!file_exists("{$this->folder}/conf/tinkergraphv3.{$this->gremlinVersion}.yaml")) {
             copy("{$this->config->dir_root}/server/tinkergraphv3/tinkergraphv3.{$this->gremlinVersion}.yaml",
-                "{$this->config->tinkergraphv3_folder}/conf/tinkergraphv3.{$this->gremlinVersion}.yaml");
+                "{$this->folder}/conf/tinkergraphv3.{$this->gremlinVersion}.yaml");
         }
     }
 
     public function start(): void {
-        if (!file_exists("{$this->config->tinkergraphv3_folder}/conf")) {
+        if (!file_exists("{$this->folder}/conf")) {
             throw new GremlinException('No tinkgergraph configuration folder found.');
         }
 
@@ -161,7 +174,7 @@ class TinkergraphV3 extends Graph {
 
         if (in_array($this->gremlinVersion, self::SUPPORTED_VERSIONS, STRICT_COMPARISON)) {
             display("start gremlin server {$this->gremlinVersion}.x TinkergraphV3");
-            exec("cd {$this->config->tinkergraphv3_folder}; rm -rf db/neo4j; GREMLIN_YAML=conf/tinkergraphv3.{$this->gremlinVersion}.yaml /bin/bash  ./bin/gremlin-server.sh start > gremlin.log 2>&1 &");
+            exec("cd {$this->folder}; rm -rf db/neo4j; GREMLIN_YAML=conf/tinkergraphv3.{$this->gremlinVersion}.yaml /bin/bash  ./bin/gremlin-server.sh start > gremlin.log 2>&1 &");
         } else {
             throw new GremlinException("Wrong version for tinkergraph V3 : $this->gremlinVersion");
         }
@@ -181,8 +194,8 @@ class TinkergraphV3 extends Graph {
 
         display("Restarted in $round rounds\n");
 
-        if (file_exists("{$this->config->tinkergraphv3_folder}/run/gremlin.pid")) {
-            $pid = trim(file_get_contents("{$this->config->tinkergraphv3_folder}/run/gremlin.pid"));
+        if (file_exists("{$this->folder}/run/gremlin.pid")) {
+            $pid = trim(file_get_contents("{$this->folder}/run/gremlin.pid"));
         } else {
             $pid = false;
         }
@@ -193,9 +206,9 @@ class TinkergraphV3 extends Graph {
     }
 
     public function stop(): void {
-        if (file_exists("{$this->config->tinkergraphv3_folder}/run/gremlin.pid")) {
+        if (file_exists("{$this->folder}/run/gremlin.pid")) {
             display("Stopping gremlin server {$this->gremlinVersion}");
-            $res = shell_exec("cd {$this->config->tinkergraphv3_folder}; GREMLIN_YAML=conf/tinkergraphv3.{$this->gremlinVersion}.yaml ./bin/gremlin-server.sh stop");
+            $res = shell_exec("cd {$this->folder}; GREMLIN_YAML=conf/tinkergraphv3.{$this->gremlinVersion}.yaml ./bin/gremlin-server.sh stop");
             if (preg_match('/\[(\d+)\]/', $res, $r)) {
                 display("Stopped gremlin server [$r[1]]");
             } else {

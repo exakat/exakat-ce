@@ -37,7 +37,12 @@ class AddETo extends DSL {
             throw new WrongNumberOfArguments(__METHOD__, func_num_args(), 3);
         }
 
-        assert($this->assertLabel($from, self::LABEL_GO));
+        if (is_int($from)) {
+            $from = ' __.V(' . $from . ') ';
+        } else {
+            assert($this->assertLabel($from, self::LABEL_GO));
+            $from = '"' . $from . '"';
+        }
 
         $properties = array();
         foreach ($options as $name => $value) {
@@ -45,7 +50,7 @@ class AddETo extends DSL {
         }
         $properties = implode('', $properties);
 
-        return new Command("addE(\"$edgeName\").to(\"$from\")$properties");
+        return new Command("addE(\"$edgeName\").to($from)$properties");
     }
 }
 ?>

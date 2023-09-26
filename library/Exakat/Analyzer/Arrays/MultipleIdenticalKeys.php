@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Arrays;
 use Exakat\Analyzer\Analyzer;
 
 class MultipleIdenticalKeys extends Analyzer {
-    protected $arrayMaxSize = 15000;
+    protected int $arrayMaxSize = 15000;
 
     public function dependsOn(): array {
         return array('Complete/PropagateConstants',

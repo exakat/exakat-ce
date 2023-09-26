@@ -28,12 +28,18 @@ class Dictionary {
     public const CASE_SENSITIVE   = true;
     public const CASE_INSENSITIVE = false;
 
+    private static self $self;
+
     private Datastore $datastore;
     private array $dictionary = array();
     private array $lcindex    = array();
 
-    public function __construct() {
+    private function __construct() {
         $this->datastore = exakat('datastore');
+    }
+
+    public static function getInstance(): self {
+        return self::$self ??= new self();
     }
 
     private function init(): void {
@@ -54,9 +60,7 @@ class Dictionary {
                 return $x;
             };
         } else {
-            $caseClosure = function (string $x) {
-                return mb_strtolower($x);
-            };
+            $caseClosure = 'mb_strtolower';
         }
 
         foreach ($code as $c) {

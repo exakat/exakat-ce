@@ -23,10 +23,14 @@
 namespace Exakat\Stubs;
 
 use Stdclass;
+use Exakat\Exceptions\NoSuchStub;
 
 class PdffReader extends Stubs implements StubsInterface {
     private string $pdffFile    = '';
-    private object $data        ;
+    private object $data;
+
+    public const STRICT = true;
+    public const LOOSE  = false;
 
     // Number of position to extend any configuration when we find a variadic parameter
     private const VARIADIC_SIZE = 10;
@@ -34,6 +38,9 @@ class PdffReader extends Stubs implements StubsInterface {
     public function __construct(string $pdffFile) {
         $this->pdffFile = $pdffFile;
 
+        if (!file_exists($pdffFile)) {
+            throw new NoSuchStub($pdffFile);
+        }
         $this->data = json_decode(file_get_contents($pdffFile)) ?? new Stdclass();
         assert(json_last_error() == 0, 'Could not decode ' . $pdffFile . '. ' . json_last_error_msg());
     }
@@ -48,7 +55,7 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $namespaces => $namespaceDefinitions) {
             foreach ($namespaceDefinitions as $namespace => $definitions) {
                 $functions = array_keys((array) ($definitions->functions ?? array()));
-                $functions = array_map(function (string $f) use ($namespace): string {
+                $functions = array_map(static function (string $f) use ($namespace): string {
                     return $namespace . $f;
                 }, $functions);
                 $return[] = $functions;
@@ -78,7 +85,7 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $namespaces => $namespaceDefinitions) {
             foreach ($namespaceDefinitions as $namespace => $definitions) {
                 $constants = array_keys((array) ($definitions->constants ?? array()));
-                $constants = array_map(function (string $c) use ($namespace): string {
+                $constants = array_map(static function (string $c) use ($namespace): string {
                     return $namespace . $c;
                 }, $constants);
                 $return[] = $constants;
@@ -95,10 +102,10 @@ class PdffReader extends Stubs implements StubsInterface {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $functions = (array) ($namespaceDetails->functions ?? array());
                 $f = array();
-                foreach ($functions as $name => $F) {
-                    $f[] = array('name' => $namespace . $name,
-                                 'args_min' => ($F->totalParameters ?? 0) - ($F->optionalParameters ?? 0),
-                                 'args_max' => ($F->totalParameters ?? 0) + (($F->variadic ?? false) ? 100 : 0 ),
+                foreach ($functions as $name => $function) {
+                    $f[] = array('name' 	=> $namespace . $name,
+                                 'args_min' => ($function->totalParameters ?? 0) - ($function->optionalParameters ?? 0),
+                                 'args_max' => ($function->totalParameters ?? 0) + (($function->variadic ?? false) ? 100 : 0 ),
                                  );
                 }
                 $return[] = $f;
@@ -115,14 +122,14 @@ class PdffReader extends Stubs implements StubsInterface {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $classes = (array) ($namespaceDetails->classes ?? array());
                 $f = array();
-                foreach ($classes as $name => $C) {
-                    if (!isset($C->methods->__construct)) {
+                foreach ($classes as $name => $class) {
+                    if (!isset($class->methods->__construct)) {
                         continue;
                     }
 
-                    $f[] = array('name' => $namespace . $name . '::__construct',
-                                 'args_min' => $C->methods->__construct->totalParameters ?? 0,
-                                 'args_max' => ($C->methods->__construct->totalParameters ?? 0) + ($C->methods->__construct->optionalParameters ?? 0),
+                    $f[] = array('name'     => $namespace . $name . '::__construct',
+                                 'args_min' => ($class->methods->__construct->totalParameters ?? 0) - ($class->methods->__construct->optionalParameters ?? 0),
+                                 'args_max' => ($class->methods->__construct->totalParameters ?? 0) + (($class->methods->__construct->variadic ?? false) ? 100 : 0),
                                  );
                 }
                 $return[] = $f;
@@ -138,30 +145,32 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $classes = (array) ($namespaceDetails->classes ?? array());
-                foreach ($classes as $name => $C) {
-                    if (!isset($C->methods)) {
+                foreach ($classes as $name => $class) {
+                    if (!isset($class->methods)) {
                         continue;
                     }
-                    foreach ($C->methods as $mname => $M) {
+                    foreach ($class->methods as $methodName => $method) {
                         $f = array();
-                        $f[] = array('name'     => $namespace . $name . '::' . $mname,
-                                     'args_min' => $M->totalParameters ?? 0,
-                                     'args_max' => ($M->totalParameters ?? 0) + ($M->optionalParameters ?? 0),
-                                 );
+                        $f[] = array('class'    => makeFullnspath($namespace . $name),
+                                     'name'     => mb_strtolower($methodName),
+                                     'args_min' => ($method->totalParameters ?? 0) - ($method->optionalParameters ?? 0),
+                                     'args_max' => ($method->totalParameters ?? 0) + (($method->variadic ?? false) ? 100 : 0 ),
+                                );
                         $return[] = $f;
                     }
                 }
 
                 $traits = (array) ($namespaceDetails->traits ?? array());
-                foreach ($traits as $name => $T) {
-                    if (!isset($T->methods)) {
+                foreach ($traits as $name => $trait) {
+                    if (!isset($trait->methods)) {
                         continue;
                     }
-                    foreach ($T->methods as $mname => $M) {
+                    foreach ($trait->methods as $methodName => $method) {
                         $f = array();
-                        $f[] = array('name'     => $namespace . $name . '::' . $mname,
-                                     'args_min' => $M->totalParameters ?? 0,
-                                     'args_max' => ($M->totalParameters ?? 0) + ($M->optionalParameters ?? 0),
+                        $f[] = array('class'    => makeFullnspath($namespace . $name),
+                                     'name'     => mb_strtolower($methodName),
+                                     'args_min' => $method->totalParameters ?? 0,
+                                     'args_max' => ($method->totalParameters ?? 0) + ($method->optionalParameters ?? 0),
                                  );
                         $return[] = $f;
                     }
@@ -178,8 +187,8 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $interfaces = array_keys((array) ($namespaceDetails->interfaces ?? array()));
-                $interfaces = array_map(function (string $i) use ($namespace): string {
-                    return $namespace . $i;
+                $interfaces = array_map(static function (string $i) use ($namespace): string {
+                    return mb_strtolower($namespace . $i);
                 }, $interfaces);
                 $return[] = $interfaces;
             }
@@ -194,8 +203,8 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $enums = array_keys((array) ($namespaceDetails->enums ?? array()));
-                $enums = array_map(function (string $e) use ($namespace): string {
-                    return $namespace . $e;
+                $enums = array_map(static function (string $e) use ($namespace): string {
+                    return mb_strtolower($namespace . $e);
                 }, $enums);
                 $return[] = $enums;
             }
@@ -210,8 +219,8 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $traits = array_keys((array) ($namespaceDetails->traits ?? array()));
-                $traits = array_map(function (string $t) use ($namespace): string {
-                    return $namespace . $t;
+                $traits = array_map(static function (string $t) use ($namespace): string {
+                    return mb_strtolower($namespace . $t);
                 }, $traits);
                 $return[] = $traits;
             }
@@ -221,9 +230,9 @@ class PdffReader extends Stubs implements StubsInterface {
     }
 
     public function getNamespaceList(): array {
-    	$first = array_keys((array) $this->data->versions)[0];
-    	$return = array_keys((array) $this->data->versions->$first);
-    	$return = array_map('rtrim', $return, array_pad(array(), count($return), '\\'));
+        $first = array_keys((array) $this->data->versions)[0];
+        $return = array_keys((array) $this->data->versions->$first);
+        $return = array_map('rtrim', $return, array_pad(array(), count($return), '\\'));
         return array_filter($return);
     }
 
@@ -233,8 +242,8 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $classes = array_keys((array) ($namespaceDetails->classes ?? array()));
-                $classes = array_map(function (string $c) use ($namespace): string {
-                    return $namespace . $c;
+                $classes = array_map(static function (string $c) use ($namespace): string {
+                    return mb_strtolower($namespace . $c);
                 }, $classes);
                 $return[] = $classes;
             }
@@ -251,7 +260,7 @@ class PdffReader extends Stubs implements StubsInterface {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $classConstants = array_keys((array) ($class->constants ?? array()));
-                    $classConstants = array_map(function (string $constant) use ($namespace, $class): string {
+                    $classConstants = array_map(static function (string $constant) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $constant;
                     }, $classConstants);
                     $return[] = $classConstants;
@@ -259,7 +268,7 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->interfaces as $interface) {
                     $classConstants = array_keys((array) ($interface->constants ?? array()));
-                    $classConstants = array_map(function (string $constant) use ($namespace, $interface): string {
+                    $classConstants = array_map(static function (string $constant) use ($namespace, $interface): string {
                         return mb_strtolower($namespace . $interface->name) . '::' . $constant;
                     }, $classConstants);
                     $return[] = $classConstants;
@@ -267,7 +276,7 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->enums as $enum) {
                     $classConstants = array_keys((array) ($enum->constants ?? array()));
-                    $classConstants = array_map(function (string $constant) use ($namespace, $enum): string {
+                    $classConstants = array_map(static function (string $constant) use ($namespace, $enum): string {
                         return mb_strtolower($namespace . $enum->name) . '::' . $constant;
                     }, $classConstants);
                     $return[] = $classConstants;
@@ -286,7 +295,7 @@ class PdffReader extends Stubs implements StubsInterface {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->enums as $enum) {
                     $cases = array_keys((array) ($enum->cases ?? array()));
-                    $cases = array_map(function (string $case) use ($namespace, $enum): string {
+                    $cases = array_map(static function (string $case) use ($namespace, $enum): string {
                         return mb_strtolower($namespace . $enum->name) . '::' . $case;
                     }, $cases);
                     $return[] = $cases;
@@ -300,14 +309,14 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getClassPropertyList(): array {
         $return = array(array());
 
-        $filter = function (Stdclass $property): bool {
+        $filter = static function (Stdclass $property): bool {
             return $property->static === false;
         };
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $properties = array_keys(array_filter((array) $class->properties ?? array(), $filter));
-                    $properties = array_map(function (string $property) use ($namespace, $class): string {
+                    $properties = array_map(static function (string $property) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $property;
                     }, $properties);
                     $return[] = $properties;
@@ -315,7 +324,7 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->traits as $trait) {
                     $properties = array_keys( array_filter((array) $trait->properties ?? array(), $filter));
-                    $properties = array_map(function (string $property) use ($namespace, $trait): string {
+                    $properties = array_map(static function (string $property) use ($namespace, $trait): string {
                         return mb_strtolower($namespace . $trait->name) . '::' . $property;
                     }, $properties);
                     $return[] = $properties;
@@ -329,14 +338,14 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getClassStaticPropertyList(): array {
         $return = array(array());
 
-        $filter = function (Stdclass $property): bool {
+        $filter = static function (Stdclass $property): bool {
             return $property->static === true;
         };
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $properties = array_keys(array_filter((array) $class->properties ?? array(), $filter));
-                    $properties = array_map(function (string $property) use ($namespace, $class): string {
+                    $properties = array_map(static function (string $property) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $property;
                     }, $properties);
                     $return[] = $properties;
@@ -344,7 +353,7 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->traits as $trait) {
                     $properties = array_keys(array_filter((array) $trait->properties ?? array(), $filter));
-                    $properties = array_map(function (string $property) use ($namespace, $trait): string {
+                    $properties = array_map(static function (string $property) use ($namespace, $trait): string {
                         return mb_strtolower($namespace . $trait->name) . '::' . $property;
                     }, $properties);
                     $return[] = $properties;
@@ -358,14 +367,14 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getClassMethodList(): array {
         $return = array(array());
 
-        $filter = function (Stdclass $property): bool {
+        $filter = static function (Stdclass $property): bool {
             return $property->static === false;
         };
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $methods = array_keys((array_filter((array) ($class->methods ?? array()), $filter)));
-                    $methods = array_map(function (string $method) use ($namespace, $class): string {
+                    $methods = array_map(static function (string $method) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
@@ -373,7 +382,7 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->traits as $trait) {
                     $methods = array_keys(array_filter((array) $trait->methods ?? array(), $filter));
-                    $methods = array_map(function (string $method) use ($namespace, $trait): string {
+                    $methods = array_map(static function (string $method) use ($namespace, $trait): string {
                         return mb_strtolower($namespace . $trait->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
@@ -387,14 +396,14 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getClassMethodNamesList(): array {
         $return = array(array());
 
-        $filter = function (Stdclass $property): bool {
+        $filter = static function (Stdclass $property): bool {
             return $property->static === false;
         };
         foreach ($this->data->versions as $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $methods = array_column((array_filter((array) ($class->methods ?? array()), $filter)), 'name');
-                    $methods = array_map(function (string $method) use ($namespace, $class): string {
+                    $methods = array_map(static function (string $method) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
@@ -402,7 +411,7 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->traits as $trait) {
                     $methods = array_column(array_filter((array) $trait->methods ?? array(), $filter), 'name');
-                    $methods = array_map(function (string $method) use ($namespace, $trait): string {
+                    $methods = array_map(static function (string $method) use ($namespace, $trait): string {
                         return mb_strtolower($namespace . $trait->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
@@ -416,14 +425,14 @@ class PdffReader extends Stubs implements StubsInterface {
     public function getClassStaticMethodList(): array {
         $return = array(array());
 
-        $filter = function (Stdclass $property): bool {
+        $filter = static function (Stdclass $property): bool {
             return $property->static === true;
         };
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $methods = array_keys(array_filter((array) ($class->methods ?? array()), $filter));
-                    $methods = array_map(function (string $method) use ($namespace, $class): string {
+                    $methods = array_map(static function (string $method) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
@@ -431,7 +440,7 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->traits as $trait) {
                     $methods = array_keys(array_filter((array) $trait->methods ?? array(), $filter));
-                    $methods = array_map(function (string $method) use ($namespace, $trait): string {
+                    $methods = array_map(static function (string $method) use ($namespace, $trait): string {
                         return mb_strtolower($namespace . $trait->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
@@ -453,10 +462,10 @@ class PdffReader extends Stubs implements StubsInterface {
                         continue;
                     }
                     $list = $body->properties;
-                    $classProperties = array_filter($classProperties, function (string $property) use ($list): bool {
+                    $classProperties = array_filter($classProperties, static function (string $property) use ($list): bool {
                         return $list->{$property}->static === false;
                     });
-                    $classProperties = array_map(function (string $property) use ($namespace, $class): string {
+                    $classProperties = array_map(static function (string $property) use ($namespace, $class): string {
                         return $namespace . $class . '::' . $property;
                     }, $classProperties);
                     $return[] = $classProperties;
@@ -478,10 +487,35 @@ class PdffReader extends Stubs implements StubsInterface {
                         continue;
                     }
                     $list = $body->methods;
-                    $classMethods = array_filter($classMethods, function (string $method) use ($list): bool {
+                    $classMethods = array_filter($classMethods, static function (string $method) use ($list): bool {
                         return $list->{$method}->static === false;
                     });
-                    $classMethods = array_map(function (string $method) use ($namespace, $class): string {
+                    $classMethods = array_map(static function (string $method) use ($namespace, $class): string {
+                        return $namespace . $class . '::' . $method;
+                    }, $classMethods);
+                    $return[] = $classMethods;
+                }
+            }
+        }
+
+        return array_merge(...$return);
+    }
+
+    public function getStaticMethodList(): array {
+        $return = array(array());
+
+        foreach ($this->data->versions as $version => $namespaceList) {
+            foreach ($namespaceList as $namespace => $namespaceDetails) {
+                foreach ($namespaceDetails->classes as $class => $body) {
+                    $classMethods = array_keys((array) ($body->methods ?? array()));
+                    if (empty($classMethods)) {
+                        continue;
+                    }
+                    $list = $body->methods;
+                    $classMethods = array_filter($classMethods, static function (string $method) use ($list): bool {
+                        return $list->{$method}->static === true;
+                    });
+                    $classMethods = array_map(static function (string $method) use ($namespace, $class): string {
                         return $namespace . $class . '::' . $method;
                     }, $classMethods);
                     $return[] = $classMethods;
@@ -515,11 +549,11 @@ class PdffReader extends Stubs implements StubsInterface {
 
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
-                $classes = array_filter((array) $namespaceDetails->classes ?? array(), function (object $class) {
+                $classes = array_filter((array) $namespaceDetails->classes ?? array(), static function (object $class) {
                     return $class->final ?? false;
                 });
                 $classes = array_keys($classes);
-                $classes = array_map(function (string $c) use ($namespace): string {
+                $classes = array_map(static function (string $c) use ($namespace): string {
                     return $namespace . $c;
                 }, $classes);
                 $return[] = $classes;
@@ -537,11 +571,11 @@ class PdffReader extends Stubs implements StubsInterface {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $methods = (array) ($class->methods ?? array());
-                    $methods = array_filter($methods, function (object $method) {
+                    $methods = array_filter($methods, static function (object $method) {
                         return $method->final ?? false;
                     });
                     $methods = array_keys($methods);
-                    $methods = array_map(function (string $method) use ($namespace, $class): string {
+                    $methods = array_map(static function (string $method) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
@@ -549,24 +583,24 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->interfaces as $interface) {
                     $methods = (array) ($interface->methods ?? array());
-                    $methods = array_filter($methods, function (object $method) {
+                    $methods = array_filter($methods, static function (object $method) {
                         return $method->final ?? false;
                     });
                     $methods = array_keys($methods);
-                    $methods = array_map(function (string $method) use ($namespace, $interface): string {
-                        return mb_strtolower($namespace . $class->name) . '::' . $method;
+                    $methods = array_map(static function (string $method) use ($namespace, $interface): string {
+                        return mb_strtolower($namespace . $interface->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
                 }
 
                 foreach ($namespaceDetails->enums as $enum) {
                     $methods = (array) ($enum->methods ?? array());
-                    $methods = array_filter($methods, function (object $method) {
+                    $methods = array_filter($methods, static function (object $method) {
                         return $method->final ?? false;
                     });
                     $methods = array_keys($methods);
-                    $methods = array_map(function (string $method) use ($namespace, $enum): string {
-                        return mb_strtolower($namespace . $class->name) . '::' . $method;
+                    $methods = array_map(static function (string $method) use ($namespace, $enum): string {
+                        return mb_strtolower($namespace . $enum->name) . '::' . $method;
                     }, $methods);
                     $return[] = $methods;
                 }
@@ -584,11 +618,11 @@ class PdffReader extends Stubs implements StubsInterface {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
                     $classConstants = (array) ($class->constants ?? array());
-                    $classConstants = array_filter($classConstants, function (object $constant) {
+                    $classConstants = array_filter($classConstants, static function (object $constant) {
                         return $constant->final ?? false;
                     });
                     $classConstants = array_keys($classConstants);
-                    $classConstants = array_map(function (string $constant) use ($namespace, $class): string {
+                    $classConstants = array_map(static function (string $constant) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $constant;
                     }, $classConstants);
                     $return[] = $classConstants;
@@ -596,11 +630,11 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->interfaces as $interface) {
                     $classConstants = (array) ($interface->constants ?? array());
-                    $classConstants = array_filter($classConstants, function (object $constant) {
+                    $classConstants = array_filter($classConstants, static function (object $constant) {
                         return $constant->final ?? false;
                     });
                     $classConstants = array_keys($classConstants);
-                    $classConstants = array_map(function (string $constant) use ($namespace, $interface): string {
+                    $classConstants = array_map(static function (string $constant) use ($namespace, $interface): string {
                         return mb_strtolower($namespace . $interface->name) . '::' . $constant;
                     }, $classConstants);
                     $return[] = $classConstants;
@@ -608,11 +642,11 @@ class PdffReader extends Stubs implements StubsInterface {
 
                 foreach ($namespaceDetails->enums as $enum) {
                     $classConstants = (array) ($enum->constants ?? array());
-                    $classConstants = array_filter($classConstants, function (object $constant) {
+                    $classConstants = array_filter($classConstants, static function (object $constant) {
                         return $constant->final ?? false;
                     });
                     $classConstants = array_keys($classConstants);
-                    $classConstants = array_map(function (string $constant) use ($namespace, $enum): string {
+                    $classConstants = array_map(static function (string $constant) use ($namespace, $enum): string {
                         return mb_strtolower($namespace . $enum->name) . '::' . $constant;
                     }, $classConstants);
                     $return[] = $classConstants;
@@ -630,9 +664,9 @@ class PdffReader extends Stubs implements StubsInterface {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $classes = (array) ($namespaceDetails->classes ?? array());
                 $f = array();
-                foreach ($classes as $name => $C) {
-                    if (!empty($C->implements)) {
-                        $return[mb_strtolower($namespace . $name)] = array_column($C->implements, 'target');
+                foreach ($classes as $name => $class) {
+                    if (!empty($class->implements)) {
+                        $return[mb_strtolower($namespace . $name)] = array_column($class->implements, 'target');
                     }
                 }
             }
@@ -671,6 +705,42 @@ class PdffReader extends Stubs implements StubsInterface {
 
         return $return;
     }
+
+    public function getMethodsReferenceArgs(): array {
+        $return = array();
+        /*
+            array of array (classs => array(methods =>, position of the referenced argument))
+        */
+
+        foreach ($this->data->versions as $namespaces => $namespaceDefinitions) {
+            foreach ($namespaceDefinitions as $namespace => $definitions) {
+                foreach ($definitions->classes ?? array() as $classes => $details) {
+                    foreach ($details->methods ?? array() as $methodName => $methodDetails) {
+                        foreach ($methodDetails->parameters as $position => $parameter) {
+                            if ($parameter->reference === true) {
+                                $return[] = array('class'    => mb_strtolower($namespace . $details->name),
+                                                  'method'   => mb_strtolower($methodDetails->name),
+                                                  'position' => $position
+                                                 );
+                                // With a variadic, the last arguments are also references
+                                if ($parameter->variadic ?? false === true) {
+                                    for ($i = 0; $i < self::VARIADIC_SIZE; ++$i) {
+                                        $return[] = array('class'    => mb_strtolower($namespace . $details->name),
+                                                          'method'   => mb_strtolower($methodDetails->name),
+                                                          'position' => $position
+                                                         );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
 
     public function getPropertyListWithVisibility(string $visibility): array {
         $return = array();
@@ -763,8 +833,8 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $functionsList = (array) ($namespaceDetails->functions ?? array());
-                foreach ($functionsList as $name => $C) {
-                    if (!isset($C->parameters)) {
+                foreach ($functionsList as $name => $class) {
+                    if (!isset($class->parameters)) {
                         continue;
                     }
 
@@ -772,7 +842,33 @@ class PdffReader extends Stubs implements StubsInterface {
                         continue;
                     }
 
-                    $return[mb_strtolower($namespace . $name)] = array_column($C->parameters, 'name');
+                    $return[mb_strtolower($namespace . $name)] = array_column($class->parameters, 'name');
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function getMethodsParameterNames(): array {
+        $return = array();
+
+        foreach ($this->data->versions as $namespaceList) {
+            foreach ($namespaceList as $namespace => $namespaceDetails) {
+                $classList = (array) ($namespaceDetails->classes ?? array());
+                foreach ($classList as $nameClass => $class) {
+                    $methodList = (array) ($class->methods ?? array());
+                    foreach ($methodList as $nameMethod => $method) {
+                        if (empty($method->parameters)) {
+                            continue;
+                        }
+
+                        $parameters = array_column($method->parameters, 'name');
+                        $parameters = array_map(function (string $s): string {
+                            return '$' . $s;
+                        }, $parameters);
+                        $return[mb_strtolower($namespace . $nameClass)][mb_strtolower($nameMethod)] = $parameters;
+                    }
                 }
             }
         }
@@ -784,19 +880,19 @@ class PdffReader extends Stubs implements StubsInterface {
         $return = array();
 
         foreach ($this->data->versions as $namespace => $namespaceList) {
-            foreach ($namespaceList as $namespace => $namespaceDetails) {
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
                 $functions = (array) ($namespaceDetails->functions ?? array());
-                foreach ($functions as $name => $C) {
-                    if (!isset($C->returntypehints)) {
+                foreach ($functions as $name => $class) {
+                    if (!isset($class->returntypehints)) {
                         continue;
                     }
-                    $types = array_column($C->returntypehints, 'typehint');
+                    $types = array_column($class->returntypehints, 'typehint');
 
                     if (in_array('\\null', $types, \STRICT_COMPARISON)) {
                         continue;
                     }
 
-                    $return[] = mb_strtolower($namespace . $name);
+                    $return[] = mb_strtolower($namespaceName . $name);
                 }
             }
         }
@@ -808,16 +904,16 @@ class PdffReader extends Stubs implements StubsInterface {
         $return = array();
 
         foreach ($this->data->versions as $namespace => $namespaceList) {
-            foreach ($namespaceList as $namespace => $namespaceDetails) {
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
                 $functions = (array) ($namespaceDetails->functions ?? array());
-                foreach ($functions as $name => $C) {
-                    if (!isset($C->returntypehints)) {
+                foreach ($functions as $name => $class) {
+                    if (!isset($class->returntypehints)) {
                         continue;
                     }
-                    $types = array_column($C->returntypehints, 'typehint');
+                    $types = array_column($class->returntypehints, 'typehint');
 
                     if (array('\\void') === array_values($types)) {
-                        $return[] = mb_strtolower($namespace . $name);
+                        $return[] = mb_strtolower($namespaceName . $name);
                     }
                 }
             }
@@ -830,8 +926,10 @@ class PdffReader extends Stubs implements StubsInterface {
         $return = array();
 
         foreach ($this->data->versions as $namespace => $namespaceList) {
-            foreach ($namespaceList as $namespace => $namespaceDetails) {
-                $classes = (array) ($namespaceDetails->classes ?? array());
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
+                $classes = array_merge((array) ($namespaceDetails->classes ?? array()),
+                    (array) ($namespaceDetails->interfaces ?? array()),
+                );
                 foreach ($classes as $name => $class) {
                     if (empty($class->methods)) {
                         continue;
@@ -840,11 +938,11 @@ class PdffReader extends Stubs implements StubsInterface {
                     foreach ($methods as $method) {
                         $types = array_column($method->returntypehints, 'typehint');
 
-                        $n = mb_strtolower($namespace . $name);
+                        $n = mb_strtolower($namespaceName . $name);
                         if (isset($return[$n])) {
-                            $return[mb_strtolower($namespace . $name)][$method->name] = $types;
+                            $return[mb_strtolower($namespaceName . $name)][mb_strtolower($method->name)] = $types;
                         } else {
-                            $return[mb_strtolower($namespace . $name)] = array($method->name => $types);
+                            $return[mb_strtolower($namespaceName . $name)] = array(mb_strtolower($method->name) => $types);
                         }
                     }
                 }
@@ -860,10 +958,10 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 $classes = (array) ($namespaceDetails->classes ?? array());
-                $classes = array_filter($classes, function ($class): bool {
+                $classes = array_filter($classes, static function (Stdclass $class): bool {
                     return $class->abstract ?? false;
                 });
-                $classes = array_map(function (object $class) use ($namespace): string {
+                $classes = array_map(static function (object $class) use ($namespace): string {
                     return mb_strtolower($namespace . $class->name);
                 }, $classes);
                 $return[] = $classes;
@@ -871,6 +969,164 @@ class PdffReader extends Stubs implements StubsInterface {
         }
 
         return array_merge(...$return);
+    }
+
+    public function getNativeMethodArgType(): array {
+        $return = array();
+
+        foreach ($this->data->versions as $version => $namespaceList) {
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
+                $classes = (array) ($namespaceDetails->classes ?? array());
+                foreach ($classes as $class) {
+                    if (empty($class->methods)) {
+                        continue;
+                    }
+                    $fnp = mb_strtolower($namespaceName . $class->name);
+                    $methods = (array) ($class->methods ?? array());
+
+                    foreach ($methods as $name => $method) {
+                        $types = array_column($method->parameters, 'typehints');
+                        if (empty($types)) {
+                            continue;
+                        }
+
+                        $methodName = mb_strtolower($method->name);
+                        foreach ($types as $rank => $typage) {
+                            $typage = array_values((array) ($typage[0] ?? array()));
+                            if (empty($typage)) {
+                                continue;
+                            }
+                            $return[$fnp][$methodName][$rank] = $typage;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function getFunctionsByReturnType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array {
+        $return = array();
+
+        // @todo : review PDFF with \int or int as values
+
+        foreach ($this->data->versions as $version => $namespaceList) {
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
+                $functions = (array) ($namespaceDetails->functions ?? array());
+                foreach ($functions as $function) {
+                    $l = array_column($function->returntypehints ?? array(), 'typehint');
+                    if (!in_array($type, $l) && !in_array("\\$type", $l)) {
+                        continue;
+                    }
+
+                    if ($singleTypeOnly === self::STRICT) {
+                        if (count($l) === 1) {
+                            $return[] = mb_strtolower($namespaceName . $function->name);
+                        }
+                        // else is empty
+                    } else {
+                        $return[] = mb_strtolower($namespaceName . $function->name);
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function getFunctionsByReturn(bool $singleTypeOnly = self::LOOSE): array {
+        $return = array();
+
+        foreach ($this->data->versions as $version => $namespaceList) {
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
+                $functions = (array) ($namespaceDetails->functions ?? array());
+                foreach ($functions as $function) {
+                    $l = array_column($function->returntypehints ?? array(), 'typehint');
+
+                    if ($singleTypeOnly === self::STRICT) {
+                        if (count($l) === 1) {
+                            array_collect_by($return, makeFullnspath($l), mb_strtolower($namespaceName . $function->name));
+                        }
+                        // else is empty
+                    } else {
+                        foreach ($l as $m) {
+                            array_collect_by($return, makeFullnspath($m), mb_strtolower($namespaceName . $function->name));
+                        }
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function getFunctionsByArgType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array {
+        $return = array();
+
+        foreach ($this->data->versions as $version => $namespaceList) {
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
+                $functions = (array) ($namespaceDetails->functions ?? array());
+                foreach ($functions as $function) {
+                    $arguments = (array) ($function->parameters ?? array());
+                    foreach ($arguments as $argument) {
+                        $l = array_column($argument->typehints ?? array(), 'typehint');
+                        if (!in_array($type, $l, STRICT_COMPARISON) && !in_array("\\$type", $l, STRICT_COMPARISON)) {
+                            continue;
+                        }
+
+                        if ($singleTypeOnly === self::STRICT) {
+                            if (count($l) === 1) {
+                                $return[] = array((int) $argument->rank, mb_strtolower($namespaceName . $function->name));
+                            }
+                            // else is empty
+                        } else {
+                            $return[] = array((int) $argument->rank, mb_strtolower($namespaceName . $function->name));
+                        }
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function getNewArgsInterval(): array {
+        $return = array();
+
+        foreach ($this->data->versions as $version => $namespaceList) {
+            foreach ($namespaceList as $namespaceName => $namespaceDetails) {
+                $classes = (array) ($namespaceDetails->classes ?? array());
+                foreach ($classes as $class) {
+                    if (!isset($class->methods->__construct)) {
+                        continue;
+                    }
+                    $method = $class->methods->__construct;
+                    $return[] = array('class'    => mb_strtolower($namespaceName . $class->name),
+                                      'args_min' => $method->totalParameters,
+                                      'args_max' => $method->optionalParameters,
+                                    );
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function getFunctionsWithOptional(): array {
+        $return = array();
+
+        foreach ($this->data->versions as $namespaces => $namespaceDefinitions) {
+            foreach ($namespaceDefinitions as $namespace => $definitions) {
+                foreach ($definitions->functions ?? array() as $f => $function) {
+                    if ($function->optionalParameters ?? 0 > 0) {
+                        $return[] = mb_strtolower($namespace . $f);
+                    }
+                }
+            }
+        }
+
+        return $return;
     }
 }
 

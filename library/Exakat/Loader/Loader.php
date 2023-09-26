@@ -24,13 +24,32 @@
 namespace Exakat\Loader;
 
 use Exakat\Tasks\Helpers\Atom;
+use Exakat\Tasks\Helpers\AtomInterface;
+use Exakat\Exceptions\NoSuchLoader;
+use Sqlite3;
 
 abstract class Loader {
-    abstract public function __construct(\Sqlite3 $sqlite, Atom $id0) ;
+    public const LOADER_LIST = array('SplitGraphsonId',
+                              'Collector',
+                              'None',
+                              );
+
+    private array $loaderList = array();
+
+    abstract protected function __construct(Sqlite3 $sqlite, Atom $id0, bool $withWs = AtomInterface::WITHOUT_WS);
 
     abstract public function finalize(array $relicat): bool;
 
     public function saveFiles(string $exakatDir, array $atoms, array $links): void {
+    }
+
+    public static function getInstance(string $loader, Sqlite3 $sqlite, Atom $id0, bool $withWs = AtomInterface::WITHOUT_WS): self {
+        $className = "\Exakat\Loader\\$loader";
+        if (!class_exists($className)) {
+            throw new NoSuchLoader($loader, self::LOADER_LIST);
+        }
+
+        return new $className($sqlite, $id0, $withWs);
     }
 }
 

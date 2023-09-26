@@ -28,6 +28,7 @@ class FixFullnspathConstants extends LoadFinal {
     public function run(): void {
         $query = $this->newQuery('fixFullnspathConstants');
         $query->atomIs(array('Identifier', 'Nsname'), Analyzer::WITHOUT_CONSTANTS)
+              ->isNot('isStub', true)
               ->has('fullnspath')
               ->_as('identifier')
               ->savePropertyAs('fullnspath', 'cc')

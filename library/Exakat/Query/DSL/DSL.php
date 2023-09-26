@@ -123,6 +123,7 @@ abstract class DSL {
     protected array      $availableAtoms         = array();
     protected array      $availableLinks         = array();
     protected array      $availableFunctioncalls = array();
+    protected array      $availableProperties    = array();
     protected array      $availableVariables     = array(); // This one is per query
     protected array      $availableLabels        = array(); // This one is per query
     protected Dictionary $dictCode               ;
@@ -152,7 +153,7 @@ abstract class DSL {
         string $analyzerQuoted        = ''
     ) {
         $this->dslfactory             = $dslfactory;
-        $this->dictCode               = exakat('dictionary');
+        $this->dictCode 			  = Dictionary::getInstance();
         $this->availableAtoms         = $availableAtoms;
         $this->availableLinks         = $availableLinks;
         $this->availableFunctioncalls = $availableFunctioncalls;
@@ -163,6 +164,8 @@ abstract class DSL {
         $this->ignoredconstants       = $ignoredconstants;
         $this->dependsOn              = $dependsOn;
         $this->analyzerQuoted         = $analyzerQuoted;
+
+        $this->availableProperties = GraphElements::PROPERTIES;
 
         if (empty(self::$linksDown)) {
             self::$linksDown = GraphElements::linksDownAsList();
@@ -187,6 +190,11 @@ abstract class DSL {
     protected function normalizeLinks(string|array $links): array {
         $links = makeArray($links);
         return array_values(array_intersect($links, $this->availableLinks));
+    }
+
+    protected function normalizeProperties(string|array $properties): array {
+        $properties = makeArray($properties);
+        return array_values(array_intersect($properties, $this->availableProperties));
     }
 
     protected function normalizeFunctioncalls(string|array $fullnspaths): array {
@@ -341,7 +349,7 @@ abstract class DSL {
         return $className;
     }
 
-    protected function tolowercase(string|array $code) : string|array {
+    protected function tolowercase(string|array $code): string|array {
         if (is_array($code)) {
             $code = array_map('mb_strtolower', $code);
         } elseif (is_string($code)) {
@@ -396,7 +404,7 @@ abstract class DSL {
         } elseif (is_bool($value)) {
             return $value ? 'true' : 'false';
         } else {
-            assert(false, 'Could not process value type : ' . get_type($value));
+            assert(false, 'Could not process value type : ' . gettype($value));
         }
     }
 }

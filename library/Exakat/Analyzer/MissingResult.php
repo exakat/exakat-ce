@@ -30,7 +30,7 @@ class MissingResult {
         $this->fullcode = $fullcode;
     }
 
-    public function toAddV() : string {
+    public function toAddV(): string {
         return <<<GREMLIN
  property(T.label, "Result")
 .property("fullcode", "{$this->fullcode}")

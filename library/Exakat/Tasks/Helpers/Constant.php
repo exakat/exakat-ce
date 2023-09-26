@@ -23,6 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 use Exakat\Tasks\Load;
+use const STRICT_COMPARISON;
 
 class Constant extends Plugin {
     public string $name = 'constant';
@@ -31,11 +32,11 @@ class Constant extends Plugin {
     private array $deterministFunctions = array();
 
     private array $skipAtoms = array('Trait'          => 1,
-                           		     'Class'          => 1,
-                           		     'Classanonymous' => 1,
-                           		     'Interface'      => 1,
-                           		     'Enum'           => 1,
-                           		   );
+                                     'Class'          => 1,
+                                     'Classanonymous' => 1,
+                                     'Interface'      => 1,
+                                     'Enum'           => 1,
+                                      );
 
     public function __construct() {
         parent::__construct();
@@ -73,6 +74,7 @@ class Constant extends Plugin {
             case 'Self' :
             case 'Static' :
             case 'Parent' :
+            case 'Closure' :
                 $atom->constant = true;
                 break;
 
@@ -114,7 +116,9 @@ class Constant extends Plugin {
 
             case 'Staticconstant' :
             case 'Staticclass' :
-                $atom->constant = $extras['CLASS']->constant;
+                if (isset($extras['CLASS'])) {
+                    $atom->constant = $extras['CLASS']->constant;
+                }
                 break;
 
             case 'Not' :
@@ -146,10 +150,6 @@ class Constant extends Plugin {
                                   $extras['ELSE']->constant;
                 break;
 
-            case 'Closure' :
-                $atom->constant = true;
-                break;
-
             case 'Assignation' :
                 $atom->constant = $extras['RIGHT']->constant && $atom->code === '=';
                 break;
@@ -157,7 +157,7 @@ class Constant extends Plugin {
             case 'Functioncall' :
                 if (empty($atom->fullnspath)) {
                     $atom->constant  = Load::NOT_CONSTANT_EXPRESSION;
-                } elseif (in_array($atom->fullnspath, $this->deterministFunctions)) {
+                } elseif (in_array($atom->fullnspath, $this->deterministFunctions, STRICT_COMPARISON)) {
                     if (isset($extras[0])) {
                         $constants = array_column($extras, 'constant');
                         $atom->constant = array_reduce($constants, function (bool $carry, bool $item): bool {

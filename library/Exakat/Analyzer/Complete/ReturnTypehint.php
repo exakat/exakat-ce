@@ -38,7 +38,8 @@ class ReturnTypehint extends Analyzer {
              ->filter(
                  $this->side()
                       ->outIs('RETURNTYPE')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
              ->outIs('RETURNED')
              ->atomIs('This')
@@ -76,7 +77,8 @@ GREMLIN
              ->filter(
                  $this->side()
                       ->outIs('RETURNTYPE')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
              ->outIs('RETURNED')
              ->atomIs('New')

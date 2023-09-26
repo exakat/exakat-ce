@@ -27,7 +27,7 @@ class CallOrder extends AnalyzerTable {
 
     protected string $analyzerTable = 'callOrder';
 
-    // Store inclusionss of files within each other
+    // Store calls of methods : origin and call
     protected string $analyzerSQLTable = <<<'SQL'
 CREATE TABLE callOrder ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                          calling STRING,
@@ -46,17 +46,30 @@ SQL;
                      'Complete/SetClassRemoteDefinitionWithParenthesis',
                      'Complete/SetClassRemoteDefinitionWithReturnTypehint',
                      'Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/OverwrittenMethods',
+                     'Complete/SetParentDefinition',
+                     'Complete/CreateMagicProperty',
+//                     'Complete/MakeClassMethodDefinition.php',
+//					 'Complete/SetParentDefinition.php',
                     );
     }
 
     public function analyze(): void {
-        $this ->atomIs(self::CALLS, self::WITHOUT_CONSTANTS)
-              ->has('fullnspath')
+    	// function foo() { a::C(); }
+    	$calls = array_merge(self::FUNCTIONS_CALLS,
+    						 array(	'Member',
+    						 		'Staticproperty',
+    						 )
+    	);
+
+        $this ->atomIs($calls, self::WITHOUT_CONSTANTS)
+//              ->has('fullnspath')
               ->goToInstruction(array('Function', 'Method', 'Magicmethod'))
               ->as('calling')
               ->as('callingName')
               ->back('first')
               ->inIs('DEFINITION')
+              ->atomIs(array('Function', 'Method', 'Magicmethod'))
               ->has('fullnspath') // may end up on a virtualmethod
               ->as('called')
               ->as('calledName')

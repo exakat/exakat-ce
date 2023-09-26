@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class UseContravariance extends Analyzer {
-    protected $phpVersion = '7.4+';
+    protected string $phpVersion = '7.4+';
 
     public function dependsOn(): array {
         return array('Complete/OverwrittenMethods',
@@ -40,21 +40,26 @@ class UseContravariance extends Analyzer {
              ->savePropertyAs('rank', 'ranked')
              ->outIs('TYPEHINT')
              ->savePropertyAs('fullnspath', 'fnp')
+             ->atomIsNot(array('Scalartypehint', 'Void', 'Null'))
              ->back('first')
 
              ->outIs('OVERWRITE')
              ->outWithRank('ARGUMENT', 'ranked')
              ->outIs('TYPEHINT')
+             ->atomIsNot(array('Scalartypehint', 'Void', 'Null'))
              ->notSamePropertyAs('fullnspath', 'fnp')
 
              ->filter(
-                $this->side()
-                     ->inIs('DEFINITION')
-                     ->goToAllImplements(self::EXCLUDE_SELF)
-                     ->samePropertyAs('fullnspath', 'fnp')
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->goToAllImplements(self::EXCLUDE_SELF)
+                      ->samePropertyAs('fullnspath', 'fnp')
              )
              ->back('first');
         $this->prepareQuery();
+
+        // @todo handle union type
+        // @todo handle intersection type
     }
 }
 

@@ -63,8 +63,10 @@ class CodeIs extends DSL {
             }
 
             return new Command("has(\"$col\", within(***))", array($translatedCode));
-        } else {
+        } elseif ($translate === Analyzer::NO_TRANSLATE) {
             return new Command("has(\"$col\", within(***))", array(makeArray($code)));
+        } else {
+            throw new Exception('No such translate as ' . $translate);
         }
     }
 }

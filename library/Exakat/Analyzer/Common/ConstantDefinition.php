@@ -26,9 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class ConstantDefinition extends Analyzer {
-    protected $constants = array();
+    protected array $constants = array();
 
     public function analyze(): void {
+        if (empty($this->constants)) {
+            return;
+        }
+
         $fullnspath = makeFullNsPath($this->constants, \FNP_CONSTANT);
 
         $this->atomIs('Const')

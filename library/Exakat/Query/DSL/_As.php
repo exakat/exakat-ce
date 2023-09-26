@@ -23,6 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Query\Query;
 
 class _As extends DSL {
     public function run(): Command {
@@ -30,6 +31,10 @@ class _As extends DSL {
         list($name) = func_get_args();
 
         assert($this->assertLabel($name, self::LABEL_SET));
+
+        if (empty($name)) {
+            return new Command(Query::STOP_QUERY);
+        }
 
         if (is_array($name)) {
             return new Command('as("' . implode('").as("', $name) . '")');

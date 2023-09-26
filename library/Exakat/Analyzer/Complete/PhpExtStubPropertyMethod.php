@@ -27,6 +27,7 @@ use Exakat\Analyzer\Analyzer;
 class PhpExtStubPropertyMethod extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/CreateDefaultValues',
+                        // @todo use variableTypehints
                     );
     }
 
@@ -36,25 +37,84 @@ class PhpExtStubPropertyMethod extends Analyzer {
 
         $properties = array();
         $methods    = array();
+        // @todo : find a way to collect some values across all available stubs (php, stub, exts)
+        $exts = array('bcmath',
+'bz2',
+'calendar',
+'core',
+'ctype',
+'curl',
+'date',
+'dba',
+'dom',
+'enchant',
+'exif',
+'ffi',
+'fileinfo',
+'filter',
+'ftp',
+'gd',
+'gettext',
+'gmp',
+'hash',
+'iconv',
+'intl',
+'json',
+'ldap',
+'libxml',
+'mbstring',
+'mysqli',
+'odbc',
+'openssl',
+'pcntl',
+'pcre',
+'pdo',
+'pdo_dblib',
+'pdo_mysql',
+'pdo_odbc',
+'pdo_pgsql',
+'pdo_sqlite',
+'pgsql',
+'phar',
+'posix',
+'pspell',
+'readline',
+'reflection',
+'session',
+'shmop',
+'simplexml',
+'soap',
+'sockets',
+'sodium',
+'spl',
+'sqlite3',
+'standard',
+'sysvmsg',
+'sysvsem',
+'sysvshm',
+'tidy',
+'tokenizer',
+'xml',
+'xmlreader',
+'xmlwriter',
+'xsl',
+'zend opcache',
+'zlib',
+);
+
         foreach ($exts as $ext) {
-            $inifile = str_replace('Extensions\Ext', '', $ext);
-            if (!file_exists($this->config->dir_root . '/data/' . $inifile . '.ini')) {
-                continue;
-            }
-            $ini = parse_ini_file($this->config->dir_root . '/data/' . $inifile . '.ini');
+            $ini = $this->loadPdff($ext . '.pdff');
 
-            if (!empty($ini['methods'][0])) {
-                foreach ($ini['methods'] as $fullMethod) {
-                    list($class, $method) = explode('::', $fullMethod, 2);
-                    array_collect_by($methods, mb_strtolower($method), makeFullNsPath($class));
-                }
+            $methodList = $ini->getMethodList();
+            foreach ($methodList as $fullMethod) {
+                list($class, $method) = explode('::', $fullMethod, 2);
+                array_collect_by($methods, mb_strtolower($method), makeFullNsPath($class));
             }
 
-            if (!empty($ini['properties'][0])) {
-                foreach ($ini['properties'] as $fullProperty) {
-                    list($class, $property) = explode('::', $fullProperty, 2);
-                    array_collect_by($properties, ltrim($property, '$'), makeFullNsPath($class));
-                }
+            $propertyList = $ini->getPropertyList();
+            foreach ($propertyList as $fullProperty) {
+                list($class, $property) = explode('::', $fullProperty, 2);
+                array_collect_by($properties, ltrim($property, '$'), makeFullNsPath($class));
             }
         }
 
@@ -67,10 +127,8 @@ class PhpExtStubPropertyMethod extends Analyzer {
              ->back('first')
 
              ->outIs('OBJECT')
-             ->atomIs('Variableobject')
-             ->inIs('DEFINITION')
-             ->inIs('NAME')
-             ->outIs('TYPEHINT')
+             ->atomIs(array('Variableobject', 'Member', 'Staticproperty'))
+             ->goToTypehint()
              ->atomIs(self::STATIC_NAMES)
              ->isHash('fullnspath', $properties, 'property')
              ->back('first')
@@ -106,14 +164,12 @@ class PhpExtStubPropertyMethod extends Analyzer {
              ->outIs('NAME')
              ->fullcodeIs(array_keys($methods), self::CASE_INSENSITIVE)
              ->savePropertyAs('fullcode', 'method')
-             ->raw('sideEffect{ method = method.toLowerCase(); }')
+             ->variableToLowerCase('method')
              ->back('first')
 
              ->outIs('OBJECT')
              ->atomIs('Variableobject')
-             ->inIs('DEFINITION')
-             ->inIs('NAME')
-             ->outIs('TYPEHINT')
+             ->goToTypehint()
              ->atomIs(self::STATIC_NAMES)
              ->isHash('fullnspath', $methods, 'method')
              ->back('first')
@@ -127,7 +183,7 @@ class PhpExtStubPropertyMethod extends Analyzer {
              ->outIs('NAME')
              ->fullcodeIs(array_keys($methods), self::CASE_INSENSITIVE)
              ->savePropertyAs('fullcode', 'method')
-             ->raw('sideEffect{ method = method.toLowerCase(); }')
+             ->variableToLowerCase('method')
              ->back('first')
 
              ->outIs('OBJECT')

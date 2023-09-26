@@ -32,8 +32,11 @@ class SetProperty extends DSL {
             return new Command("sideEffect{ it.get().property(\"$property\", true); }");
         } elseif ($value === false) {
             return new Command("sideEffect{ it.get().property(\"$property\", false); }");
-        } else {
+        } elseif ($this->isVariable($value)) {
             return new Command("sideEffect{ it.get().property(\"$property\", $value); }");
+        } else {
+            // This is a value
+            return new Command("sideEffect{ it.get().property(\"$property\", ***); }", array($value));
         }
     }
 }

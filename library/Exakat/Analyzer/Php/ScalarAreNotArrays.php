@@ -47,7 +47,7 @@ class ScalarAreNotArrays extends Analyzer {
              ->inIs('VARIABLE');
         $this->prepareQuery();
 
-        // With typehint
+        // With argument's default value
         // function foo($x = 2) { echo $x[2]; }
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
@@ -72,19 +72,6 @@ class ScalarAreNotArrays extends Analyzer {
              ->outIs('RETURNTYPE')
              ->fullnspathIs(array('\\int', '\\bool', '\\float', '\\void', '\\callable', '\\null'))
              ->back('first')
-             ->inIs('VARIABLE')
-             ->analyzerIsNot('self');
-        $this->prepareQuery();
-
-        // With argument's default value
-        // function foo(int $x) { echo $x[2]; }
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
-             ->outIs('DEFAULT')
-             ->fullnspathIs(array('\\int', '\\bool', '\\float', '\\null'))
-             ->inIs('DEFAULT')
-             ->outIs('DEFINITION')
-             ->atomIs('Variablearray')
              ->inIs('VARIABLE')
              ->analyzerIsNot('self');
         $this->prepareQuery();

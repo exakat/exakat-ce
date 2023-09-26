@@ -33,10 +33,12 @@ class WrongTypeForNativeFunction extends Analyzer {
     }
 
     public function analyze(): void {
-        // @todo : case for union and intersection types
+        // @todo : case for union and intersection types, and dnf
+        // @todo add support for methods in stubs/ext/php
+        // @todo better support for properties
 
-        $types = array('float'  => array('Integer', 'Float'),
-                       'int'    => array('Integer'),
+        $types = array('int'    => array('Integer'),
+                       'float'  => array('Integer', 'Float'),
                        'string' => self::STRINGS_LITERALS,
                        'array'  => array('Arrayliteral'),
                        'bool'   => array('Boolean', 'Bitoperation', 'Logical', 'Comparison'),
@@ -51,10 +53,11 @@ class WrongTypeForNativeFunction extends Analyzer {
 
         $returntypes = array();
         foreach ($types as $type => $atoms) {
-            $returntypes[$type] = $this->methods->getFunctionsByReturnType($type, Methods::LOOSE);
+            $returntypes[$type] = $this->readStubs('getFunctionsByReturnType', array($type ,   Methods::LOOSE));
         }
-        $returntypes['null'] = $this->methods->getFunctionsByReturnType('null', Methods::LOOSE);
-        $returntypes['false'] = $this->methods->getFunctionsByReturnType('false', Methods::LOOSE);
+        $returntypes['null']    = $this->readStubs('getFunctionsByReturnType', array('null' ,  Methods::LOOSE));
+        $returntypes['false']   = $this->readStubs('getFunctionsByReturnType', array('false' , Methods::LOOSE));
+        ;
 
         $returnOtherTypes = array();
         foreach ($returntypes as $type => $functions) {
@@ -65,7 +68,11 @@ class WrongTypeForNativeFunction extends Analyzer {
         }
 
         foreach ($types as $type => $atoms) {
-            $ini = $this->methods->getFunctionsByArgType($type, Methods::STRICT);
+            $list = $this->readStubs('getFunctionsByArgType', array($type, Methods::STRICT));
+            $ini = array();
+            foreach ($list as $l) {
+                array_collect_by($ini, $l[0], $l[1]);
+            }
 
             if (empty($ini)) {
                 continue;
@@ -143,7 +150,7 @@ class WrongTypeForNativeFunction extends Analyzer {
                      // Special case for false, inside a ?:
                      ->not(
                          $this->side()
-                              ->fullnspathIs($returntypes['bool'])
+                              ->fullnspathIs($returntypes['bool'] ?? array())
                               ->inIs('CONDITION')
                               ->atomIs('Ternary')
                               ->outIs('THEN')
@@ -159,6 +166,20 @@ class WrongTypeForNativeFunction extends Analyzer {
                      )
                      ->back('results')
                      ->atomIsNot(array_merge(self::CONTAINERS, array('Void', 'Identifier', 'Nsname')))
+                     ->back('first');
+                $this->prepareQuery();
+
+                // native functions
+                // foo(array $array) { substr($array, 1); }
+                $this->atomFunctionIs($functions)
+                     ->analyzerIsNot('self')
+                     ->outWithRank('ARGUMENT', (int) $rank)
+                     ->as('results')
+                     ->followParAs(FollowParAs::FOLLOW_NONE)
+                     ->atomIs('Variable', self::WITH_VARIABLES)
+                     ->goToTypehint()
+                     ->atomIsNot('Void')
+                     ->fullnspathIsNot('\\' . $type)
                      ->back('first');
                 $this->prepareQuery();
 

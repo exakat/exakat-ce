@@ -23,7 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 class Boolval extends Plugin {
-    public const NO_VALUE = false;
+    public const NO_VALUE = null;
 
     public $name = 'boolean';
     public $type = 'boolean';
@@ -46,8 +46,8 @@ class Boolval extends Plugin {
                 return;
 
             default:
-            // All is OK, we proceed
-            }
+                // All is OK, we proceed
+        }
 
         foreach ($extras as $extra) {
             if (is_array($extra)) {
@@ -69,24 +69,23 @@ class Boolval extends Plugin {
             case 'Self'          :
             case 'Parent'        :
             case 'Closure'       :
-//            case 'Sequence'      :
             case 'Magicconstant' :
                 $atom->boolean = true;
                 break;
 
             case 'Identifier' :
-                // $atom->code is a string
-                $atom->boolean = (bool) (string) $atom->code;
+            case 'Nsname' :
+                if (isset($atom->noDelimiter)) {
+                    $atom->boolean = (bool) $atom->noDelimiter;
+                } else {
+                    $atom->boolean = self::NO_VALUE;
+                }
                 break;
 
             case 'Constant' :
                 $atom->boolean    = $extras['VALUE']->boolean;
                 break;
 
-            case 'Nsname' :
-                // when it is a string, there is no fallback
-                $atom->boolean = false;
-                break;
 
             case 'Float' :
                 // $atom->code is a string
@@ -125,7 +124,7 @@ class Boolval extends Plugin {
 
             case 'String' :
             case 'Heredoc' :
-                $atom->boolean = (trimOnce($atom->code) !== '');
+                $atom->boolean = (bool) trimOnce($atom->code);
                 break;
 
             case 'Null' :
@@ -175,7 +174,9 @@ class Boolval extends Plugin {
                 if ($atom->code === '!') {
                     $atom->boolean = !$extras['NOT']->boolean;
                 } elseif ($atom->code === '~') {
-                    $atom->boolean = (bool) ~(int) $extras['NOT']->intval;
+                    $atom->boolean = (bool) ~(int) $extras['NOT']->boolean;
+                } else {
+                    assert(false, 'Not is not ! nor ~');
                 }
                 break;
 
@@ -261,6 +262,15 @@ class Boolval extends Plugin {
                 if ($atom->code === '=') {
                     $atom->boolean =  $extras['RIGHT']->boolean;
                 }
+                break;
+
+            case 'Cast' :
+                $atom->boolean = $extras['CAST']->boolean;
+                break;
+
+            case 'Functioncall' :
+            case 'Variable' :
+                // Ignore
                 break;
 
             default :

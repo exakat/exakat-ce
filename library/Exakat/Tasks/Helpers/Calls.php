@@ -22,6 +22,9 @@
 
 namespace Exakat\Tasks\Helpers;
 
+use const STRICT_COMPARISON;
+use Sqlite3;
+
 class Calls {
     public const A_CLASS        = 'class';
     public const FUNCTION       = 'function';
@@ -44,12 +47,12 @@ class Calls {
                         self::GOTO,
                        );
 
-    private \sqlite3 $callsSqlite;
+    private Sqlite3 $callsSqlite;
 
     private array $definitions = array();
     private array $calls       = array();
 
-    public function __construct(\Sqlite3 $sqlite) {
+    public function __construct(Sqlite3 $sqlite) {
         $this->callsSqlite = $sqlite;
 
         $calls = <<<'SQL'
@@ -78,7 +81,6 @@ SQL;
     public function reset(): void {
         $this->calls       = array();
         $this->definitions = array();
-        $this->globals     = array();
     }
 
     public function save(): void {
@@ -99,19 +101,10 @@ SQL;
             }
             $this->definitions = array();
         }
-
-        if (!empty($this->globals)) {
-            $chunks = array_chunk($this->globals, SQLITE_CHUNK_SIZE);
-            foreach ($chunks as $chunk) {
-                $query = 'INSERT INTO globals VALUES ' . implode(', ', $chunk);
-                $this->callsSqlite->query($query);
-            }
-            $this->globals = array();
-        }
     }
 
     public function addCall(string $type, string $fullnspath, AtomInterface $call): void {
-        assert(in_array($type, self::ALL), "Unknown call type : $type\n");
+        assert(in_array($type, self::ALL, STRICT_COMPARISON), "Unknown call type : $type\n");
 
         if (empty($fullnspath)) {
             return;
@@ -124,7 +117,7 @@ SQL;
                                         'Empty',
                                         'Eval',
                                         'Exit',
-                                        ))) {
+                                        ), STRICT_COMPARISON)) {
             return;
         }
 
@@ -143,7 +136,7 @@ SQL;
                            '{$call->id}')";
     }
 
-    public function addNoDelimiterCall(Atom $call): void {
+    public function addNoDelimiterCall(AtomInterface $call): void {
         if (empty($call->noDelimiter)) {
             return; // Can't be a class anyway.
         }
@@ -152,11 +145,25 @@ SQL;
         }
         // single : is OK
         // \ is OK (for hardcoded path)
-        if (preg_match_all('/[$ #?;%^\*\'\"\. <>~&,|\(\){}\[\]\/\s=\+!`@\-]/is', $call->noDelimiter, $r)) {
+        if (preg_match_all('/[$ #?;%^\*\'\"\. <>~&,|\(\){}\[\]\/\s=\+!`@\-]/is', $call->noDelimiter)) {
             return; // Can't be a class anyway.
         }
 
-        if (!str_contains($call->noDelimiter, '::')  ) {
+        if (str_contains($call->noDelimiter, '::')) {
+            $fullnspath = mb_strtolower($call->noDelimiter);
+
+            if (empty($fullnspath)) {
+                return;
+            } elseif ($fullnspath[0] === ':') {
+                return;
+            }
+
+            if ($fullnspath[0] !== '\\') {
+                $fullnspath = '\\' . $fullnspath;
+            }
+
+            $types = array('staticmethod', 'staticconstant');
+        } else {
             $types = array('function', 'class');
 
             $fullnspath = mb_strtolower($call->noDelimiter);
@@ -166,18 +173,6 @@ SQL;
             if (str_contains($fullnspath, '\\\\')  ) {
                 $fullnspath = stripslashes($fullnspath);
             }
-        } else {
-            $fullnspath = mb_strtolower($call->noDelimiter);
-
-            if (empty($fullnspath)) {
-                return;
-            } elseif ($fullnspath[0] === ':') {
-                return;
-            } elseif ($fullnspath[0] !== '\\') {
-                $fullnspath = '\\' . $fullnspath;
-            }
-
-            $types = array('staticmethod', 'staticconstant');
         }
 
         $atom = 'String';
@@ -194,7 +189,7 @@ SQL;
     }
 
     public function addDefinition(string $type, string $fullnspath, AtomInterface $definition): void {
-        assert(in_array($type, self::ALL), "Unknown definition type : $type\n");
+        assert(in_array($type, self::ALL, STRICT_COMPARISON), "Unknown definition type : $type\n");
         if (empty($fullnspath)) {
             return;
         }

@@ -46,10 +46,16 @@ class IsEqual extends DSL {
         }
     }
 
-    private function makeCommand(int|string $value): Command {
+    private function makeCommand(int|string|array $value): Command {
         // It is an integer
         if (is_int($value)) {
             return new Command('is(eq(' . (string) $value . '))');
+        }
+
+        // It is an array
+        if (is_array($value)) {
+            // @todo : also checks for the content of the array : type is int? string ? hash?
+            return new Command('is(within(***))', array_values($value));
         }
 
         // It is a gremlin variable
@@ -64,10 +70,10 @@ class IsEqual extends DSL {
 
         // It is a gremlin property
         if ($this->isProperty($value)) {
-            assert(false, 'This is not supported with properties yet');
+            die('This is not supported with properties yet');
         }
 
-        assert(false, $value . ' must be an integer, label, atom property or gremlin variable in ' . __METHOD__);
+        return new Command('is(eq("' . (string) $value . '"))');
     }
 }
 ?>

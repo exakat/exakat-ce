@@ -22,6 +22,8 @@
 
 namespace Exakat\Tasks;
 
+use DateTimeImmutable;
+
 class Api extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
@@ -57,7 +59,7 @@ class Api extends Tasks {
         file_put_contents("{$this->config->projects_root}/projects/api.php", $php);
 
         if (!file_exists("{$this->config->projects_root}/projects/api.log")) {
-            file_put_contents("{$this->config->projects_root}/projects/api.log", date('r') . "\tCreated file\n");
+            file_put_contents("{$this->config->projects_root}/projects/api.log", (new DateTimeImmutable())->format('r') . "\tCreated file\n");
         }
 
         display('Start api');

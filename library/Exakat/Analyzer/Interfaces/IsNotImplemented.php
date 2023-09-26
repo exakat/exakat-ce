@@ -36,6 +36,7 @@ class IsNotImplemented extends Analyzer {
              ->goToAllChildren(self::EXCLUDE_SELF)
              ->atomIs(self::CLASSES_ALL)
              ->isNot('abstract', true)
+             ->analyzerIsNot('self')
              ->collectMethods('classMethods', CollectMethods::METHOD_CONCRETE)
              ->raw('filter{interfaceMethods.size() > classMethods.size() || !classMethods.containsAll(interfaceMethods);}');
         $this->prepareQuery();
@@ -54,6 +55,7 @@ class IsNotImplemented extends Analyzer {
              ->savePropertyAs('fullnspath', 'fqn')
              ->back('first')
              ->isNot('abstract', true)
+             ->analyzerIsNot('self')
              ->collectMethods('classMethods', CollectMethods::METHOD_CONCRETE)
              ->raw('filter{x = ***; x[fqn].size() > classMethods.size() || x[fqn].intersect(classMethods).size() != x[fqn].size();}',$list);
         $this->prepareQuery();

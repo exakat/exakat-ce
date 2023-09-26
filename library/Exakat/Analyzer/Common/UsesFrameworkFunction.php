@@ -25,26 +25,28 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class UsesFrameworkFunction extends Analyzer {
-    protected $functions    = array();
+    protected array $functions    = array();
 
     public function analyze(): void {
+        if (empty($this->functions)) {
+            return;
+        }
+
         $analyzerId = null;
 
-        if (!empty($this->functions[0])) {
-            $functions    = makeFullNsPath($this->functions);
+        $functions    = makeFullNsPath($this->functions);
 
-            if (!empty($functions)) {
-                $functionsUsage = new FunctionUsage();
-                $functionsUsage->setAnalyzer(get_class($this));
-                $functionsUsage->setFunctions($functions);
-                $analyzerId = $functionsUsage->init($analyzerId);
-                $functionsUsage->run();
+        if (!empty($functions)) {
+            $functionsUsage = new FunctionUsage();
+            $functionsUsage->setAnalyzer(get_class($this));
+            $functionsUsage->setFunctions($functions);
+            $analyzerId = $functionsUsage->init($analyzerId);
+            $functionsUsage->run();
 
-                $this->rowCount        += $functionsUsage->getRowCount();
-                $this->processedCount  += $functionsUsage->getProcessedCount();
-                $this->queryCount      += $functionsUsage->getQueryCount();
-                $this->rawQueryCount   += $functionsUsage->getRawQueryCount();
-            }
+            $this->rowCount        += $functionsUsage->getRowCount();
+            $this->processedCount  += $functionsUsage->getProcessedCount();
+            $this->queryCount      += $functionsUsage->getQueryCount();
+            $this->rawQueryCount   += $functionsUsage->getRawQueryCount();
         }
     }
 }

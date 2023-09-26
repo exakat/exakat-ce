@@ -31,6 +31,7 @@ class ObjectReferences extends Analyzer {
 
         // f(stdclass &$x)
         $this->atomIs(self::FUNCTIONS_ALL)
+             ->analyzerIsNot('self')
              ->outIs('ARGUMENT')
              ->is('reference', true)
 
@@ -54,6 +55,7 @@ class ObjectReferences extends Analyzer {
         // f(&$x) and $x->y;
         // No assignation with new inside
         $this->atomIs(self::FUNCTIONS_ALL)
+             ->analyzerIsNot('self')
              ->outIs('ARGUMENT')
              ->is('reference', true)
              ->outIs('TYPEHINT')
@@ -84,6 +86,7 @@ class ObjectReferences extends Analyzer {
              ->outIs('BLOCK')
              ->atomInsideNoDefinition(array('Methodcall', 'Member'))
              ->outIs('OBJECT')
+             ->analyzerIsNot('self')
              ->samePropertyAs('code', 'variable');
         $this->prepareQuery();
 

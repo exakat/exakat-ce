@@ -34,7 +34,12 @@ class ThrowsAndAssign extends Analyzer {
              ->outIs('LEFT')
              ->inIs('DEFINITION')
              ->atomIs('Variabledefinition') // if property, then it may be reused
-             ->raw('where(__.out("DEFINITION").count().is(eq(1)))')
+             ->filter(
+                 $this->side()
+                      ->outIs('DEFINITION')
+                      ->count()
+                      ->isEqual(1)
+             )
              ->back('first');
         $this->prepareQuery();
     }

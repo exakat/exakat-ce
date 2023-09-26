@@ -25,12 +25,13 @@ namespace Exakat\Tasks\Helpers;
 
 class ClassTraitContext {
     public const NO_CLASS_TRAIT_CONTEXT = null;
-    public const CLASS_CONTEXT = 'class';
-    public const ALL_CONTEXT   = 'all';
+    public const CLASS_CONTEXT          = 'class';
+    public const ALL_CONTEXT            = 'all';
 
-    private array          $contexts = array();
-    private ?AtomInterface $last       = self::NO_CLASS_TRAIT_CONTEXT;
-    private ?AtomInterface $lastClass  = self::NO_CLASS_TRAIT_CONTEXT;
+    private array          $contexts    = array();
+    private ?AtomInterface $last        = self::NO_CLASS_TRAIT_CONTEXT;
+    private ?AtomInterface $lastClass   = self::NO_CLASS_TRAIT_CONTEXT;
+    private bool           $thisContext = true;
 
     public function getCurrent(string $type = self::ALL_CONTEXT): ?AtomInterface {
         if ($type === self::ALL_CONTEXT) {
@@ -39,6 +40,15 @@ class ClassTraitContext {
 
         return $this->lastClass;
     }
+
+    public function getCurrentForThis(): ?AtomInterface {
+        return $this->thisContext ? $this->last : self::NO_CLASS_TRAIT_CONTEXT;
+    }
+
+    public function toggleThisContext(): bool {
+        return $this->thisContext = !$this->thisContext;
+    }
+
 
     public function pushContext(?AtomInterface $context): void {
         $this->contexts[] = $context;

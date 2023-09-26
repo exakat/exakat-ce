@@ -43,6 +43,7 @@ SQL;
         $this->atomIs(array('Function', 'Closure', 'Arrowfunction', 'Method', 'Magicmethod', 'File'), self::WITHOUT_CONSTANTS)
              ->initVariable('functions', '0')
              ->initVariable('name', '""')
+             ->initVariable('file', '""')
              ->initVariable('expression', '0')
              ->not(
                  $this->side()

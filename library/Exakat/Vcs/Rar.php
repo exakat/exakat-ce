@@ -25,7 +25,7 @@ namespace Exakat\Vcs;
 use Exakat\Exceptions\HelperException;
 
 class Rar extends Vcs {
-    private $executable = 'unrar';
+    private string $executable = 'unrar';
 
     public function __construct(string $destination, string $project_root) {
         parent::__construct($destination, $project_root);

@@ -58,6 +58,7 @@ class CountBy extends DSL {
 where(  
     __.sideEffect{ {$variable} = [:]; }
       .out("$link")
+      .has("$property")
       .sideEffect{
         s = it.get().value("$property"); 
         if ({$variable}[s] != null) { 

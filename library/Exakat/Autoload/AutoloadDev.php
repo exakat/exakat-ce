@@ -33,7 +33,7 @@ class AutoloadDev implements Autoloader {
         if (class_exists('\\Phar') && phar::running()) {
             // No autoloadDev with phar
             // Ignoring it all
-            return;
+//            return;
         }
 
         $this->path = $path;
@@ -51,11 +51,11 @@ class AutoloadDev implements Autoloader {
         }
     }
 
-    public function registerAutoload() : void {
+    public function registerAutoload(): void {
         spl_autoload_register(array($this, 'autoload'));
     }
 
-    public function getAllAnalyzers() : array {
+    public function getAllAnalyzers(): array {
         $fullPath = "{$this->path}/Analyzer/analyzers.ini";
 
         if (!file_exists($fullPath)) {
@@ -67,7 +67,7 @@ class AutoloadDev implements Autoloader {
         return $ini === false ? array() : $ini;
     }
 
-    public function loadIni(string $name, int $libel = self::LOAD_ALL) : array {
+    public function loadIni(string $name, int $libel = self::LOAD_ALL): array {
         $fullPath = "{$this->path}/data/$name";
 
         if (!file_exists($fullPath)) {
@@ -88,7 +88,7 @@ class AutoloadDev implements Autoloader {
         return array_merge($return);
     }
 
-    public function loadJson(string $name, int $libel = self::LOAD_ALL) : array {
+    public function loadJson(string $name, int $libel = self::LOAD_ALL): array {
         $fullPath = "{$this->path}/data/$name";
 
         if (!file_exists($fullPath)) {
@@ -108,13 +108,13 @@ class AutoloadDev implements Autoloader {
         return $return;
     }
 
-    public function loadData(string $path) : array {
+    public function loadData(string $path): string {
         $fullPath = "{$this->path}/$path";
 
         if (file_exists($fullPath)) {
-            return file_get_contents($fullPath);
+            return file_get_contents($fullPath) ?: '';
         } else {
-            return null;
+            return '';
         }
     }
 }

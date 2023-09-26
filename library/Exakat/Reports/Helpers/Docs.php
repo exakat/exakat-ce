@@ -33,13 +33,13 @@ class Docs {
 
     private static $docs = null;
 
-    public function __construct(string $pathToIni, AutoloadExt $ext = null, AutoloadDev $dev = null) {
+    public function __construct(string $pathToIni, AutoloadExt $ext, AutoloadDev $dev) {
         $this->pathToIni = $pathToIni;
         $this->ext = $ext;
         $this->dev = $dev;
     }
 
-    public function getDocs(string $analyzer, string $property = null) : mixed {
+    public function getDocs(string $analyzer, string $property = null): mixed {
         if (isset(self::$docs[$analyzer])) {
             if (isset(self::$docs[$analyzer][$property])) {
                 return self::$docs[$analyzer][$property];
@@ -48,21 +48,25 @@ class Docs {
             }
         }
 
+        // Move do doc loader class
         if (file_exists("{$this->pathToIni}/human/en/$analyzer.ini")) {
             $ini = parse_ini_file("{$this->pathToIni}/human/en/$analyzer.ini", \INI_PROCESS_SECTIONS);
-        } elseif (($this->dev !== null) && ($iniString = $this->dev->loadData("human/en/$analyzer.ini")) !== null) {
+        } elseif (($iniString = $this->ext->loadData("human/en/$analyzer.ini")) !== '') {
             $ini = parse_ini_string($iniString, \INI_PROCESS_SECTIONS);
-        } elseif (($this->ext !== null) && ($iniString = $this->ext->loadData("human/en/$analyzer.ini")) !== null) {
+        } elseif (($iniString = $this->dev->loadData("human/en/$analyzer.ini")) !== '') {
+            $ini = parse_ini_string($iniString, \INI_PROCESS_SECTIONS);
+        } elseif (($iniString = $this->dev->loadData("human/en/$analyzer.ini")) !== '') {
             $ini = parse_ini_string($iniString, \INI_PROCESS_SECTIONS);
         } else {
             assert(file_exists("{$this->pathToIni}/human/en/$analyzer.ini"), "No documentation for '$analyzer'.");
         }
+
         assert($ini !== null, "No readable documentation for '$analyzer'.");
         assert($ini['exakatSince'] !== null, "No exakatSince documentation for '$analyzer'.");
 
         $ini['parameter'] = array();
-        $ranks = array_filter(array_keys($ini), function (string $s) {
-            return preg_match('/^parameter\d+$/', $s) ?? false;
+        $ranks = array_filter(array_keys($ini), function (string $s): int {
+            return preg_match('/^parameter\d+$/', $s) ?: 0;
         });
         foreach ($ranks as $rank) {
             $ini['parameter'][] = $ini[$rank];

@@ -26,13 +26,26 @@ namespace Exakat\Analyzer\Functions;
 use Exakat\Analyzer\Analyzer;
 
 class UsesDefaultArguments extends Analyzer {
+    public function dependsOn(): array {
+        return array('Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/SetClassRemoteDefinitionWithGlobal',
+                     'Complete/SetClassRemoteDefinitionWithInjection',
+                     'Complete/SetClassRemoteDefinitionWithLocalNew',
+                     'Complete/SetClassRemoteDefinitionWithParenthesis',
+                     'Complete/SetClassRemoteDefinitionWithReturnTypehint',
+                     'Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/VariableTypehint',
+                    );
+    }
     // $c = count($x);
     //PHP native function : count($array, $options)
     public function analyze(): void {
-        $functions = $this->methods->getFunctionsArgsInterval();
+        // case for functions
+        $functions = $this->readStubs('getFunctionsArgsInterval');
 
         $positions = array();
         foreach ($functions as $function) {
+            // No default argument, so just skip them
             if ($function['args_min'] === $function['args_max']) {
                 continue;
             }
@@ -40,13 +53,29 @@ class UsesDefaultArguments extends Analyzer {
                 continue;
             }
             // Only test if the last is missing. This is sufficient
-            $positions["\\$function[name]"] = $function['args_max'];
+            $positions[makeFullnspath($function['name'])] = $function['args_max'];
         }
 
         $this->atomFunctionIs(array_keys($positions))
              ->savePropertyAs('fullnspath', 'fnp')
              ->isLessHash('count', $positions, 'fnp');
         $this->prepareQuery();
+
+        // in-code definitions
+        $this->atomIs(array('Function', 'Method'))
+             ->savePropertyAs('args_max', 'c')
+             ->back('first')
+             ->outIs('DEFINITION')
+             ->atomIs(self::CALLS)
+             ->outIsIE('METHOD')
+             ->analyzerIsNot('self')
+             ->atomIsNot('Virtualproperty')
+             ->isLess('count', 'c')
+             ->inIsIE('METHOD');
+        $this->prepareQuery();
+
+        // @todo : same for methods : static + normal
+        // @todo : local definitions? methods, functions, closures/fn
     }
 }
 

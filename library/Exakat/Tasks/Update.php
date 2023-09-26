@@ -74,15 +74,15 @@ class Update extends Tasks {
 
     private function runProject(): void {
         if (!file_exists($this->config->project_dir)) {
-            throw new NoSuchProject($this->config->project);
+            throw new NoSuchProject((string) $this->config->project);
         }
 
         if (!is_dir($this->config->project_dir)) {
-            throw new NoSuchProject($this->config->project);
+            throw new NoSuchProject((string) $this->config->project);
         }
 
         if (!file_exists($this->config->code_dir)) {
-            throw new NoCodeInProject($this->config->project);
+            throw new NoCodeInProject((string) $this->config->project);
         }
 
         // clean all previous sql caches
@@ -97,7 +97,6 @@ class Update extends Tasks {
 
     private function updateCode(Config $updateConfig): void {
         $vcs = Vcs::getVcs($updateConfig);
-        $vcs = new $vcs((string) $updateConfig->project, $updateConfig->code_dir);
 
         display("Code update $updateConfig->project with " . $vcs->getName());
         $new = $vcs->update();

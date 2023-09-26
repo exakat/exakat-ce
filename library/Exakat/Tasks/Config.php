@@ -45,7 +45,7 @@ class Config extends Tasks {
             $projectConfig = new ProjectConfig($this->config->projects_root);
         } else {
             if (!file_exists("{$this->config->projects_root}/projects/$project")) {
-                throw new NoSuchProject($this->config->project);
+                throw new NoSuchProject((string) $this->config->project);
             }
 
             $projectConfig = new ProjectConfig($this->config->projects_root);

@@ -46,6 +46,11 @@ class GetStringLength extends DSL {
                 assert(false, 'No enough arguments for ' . __METHOD__);
         }
 
+        $check = $this->dslfactory->factory('initVariable');
+        $return = $check->run($variable);
+
+        $this->assertProperty($property);
+
         $gremlin = <<<'GREMLIN'
 sideEffect{
     s = it.get().value("PROPERTY");

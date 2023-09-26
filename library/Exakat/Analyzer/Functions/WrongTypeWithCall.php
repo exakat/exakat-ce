@@ -28,8 +28,10 @@ class WrongTypeWithCall extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/PropagateConstants',
                      'Complete/FollowClosureDefinition',
+                     'Complete/MakeClassMethodDefinition',
                      'Complete/SetClassMethodRemoteDefinition',
                      'Complete/SetClassRemoteDefinitionWithParenthesis',
+                     'Complete/VariableTypehint',
                     );
     }
 
@@ -46,6 +48,7 @@ class WrongTypeWithCall extends Analyzer {
 
              ->outIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->as('results')
              ->outIsIE('METHOD')
              ->outWithRank('ARGUMENT', 'ranked')
@@ -56,8 +59,39 @@ class WrongTypeWithCall extends Analyzer {
                             'Addition',
                             'Power',
                             'Float',
+                            'Cast',
+                            'Comparison',
+                            'Bitshift',
                             ), self::WITH_CONSTANTS)
              ->checkTypeWithAtom('fnp')
+             ->back('results');
+        $this->prepareQuery();
+
+        // function foo(string $s) { bar($s)}  function bar(int $i) {}
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('ARGUMENT')
+             ->savePropertyAs('rank', 'ranked')
+             ->isNot('variadic', true)
+             ->outIs('TYPEHINT')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->atomIs('Scalartypehint')
+             ->back('first')
+
+             ->outIs('DEFINITION')
+             ->outIsIE('NEW')
+             ->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
+             ->as('results')
+             ->outIsIE('METHOD')
+             ->outWithRank('ARGUMENT', 'ranked')
+             ->atomIs(array('Variable',
+                            'Member',
+                            'Staticproperty',
+                            ))
+             ->goToTypehint()
+             ->atomIs('Scalartypehint')
+             ->fullnspathIsNot('\\void')
+             ->notSamePropertyAs('fullnspath', 'fnp')
              ->back('results');
         $this->prepareQuery();
 
@@ -75,6 +109,7 @@ class WrongTypeWithCall extends Analyzer {
 
              ->outIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->as('results')
              ->outIsIE('METHOD')
              ->outWithRank('ARGUMENT', 'ranked')
@@ -101,6 +136,7 @@ class WrongTypeWithCall extends Analyzer {
 
              ->outIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->as('results')
              ->outIsIE('METHOD')
              ->outWithRank('ARGUMENT', 'ranked')
@@ -126,6 +162,7 @@ class WrongTypeWithCall extends Analyzer {
 
              ->outIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->as('results')
              ->outIsIE('METHOD')
              ->outWithRank('ARGUMENT', 'ranked')
@@ -140,11 +177,10 @@ class WrongTypeWithCall extends Analyzer {
              ->back('results');
         $this->prepareQuery();
 
-        // calling a class-typed argument with self/static/parent
+        // @todo calling a class-typed argument with self/static/parent
         // foo(new Z); function foo(self $s) {}
 
-        // @todo
-        // calling a class-typed argument with typed element (with typed property)
+        // @todo calling a class-typed argument with typed element (with typed property)
         // foo(new Z); function foo(self $s) {}
     }
 }

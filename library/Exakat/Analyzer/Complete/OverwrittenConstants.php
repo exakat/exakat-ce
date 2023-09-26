@@ -28,6 +28,7 @@ class OverwrittenConstants extends Complete {
         // class x { protected const X = 1;}
         // class xx extends x {  protected const X = 1;}
         $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
+              ->hasNoOut('OVERWRITE')
               ->outIs('NAME')
               ->savePropertyAs('code', 'name')
               ->goToClassInterface()
@@ -38,8 +39,7 @@ class OverwrittenConstants extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name',  self::CASE_SENSITIVE)
               ->inIs('NAME')
-              ->as('origin')
-              ->dedup(array('first', 'origin'))
+              ->hasNoLinkYet('OVERWRITE', 'first')
               ->addEFrom('OVERWRITE', 'first');
         $this->prepareQuery();
     }

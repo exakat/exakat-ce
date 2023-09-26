@@ -23,8 +23,8 @@
 namespace Exakat\Log;
 
 class Timing extends Log {
-    private float $start;
-    private float $begin;
+    private float $start;  // start of the whole timer
+    private float $begin;  // milestone
     private float $end;
 
     public function __construct(string $name = '') {
@@ -32,7 +32,7 @@ class Timing extends Log {
         parent::__construct($name);
 
         $this->begin = microtime(\TIME_AS_NUMBER);
-        $this->start = microtime(\TIME_AS_NUMBER);
+        $this->start = $this->begin;
     }
 
 

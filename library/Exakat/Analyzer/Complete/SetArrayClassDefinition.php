@@ -49,6 +49,7 @@ class SetArrayClassDefinition extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -74,6 +75,7 @@ class SetArrayClassDefinition extends Complete {
              ->outIs('NAME')
              ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -95,6 +97,68 @@ class SetArrayClassDefinition extends Complete {
              ->outIs('NAME')
              ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
+             ->addETo('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // function foo(X $x) { array($x, foo); }
+        $this->atomIs('Arrayliteral', self::WITHOUT_CONSTANTS)
+             ->hasNoIn('DEFINITION')
+             ->is('count', 2)
+             ->outWithRank('ARGUMENT', 1)
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->savePropertyAs('noDelimiter', 'methodName')
+             ->back('first')
+             ->outWithRank('ARGUMENT', 0)
+             ->goToTypehint()
+             ->inIs('DEFINITION')
+             ->outIs(array('MAGICMETHOD', 'METHOD'))
+             ->atomIs(array('Method', 'Magicmethod'))
+             ->outIs('NAME')
+             ->samePropertyAs('fullcode', 'methodName', self::CASE_INSENSITIVE)
+             ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
+             ->addETo('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // function foo(X $x) { array(self::class, foo); }
+        $this->atomIs('Arrayliteral', self::WITHOUT_CONSTANTS)
+             ->hasNoIn('DEFINITION')
+             ->is('count', 2)
+             ->outWithRank('ARGUMENT', 1)
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->savePropertyAs('noDelimiter', 'methodName')
+             ->back('first')
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs(array('Staticconstant'), self::WITH_CONSTANTS)
+             ->inIs('DEFINITION')
+             ->outIs(array('MAGICMETHOD', 'METHOD'))
+             ->atomIs(array('Method', 'Magicmethod'))
+             ->outIs('NAME')
+             ->samePropertyAs('fullcode', 'methodName', self::CASE_INSENSITIVE)
+             ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
+             ->addETo('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // function foo(X $x) { array(__CLASS__, foo); }
+        $this->atomIs('Arrayliteral', self::WITHOUT_CONSTANTS)
+             ->hasNoIn('DEFINITION')
+             ->is('count', 2)
+             ->outWithRank('ARGUMENT', 1)
+             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->savePropertyAs('noDelimiter', 'methodName')
+             ->back('first')
+             ->outWithRank('ARGUMENT', 0)
+             ->atomIs(array('Magicconstant'), self::WITH_CONSTANTS)
+             ->fullcodeIs('__CLASS__', self::CASE_INSENSITIVE)
+             ->goToClass()
+             ->outIs(array('MAGICMETHOD', 'METHOD'))
+             ->atomIs(array('Method', 'Magicmethod'))
+             ->outIs('NAME')
+             ->samePropertyAs('fullcode', 'methodName', self::CASE_INSENSITIVE)
+             ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -117,6 +181,7 @@ class SetArrayClassDefinition extends Complete {
              ->outIs('NAME')
              ->samePropertyAs('fullcode', 'method', self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -130,6 +195,7 @@ class SetArrayClassDefinition extends Complete {
 
              ->inIs('NAME')
              ->atomIs('Functioncall')
+             ->hasNoLinkYet('DEFINITION', 'method')
              ->addEFrom('DEFINITION', 'method');
         $this->prepareQuery();
     }

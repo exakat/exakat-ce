@@ -28,6 +28,9 @@ class StubJson extends Stubs implements StubsInterface {
     private string    $stubFile    = '';
     private stdclass  $stub;
 
+    public const STRICT = true;
+    public const LOOSE  = false;
+
     public function __construct(string $stubFile) {
         $this->stubFile = $stubFile;
 
@@ -43,8 +46,8 @@ class StubJson extends Stubs implements StubsInterface {
 
         foreach ($this->stub->versions as $namespace => $definitions) {
             $functions = array_keys((array) ($definitions->functions ?? array()));
-            $functions = array_map(function (string $f) use ($namespace): string {
-                return $namespace . $f;
+            $functions = array_map(static function (string $f) use ($namespace): string {
+                return mb_strtolower($namespace . $f);
             }, $functions);
             $return[] = $functions;
         }
@@ -57,7 +60,7 @@ class StubJson extends Stubs implements StubsInterface {
 
         foreach ($this->stub->versions as $namespace => $definitions) {
             $constants = array_keys((array) ($definitions->constants ?? array()));
-            $constants = array_map(function (string $c) use ($namespace): string {
+            $constants = array_map(static function (string $c) use ($namespace): string {
                 return $namespace . $c;
             }, $constants);
             $return[] = $constants;
@@ -88,7 +91,7 @@ class StubJson extends Stubs implements StubsInterface {
 
         foreach ($this->stub->versions as $namespace => $definitions) {
             $interfaces = array_keys((array) ($definitions->interfaces ?? array()));
-            $interfaces = array_map(function (string $c) use ($namespace): string {
+            $interfaces = array_map(static function (string $c) use ($namespace): string {
                 return $namespace . $c;
             }, $interfaces);
             $return[] = $interfaces;
@@ -102,7 +105,7 @@ class StubJson extends Stubs implements StubsInterface {
 
         foreach ($this->stub->versions as $namespace => $definitions) {
             $traits = array_keys((array) ($definitions->traits ?? array()));
-            $traits = array_map(function (string $c) use ($namespace): string {
+            $traits = array_map(static function (string $c) use ($namespace): string {
                 return $namespace . $c;
             }, $traits);
             $return[] = $traits;
@@ -116,7 +119,7 @@ class StubJson extends Stubs implements StubsInterface {
 
         foreach ($this->stub->versions as $namespace => $definitions) {
             $classes = array_keys((array) ($definitions->classes ?? array()));
-            $classes = array_map(function (string $c) use ($namespace): string {
+            $classes = array_map(static function (string $c) use ($namespace): string {
                 return $namespace . $c;
             }, $classes);
             $return[] = $classes;
@@ -134,8 +137,8 @@ class StubJson extends Stubs implements StubsInterface {
                 if (empty($classConstants)) {
                     continue;
                 }
-                $classConstants = array_map(function (string $constant) use ($namespace, $class): string {
-                    return $namespace . $class . '::' . $constant;
+                $classConstants = array_map(static function (string $constant) use ($namespace, $class): string {
+                    return mb_strtolower($namespace . $class) . '::' . $constant;
                 }, $classConstants);
                 $return[] = $classConstants;
             }
@@ -154,10 +157,10 @@ class StubJson extends Stubs implements StubsInterface {
                     continue;
                 }
                 $list = $body->properties;
-                $classProperties = array_filter($classProperties, function (string $property) use ($list): bool {
+                $classProperties = array_filter($classProperties, static function (string $property) use ($list): bool {
                     return $list->{$property}->static === true;
                 });
-                $classProperties = array_map(function (string $property) use ($namespace, $class): string {
+                $classProperties = array_map(static function (string $property) use ($namespace, $class): string {
                     return $namespace . $class . '::' . $property;
                 }, $classProperties);
                 $return[] = $classProperties;
@@ -177,10 +180,10 @@ class StubJson extends Stubs implements StubsInterface {
                     continue;
                 }
                 $list = $body->methods;
-                $classMethods = array_filter($classMethods, function (string $method) use ($list): bool {
+                $classMethods = array_filter($classMethods, static function (string $method) use ($list): bool {
                     return $list->{$method}->static === true;
                 });
-                $classMethods = array_map(function (string $method) use ($namespace, $class): string {
+                $classMethods = array_map(static function (string $method) use ($namespace, $class): string {
                     return $namespace . $class . '::' . $method;
                 }, $classMethods);
                 $return[] = $classMethods;
@@ -201,10 +204,10 @@ class StubJson extends Stubs implements StubsInterface {
                     continue;
                 }
                 $list = $body->properties;
-                $classProperties = array_filter($classProperties, function (string $property) use ($list): bool {
+                $classProperties = array_filter($classProperties, static function (string $property) use ($list): bool {
                     return $list->{$property}->static === false;
                 });
-                $classProperties = array_map(function (string $property) use ($namespace, $class): string {
+                $classProperties = array_map(static function (string $property) use ($namespace, $class): string {
                     return $namespace . $class . '::' . $property;
                 }, $classProperties);
                 $return[] = $classProperties;
@@ -235,6 +238,10 @@ class StubJson extends Stubs implements StubsInterface {
     }
 
     public function getMethodList(): array {
+        return array();
+    }
+
+    public function getStaticMethodList(): array {
         return array();
     }
 
@@ -278,6 +285,10 @@ class StubJson extends Stubs implements StubsInterface {
         return array();
     }
 
+    public function getMethodsReferenceArgs(): array {
+        return array();
+    }
+
     public function getPropertyListWithVisibility(string $visibility): array {
         return array();
     }
@@ -311,6 +322,34 @@ class StubJson extends Stubs implements StubsInterface {
     }
 
     public function getVoidReturningFunctions(): array {
+        return array();
+    }
+
+    public function getNativeMethodArgType(): array {
+        return array();
+    }
+
+    public function getMethodsParameterNames(): array {
+        return array();
+    }
+
+    public function getFunctionsByReturnType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array {
+        return array();
+    }
+
+    public function getFunctionsByArgType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array {
+        return array();
+    }
+
+    public function getNewArgsInterval(): array {
+        return array();
+    }
+
+    public function getFunctionsByReturn(bool $singleTypeOnly = self::LOOSE): array {
+        return array();
+    }
+
+    public function getFunctionsWithOptional(): array {
         return array();
     }
 }

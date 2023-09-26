@@ -24,6 +24,7 @@
 namespace Exakat\Query\DSL;
 
 use Exakat\Query\Query;
+use Exakat\Analyzer\Analyzer;
 
 class AtomInsideNoDefinition extends DSL {
     public function run(): Command {
@@ -35,12 +36,13 @@ class AtomInsideNoDefinition extends DSL {
             return new Command(Query::STOP_QUERY);
         }
 
-        $linksDown = self::$linksDown;
-        $MAX_LOOPING  = self::$MAX_LOOPING;
+        $linksDown   = self::$linksDown;
+        $MAX_LOOPING = self::$MAX_LOOPING;
+        $definitions = makelist(Analyzer::DEFINITIONS);
 
         $gremlin = <<<GREMLIN
 emit( ).repeat( __.out($linksDown)
-                  .not(hasLabel("Closure", "Classanonymous", "Function", "Class", "Trait", "Interface")) 
+                  .not(hasLabel($definitions)) 
             )
             .times($MAX_LOOPING)
             .hasLabel(within(***))

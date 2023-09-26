@@ -42,11 +42,15 @@ class ClassUsage extends Analyzer {
              ->fullnspathIs($classes);
         $this->prepareQuery();
 
+        // @todo : shall skip traits and enums too ?
+        $interfaces = $this->readStubs('getInterfaceList');
+
         // Typehint (return and argument), catch, instanceof, classes with extends
         $this->atomIs(array('Identifier', 'Nsname'))
-             ->has('line') // what for? 
+             ->has('line') // what for?
              ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'CLASS')) // NOT IMPLEMENT
              ->fullnspathIs($classes)
+             ->fullnspathIsNot($interfaces)
              ->analyzerIsNot('self');
         $this->prepareQuery();
 

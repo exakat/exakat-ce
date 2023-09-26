@@ -23,10 +23,11 @@
 namespace Exakat;
 
 use Exakat\Configsource\CommandLine;
+use DateTimeImmutable;
 
 class Exakat {
-	public const VERSION = '2.4.7';
-	public const BUILD = 1382;
+	public const VERSION = '2.5.3';
+	public const BUILD = 1479;
 	
 	private Config $config;
 
@@ -88,6 +89,11 @@ class Exakat {
 
 			case 'results' :
 				$task = new Tasks\Results();
+				$task->run();
+				break;
+
+			case 'mr' :
+				$task = new Tasks\Mr();
 				$task->run();
 				break;
 
@@ -183,7 +189,7 @@ class Exakat {
 			case 'version' :
 				$version = self::VERSION;
 				$build = self::BUILD;
-				$date = date('r', filemtime(__FILE__));
+				$date = (DateTimeImmutable::createFromFormat('U', (string) filemtime(__FILE__)))->format('r') ;
 				echo "
  ________                 __              _    
 |_   __  |               [  |  _         / |_  
@@ -193,7 +199,7 @@ class Exakat {
 |________|[__]`\_]\'-;__/[__|  \_]\'-;__/\__/  
                                                
 
-Exakat : @ 2014-2022 Damien Seguy - Exakat SAS <contact(at)exakat.io>. 
+Exakat : @ 2014-2023 Damien Seguy - Exakat SAS <contact(at)exakat.io>. 
 Version : ", $version, ' - Build ', $build, ' - ', $date, "\n";
 
 				break;

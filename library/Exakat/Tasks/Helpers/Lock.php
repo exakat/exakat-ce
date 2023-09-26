@@ -37,24 +37,20 @@ class Lock {
     public function check(): bool {
         $fp = @fopen($this->path, 'x');
         if ($fp === false) {
-            $this->path = null;
+            $this->path = '';
             return false;
         }
         if (flock($fp, LOCK_EX | LOCK_NB)) {
             fwrite($fp, (string) getmypid());
             return true;
         } else {
-            $this->path = null;
+            $this->path = '';
             return false;
         }
     }
 
     public function __destruct() {
         if (!empty($this->path) && file_exists($this->path)) {
-            $pid = file_get_contents($this->path);
-
-            assert($pid == getmypid(), "Alert : removing wrong pid for $this->path");
-
             unlink($this->path);
         }
     }

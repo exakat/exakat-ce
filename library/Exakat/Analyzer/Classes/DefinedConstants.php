@@ -31,7 +31,7 @@ class DefinedConstants extends Analyzer {
                      'Complete/IsPhpStructure',
                      'Complete/MakeClassConstantDefinition',
                      'Complete/OverwrittenConstants',
-                     'Classes/IsExtClass',
+                     'Complete/SetParentDefinition',
                     );
     }
 
@@ -40,6 +40,7 @@ class DefinedConstants extends Analyzer {
         // constants defined at the parents level
         // This includes interfaces
         $this->atomIs('Staticconstant')
+             ->analyzerIsNot('self')
              ->inIs('DEFINITION')
              ->atomIs('Constant')
              ->back('first');
@@ -47,20 +48,9 @@ class DefinedConstants extends Analyzer {
 
         // constants defined in a class of an extension
         $this->atomIs('Staticconstant')
+             ->analyzerIsNot('self')
              ->outIs('CLASS')
-             ->is('isPhp', true)
-             ->back('first');
-        $this->prepareQuery();
-
-        $this->atomIs('Staticconstant')
-             ->outIs('CLASS')
-             ->is('isStub', true)
-             ->back('first');
-        $this->prepareQuery();
-
-        $this->atomIs('Staticconstant')
-             ->outIs('CLASS')
-             ->is('isExt', true)
+             ->isAnyOf(array('isPhp', 'isStub', 'isExt'), true)
              ->back('first');
         $this->prepareQuery();
     }

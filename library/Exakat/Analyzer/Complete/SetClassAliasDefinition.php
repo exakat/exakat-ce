@@ -35,8 +35,8 @@ class SetClassAliasDefinition extends Complete {
               ->outWithRank('ARGUMENT', 1)
               ->outIs('DEFINITION')
               ->atomIs(array('Identifier', 'Nsname', 'Newcall', 'Name', 'Newcallname'), self::WITHOUT_CONSTANTS)
-              ->dedup('')
               ->setProperty('fullnspath', 'fnp')
+              ->hasNoLinkYet('DEFINITION', 'method')
               ->addEFrom('DEFINITION', 'method');
         $this->prepareQuery();
     }

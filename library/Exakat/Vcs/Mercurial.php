@@ -25,7 +25,7 @@ namespace Exakat\Vcs;
 use Exakat\Exceptions\HelperException;
 
 class Mercurial extends Vcs {
-    private $executable = 'hg';
+    private string $executable = 'hg';
 
     protected function selfCheck(): void {
         $res = $this->shell("{$this->executable} --version 2>&1");

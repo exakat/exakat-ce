@@ -47,13 +47,13 @@ abstract class AtomInterface {
     public ?string $noDelimiter  	= null;
     public ?int    $count        	= null;
     public string  $fullnspath   	= '';
-    public string    $alias        	= Load::NOT_ALIASED;
+    public string  $alias        	= Load::NOT_ALIASED;
     public string  $origin       	= '';
     public string  $encoding     	= '';
-    public $block        = '';
+    public string  $block        	= '';
     public ?int    $intval       	= Intval::NO_VALUE;
-    public ?string  $strval      	= Strval::NO_VALUE;
-    public bool    $boolean      	= Boolval::NO_VALUE;
+    public ?string $strval      	= Strval::NO_VALUE;
+    public ?bool   $boolean      	= Boolval::NO_VALUE;
     public bool    $enclosing    	= Load::NO_ENCLOSING;
     public bool    $bracket      	= Load::NOT_BRACKET;
     public bool    $flexible     	= Load::NOT_FLEXIBLE;
@@ -61,7 +61,7 @@ abstract class AtomInterface {
     public ?string $propertyname 	= null;
     public bool    $constant     	= Load::NOT_CONSTANT_EXPRESSION;
     public string  $binaryString 	= Load::NOT_BINARY;
-    public string  $visibility   	= 'none';  // none, public, private, protected
+    public string  $visibility   	= '';  // none, public, private, protected, ''
 
     public ?int $args_max     = null;
     public ?int $args_min     = null;
@@ -70,7 +70,7 @@ abstract class AtomInterface {
     public bool $heredoc		= false;
     public bool $variadic		= Load::NOT_VARIADIC;
     public bool $absolute		= Load::NOT_ABSOLUTE;
-    public $globalvar		= false;
+    public bool|string $globalvar	= false;
     public bool $final			= false;
     public bool $isNull			= false;
     public bool $abstract		= false;
@@ -85,21 +85,17 @@ abstract class AtomInterface {
     public bool $isStub			= false;
     public bool $isConst		= false;
 
-    public $use					= '';
+    public string $use			= '';
     public ?string $typehint	= null;
 
     public Whitespace $ws ;
     public int $eId;
 
-//    public $position     = 0;
-
     public function __construct(string $ws) {
         $this->ws   = new Whitespace($ws);
     }
 
-    abstract public function toArray(): array;
-
-    abstract public function toGraphsonLine(int &$id, bool $toSkip = self::SKIP): stdClass;
+    abstract public function toGraphsonLine(int &$id, bool $toSkip = self::WITHOUT_WS): stdClass;
 
     abstract public function boolProperties(): array;
 

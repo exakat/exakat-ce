@@ -24,14 +24,15 @@
 namespace Exakat\Data;
 
 use Sqlite3;
+use Exakat\Config;
 
 abstract class Data {
-    private $config = null;
+    private Config $config;
 
-    protected $name = '';
+    protected string $name = '';
 
-    private $sqlite = null;
-    private $phar_tmp = null;
+    private Sqlite3 $sqlite;
+    private string  $phar_tmp = null;
 
     public function __construct(string $name) {
         $this->name = $name;
@@ -66,7 +67,8 @@ abstract class Data {
         }
     }
 
-    public function getVersions($component = null) {
+    public function getVersions(string $component = null): array {
+        // @todo : $component is not used. Is could have been the namespace
         $query = 'SELECT version AS version FROM versions ORDER BY 1';
         $res = $this->sqlite->query($query);
 
@@ -78,7 +80,8 @@ abstract class Data {
         return $return;
     }
 
-    public function getCIT($component, $version = null) {
+    public function getCIT(string $component, string $version = null): array {
+        // @todo : $component is not used. Is could have been the namespace
         $query = 'SELECT namespaces.name || "\" || cit.name AS className, version FROM cit 
                     JOIN namespaces 
                       ON cit.namespaceId = namespaces.id
@@ -102,7 +105,8 @@ abstract class Data {
         return $return;
     }
 
-    public function getClasses($component, $version = null) {
+    public function getClasses(string $component, string $version = null): array {
+        // @todo : $component is not used. Is could have been the namespace
         $query = 'SELECT namespaces.name || "\" || cit.name AS className, version FROM cit 
                     JOIN namespaces 
                       ON cit.namespaceId = namespaces.id
@@ -127,7 +131,8 @@ abstract class Data {
         return $return;
     }
 
-    public function getInterfaces($component, $version = null) {
+    public function getInterfaces(string $component, version $version = null): array {
+        // @todo : $component is not used. Is could have been the namespace
         $query = 'SELECT namespaces.name || "\" || cit.name AS interfaceName, version FROM cit 
                     JOIN namespaces 
                       ON cit.namespaceId = namespaces.id
@@ -152,7 +157,8 @@ abstract class Data {
         return $return;
     }
 
-    public function getTraits($component, $version = null) {
+    public function getTraits(string $component, string $version = null): array {
+        // @todo : $component is not used. Is could have been the namespace
         $query = 'SELECT namespaces.name || "\" || cit.name AS traitName, version FROM cit 
                     JOIN namespaces 
                       ON cit.namespaceId = namespaces.id
@@ -178,7 +184,8 @@ abstract class Data {
         return $return;
     }
 
-    public function getNamespaces($component, $version = null) {
+    public function getNamespaces(string $component, string $version = null): array {
+        // @todo : $component is not used. Is could have been the namespace
         $query = 'SELECT namespaces.name as namespaceName, version FROM namespaces 
                     JOIN versions 
                       ON namespaces.versionId = versions.id 

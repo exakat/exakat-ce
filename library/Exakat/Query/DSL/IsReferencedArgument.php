@@ -39,10 +39,10 @@ class IsReferencedArgument extends DSL {
                 assert(false, 'wrong number of argument for ' . __METHOD__);
         }
 
-        $gremlin = <<<GREMLIN
+        $gremlin = <<<'GREMLIN'
 not(
     where(
-        __.repeat( __.in()).until(hasLabel("Function")).out("ARGUMENT").filter{it.get().value("code") == $variable}.has("reference", true)
+    	__.in("DEFINITION").hasLabel("Parameter").has("reference", true)
     )
 )
 

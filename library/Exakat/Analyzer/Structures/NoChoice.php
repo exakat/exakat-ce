@@ -36,6 +36,7 @@ class NoChoice extends Analyzer {
                                 'Yield',
                                 'Yieldfrom',
                                 'Ifthen',
+                                'Sequence',
                                 );
 
         // $a == 2 ? doThis() : doThis();

@@ -12,6 +12,10 @@
         }
     ],
     "support": {
+        "email": "contact@exakat.io",
+        "forum": "https:\/\/forum.froxlor.org\/",
+        "tweeter": "https://twitter.com/exakat",
+        "community": "https://twitter.com/i/communities/1525023388263137280",
         "docs": "https://exakat.readthedocs.org/",
         "source": "https://github.com/exakat/exakat"
     },
@@ -23,8 +27,11 @@
         "post-install-cmd": [
             "echo ' running post-install-cmd'",
             "@php exakat doctor",
-            "@php exakat install"
-        ]
+            "@php exakat install",
+            "@php vendor/bin/phpcs --config-set installed_paths vendor/phpcompatibility/php-compatibility"
+        ],
+	    "post-update-cmd" : "@php vendor/bin/phpcs --config-set installed_paths vendor/phpcompatibility/php-compatibility"
+
     },
     "require": {
         "ext-curl": "*",
@@ -36,13 +43,22 @@
         "ext-xmlwriter": "*",
         "guiguiboy/php-cli-progress-bar":"0.0.4",
         "brightzone/gremlin-php": "3.1.1",
-        "symfony/yaml": "^5.0",
-        "bartlett/sarif-php-sdk": "^1.0"
+        "symfony/yaml": "5.*",
+        "bartlett/sarif-php-sdk": "^1.0",
+        "symfony/process": "^6.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "*",
+        "phpunit/phpunit": "^9.6",
         "friendsofphp/php-cs-fixer": "*",
         "php-parallel-lint/php-parallel-lint": "^1.2",
-        "symplify/easy-ci": "^9.4.70"
+        "phpcompatibility/php-compatibility": "*",
+        "squizlabs/php_codesniffer": "*",
+        "phpmd/phpmd": "^2.13"
+    },
+    "config": {
+    	"platform-check": false,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
     }
 }

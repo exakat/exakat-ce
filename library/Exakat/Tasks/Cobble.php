@@ -55,7 +55,7 @@ class Cobble extends Tasks {
         } else {
             $cobblersClass = array($this->config->program);
         }
-        
+
         // @todo check for format now
 
         foreach ($cobblersClass as $cobbler) {
@@ -72,13 +72,13 @@ class Cobble extends Tasks {
         }
 
         $vcs = Vcs::getVcs($this->config);
-        if ($vcs !== \Exakat\Vcs\Git::class) {
-            print "Cobbling only support git ($vcs).\n";
+        if ($vcs->getName() !== 'git') {
+            print 'Cobbling only support git (' . $vcs->getName() . " provided).\n";
 
             return;
         }
 
-		// @todo : make this call getinstance 
+        // @todo : make this call getinstance
         $vcs = new $vcs((string) $this->config->project, $this->config->code_dir);
         if (!empty($this->config->branch) && $vcs->hasBranch($this->config->branch)) {
             print 'Branch already exists : cannot overwrite an existing branch. Please, change branch name or remove branch first.';
@@ -138,8 +138,6 @@ class Cobble extends Tasks {
 
             $total_results = $cobbler->getRowCount();
             $processed     = $cobbler->getProcessedCount();
-            $queries       = $cobbler->getQueryCount();
-            $rawQueries    = $cobbler->getRawQueryCount();
 
             display( "$program run ($total_results / $processed)\n");
         }

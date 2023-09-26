@@ -66,7 +66,7 @@ class ReportConfig {
             $this->options     = $exakat_config->$reportName ?? array();
             $this->destination = $exakat_config->file ?: constant("\Exakat\Reports\\$config::FILE_FILENAME");
         } else {
-            throw new NoSuchReport($config);
+            throw new NoSuchReport((string) $config->project);
         }
 
         $this->config = $exakat_config;

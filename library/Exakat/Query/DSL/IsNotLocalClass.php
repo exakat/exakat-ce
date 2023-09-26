@@ -28,7 +28,8 @@ class IsNotLocalClass extends DSL {
         $linksDown = self::$linksDown;
 
         $gremlin = <<<GREMLIN
-sideEffect{ inside = it.get().value("fullnspath"); }
+has("fullnspath")
+.sideEffect{ inside = it.get().value("fullnspath"); }
 .where(  __.repeat( __.in({$linksDown}) ).until( hasLabel("Class") ).filter{ it.get().value("fullnspath") == inside; }.count().is(eq(0)) )
 
 GREMLIN;

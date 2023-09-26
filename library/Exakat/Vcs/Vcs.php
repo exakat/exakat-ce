@@ -80,38 +80,35 @@ abstract class Vcs {
         return self::NO_UPDATE;
     }
 
-    public static function getVcs(Config $config): string {
-        if ($config->svn === true) {
-            return Svn::class;
-        } elseif ($config->hg === true) {
-            return Mercurial::class;
-        } elseif ($config->bzr === true) {
-            return Bazaar::class;
-        } elseif ($config->composer === true) {
-            return Composer::class;
-        } elseif ($config->symlink === true) {
-            return Symlink::class;
-        } elseif ($config->tbz === true) {
-            return Tarbz::class;
-        } elseif ($config->tgz === true) {
-            return Targz::class;
-        } elseif ($config->zip === true) {
-            return Zip::class;
-        } elseif ($config->copy === true) {
-            return Copy::class;
-        } elseif ($config->rar === true) {
-            return Rar::class;
-        } elseif ($config->sevenz === true) {
-            return SevenZ::class;
-        } elseif ($config->cvs === true) {
-            return Cvs::class;
-        } elseif ($config->none === true) {
-            return None::class;
-        } elseif ($config->git === true) {
-            return Git::class;
-        } else {
-            return None::class;
+    public static function getVcs(Config $config): self {
+        $list = array('svn'      => 'Svn',
+                      'hg'       => 'Mercurial',
+                      'bzr'      => 'Bazaar',
+                      'git'      => 'Git',
+                      'composer' => 'Composer',
+                      'symlink'  => 'Symlink',
+                      'tbz'      => 'Tarbz',
+                      'tgz'      => 'Targz',
+                      'zip'      => 'Zip',
+                      'csv'      => 'Csv',
+                      'copy'     => 'Copy',
+                      'rar'      => 'Rar',
+                      'sevenz'   => 'SevenZ',
+                      'None'     => 'None',
+                      );
+
+        $vcs = __NAMESPACE__ . '//None';
+
+        foreach ($list as $option => $class) {
+            if ($config->$option === true) {
+                $vcs = __NAMESPACE__ . '\\' . $class;
+
+                assert(class_exists($vcs), "No such VCS as $option\n");
+                break;
+            }
         }
+
+        return new $vcs((string) $config->project, $config->code_dir);
     }
 
     public function getStatus(): array {

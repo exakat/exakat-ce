@@ -97,15 +97,15 @@ class WrongTypedPropertyInit extends Analyzer {
 
              ->back('first') // This avoids ending on another property definition when in multiple PPP definition
              ->outIs('DEFAULT')
-             ->hasNoIn('RIGHT')
              ->atomIs(array('Integer', 'Float', 'Null', 'Boolean', 'Arrayliteral', 'String', 'New', 'Functioncall'), self::WITH_CONSTANTS)
-             ->raw('
-or(
-    __.hasLabel("Integer", "Float", "Null", "Boolean", "Arrayliteral", "String" ),
-    __.out("NEW").has("fullnspath")
-)
-             ')
+             ->not(
+             	$this->side()
+             		 ->atomIs('New')
+             		 ->outIs('NEW')
+             		 ->hasNo('fullnspath')             
+             )
              ->savePropertyAs('label', 'type')
+
              // For New values
              ->optional(
                  $this->side()

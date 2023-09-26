@@ -40,6 +40,7 @@ interface StubsInterface {
     public function getClassStaticMethodList(): array;
     public function getPropertyList(): array;
     public function getMethodList(): array;
+    public function getStaticMethodList(): array;
     public function getInterfaceMethodsNameAndCount(): array;
     public function getFinalClasses(): array;
     public function getFinalClassConstants(): array;
@@ -51,6 +52,7 @@ interface StubsInterface {
     public function getMethodsArgsInterval(): array;
     public function getClassImplementingList(): array;
     public function getFunctionsReferenceArgs(): array;
+    public function getMethodsReferenceArgs(): array;
     public function getPropertyListWithVisibility(string $visibility): array;
     public function getConstantListWithVisibility(string $visibility): array;
     public function getMethodListWithVisibility(string $visibility): array;
@@ -58,4 +60,11 @@ interface StubsInterface {
     public function getNoNullReturningFunctions(): array;
     public function getNativeMethodReturn(): array;
     public function getVoidReturningFunctions(): array;
+    public function getNativeMethodArgType(): array;
+    public function getMethodsParameterNames(): array;
+    public function getFunctionsByReturnType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array;
+    public function getFunctionsByArgType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array;
+    public function getNewArgsInterval(): array;
+    public function getFunctionsByReturn(bool $singleTypeOnly = self::LOOSE): array;
+    public function getFunctionsWithOptional(): array;
 }

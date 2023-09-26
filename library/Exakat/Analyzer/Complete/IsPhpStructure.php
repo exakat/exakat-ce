@@ -22,9 +22,19 @@
 
 namespace Exakat\Analyzer\Complete;
 
+use Exakat\Stubs\Stubs;
+
 class IsPhpStructure extends IsStubStructure {
     protected const PROPERTY = 'isPhp';
     protected const PDFF     = 'phpCore';
+
+    public function analyze(): void {
+        $this->stubs = new Stubs($this->config->dir_root . '/data/core/',
+            $this->config->php_core ?? array(),
+        );
+
+        $this->_analyze();
+    }
 }
 
 ?>

@@ -23,7 +23,6 @@
 namespace Exakat;
 
 use Exakat\Analyzer\Rulesets;
-use Exakat\Data\Dictionary;
 use Exakat\Data\Methods;
 use Exakat\Exceptions\NoPhpBinary;
 use Exakat\Graph\Graph;
@@ -37,14 +36,10 @@ class Container {
     private Config     	$config			;
     private Graph      	$graphdb		;
     private Datastore  	$datastore		;
-    private Dictionary 	$dictionary		;
     private Docs		$docs			;
     private Methods    	$methods		;
     private Rulesets	$rulesets		;
     private Phpexec		$php			;
-    private Stubs		$stubs		 	;
-    private Stubs		$phpCore	 	;
-    private Stubs		$phpExtensions	;
     private array		$inited			= array();
 
     public function init(array $argv = array()): void {
@@ -73,30 +68,8 @@ class Container {
         $this->datastore  = new Datastore($this->config);
     }
 
-    private function dictionary(): void {
-        $this->dictionary = new Dictionary();
-    }
-
     private function methods(): void {
         $this->methods    = new Methods($this->config);
-    }
-
-    private function stubs(): void {
-        $this->stubs = new Stubs($this->config->dir_root . '/stubs/',
-                                 $this->config->stubs,
-                                 );
-    }
-
-    private function phpCore(): void {
-        $this->phpCore = new Stubs($this->config->dir_root . '/data/core/',
-                                   $this->config->php_core ?? array(),
-                                   );
-    }
-
-    private function phpExtensions(): void {
-        $this->phpExtensions = new Stubs($this->config->dir_root . '/data/extensions/',
-                                         $this->config->php_extensions ?? array(),
-                                        );
     }
 
     private function docs(): void {

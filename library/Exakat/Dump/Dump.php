@@ -95,6 +95,7 @@ abstract class Dump {
                         'compilation80',
                         'compilation81',
                         'compilation82',
+                        'compilation83',
                         'composer',
                         'configFiles',
                         'externallibraries',
@@ -111,8 +112,12 @@ abstract class Dump {
     public function removeResults(array $analyzers): void {
         $classesList = makeList($analyzers);
 
-        $this->sqlite->query("DELETE FROM results WHERE analyzer IN ($classesList)");
-        $this->sqlite->query("DELETE FROM resultsCounts WHERE analyzer IN ($classesList)");
+        if (!$this->sqlite->query("DELETE FROM results WHERE analyzer IN ($classesList)")) {
+            return;
+        }
+        if (!$this->sqlite->query("DELETE FROM resultsCounts WHERE analyzer IN ($classesList)")) {
+            return;
+        }
     }
 
     public function addResults(array $toDump): array {
@@ -130,7 +135,9 @@ abstract class Dump {
             unset($c);
 
             $sql = 'REPLACE INTO results ("id", "fullcode", "file", "line", "namespace", "class", "function", "analyzer", "severity") VALUES ' . implode(', ', $chunk);
-            $this->sqlite->query($sql);
+            if (!$this->sqlite->query($sql)) {
+                break 1;
+            }
         }
 
         $return = array_column($toDump, 6);
@@ -182,9 +189,14 @@ abstract class Dump {
     }
 
     public function close(): void {
-        $this->sqlite->query('REPLACE INTO resultsCounts ("id", "analyzer", "count") VALUES (NULL, \'Project/Dump\', 1)');
+        $res = $this->sqlite->query('REPLACE INTO resultsCounts ("id", "analyzer", "count") VALUES (NULL, \'Project/Dump\', 1)');
+        if (!$res) {
+            return ;
+        }
 
-        rename($this->sqliteFile, $this->sqliteFileFinal);
+        if (file_exists($this->sqliteFile)) {
+            rename($this->sqliteFile, $this->sqliteFileFinal);
+        }
     }
 
     public function cleanTable(string $table): void {
@@ -206,7 +218,11 @@ abstract class Dump {
             $chunks = array_chunk($values, SQLITE_CHUNK_SIZE);
             foreach ($chunks as $chunk) {
                 $query = 'REPLACE INTO ' . $table . ' VALUES ' . implode(', ', $chunk);
-                $this->sqlite->query($query);
+                if (!$this->sqlite->query($query)) {
+                    // attempt to write a readonly database
+                    print $this->sqlite->lastErrorMsg() . PHP_EOL;
+                    break 1;
+                }
             }
         }
 

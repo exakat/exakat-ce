@@ -63,7 +63,8 @@ class VariableUsedOnceByContext extends Analyzer {
                       ->outIs('DEFINITION')
                       ->atomIs(array('Variable', 'Variableobject', 'Variablearray', 'Parameter', 'String'))
                       ->analyzerIsNot('Variables/SelfTransform')
-                      ->raw('count().is(eq(1))')
+                      ->count()
+                      ->isEqual(1)
              )
              ->not(
                  $this->side()

@@ -35,19 +35,28 @@ use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Tasks\Helpers\BaselineStash;
 use Exakat\Tasks\Helpers\ReportConfig;
 use Exception;
-
+use Symfony\Component\Process\Process;
 use Exakat\Vcs\Vcs;
+use Exakat\Vcs\Vcs\None;
+use Exakat\Log;
+use const PARALLEL_WAIT_MS;
 
 class Project extends Tasks {
     public const CONCURENCE = self::NONE;
 
     protected array $rulesetsToRun = array('Analyze',
-                    	                   'Preferences',
-                          		          );
+                                           'Preferences',
+                                            );
 
     protected array $reports       = array();
     protected array $reportConfigs = array();
     private Timer $timer;
+
+    private ?Process $process = null;
+
+    private string $mode = 'serial';
+    
+    private ?Log $finishLog = null;
 
     public function __construct(bool $subTask = self::IS_NOT_SUBTASK) {
         parent::__construct($subTask);
@@ -57,6 +66,13 @@ class Project extends Tasks {
         }
 
         $this->timer = new Timer();
+
+        // Forcing mode
+        if ($this->config->loader_mode === 'serial' || $this->config->parallel < 2) {
+            $this->mode = 'serial';
+        } else {
+            $this->mode = 'parallel';
+        }
     }
 
     public function run(): void {
@@ -103,10 +119,10 @@ class Project extends Tasks {
                                          ));
 
         $info = array();
-        if (($vcsClass = Vcs::getVcs($this->config)) === 'None') {
+        if (($vcsClass = Vcs::getVcs($this->config)) instanceof None) {
             $info['vcs_type'] = 'Standalone archive';
         } else {
-            $info['vcs_type'] = strtolower($vcsClass);
+            $info['vcs_type'] = strtolower($vcsClass->getName());
             $info['vcs_url']  = $this->config->project_url;
 
             $vcs = new $vcsClass((string) $this->config->project, $this->config->code_dir);
@@ -189,7 +205,7 @@ class Project extends Tasks {
 
         $nb_files = (int) $this->datastore->getHash('files');
         if ($nb_files === 0) {
-            throw new NoCodeInProject($this->config->project);
+            throw new NoCodeInProject((string) $this->config->project);
         }
 
         display('Cleaning DB' . PHP_EOL);
@@ -222,16 +238,20 @@ class Project extends Tasks {
         // Dump is a child process
         // initialization and first collection (action done once)
         display('Initial dump');
-        $dumpConfig = $this->config->duplicate(array('collect'            => true,
-                                                     'load_dump'          => true,
-                                                     'project_rulesets'   => array('First'),
-                                                     'program'            => '',
-                                                     )
-        );
-        $firstDump = new Dump(self::IS_SUBTASK);
-        $firstDump->setConfig($dumpConfig);
-        $firstDump->run();
-        unset($firstDump);
+        $process = new Process(array('php',
+                                'exakat',
+                                'dump',
+                                '-p',
+                                $this->config->project,
+                                '-T',
+                                'First',
+                                '-collect'
+                                ));
+        $process->start();
+        $this->process = $process;
+        // Cheap synchrone run
+		$this->finishProcess();
+
         $this->logTime('Initial dump');
 
         if (empty($this->config->program)) {
@@ -240,11 +260,13 @@ class Project extends Tasks {
             $this->analyzeOne($this->config->program, $audit_start, $this->config->verbose);
         }
 
+        // Finish all processes of dumping before moving on
+        $this->finishProcess();
+
         display('Analyzed project' . PHP_EOL);
         $this->logTime('Analyze');
         $this->addSnitch(array('step'    => 'Analyzed',
                                'project' => $this->config->project));
-
         $this->logTime('Analyze');
 
         $dump = new Dump(self::IS_SUBTASK);
@@ -314,11 +336,20 @@ class Project extends Tasks {
             $query = 'g.E().count()';
             $res = $this->gremlin->query($query);
             $links = $res[0];
+            $query = 'g.V().properties().count()';
+            $res = $this->gremlin->query($query);
+            $properties = $res[0];
+            $query = 'g.V().properties().key().groupCount("m").cap("m")';
+            $res = $this->gremlin->query($query);
+            $propertiesCount = $res[0];
 
-            $this->datastore->addRow('hash', array('audit_end'    => $audit_end,
-                                                   'audit_length' => $audit_end - $audit_start,
-                                                   'graphNodes'   => $nodes,
-                                                   'graphLinks'   => $links));
+            $this->datastore->addRow('hash', array('audit_end'       => $audit_end,
+                                                   'audit_length'    => $audit_end - $audit_start,
+                                                   'graphNodes'      => $nodes,
+                                                   'graphLinks'      => $links,
+                                                   'graphProperties' => $properties,
+                                                   ...$propertiesCount
+                                                   ));
 
             $dump = new Dump(self::IS_SUBTASK);
             $dump->run();
@@ -367,52 +398,83 @@ class Project extends Tasks {
                 $audit_end = time();
                 $query = 'g.V().count()';
                 $res = $this->gremlin->query($query);
-                if (isset($res->results)) {
-                    $nodes = $res->results[0];
-                } else {
-                    $nodes = $res[0];
-                }
+                $nodes = $res[0];
                 $query = 'g.E().count()';
                 $res = $this->gremlin->query($query);
-                if (isset($res->results)) {
-                    $links = $res->results[0];
-                } else {
-                    $links = $res[0];
-                }
-
-                $finalMark = array('audit_end'    => $audit_end,
-                                   'audit_length' => $audit_end - $audit_start,
-                                   'graphNodes'   => $nodes,
-                                   'graphLinks'   => $links);
-                $this->datastore->addRow('hash', $finalMark);
-
-                // Skip Dump, as it is auto-saving itself.
-                $dumpConfig = $this->config->duplicate(array('update'               => true,
-                                                             'project_rulesets'     => array($ruleset),
-                                                             'load_dump'            => true,
-                                                             'verbose'              => false,
-                                                             ));
-                /*
-                                $shell = "nohup php exakat dump -p {$this->config->project} -T $ruleset -load-dump -u >/dev/null & echo $!";
-                                $pid = shell_exec($shell);
-                                print "New PID : $pid\n";
-                                print "Slept for PID : $pid\n";
+                $links = $res[0];
+                $query = 'g.V().properties().count()';
+                $res = $this->gremlin->query($query);
+                $properties = $res[0];
+                /*                $query = 'g.V().properties().key().groupCount("m").cap("m")';
+                                $res = $this->gremlin->query($query);
+                                $propertiesCount = $res[0];
                 */
-                $dump = new Dump(self::IS_SUBTASK);
-                $dump->setConfig($dumpConfig);
-                $dump->run();
-                $dump->finalMark($finalMark);
-                unset($dump);
-                unset($dumpConfig);
+                $this->datastore->addRow('hash', array('audit_end'       => $audit_end,
+                                                       'audit_length'    => $audit_end - $audit_start,
+                                                       'graphNodes'      => $nodes,
+                                                       'graphLinks'      => $links,
+                                                       'graphProperties' => $properties,
+//                                                       ...$propertiesCount
+                                                       ));
 
-                gc_collect_cycles();
-                $this->logTime("Dumped : $ruleset");
+                // finish previous process (if any) before doint another one
+                $this->finishProcess();
+
+                if ($this->mode === 'parallel') {
+                    $process = new Process(array('php',
+                                            'exakat',
+                                            'dump',
+                                            '-p',
+                                            $this->config->project,
+                                            '-T',
+                                            $ruleset,
+                                            '-u',
+                                            '-v',
+                                            ));
+                    $process->start();
+                    $this->process = $process;
+                } else {
+                    // Skip Dump, as it is auto-saving itself.
+                    $dumpConfig = $this->config->duplicate(array('update'               => true,
+                                                                 'project_rulesets'     => array($ruleset),
+                                                                 'load_dump'            => true,
+                                                                 'verbose'              => false,
+                                                                 ));
+
+
+                    $dump = new Dump(self::IS_SUBTASK);
+                    $dump->setConfig($dumpConfig);
+                    $dump->run();
+                    unset($dump);
+                    unset($dumpConfig);
+
+                    gc_collect_cycles();
+                    $this->logTime("Dumped : $ruleset");
+                }
             } catch (Exception $e) {
                 display("Error while running the ruleset $ruleset.\nTrying next ruleset.\n");
+                // @todo replace this with a valid log name
                 file_put_contents("{$this->config->log_dir}/analyze.$rulesetForFile.final.log", $e->getMessage(), FILE_APPEND);
             }
         }
         $VERBOSE = $oldVerbose;
+    }
+
+    private function finishProcess(): void {
+        while (!empty($this->process)) {
+            if ($this->process->isRunning()) {
+                usleep(PARALLEL_WAIT_MS);
+            } else {
+            	if ($this->finishLog === null) {
+			        $this->finishLog = new Log('finish',
+            			                       "{$this->config->projects_root}/projects/{$this->config->project}");
+            	}
+            
+                // @todo : put this in a log file
+                $this->finishLog->log($this->process->getPid().' '.$this->process->getOutput());
+                $this->process = null;
+            }
+        };
     }
 
     private function generateName(): string {

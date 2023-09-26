@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class ListShortSyntax extends Analyzer {
-    protected $phpVersion = '7.1+';
+    protected string $phpVersion = '7.1+';
 
     public function analyze(): void {
         // [$a, $b] = [1, 2], insteead of list($a, $b);

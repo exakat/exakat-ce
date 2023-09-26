@@ -116,7 +116,7 @@ class UselessInstruction extends Analyzer {
         $this->prepareQuery();
 
         // return an assigned variable
-        // todo : add support for static, referenc argument, global
+        // @todo : add support for static, referenc argument, global
         $this->atomIs('Return')
              ->analyzerIsNot('self')
              ->atomInsideNoDefinition('Assignation')
@@ -181,7 +181,7 @@ class UselessInstruction extends Analyzer {
         $this->prepareQuery();
 
         // New in a clone
-        $this->atomIs('New')
+        $this->atomIs(array('New', 'Clone'))
              ->inIsIE(array('CODE', 'CLONE'))
              ->atomIs('Clone');
         $this->prepareQuery();

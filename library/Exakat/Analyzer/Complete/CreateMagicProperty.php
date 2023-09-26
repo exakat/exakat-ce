@@ -33,7 +33,6 @@ class CreateMagicProperty extends Complete {
     }
 
     public function analyze(): void {
-
         // Missing : typehinted properties, return typehint, clone
 
         // link to __get
@@ -41,7 +40,7 @@ class CreateMagicProperty extends Complete {
              ->not(
                  $this->side()
                       ->inIs('DEFINITION')
-                      ->atomIs('Propertydefinition')
+                      ->atomIs(array('Propertydefinition', 'Magicmethod'))
              )
              ->not(
                  $this->side()
@@ -76,9 +75,11 @@ class CreateMagicProperty extends Complete {
 
              ->goToAllParentsTraits(self::INCLUDE_SELF)
              ->outIs('MAGICMETHOD')
+             ->atomIs('Magicmethod')
              ->outIs('NAME')
              ->codeIs('__get', self::TRANSLATE, self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
 
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
@@ -89,7 +90,7 @@ class CreateMagicProperty extends Complete {
              ->not(
                  $this->side()
                       ->inIs('DEFINITION')
-                      ->atomIs('Propertydefinition')
+                      ->atomIs(array('Propertydefinition'))
              )
              ->not(
                  $this->side()
@@ -120,6 +121,7 @@ class CreateMagicProperty extends Complete {
              ->outIs('NAME')
              ->codeIs('__set', self::TRANSLATE, self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -129,7 +131,7 @@ class CreateMagicProperty extends Complete {
              ->not(
                  $this->side()
                       ->inIs('DEFINITION')
-                      ->atomIs('Propertydefinition')
+                      ->atomIs(array('Propertydefinition', 'Magicmethod'))
              )
              ->not(
                  $this->side()
@@ -154,6 +156,7 @@ class CreateMagicProperty extends Complete {
              ->outIs('NAME')
              ->codeIs('__isset', self::TRANSLATE, self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -163,7 +166,7 @@ class CreateMagicProperty extends Complete {
              ->not(
                  $this->side()
                       ->inIs('DEFINITION')
-                      ->atomIs('Propertydefinition')
+                      ->atomIs(array('Propertydefinition', 'Magicmethod'))
              )
              ->not(
                  $this->side()
@@ -188,6 +191,7 @@ class CreateMagicProperty extends Complete {
              ->outIs('NAME')
              ->codeIs('__unset', self::TRANSLATE, self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -197,7 +201,7 @@ class CreateMagicProperty extends Complete {
              ->not(
                  $this->side()
                       ->inIs('DEFINITION')
-                      ->atomIs('Propertydefinition')
+                      ->atomIs(array('Propertydefinition', 'Magicmethod'))
              )
              ->not(
                  $this->side()
@@ -223,44 +227,30 @@ class CreateMagicProperty extends Complete {
              ->outIs('NAME')
              ->codeIs('__unset', self::TRANSLATE, self::CASE_INSENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // links to __invoke
+        // @todo : some calls to __invoke are missing! parameters, typed variables
+        // $a = new X; $a();
         $this->atomIs('Magicmethod', self::WITHOUT_CONSTANTS)
              ->outIs('NAME')
-             ->codeIs('__invoke', self::TRANSLATE, self::CASE_INSENSITIVE)
-             ->back('first')
-
-             ->inIs('MAGICMETHOD')
-             ->outIs('DEFINITION')
-             ->inIs('NEW')
-             ->inIs('RIGHT')
-             ->atomIs('Assignation')
-             ->outIs('LEFT')
-             ->inIs('DEFINITION')
-             ->outIs('DEFINITION')
-             ->inIs('NAME')
-             ->atomIs('Functioncall')
-             ->addEFrom('DEFINITION', 'first');
-        $this->prepareQuery();
-
-        // links to __string
-        $this->atomIs('Magicmethod', self::WITHOUT_CONSTANTS)
-             ->outIs('NAME')
-             ->codeIs('__toString', self::TRANSLATE, self::CASE_INSENSITIVE)
+             ->fullcodeIs('__invoke', self::CASE_INSENSITIVE)
              ->back('first')
 
              ->inIs('MAGICMETHOD')
              ->outIs('DEFINITION')
              ->inIs('TYPEHINT')
-             ->outIsIE('PPP') // for properties
+             ->outIsIE('PPP') /// case for properties
              ->outIs('DEFINITION')
-             ->hasIn('CONCAT')
+             ->inIs('NAME')
+             ->atomIs('Functioncall')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
 
-        // $this($a, $b);
+        // $this($a);
         $this->atomIs('Magicmethod', self::WITHOUT_CONSTANTS)
              ->outIs('NAME')
              ->codeIs('__invoke', self::TRANSLATE, self::CASE_INSENSITIVE)
@@ -271,8 +261,26 @@ class CreateMagicProperty extends Complete {
              ->atomIs('This')
              ->inIs('NAME')
              ->atomIs('Functioncall')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
+
+        // links to __string
+        $this->atomIs('Magicmethod', self::WITHOUT_CONSTANTS)
+             ->outIs('NAME')
+             ->fullcodeIs('__tostring', self::CASE_INSENSITIVE)
+             ->back('first')
+
+             ->inIs('MAGICMETHOD')
+             ->outIs('DEFINITION')
+             ->inIs('TYPEHINT')
+             ->outIs('DEFINITION')
+             ->hasIn('CONCAT')
+             ->hasNoLinkYet('DEFINITION', 'first')
+             ->addEFrom('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // @todo add link from echo/print
     }
 }
 

@@ -111,14 +111,14 @@ class RulesetsDev {
     }
 
     public function getSuggestionClass(string $name): array {
-        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name) : bool {
+        return array_filter($this->listAllAnalyzer(), function (string $c) use ($name): bool {
             $l = levenshtein($c, $name);
 
             return $l < 8;
         });
     }
 
-    public function getClass(string $name) : string|bool {
+    public function getClass(string $name): string|bool {
         // accepted names :
         // PHP full name : Analyzer\\Type\\Class
         // PHP short name : Type\\Class

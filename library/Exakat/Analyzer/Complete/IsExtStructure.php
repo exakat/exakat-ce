@@ -22,10 +22,19 @@
 
 namespace Exakat\Analyzer\Complete;
 
+use Exakat\Stubs\Stubs;
 
 class IsExtStructure extends IsStubStructure {
     protected const PROPERTY = 'isExt';
     protected const PDFF     = 'phpExtensions';
+
+    public function analyze(): void {
+        $this->stubs = new Stubs($this->config->dir_root . '/data/extensions/',
+            $this->config->php_extensions ?? array(),
+        );
+
+        $this->_analyze();
+    }
 }
 
 ?>

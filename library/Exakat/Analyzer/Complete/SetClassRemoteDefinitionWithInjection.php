@@ -27,7 +27,6 @@ class SetClassRemoteDefinitionWithInjection extends Complete {
         // function foo(J $j) { $j->method()
         $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->as('parameter')
-              ->outIs('NAME')
               ->outIs('DEFINITION')
               ->inIs(array('OBJECT', 'CLASS'))
               ->atomIs(array('Methodcall', 'Staticmethodcall'), self::WITHOUT_CONSTANTS)
@@ -38,18 +37,18 @@ class SetClassRemoteDefinitionWithInjection extends Complete {
               ->back('first')
               ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs(array('METHOD', 'MAGICMETHOD'))
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'call')
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
 
         // function foo(J $j) { $j->p
         $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->as('parameter')
-              ->outIs('NAME')
               ->outIs('DEFINITION')
               ->inIs('OBJECT')
               ->atomIs('Member', self::WITHOUT_CONSTANTS)
@@ -60,17 +59,17 @@ class SetClassRemoteDefinitionWithInjection extends Complete {
               ->back('first')
               ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'call')
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
 
         // function foo(J $j) { $j::$p
         $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->as('parameter')
-              ->outIs('NAME')
               ->outIs('DEFINITION')
               ->inIs('CLASS')
               ->atomIs('Staticproperty', self::WITHOUT_CONSTANTS)
@@ -81,17 +80,17 @@ class SetClassRemoteDefinitionWithInjection extends Complete {
               ->back('first')
               ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'call')
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
 
         // function foo(J $j) { $j::X
         $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
               ->as('parameter')
-              ->outIs('NAME')
               ->outIs('DEFINITION')
               ->inIs('CLASS')
               ->atomIs('Staticconstant', self::WITHOUT_CONSTANTS)
@@ -102,11 +101,12 @@ class SetClassRemoteDefinitionWithInjection extends Complete {
               ->back('first')
               ->outIs('TYPEHINT')
               ->inIs('DEFINITION')
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs('CONST')
               ->outIs('CONST')
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'call')
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
     }

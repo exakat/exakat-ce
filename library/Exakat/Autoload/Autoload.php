@@ -25,7 +25,7 @@ namespace Exakat\Autoload;
 include __DIR__ . '/Autoloader.php';
 
 class Autoload implements Autoloader {
-    public function autoload(string $name) : void {
+    public function autoload(string $name): void {
         $file = dirname(__DIR__, 2) . '/' . str_replace('\\', DIRECTORY_SEPARATOR, $name) . '.php';
 
         if (file_exists($file)) {
@@ -33,7 +33,7 @@ class Autoload implements Autoloader {
         }
     }
 
-    public static function autoload_test(string $name) : void {
+    public static function autoload_test(string $name): void {
         $file = dirname(__DIR__, 3) . '/tests/analyzer/' . str_replace('\\', DIRECTORY_SEPARATOR, $name) . '.php';
 
         if (file_exists($file)) {
@@ -41,7 +41,7 @@ class Autoload implements Autoloader {
         }
     }
 
-    public static function autoload_phpunit(string $name) : void {
+    public static function autoload_phpunit(string $name): void {
         $fileName = preg_replace('/^([^_]+?)_(.*)$/', '$1' . DIRECTORY_SEPARATOR . '$2', $name);
         $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $fileName);
 
@@ -58,7 +58,7 @@ class Autoload implements Autoloader {
         }
     }
 
-    public function registerAutoload() : void {
+    public function registerAutoload(): void {
         spl_autoload_register(array(self::class, 'autoload'));
     }
 }

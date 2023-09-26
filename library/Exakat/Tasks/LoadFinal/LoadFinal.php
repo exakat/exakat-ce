@@ -23,7 +23,6 @@
 namespace Exakat\Tasks\LoadFinal;
 
 use Exakat\Query\Query;
-use Exakat\Exceptions\GremlinException;
 use Exakat\Log;
 use Exakat\Config;
 use Exakat\Datastore;
@@ -89,12 +88,12 @@ GREMLIN;
         $this->spotFallbackConstants();
         $this->log('spotFallbackConstants');
 
-        $list = array('\Exakat\Tasks\LoadFinal\FixFullnspathConstants',
-                      '\Exakat\Tasks\LoadFinal\FinishIsModified',
-                      '\Exakat\Tasks\LoadFinal\IsInIgnoredDir',
-                      '\Exakat\Tasks\LoadFinal\FinishExtends',
-                      '\Exakat\Tasks\LoadFinal\FinishReadonlyClass',
-                      '\Exakat\Tasks\LoadFinal\FinishPppTypehint',
+        $list = array(FixFullnspathConstants::class,
+                      FinishIsModified::class,
+                      IsInIgnoredDir::class,
+                      FinishExtends::class,
+                      FinishReadonlyClass::class,
+                      FinishPppTypehint::class,
                       );
         foreach ($list as $class) {
             $task = new $class();
@@ -183,7 +182,7 @@ g.V().hasLabel("Usetrait")
 GREMLIN;
         $result = $this->gremlin->query($query);
 
-        display($result->toInt() . ' removed class implements link');
+        display($result->toInt() . ' removed use DEFINITION link');
         $this->log->log(__METHOD__);
     }
 
@@ -192,7 +191,10 @@ GREMLIN;
         display('fixing Fullnspath for Functions');
 
         // Fix fullnspath with definition local to namespace when there is a definition
-        // namesapce x { function substr() ; substr(); }
+        // namespace x { function substr() ; substr(); }
+
+        // @todo : upgrade this to avoid reducing namespaced constants to global
+        // \tests\TEST_CONSTANT -> TEST_CONSTANT
 
         $query = <<<'GREMLIN'
 g.V().hasLabel("Functioncall", "Identifier", "Nsname")
@@ -210,11 +212,12 @@ g.V().hasLabel("Functioncall", "Identifier", "Nsname")
                     .optional(
                         __.hasLabel("Constant").out("NAME")
                     )
+                    .has("fullnspath")
                     .filter{ actual = it.get().value("fullnspath"); cc != actual;}
                  ),
          __.has("isPhp", true).not(__.where(__.in('DEFINITION'))).sideEffect{ actual = '\\' + it.get().value("fullnspath").tokenize('\\\\').last();},
          __.has("isExt", true).not(__.where(__.in('DEFINITION'))).sideEffect{ actual = '\\' + it.get().value("fullnspath").tokenize('\\\\').last();},
-         __.has("isStub", true).not(__.where(__.in('DEFINITION'))).sideEffect{ actual = '\\' + it.get().value("fullnspath").tokenize('\\\\').last();}
+//         __.has("isStub", true).not(__.where(__.in('DEFINITION'))).sideEffect{ actual = '\\' + it.get().value("fullnspath").tokenize('\\\\').last();}
       )
      .select("identifier")
      .sideEffect{ 
@@ -226,22 +229,6 @@ GREMLIN;
 
         display($result->toInt() . ' fixed Fullnspath for Functions and Constants');
         $this->log->log(__METHOD__);
-    }
-
-    private function runQuery(string $query, string $title, array $args = array(), string $method = __METHOD__): void {
-        display($title);
-
-        $this->logTime($title);
-
-        try {
-            $this->gremlin->query($query, $args);
-        } catch (GremlinException $e) {
-            // This should be handled nicely!!!
-        }
-
-        display('   /' . $title);
-        $this->logTime('end ' . $title);
-        $this->log->log($method);
     }
 
     private function spotFallbackConstants(): void {
@@ -348,7 +335,7 @@ GREMLIN;
             $this->gremlin->query($query, array('arg1' => $constConstants));
         }
 
-        // TODO : handle case-insensitive
+        // @todo : handle case-insensitive
         $this->logTime('Constant definitions');
         display('Link constant definitions');
         $this->log->log(__METHOD__);

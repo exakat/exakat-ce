@@ -108,7 +108,7 @@ class Node {
         $this->inside = $inside;
     }
 
-    public function setProperty(string $name, mixed $value) : void {
+    public function setProperty(string $name, mixed $value): void {
         if ($name === 'link') {
             $this->link = $value;
         } else {
@@ -116,15 +116,15 @@ class Node {
         }
     }
 
-    public function getProperty(string $name) : mixed {
+    public function getProperty(string $name): mixed {
         return $this->properties[$name];
     }
 
-    public function getInside() : string {
+    public function getInside(): string {
         return $this->inside;
     }
 
-    public function getAtom() : string {
+    public function getAtom(): string {
         return $this->atom;
     }
 

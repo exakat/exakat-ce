@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy â€“ Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,6 +27,7 @@ use Exakat\Exceptions\InaptPHPBinary;
 use Exakat\Autoload\AutoloadDev;
 use Exakat\Autoload\AutoloadExt;
 use Phar;
+use Exakat\Helpers\Directive;
 
 class Config extends Configsource {
     public const PHP_VERSIONS = Phpexec::VERSIONS_COMPACT;
@@ -163,48 +164,6 @@ class Config extends Configsource {
             }
         }
 
-/*
-        // then read the config for the project in its folder
-        if ($this->commandLineConfig->get('command') === 'onefile') {
-            $project = new Project('onepage');
-            $this->projectConfig = new ProjectConfig($this->projects_root);
-            $this->projectConfig->setProject($project);
-
-            $this->dotExakatConfig     = new EmptyConfig();
-            $this->dotExakatYamlConfig = new EmptyConfig();
-
-        } elseif ($this->commandLineConfig->get('project')->isDefault()) {
-
-            $this->projectConfig   = new EmptyConfig();
-
-            $this->dotExakatConfig = new DotExakatConfig();
-            if (($file = $this->dotExakatConfig->loadConfig($project)) === self::NOT_LOADED) {
-                $this->dotExakatYamlConfig = new DotExakatYamlConfig();
-                $file = $this->dotExakatYamlConfig->loadConfig($project);
-                if ($file !== self::NOT_LOADED) {
-                    $this->configFiles[] = $file;
-                }
-            } else {
-                $this->configFiles[] = $file;
-                $this->dotExakatYamlConfig = new EmptyConfig();
-            }
-
-            $this->projectConfig = new EmptyConfig();
-        } else {
-            $this->projectConfig = new ProjectConfig($this->projects_root);
-            if ($file = $this->projectConfig->loadConfig($this->commandLineConfig->get('project'))) {
-                $this->configFiles[] = $file;
-            }
-
-            $this->dotExakatConfig     = new EmptyConfig();
-            $this->dotExakatYamlConfig = new DotExakatYamlConfig();
-            $file = $this->dotExakatYamlConfig->loadConfig($project);
-            print $file;die();
-            $this->dotExakatYamlConfig = new EmptyConfig();
-        }
-        
-        print_r($configFiles);
-*/
         // build the actual config. Project overwrite commandline overwrites config, if any.
         $this->options = array_merge($this->defaultConfig      ->toArray(),
                                      $this->exakatConfig       ->toArray(),
@@ -214,7 +173,7 @@ class Config extends Configsource {
                                      $this->commandLineConfig  ->toArray()
                                      );
 
-        // todo : consider 'onefile' as a separate config, as the others.
+        // @todo : consider 'onefile' as a separate config, as the others.
         if ($this->commandLineConfig->get('command') === 'onefile') {
             $this->options['project'] = $project;
         }
@@ -223,13 +182,6 @@ class Config extends Configsource {
             !$this->dotExakatConfig->get('project')->isDefault()) {
             $this->options['project'] = $this->dotExakatConfig->get('project');
         }
-        
-//        $this->options['project'] = $this->options['project']->isDefault() ? $this->dotExakatYamlConfig->get('project') : $this->options['project'];
-//        $this->options['project'] = $this->options['project']->isDefault() ? $this->dotExakatConfig->get('project') : $this->options['project'];
-
-//        if ($this->options['project']->isDefault() && $this->commandLineConfig->get('project')->isDefault()) {
-//            $this->options['project'] = $this->dotExakatYamlConfig->get('project');
-//        }
 
         unset($this->options['project_themes']);
         $this->options['configFiles'] = $this->configFiles;
@@ -245,7 +197,7 @@ class Config extends Configsource {
 
         //program has precedence over rulesets
         if (isset($this->commandLineConfig->toArray()['program']) && 
-        	$this->command !== 'export') {
+        	!in_array($this->command, array('export', 'report'), \STRICT_COMPARISON)) {
             $this->options['project_rulesets'] = array();
             $this->options['project_reports'] = array();
         }
@@ -268,10 +220,14 @@ class Config extends Configsource {
             $this->checkSelf();
         }
 
-        $this->options['stubs'] = array_unique(array_merge($this->projectConfig->toArray()['stubs']                      ?? array(),
-                                                           $this->exakatConfig->toArray()['stubs']                       ?? array(),
-                                                           $this->dotExakatConfig->toArray()['stubs']                    ?? array(),
-                                                           $this->commandLineConfig->toArray()['directives']['stubs']    ?? array(),
+		$stubsDirectives = $this->commandLineConfig->toArray()['directives']['stubs'] ?? array();
+		if ($stubsDirectives instanceof Directive) {
+			$stubsDirectives = $stubsDirectives->list();
+		} 
+        $this->options['stubs'] = array_unique(array_merge($this->projectConfig->toArray()['stubs']                              ?? array(),
+                                                           $this->exakatConfig->toArray()['stubs']                               ?? array(),
+                                                           $this->dotExakatConfig->toArray()['stubs']                            ?? array(),
+                                                           $stubsDirectives,
                                             ));
 
         // autoload dev

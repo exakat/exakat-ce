@@ -40,19 +40,26 @@ class NoNullForNative extends Analyzer {
     }
 
     public function analyze(): void {
-        $returnNull = $this->methods->getFunctionsByReturnType('null', Methods::LOOSE);
-        $acceptNull = $this->methods->getArgsByType('null', Methods::INVERSE);
+        $returnNull = $this->readStubs('getFunctionsByReturnType', array('null', Methods::LOOSE));
+        $acceptNull = exakat('methods')->getArgsByType('null', Methods::INVERSE);
 
-        $functions = array();
+        $called = array_flip($this->called->getCalledFunctions());
+        $calledClasses = array_flip($this->called->getCalledClasses());
+
+        $functions 	  = array();
         $allMethods   = array();
 
         foreach ($acceptNull as $position => $list) {
             foreach ($list as $function) {
                 if (!str_contains($function, '::')  ) {
-                    $functions[$position][] = $function;
+                    if (isset($called[$function])) {
+                        $functions[$position][] = $function;
+                    }
                 } else {
-                    list($class, $method) = explode('::', $function);
-                    $allMethods[$class][$position][] = $method;
+                    list($class, $method) = explode('::', $function, 2);
+                    if (isset($calledClasses[$class])) {
+                        $allMethods[$class][$position][] = $method;
+                    }
                 }
             }
         }
@@ -61,6 +68,7 @@ class NoNullForNative extends Analyzer {
         foreach ($functions as $position => $fnp) {
             // NULL literal
             $this->atomIs('Functioncall')
+                 ->analyzerIsNot('self')
                  ->is('isPhp', true)
                  ->fullnspathIs($fnp)
                  ->outWithRank('ARGUMENT', $position)
@@ -70,6 +78,7 @@ class NoNullForNative extends Analyzer {
 
             // from php functions
             $this->atomIs('Functioncall')
+                 ->analyzerIsNot('self')
                  ->is('isPhp', true)
                  ->fullnspathIs($fnp)
                  ->outWithRank('ARGUMENT', $position)
@@ -81,6 +90,7 @@ class NoNullForNative extends Analyzer {
 
             // from custom variables
             $this->atomIs('Functioncall')
+                 ->analyzerIsNot('self')
                  ->is('isPhp', true)
                  ->fullnspathIs($fnp)
                  ->outWithRank('ARGUMENT', $position)
@@ -92,6 +102,7 @@ class NoNullForNative extends Analyzer {
 
             // from typed variables
             $this->atomIs('Functioncall')
+                 ->analyzerIsNot('self')
                  ->is('isPhp', true)
                  ->fullnspathIs($fnp)
                  ->outWithRank('ARGUMENT', $position)
@@ -114,6 +125,7 @@ class NoNullForNative extends Analyzer {
 
             // from typed properties
             $this->atomIs('Functioncall')
+                 ->analyzerIsNot('self')
                  ->is('isPhp', true)
                  ->fullnspathIs($fnp)
                  ->outWithRank('ARGUMENT', $position)
@@ -128,6 +140,7 @@ class NoNullForNative extends Analyzer {
         foreach ($allMethods as $class => $methods) {
             foreach ($methods as $position => $name) {
                 $this->atomIs('Methodcall')
+                     ->analyzerIsNot('self')
                      ->outIs('OBJECT')
                      ->inIs('DEFINITION')
                      ->inIs('PPP')

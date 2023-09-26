@@ -27,72 +27,75 @@ use Exakat\Analyzer\Analyzer;
 class JsonSerializeReturnType extends Analyzer {
     public function analyze(): void {
         // class x implements jsonserialize { function jsonseralize() : int {}}
-/*
-    JsonSerializable::jsonSerialize()
-    SessionHandlerInterface::open()
-    SessionHandlerInterface::close()
-    SessionHandlerInterface::read()
-    SessionHandlerInterface::write()
-    SessionHandlerInterface::destroy()
-    SessionHandlerInterface::gc()
+        /*
+            JsonSerializable::jsonSerialize()
+            SessionHandlerInterface::open()
+            SessionHandlerInterface::close()
+            SessionHandlerInterface::read()
+            SessionHandlerInterface::write()
+            SessionHandlerInterface::destroy()
+            SessionHandlerInterface::gc()
 
-*/
-		// @todo : case for    ReflectionClass::*()
-		$list = array('\\jsonserializable'		=> array('jsonserialize' => '\\mixed'),		
-					  '\\exception' 			=> array('__wakeup'		 => '\\void'),		
-					  '\\filteriterator' 		=> array('accept'		 => '\\bool'),		
-					  '\\countable' 			=> array('count'		 => '\\int'),				
-					  '\\php_user_filter' 		=> array('filter'		 => '\\int'),				
-					  '\\arrayaccess' 			=> array('offsetexists'  => '\\bool',
-					  									 'offsetset' 	 => '\\void',
-					  									 'offsetget' 	 => '\\mixed',
-						  								 'offsetunset' 	 => '\\void',
-						  								),
-					  '\\iterator' 				=> array('next' 	 => '\\void',	
-					  									 'current' 	 => '\\mixed',
-					  									 'valid' 	 => '\\void',
-							  							 'rewind' 	 => '\\void',
-							  							 'key' 	 	 => '\\mixed',
-							  							),
-					  '\\sessionhandlerinterface' => array(	'destroy' 	 	 => '\\bool',
+        */
+        // @todo : case for    ReflectionClass::*()
+        // @todo : support all PHP interfaces implements and classes extends
+        $list = array('\\jsonserializable'		=> array('jsonserialize' => '\\mixed'),
+                      '\\exception' 			=> array('__wakeup'		 => '\\void'),
+                      '\\filteriterator' 		=> array('accept'		 => '\\bool'),
+                      '\\countable' 			=> array('count'		 => '\\int'),
+                      '\\php_user_filter' 		=> array('filter'		 => '\\int'),
+                      '\\arrayaccess' 			=> array('offsetexists'  => '\\bool',
+                                                         'offsetset' 	 => '\\void',
+                                                         'offsetget' 	 => '\\mixed',
+                                                         'offsetunset' 	 => '\\void',
+                                                        ),
+                      '\\iterator' 				=> array('next' 	     => '\\void',
+                                                         'rewind' 	     => '\\void',
+                                                         'valid' 	     => '\\bool',
+                                                         'current' 	     => '\\mixed',
+                                                         'key' 	 	     => '\\mixed',
+                                                        ),
+                      '\\sessionhandlerinterface' => array(	'destroy' 	 => '\\bool',
 //					  										'gc' 	 	 => '\\key',				// int|false
-						  									'write' 	 	 => '\\bool',
-							  								'close' 	 	 => '\\bool',
+                                                            'write' 	 	 => '\\bool',
+                                                            'close' 	 	 => '\\bool',
 //							  								'read' 	 	 => '\\key',				// string|false
-							  								'open' 	 	 => '\\bool',
-							  								),
-					  /*
-					  // Multiple types are not supported yet
-					  '\\recursiveiterator' 	=> array('getchildren'),		// ?RecursiveIterator
-					  '\\iteratoraggregate' 	=> array('getiterator'),		// ?RecursiveIterator
-					  '\\iteratoraggregate' 	=> array('getiterator'),		// ?RecursiveIterator
-							  								*/
-		);
+                                                            'open' 	 	 => '\\bool',
+                                                            ),
+                      /*
+                      // @todo : Multiple types are not supported yet
+                      '\\recursiveiterator' 	=> array('getchildren'),		// ?RecursiveIterator
+                      '\\iteratoraggregate' 	=> array('getiterator'),		// ?RecursiveIterator
+                      '\\iteratoraggregate' 	=> array('getiterator'),		// ?RecursiveIterator
+                      
+                                                              */
 
-		foreach($list as $class => $methods) {
-			foreach($methods as $name => $type) {
-        		$this->atomIs(self::STATIC_NAMES)
-        		     ->fullnspathIs($class)
-        		     ->inIs('IMPLEMENTS')
-        		     ->goToAllChildren(self::INCLUDE_SELF)
-		
-        		     ->goToMethod($name)
-        		     ->not(
-        		         $this->side()
-        		              ->outIs('ATTRIBUTE')
-        		              ->fullnspathIs('\\returntypewillchange')
-        		     )
-        		     ->as('results')
-        		     ->not(
-        		         $this->side()
-        		              ->outIs('RETURNTYPE')
-        		              ->atomIs('Scalartypehint')
-        		              ->fullnspathIs($type)
-        		     )
-        		     ->back('results');
-        		$this->prepareQuery();
-			}
-		}
+        );
+
+        foreach ($list as $class => $methods) {
+            foreach ($methods as $name => $type) {
+                $this->atomIs(self::STATIC_NAMES)
+                     ->fullnspathIs($class)
+                     ->inIs('IMPLEMENTS')
+                     ->goToAllChildren(self::INCLUDE_SELF)
+
+                     ->goToMethod($name)
+                     ->not(
+                         $this->side()
+                              ->outIs('ATTRIBUTE')
+                              ->fullnspathIs('\\returntypewillchange')
+                     )
+                     ->as('results')
+                     ->not(
+                         $this->side()
+                              ->outIs('RETURNTYPE')
+                              ->atomIs('Scalartypehint')
+                              ->fullnspathIs($type)
+                     )
+                     ->back('results');
+                $this->prepareQuery();
+            }
+        }
     }
 }
 

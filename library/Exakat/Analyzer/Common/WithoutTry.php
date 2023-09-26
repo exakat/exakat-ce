@@ -26,8 +26,8 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class WithoutTry extends Analyzer {
-    protected $functions = array();
-    protected $atoms = array();
+    protected array $functions = array();
+    protected array $atoms = array();
 
     public function analyze(): void {
         if (!empty($this->functions)) {

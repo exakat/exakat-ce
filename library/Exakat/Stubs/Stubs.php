@@ -22,19 +22,15 @@
 
 namespace Exakat\Stubs;
 
+use Exakat\Exceptions\NoStubDir;
+
 class Stubs {
     private array  $stubs       = array();
     private string $stubsDir    = '';
 
     public function __construct(string $stubsDir	= '',
-        array $stubsFiles	= array()) {
-        $this->stubsDir = $stubsDir;
-
-        if (empty($stubsDir)) {
-            $files = array();
-        } else {
-            $files = glob($stubsDir . '*');
-        }
+                                array $stubsFiles	= array()) {
+        $files = $this->readFolder($stubsDir);
 
         $all = array_merge($files, $stubsFiles);
         foreach ($all as $file) {
@@ -56,6 +52,39 @@ class Stubs {
             }
             // @todo : Format manuel?
         }
+    }
+
+    private function readFolder(string $stubsDir): array {
+        if (empty($stubsDir)) {
+            return array();
+        }
+
+        if (!file_exists($stubsDir)) {
+            return array();
+        }
+
+        if (!is_dir($stubsDir)) {
+            return array();
+        }
+
+        $files = array();
+        $dh = opendir($stubsDir);
+        if (!$dh) {
+            throw new NoStubDir($stubsbDir);
+        }
+
+        while (($file = readdir($dh)) !== false) {
+            if ($file[0] === '.') {
+                continue;
+            }
+            if (!str_contains($file, '.')) {
+                continue;
+            }
+            $files[] = $file;
+        }
+        closedir($dh);
+
+        return $files;
     }
 
     public function list(): array {

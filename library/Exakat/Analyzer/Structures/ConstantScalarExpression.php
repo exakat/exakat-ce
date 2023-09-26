@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Structures;
 use Exakat\Analyzer\Analyzer;
 
 class ConstantScalarExpression extends Analyzer {
-    protected $phpVersion = '5.6+';
+    protected string $phpVersion = '5.6+';
 
     public function analyze(): void {
         $authorizedAtoms = array('Integer', 'String', 'Float', 'Boolean', 'Void', 'Staticconstant', 'Null', 'Identifier');

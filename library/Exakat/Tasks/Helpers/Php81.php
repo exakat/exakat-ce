@@ -24,7 +24,6 @@ namespace Exakat\Tasks\Helpers;
 
 
 class Php81 extends Php {
-
     // PHP tokens
     public const T_LNUMBER                                          = 260;
     public const T_DNUMBER                                          = 261;

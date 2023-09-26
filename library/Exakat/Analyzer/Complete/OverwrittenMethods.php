@@ -24,6 +24,8 @@ namespace Exakat\Analyzer\Complete;
 
 class OverwrittenMethods extends Complete {
     public function analyze(): void {
+        // @todo : handle change of visibility with use in traits
+        // @todo : handle conflict resolution with use in traits
 
         // This query is more specific than the next
         // class x {use t { t::a as b}}
@@ -54,7 +56,7 @@ class OverwrittenMethods extends Complete {
              ->outIs('NAME')
              ->samePropertyAs('code', 'name',  self::CASE_INSENSITIVE)
              ->back('origin')
-             ->dedup(array('first', 'origin'))
+             ->hasNoLinkYet('OVERWRITE', 'first')
              ->addEFrom('OVERWRITE', 'first');
         $this->prepareQuery();
 
@@ -84,7 +86,7 @@ class OverwrittenMethods extends Complete {
              ->hasNoOut('METHOD')
              ->samePropertyAs('code', 'name',  self::CASE_INSENSITIVE)
              ->back('origin')
-             ->dedup(array('first', 'origin'))
+             ->hasNoLinkYet('OVERWRITE', 'first')
              ->addEFrom('OVERWRITE', 'first');
         $this->prepareQuery();
 
@@ -102,16 +104,16 @@ class OverwrittenMethods extends Complete {
              ->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS) // No virtualmethod here
              ->as('origin')
              ->outIs('NAME')
-             ->samePropertyAs('code', 'name',  self::CASE_INSENSITIVE)
+             ->samePropertyAs('lccode', 'name',  self::CASE_INSENSITIVE)
              ->back('origin')
-             ->dedup(array('first', 'origin'))
+             ->hasNoLinkYet('OVERWRITE', 'first')
              ->addEFrom('OVERWRITE', 'first');
         $this->prepareQuery();
 
         // interface x { protected function foo()  {}}
         // interface xx extends x { protected function foo()  {}}
         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
-             ->hasNoOut('OVERWRITE')
+             ->hasNoIn('OVERWRITE')
              ->outIs('NAME')
              ->savePropertyAs('lccode', 'name')
              ->goToInterface()
@@ -122,7 +124,7 @@ class OverwrittenMethods extends Complete {
              ->samePropertyAs('code', 'name',  self::CASE_INSENSITIVE)
              ->inIs('NAME')
              ->as('origin')
-             ->dedup(array('first', 'origin'))
+             ->hasNoLinkYet('OVERWRITE', 'first')
              ->addETo('OVERWRITE', 'first');
         $this->prepareQuery();
 
@@ -132,7 +134,12 @@ class OverwrittenMethods extends Complete {
              ->atomIs('Virtualmethod')
              ->outIs('DEFINITION')
              ->as('origin')
-             ->dedup(array('first', 'origin'))
+             ->not(
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->raw('where(eq("first"))')
+             )
+             ->hasNoLinkYet('OVERWRITE', 'first')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
     }

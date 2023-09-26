@@ -3,6 +3,7 @@
 namespace Exakat\Dump;
 
 use Exakat\Reports\Helpers\Results;
+use const STRICT_COMPARISON;
 
 class Dump2 extends Dump1 {
     private const VERSION = 2;
@@ -264,7 +265,7 @@ SQL;
             $cols = implode(', ', $list);
         }
 
-        if (!in_array($table, $this->tablesList)) {
+        if (!in_array($table, $this->tablesList, STRICT_COMPARISON)) {
             return new Results();
         }
 
@@ -313,7 +314,7 @@ SQL;
     }
 
     public function getCit(string $type = 'class'): Results {
-        assert(in_array($type, array('class', 'trait', 'interface')));
+        assert(in_array($type, array('class', 'trait', 'interface'), STRICT_COMPARISON));
 
         $query = "SELECT name FROM cit WHERE type='$type' ORDER BY name";
 
@@ -358,13 +359,17 @@ SELECT properties.*,
        cit.type AS type,
        lower(namespaces.namespace) || lower(cit.name) || '::' || lower(properties.property) AS fullnspath,
        cit.name AS class,
-       cit.file AS file
+       cit.file AS file,
+       group_concat(typehints.name) AS typehint
 
     FROM properties
     JOIN cit
         ON properties.citId = cit.id
     JOIN namespaces 
         ON cit.namespaceId = namespaces.id
+    LEFT JOIN typehints
+        ON properties.id = typehints.object AND
+          typehints.type = 'property'
     GROUP BY properties.id
 SQL
         );
@@ -385,17 +390,20 @@ SELECT methods.*,
        cit.name AS class,
        cit.file AS file,
        methods.begin AS line,
-       group_concat(typehints.name) AS typehint
+       group_concat(typehints.name) AS returntype
 
     FROM methods
     LEFT JOIN typehints
-        ON methods.id = typehints.object
+        ON methods.id = typehints.object AND
+          typehints.type = 'method'
     LEFT JOIN arguments
         ON methods.id = arguments.methodId
     JOIN cit
         ON methods.citId = cit.id
     JOIN namespaces 
         ON cit.namespaceId = namespaces.id
+	WHERE methods.method = 'isError'
+
     GROUP BY methods.id
 SQL
         );
@@ -407,22 +415,26 @@ SQL
         $res = $this->sqlite->query(<<<'SQL'
 SELECT lower(namespaces.namespace) || lower(functions.function) AS fullnspath,
        functions.function,
+       functions.type,
        arguments.name AS argument,
        init,
-       typehint,
-       typehint_fnp,
+       group_concat(typehints.fnp) as typehint, 
        rank,
        arguments.line,
        files.file AS file,
        functions.begin AS line,
-       type as type
+       functions.type as type
 FROM functions
 JOIN arguments 
     ON functions.id = arguments.methodId
 LEFT JOIN namespaces 
     ON functions.namespaceId = namespaces.id
+LEFT JOIN typehints 
+    ON arguments.id = typehints.object AND
+    	typehints.type = 'argument'
 JOIN files
     ON functions.file = files.id
+GROUP BY functions.id
 SQL
         );
 
@@ -432,16 +444,20 @@ SQL
     public function fetchTableFunctionsByReturnType(): Results {
         $res = $this->sqlite->query(<<<'SQL'
 SELECT namespaces.namespace || lower(functions.function) AS fullnspath,
-       returntype, 
-       type,
+       group_concat(typehints.fnp) as returntype, 
+       functions.type,
        functions.function,
        files.file AS file,
        functions.begin AS line
 FROM functions
 LEFT JOIN namespaces 
     ON functions.namespaceId = namespaces.id
+LEFT JOIN typehints 
+    ON functions.id = typehints.object AND
+    	typehints.type = 'function'
 JOIN files
     ON functions.file = files.id
+GROUP BY functions.id
 SQL
         );
 
@@ -463,10 +479,11 @@ SELECT cit.type || ' ' || cit.name AS theClass,
        arguments.line,
        cit.file
 FROM cit
-LEFT JOIN methods 
+JOIN methods 
     ON methods.citId = cit.id
 LEFT JOIN typehints 
-    ON methods.id = typehints.object
+    ON methods.id = typehints.object AND
+    	typehints.type = 'method'
 LEFT JOIN arguments 
     ON methods.id = arguments.methodId AND
        arguments.citId != 0
@@ -1070,6 +1087,51 @@ SQL;
         $result = $this->sqlite->query($query);
         return new Results($result);
     }
+
+    public function getClassesDependencies(): Results {
+        $query = <<<'SQL'
+SELECT *, count(*) AS count
+    FROM classesDependencies
+    GROUP BY including, included, type
+    ORDER BY COUNT(*), including, included, type
+SQL;
+        $result = $this->sqlite->query($query);
+        return new Results($result);
+    }
+
+    public function getClassInjectionCounts(): Results {
+        $query = <<<'SQL'
+SELECT *, COUNT(DISTINCT included) AS count
+    FROM classesDependencies
+    GROUP BY including
+    ORDER BY COUNT(DISTINCT included) DESC
+SQL;
+        $result = $this->sqlite->query($query);
+        return new Results($result);
+    }
+
+    public function getClassesDependenciesIncludingCount(): Results {
+        $query = <<<'SQL'
+SELECT *, COUNT(DISTINCT included) AS count
+    FROM classesDependencies
+    GROUP BY including
+    ORDER BY COUNT(DISTINCT included) DESC
+SQL;
+        $result = $this->sqlite->query($query);
+        return new Results($result);
+    }
+
+    public function getClassesDependenciesIncludedCount(): Results {
+        $query = <<<'SQL'
+SELECT included_name AS including_name, including AS including, COUNT(DISTINCT including) AS count
+    FROM classesDependencies
+    GROUP BY included
+    ORDER BY COUNT(DISTINCT including) DESC
+SQL;
+        $result = $this->sqlite->query($query);
+        return new Results($result);
+    }
+
 
     public function getConstructorDependencies(): Results {
         $query = <<<'SQL'

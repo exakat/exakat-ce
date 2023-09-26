@@ -25,7 +25,6 @@ namespace Exakat\Tasks\Helpers;
 use Exakat\Exceptions\NoRecognizedTokens;
 
 abstract class Php {
-
     // Exakat home-made tokens
     public const T_BANG                         = '!';
     public const T_CLOSE_BRACKET                = ']';
@@ -254,7 +253,7 @@ abstract class Php {
             throw new NoRecognizedTokens('<No token provided>');
         }
 
-        $versions = array('Php82', 'Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
+        $versions = array('Php83', 'Php82', 'Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
 
         foreach ($versions as $version) {
             $errors = array_filter($tokens,

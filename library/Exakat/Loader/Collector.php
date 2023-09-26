@@ -26,6 +26,7 @@ namespace Exakat\Loader;
 use Exakat\Tasks\Helpers\Atom;
 use Sqlite3;
 use Exakat\Datastore;
+use Exakat\Tasks\Helpers\AtomInterface;
 
 class Collector extends Loader {
     private array $cit        = array();
@@ -34,7 +35,7 @@ class Collector extends Loader {
 
     private Datastore $datastore;
 
-    public function __construct(Sqlite3 $sqlite, Atom $id0) {
+    public function __construct(Sqlite3 $sqlite, Atom $id0, bool $withWs = AtomInterface::WITHOUT_WS) {
         $this->datastore = exakat('datastore');
     }
 

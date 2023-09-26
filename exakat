@@ -1,5 +1,7 @@
 <?php
 
+$begin = hrtime(true);
+
 try {
     if (version_compare(PHP_VERSION, '7.3.0') < 0) {
         die("Exakat requires PHP 7.3 or more recent to run : ".PHP_VERSION." provided, located in {$_ENV[_]}. \n");

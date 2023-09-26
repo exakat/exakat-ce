@@ -25,7 +25,9 @@ namespace Exakat;
 use Exakat\Config;
 use Exakat\Exceptions\WrongNumberOfColsForAHash;
 use Exakat\Exceptions\NoStructureForTable;
-use \Sqlite3;
+use Exakat\Exceptions\NoSuchHash;
+use Sqlite3;
+use DateTimeImmutable;
 
 class Datastore {
     public const CREATE = 1;
@@ -34,7 +36,7 @@ class Datastore {
     public const TIMEOUT_READ = 6000;
 
     private Sqlite3 $sqliteRead;
-    private Sqlite3$sqliteWrite;
+    private Sqlite3 $sqliteWrite;
     private Config $config;
 
     public function __construct(Config $config) {
@@ -56,7 +58,7 @@ class Datastore {
         $this->cleanTable('hash');
         $this->addRow('hash', array('exakat_version'       => Exakat::VERSION,
                                     'exakat_build'         => Exakat::BUILD,
-                                    'datastore_creation'   => date('r', time()),
+                                    'datastore_creation'   => (new DateTimeImmutable())->format('r'),
                                     'project'              => $this->config->project,
                                     'project_description'  => $this->config->project_description,
                                     'write_acces'          => 0,
@@ -185,7 +187,7 @@ class Datastore {
             }
 
             $list = makeList($d);
-            $query = "DELETE FROM $table WHERE $col IN (" . makeList($d) . ')';
+            $query = "DELETE FROM $table WHERE $col IN (" . $list . ')';
             $this->sqliteWrite->querySingle($query);
         }
 
@@ -215,11 +217,10 @@ class Datastore {
         try {
             $res = $this->sqliteRead->query($query);
         } catch (\Throwable $e) {
-        	$res = null;
             // This also catch when the datastore is not available
         }
 
-		if ($res === null) {
+		if (!isset($res)) {
 			return array();
 		}
 
@@ -236,17 +237,18 @@ class Datastore {
         try {
             $stmt = $this->sqliteRead->prepare($query);
         } catch (\Exception $e) {
-            $stmt = null;
+        	throw new NoSuchHash($key);
         }
-        if ($stmt === null) {
-            return null;
-        }
+
+		if (!isset($stmt)) {
+			return null;
+		}
         $stmt->bindValue(':key', $key, \SQLITE3_TEXT);
 
         $res = $stmt->execute();
 
         if ($res === false) {
-            return null;
+        	throw new NoSuchHash($key);
         }
 
         $row = $res->fetchArray(\SQLITE3_ASSOC);
@@ -332,6 +334,7 @@ class Datastore {
         }
 
         switch($table) {
+            case 'compilation83' :
             case 'compilation82' :
             case 'compilation81' :
             case 'compilation80' :

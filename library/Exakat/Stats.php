@@ -43,7 +43,7 @@ class Stats {
 		return true;
 	}
 
-	public function __get(string $name) : miixed {
+	public function __get(string $name) : mixed {
 		if (isset($this->stats[$name])) {
 			return $this->stats[$name];
 		} else {

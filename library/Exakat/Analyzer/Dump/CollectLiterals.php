@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Dump;
 use Exakat\Dump\Dump;
 
 class CollectLiterals extends AnalyzerTable {
-    protected string $analyzerName = 'Local Variable Counts';
+    protected string $analyzerName = 'Literal values';
 
     public function analyze(): void {
         $types = array('Integer', 'Float', 'String', 'Heredoc', 'Arrayliteral');
@@ -61,22 +61,8 @@ map{
 GREMLIN
                  );
             $this->prepareQuery();
-            $this->execQuery();
         }
-        /*
-               $otherTypes = array('Null', 'Boolean', 'Closure');
-               foreach($otherTypes as $type) {
-                    $query = <<<GREMLIN
-        g.V().hasLabel("$type").count();
-        GREMLIN;
-                    $total = $this->gremlin->query($query)->toInt();
-
-                    $query = "INSERT INTO resultsCounts (analyzer, count) VALUES (\"$type\", $total)";
-                    $this->sqlite->query($query);
-                    display( "Other $type : $total\n");
-               }
-        */
-
+        
         $this->analyzerTable = 'stringEncodings';
         $this->analyzerSQLTable = <<<'SQL'
 CREATE TABLE stringEncodings (  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -86,7 +72,7 @@ CREATE TABLE stringEncodings (  id INTEGER PRIMARY KEY AUTOINCREMENT,
                               )
 SQL;
 
-        //, 'Concatenation', 'Heredoc' too
+        // @todo 'Concatenation', 'Heredoc' too
         $this->atomIs('String')
              ->raw(<<<'GREMLIN'
 map{ 
@@ -113,7 +99,7 @@ GREMLIN
 
         $report = array();
 
-        // todo : we need all the other tables of literals
+        // @todo : we need all the other tables of literals
         $dump = Dump::factory($this->config->dump);
         $r = $dump->fetchTable('literalString', array('name'));
         $report['string'] = $r->toArray();

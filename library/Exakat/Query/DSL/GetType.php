@@ -28,6 +28,9 @@ class GetType extends DSL {
     public function run(): Command {
         list($variable) = func_get_args();
 
+        $check = $this->dslfactory->factory('initVariable');
+        $return = $check->run($variable);
+
         return new Command(<<<GREMLIN
 coalesce(
     __.hasLabel("String", "Heredoc", "Concatenation").sideEffect{ type = "\\\\string"; },

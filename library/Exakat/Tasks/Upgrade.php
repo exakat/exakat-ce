@@ -73,36 +73,37 @@ class Upgrade extends Tasks {
         if (version_compare(Exakat::VERSION, $version) !== 0) {
             echo 'This version may be updated from the current version ' , Exakat::VERSION , ' to ' , $version  , PHP_EOL;
 
-            if ($this->config->update === true) {
-                echo '  Updating to version ' , $version , PHP_EOL;
-                preg_match('#<pre id="sha256"><a href="index.php\?file=exakat-' . $version . '.phar.sha256">(.*?)</pre>#', $html, $r);
-                $sha256 = strip_tags($r[1]);
-
-                // Read what we can
-                $phar = (string) @file_get_contents('https://www.exakat.io/versions/index.php?file=exakat-' . $version . '.phar');
-
-                if (hash('sha256', $phar) !== $sha256) {
-                    print 'Error while checking exakat.phar\'s checksum. Aborting update. Please, try again' . PHP_EOL;
-                    return;
-                }
-
-                $path = sys_get_temp_dir() . '/exakat.1.phar';
-                file_put_contents($path, $phar);
-                print 'Setting up exakat.phar' . PHP_EOL;
-                rename($path, 'exakat.phar');
-
-                return;
-            } else {
+            if ($this->config->update !== true) {
                 print '  You may run this command with -u option to upgrade to the latest exakat version.' . PHP_EOL;
                 return;
             }
-        } elseif (version_compare(Exakat::VERSION, $r[1]) === 0) {
-            print 'This is the latest version (' . Exakat::VERSION . ')' . PHP_EOL;
-            return;
-        } else {
-            print 'This version is ahead of the latest publication (Current : ' . Exakat::VERSION . ', Latest: ' . $r[1] . ')' . PHP_EOL;
+
+            echo '  Updating to version ' , $version , PHP_EOL;
+            preg_match('#<pre id="sha256"><a href="index.php\?file=exakat-' . $version . '.phar.sha256">(.*?)</pre>#', $html, $r);
+            $sha256 = strip_tags($r[1]);
+
+            // Read what we can
+            $phar = (string) file_get_contents('https://www.exakat.io/versions/index.php?file=exakat-' . $version . '.phar');
+
+            if (hash('sha256', $phar) !== $sha256) {
+                print 'Error while checking exakat.phar\'s checksum. Aborting update. Please, try again' . PHP_EOL;
+                return;
+            }
+
+            $path = sys_get_temp_dir() . '/exakat.1.phar';
+            file_put_contents($path, $phar);
+            print 'Setting up exakat.phar' . PHP_EOL;
+            rename($path, 'exakat.phar');
+
             return;
         }
+
+        if (version_compare(Exakat::VERSION, $r[1]) === 0) {
+            print 'This is the latest version (' . Exakat::VERSION . ')' . PHP_EOL;
+            return;
+        }
+
+        print 'This version is ahead of the latest publication (Current : ' . Exakat::VERSION . ', Latest: ' . $r[1] . ')' . PHP_EOL;
     }
 }
 

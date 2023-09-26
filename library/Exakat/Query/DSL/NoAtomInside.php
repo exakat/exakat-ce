@@ -36,7 +36,7 @@ class NoAtomInside extends DSL {
 
         $gremlin = <<<GREMLIN
 not(
-    where( __.repeat( __.out($linksDown).not(hasLabel("Closure", "Arrowfunction", "Class", "Function", "Classanonymous")) ).emit( )
+    where( __.repeat( __.out($linksDown).not(hasLabel("Closure", "Arrowfunction", "Class", "Function", "Classanonymous", "Enum", "Trait")) ).emit( )
                      .times($MAX_LOOPING)
                      .hasLabel(within(***)) 
           )

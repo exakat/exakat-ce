@@ -38,7 +38,8 @@ class FollowValue extends DSL {
                 break;
         }
 
-        // Coalesce is not supported
+        // #todo : limit propagation to write/read sequences
+        // #todo : Coalesce and ternary is not supported
         return new Command(<<<GREMLIN
 repeat(
     __.timeLimit($TIME_LIMIT).union(
@@ -47,14 +48,17 @@ repeat(
 
 		// By name
         // foo(c: \$a) => function (\$c)
-        __.as('a').has("rankName").in("ARGUMENT").in("DEFINITION").out("ARGUMENT").as("b").where("a", eq("b") ).by("rankName").by(out("NAME").values("fullcode")).out("DEFINITION"),
+        __.as('a').has("rankName").in("ARGUMENT").in("DEFINITION").hasLabel("Method", "Magicmethod", "Function", "Arrowfunction", "Closure").out("ARGUMENT").as("b").where("a", eq("b") ).by("rankName").by(out("NAME").values("fullcode")).out("DEFINITION"),
 
 		// By position
         // foo(\$a) => function (\$c)
-        __.as('a').not(has("rankName")).in("ARGUMENT").in("DEFINITION").out("ARGUMENT").as("b").where("a", eq("b") ).by("rank").out("DEFINITION"),
+        __.as('a').not(has("rankName")).in("ARGUMENT").in("DEFINITION").hasLabel("Method", "Magicmethod", "Function", "Arrowfunction", "Closure").out("ARGUMENT").as("b").where("a", eq("b") ).by("rank").out("DEFINITION"),
 
         // foo(bar(\$a)) => function foo(\$c)
         __.in("RETURNED").out("DEFINITION"),
+
+        // foreach(\$a as $\b)
+        __.in("SOURCE").out("VALUE", "INDEX").in('DEFINITION').out('DEFINITION'),
 
         // global
         __.hasLabel("Variable").in('DEFINITION').as('c').in('DEFINITION').hasLabel('Virtualglobal').out('DEFINITION').out('DEFINITION'),

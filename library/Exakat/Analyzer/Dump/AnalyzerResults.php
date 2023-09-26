@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,9 +24,9 @@ namespace Exakat\Analyzer\Dump;
 
 
 abstract class AnalyzerResults extends AnalyzerDump {
-    protected $storageType = self::QUERY_RESULTS;
+    protected int $storageType = self::QUERY_RESULTS;
 
-    protected $dumpQueries = array();
+    protected array $dumpQueries = array();
 
     public function prepareQuery(): void {
         ++$this->queryId;
@@ -36,7 +36,7 @@ abstract class AnalyzerResults extends AnalyzerDump {
         ++$this->queryCount;
 
         $c = $result->toArray();
-        if (!is_array($c) || !isset($c[0])) {
+        if (!isset($c[0])) {
             return ;
         }
 
@@ -44,20 +44,19 @@ abstract class AnalyzerResults extends AnalyzerDump {
         $this->rowCount       += count($c);
 
         $valuesSQL = array();
-        foreach($c as $row) {
+        foreach ($c as $row) {
             $row = array_map(array('\\Sqlite3', 'escapeString'), $row);
             $row['analyzer']  = $this->shortAnalyzer;
             $valuesSQL[] = "(NULL, '" . implode("', '", $row) . "', 0) \n";
         }
 
         $chunks = array_chunk($valuesSQL, SQLITE_CHUNK_SIZE);
-        foreach($chunks as $chunk) {
+        foreach ($chunks as $chunk) {
             $query = 'INSERT INTO results VALUES ' . implode(', ', $chunk);
             $this->dumpQueries[] = $query;
         }
 
         $this->dumpQueries[] = "INSERT INTO resultsCounts (\"id\", \"analyzer\", \"count\") VALUES (NULL, '{$this->shortAnalyzer}', " . (count($valuesSQL)) . ')';
-
     }
 
     public function execQuery(): int {

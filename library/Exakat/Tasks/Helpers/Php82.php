@@ -24,7 +24,6 @@ namespace Exakat\Tasks\Helpers;
 
 
 class Php82 extends Php {
-
     // PHP tokens
     public const T_LNUMBER                                          = 260;
     public const T_DNUMBER                                          = 261;
@@ -173,6 +172,5 @@ class Php82 extends Php {
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 404;
     public const T_BAD_CHARACTER                                    = 405;
     public const T_DOUBLE_COLON                                     = 397;
-    public const T_CHARACTER                                        = 1000;
 }
 ?>

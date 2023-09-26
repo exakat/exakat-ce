@@ -25,12 +25,12 @@ namespace Exakat\Analyzer\Structures;
 use Exakat\Analyzer\Analyzer;
 
 class NoEmptyRegex extends Analyzer {
-    public static $pregFunctions = array('\\preg_match_all',
-                                         '\\preg_match',
-                                         '\\preg_replace',
-                                         '\\preg_replace_callback',
-                                         '\\preg_relace_callback_array',
-                                         );
+    public static array $pregFunctions = array('\\preg_match_all',
+                                               '\\preg_match',
+                                               '\\preg_replace',
+                                               '\\preg_replace_callback',
+                                               '\\preg_relace_callback_array',
+                                               );
 
     public function analyze(): void {
         // preg_match(''.$b, $d, $d); Empty delimiter

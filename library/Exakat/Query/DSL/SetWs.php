@@ -34,8 +34,12 @@ class SetWs extends DSL {
         $code = array();
         $arguments = array();
         foreach ($values as $name => $value) {
-            $code[] = "j[\"$name\"] = ***;";
-            $arguments[] = $value;
+            if ($this->isVariable($value)) {
+                $code[] = "j[\"$name\"] = $value;";
+            } else {
+                $code[] = "j[\"$name\"] = ***;";
+                $arguments[] = $value;
+            }
         }
 
         $codeGremlin = implode(PHP_EOL, $code);

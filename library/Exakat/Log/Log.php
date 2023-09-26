@@ -22,8 +22,10 @@
 
 namespace Exakat\Log;
 
+use SplFileObject;
+
 class Log {
-    private $file = null;
+    private ?SplFileObject $file = null;
     private string $name = '';
 
     public function __construct(string $name = '') {
@@ -46,9 +48,9 @@ class Log {
         }
 
         if (file_exists("$dir/log/{$this->name}.log")) {
-            $this->file = fopen("$dir/log/{$this->name}.log", 'a');
+            $this->file = new SplFileObject("$dir/log/{$this->name}.log", 'a');
         } else {
-            $this->file = fopen("$dir/log/{$this->name}.log", 'w+');
+            $this->file = new SplFileObject("$dir/log/{$this->name}.log", 'w+');
         }
 
         if (!$this->file) {
@@ -63,7 +65,7 @@ class Log {
             return;
         }
 
-        fwrite($this->file, $message . PHP_EOL);
+        $this->file->fwrite($message . PHP_EOL);
     }
 }
 

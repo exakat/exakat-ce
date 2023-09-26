@@ -36,12 +36,12 @@ class Namespaces extends Fileset {
         }
     }
 
-    public function setFiles(array $files) {
+    public function setFiles(array $files): void {
         // No feature here, as namespaces can only be filtered after load
 
         // Nothing to do, just pass the files to the next
-        $this->files = $files;
-        $this->ignoredFiles = array();
+        $this->files   = $files;
+        $this->ignored = array();
     }
 
     public function filterFile(array $result): bool {

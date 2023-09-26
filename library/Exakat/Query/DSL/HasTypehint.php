@@ -23,12 +23,18 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Query\Query;
+
 class HasTypehint extends DSL {
     public function run(): Command {
         $this->assertArguments(1, func_num_args(), __METHOD__);
         list($typehints) = func_get_args();
 
         // @todo handle case sensitive, like fullnspathIs()
+
+        if (empty($typehints)) {
+            return new Command(Query::STOP_QUERY);
+        }
         if (!is_array($typehints)) {
             $typehints = array($typehints);
         }

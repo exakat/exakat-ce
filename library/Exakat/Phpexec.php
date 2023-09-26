@@ -23,12 +23,13 @@
 namespace Exakat;
 
 use Exakat\Exceptions\NoPhpBinary;
+use Throwable;
 
 class Phpexec {
     private const CLI_OR_DOCKER_REGEX = '#[a-z0-9]+:[a-z0-9]+#i';
 
-    public const VERSIONS         = array('5.2', '5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2');
-    public const VERSIONS_COMPACT = array('52',  '53',  '54',  '55',  '56',  '70',  '71',  '72',  '73',  '74',  '80',  '81',  '82');
+    public const VERSIONS         = array('5.2', '5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3');
+    public const VERSIONS_COMPACT = array('52',  '53',  '54',  '55',  '56',  '70',  '71',  '72',  '73',  '74',  '80',  '81',  '82',  '83');
 
     private string $phpexec        = 'php';
     private static array $extraTokens    = array(';'       => 'T_SEMICOLON',
@@ -190,7 +191,7 @@ class Phpexec {
             $res = shell_exec($shell);
             try {
                 eval("\$tokens = $res;");
-            } catch (\Throwable $t) {
+            } catch (Throwable $t) {
                 $tokens = array();
             }
 
@@ -364,7 +365,7 @@ class Phpexec {
         );
     }
 
-    public function getConfiguration(string $name = null) : mixed {
+    public function getConfiguration(?string $name = null) : mixed {
         if ($name === null) {
             return $this->config;
         } elseif (isset($this->config[$name])) {
@@ -388,7 +389,7 @@ class Phpexec {
         } else {
             try {
                 $crc = random_int(0, PHP_INT_MAX);
-            } catch (\Throwable $t) {
+            } catch (Throwable $t) {
                 $crc = (int) microtime(\TIME_AS_NUMBER);
             }
 
@@ -416,7 +417,7 @@ PHP;
                     } else {
                         $this->config = array();
                     }
-                } catch(\Throwable $e) {
+                } catch(Throwable $t) {
                     $this->config = array();
                 }
             } else {

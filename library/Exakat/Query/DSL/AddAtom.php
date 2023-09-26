@@ -35,7 +35,7 @@ class AddAtom extends DSL {
             if (!$this->isVariable((string) $value)) {
                 $value = $this->protectValue($value);
             }
-            $sideEffect = new Command('sideEffect{ it.get().property("' . $name . '", ' . $value . ');}');
+            $sideEffect = new Command('sideEffect{ it.get().property("' . $name . '", ' . str_replace('$', '\\$',$value) . ');}');
 
             $return->add($sideEffect);
         }

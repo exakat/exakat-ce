@@ -28,23 +28,26 @@ use Exakat\Analyzer\Analyzer;
 class UndefinedInterfaces extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/VariableTypehint',
-                     'Complete/ReturntTypehint',
+                     'Complete/ReturnTypehint',
+                     'Complete/IsPhpStructure',
+                     'Complete/IsExtStructure',
+                     'Complete/IsStubStructure',
                     );
     }
 
     public function analyze(): void {
         // interface used in a class
+        // interface extending another interface
         $this->atomIs(self::CLASSES_ALL)
-             ->outIs('IMPLEMENTS')
+             ->outIs(array('IMPLEMENTS'))
              ->hasNoIn('DEFINITION')
              ->isNot('isPhp', true)
              ->isNot('isExt', true)
              ->isNot('isStub', true);
         $this->prepareQuery();
 
-        // interface extending another interface
         $this->atomIs('Interface')
-             ->outIs('EXTENDS')
+             ->outIs(array('EXTENDS'))
              ->hasNoIn('DEFINITION')
              ->isNot('isPhp', true)
              ->isNot('isExt', true)

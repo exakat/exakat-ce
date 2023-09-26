@@ -123,6 +123,13 @@ class NonStaticMethodsCalledStatic extends Analyzer {
              ->isNot('static', true)
              ->back('first');
         $this->prepareQuery();
+
+        // the method is defined in a pdff
+        $methods = $this->readStubs('getMethodList');
+        $this->atomIs('Staticmethodcall')
+             ->fullnspathIs($methods)
+             ->back('first');
+        $this->prepareQuery();
     }
 }
 

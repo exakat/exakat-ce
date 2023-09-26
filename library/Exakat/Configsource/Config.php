@@ -50,7 +50,7 @@ abstract class Config {
         return $this->config;
     }
 
-    public function get(string $index) : mixed {
+    public function get(string $index): mixed {
         if (!isset($this->config[$index])) {
             print 'No such config as ' . $index . ' in ' . static::class . PHP_EOL;
             return null;
@@ -160,7 +160,7 @@ abstract class Config {
     }
 
     protected function cleanFileExtensions(array $extensions): array {
-        $filter = function (?string $s) : string {
+        $filter = function (?string $s): string {
             if (!is_string($s)) {
                 return '';
             }
@@ -173,7 +173,7 @@ abstract class Config {
     }
 
     protected function cleanProjectReports(array $reports): array {
-        $filter = function (mixed $s) : string {
+        $filter = function (mixed $s): string {
             if (!is_string($s)) {
                 return '';
             }

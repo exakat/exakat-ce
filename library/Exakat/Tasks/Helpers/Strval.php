@@ -22,6 +22,8 @@
 
 namespace Exakat\Tasks\Helpers;
 
+use Exakat\Phpexec;
+
 class Strval extends Plugin {
     public const NO_VALUE = null;
 
@@ -31,8 +33,17 @@ class Strval extends Plugin {
                               'Interface'      => 1,
                              );
 
-    public $name = 'noDelimiter';
-    public $type = 'string';
+    public string  $name = 'noDelimiter';
+    public string  $type = 'string';
+    public array   $constants = array();
+    public Phpexec $php;
+
+    public function __construct(array $constants, Phpexec $php) {
+        parent::__construct();
+
+        $this->constants = $constants;
+        $this->php = $php;
+    }
 
     public function run(Atom $atom, array $extras): void {
         if (isset($this->skipAtoms[$atom->atom])) {
@@ -85,7 +96,6 @@ class Strval extends Plugin {
 
             case 'Float' :
             case 'String' :
-            case 'Identifier': // Nsname creates a fatal error
                 if (empty($extras)) {
                     $atom->noDelimiter = trimOnce($atom->code);
                 } else {
@@ -251,7 +261,27 @@ class Strval extends Plugin {
                 }
                 break;
 
+            case 'Nsname': // Nsname creates a fatal error
+                if (isset($this->constants[$atom->fullnspath])) {
+                    $atom->noDelimiter = $this->constants[$atom->fullnspath];
+                }
+                $atom->noDelimiter == null;
+                break;
+                // fallthrough
+
+            case 'Identifier':
+                // PHP 8+, no value
+                // PHP 7-, the eponynous value
+                if (version_compare($this->php->getVersion(), '8.0.0') <= 0 &&
+                    $atom->noDelimiter === null
+                ) {
+                    $atom->noDelimiter = $atom->fullcode;
+                }
+                break;
+
             case 'Functioncall' :
+            case 'Methodcall' :
+            case 'Staticmethodcall' :
             case 'Self' :
             case 'Parent' :
                 $atom->noDelimiter = null;
@@ -261,9 +291,13 @@ class Strval extends Plugin {
                 $atom->noDelimiter = $atom->fullcode;
                 break;
 
+            case 'Cast' :
+                $atom->noDelimiter = $extras['CAST']->noDelimiter;
+                break;
+
             default :
-            // Nothing, really
-            }
+                // Nothing, really
+        }
     }
 }
 

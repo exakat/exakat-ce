@@ -27,6 +27,7 @@ use Exakat\Vcs\Vcs;
 use Exakat\Export\Export as ExportFormat;
 use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Phpexec;
+use const STRICT_COMPARISON;
 
 class Export extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -38,7 +39,7 @@ class Export extends Tasks {
 
     private Phpexec $php;
 
-    public function run(): void {	
+    public function run(): void {
         if ($this->config->project->isDefault()) {
             throw new ProjectNeeded();
         }
@@ -64,7 +65,7 @@ class Export extends Tasks {
         }
 
         if (version_compare($gremlinVersion, '3.4.0') >= 0) {
-            $queryTemplate = 'g.E().as("e").outV().as("outV").select("e").inV().as("inV").select("e", "inV", "outV").by(valueMap(true).by(unfold())).by(id()).by(id())';
+            $queryTemplate = 'g.E().not(has("extra")).as("e").outV().as("outV").select("e").inV().as("inV").select("e", "inV", "outV").by(valueMap(true).by(unfold())).by(id()).by(id())';
         } else {
             $queryTemplate = 'g.E()';
         }
@@ -85,15 +86,15 @@ class Export extends Tasks {
             array_collect_by($E[$id], $edge['inV'], $edge['label']);
         }
 
-        if (in_array('Vis', $this->config->project_reports)) {
+        if (in_array('Vis', $this->config->project_reports, STRICT_COMPARISON)) {
             $renderer = ExportFormat::getInstance('Vis', $V, $E);
             $text = $renderer->render($root);
             $extension = $renderer->getExtension();
-        } elseif (in_array('Dot', $this->config->project_reports)) {
+        } elseif (in_array('Dot', $this->config->project_reports, STRICT_COMPARISON)) {
             $renderer = ExportFormat::getInstance('Dot', $V, $E);
             $text = $renderer->render($root);
             $extension = $renderer->getExtension();
-        } elseif (in_array('Php', $this->config->project_reports)) {
+        } elseif (in_array('Php', $this->config->project_reports, STRICT_COMPARISON)) {
             $renderer = ExportFormat::getInstance('Php', $V, $E);
             $text = $renderer->render($root);
             $files = json_decode($text, true);
@@ -141,7 +142,6 @@ class Export extends Tasks {
                     display("Writing in branch : {$this->config->branch}\n");
 
                     $vcs = Vcs::getVcs($this->config);
-                    $vcs = new $vcs( (string) $this->config->project, $this->config->code_dir);
                     $branch = $vcs->getBranch();
                     $vcs->createBranch($this->config->branch);
 
@@ -160,7 +160,7 @@ class Export extends Tasks {
             }
 
             $text = implode('', $files);
-        } elseif (in_array('Table', $this->config->project_reports)) {
+        } elseif (in_array('Table', $this->config->project_reports, STRICT_COMPARISON)) {
             $renderer = ExportFormat::getInstance('Table', $V, $E);
             $text = $renderer->render($root);
             $extension = $renderer->getExtension();
@@ -173,14 +173,14 @@ class Export extends Tasks {
         if ($filenames = $this->config->filename) {
             foreach ($filenames as $filename) {
                 $filename = array_pop($filenames);
-                if (in_array('Dot', $this->config->project_reports)) {
+                if (in_array('Dot', $this->config->project_reports, STRICT_COMPARISON)) {
                     $fp = fopen($filename . '.dot', 'w+');
-                } elseif (in_array('Vis', $this->config->project_reports)) {
+                } elseif (in_array('Vis', $this->config->project_reports, STRICT_COMPARISON)) {
                     $fp = fopen($filename . '.html', 'w+');
-                } elseif (in_array('Php', $this->config->project_reports)) {
+                } elseif (in_array('Php', $this->config->project_reports, STRICT_COMPARISON)) {
                     $fp = fopen($filename . '.php', 'w+');
                 } else {
-                    // todo : case this is a folder
+                    // @todo : what to do when this is a folder
                     $fp = fopen($filename, 'w+');
                 }
                 fwrite($fp, $text);

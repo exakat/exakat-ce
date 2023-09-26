@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,36 +25,33 @@ namespace Exakat\Analyzer\Dump;
 use Exakat\Dump\Dump;
 
 abstract class AnalyzerTable extends AnalyzerDump {
-    protected $storageType = self::QUERY_TABLE;
+    protected int $storageType = self::QUERY_TABLE;
 
-    protected $dumpQueries = array();
+    protected array $dumpQueries = array();
 
     public function prepareDirectQuery(string $query): void {
         ++$this->queryId;
 
         $result = $this->gremlin->query($query);
 
-        if (empty($result)) {
+        if ($result->isEmpty()) {
             return ;
         }
 
         ++$this->queryCount;
 
         $c = $result->toArray();
-        if (!is_array($c) || !isset($c[0])) {
-            return ;
-        }
 
         $this->processedCount += count($c);
         $this->rowCount       += count($c);
 
         $valuesSQL = array();
-        foreach($c as $row) {
+        foreach ($c as $row) {
             $valuesSQL[] = "(NULL, '" . implode("', '", array_map(array('\\Sqlite3', 'escapeString'), $row)) . "') \n";
         }
 
         $chunks = array_chunk($valuesSQL, SQLITE_CHUNK_SIZE);
-        foreach($chunks as $chunk) {
+        foreach ($chunks as $chunk) {
             $query = 'INSERT INTO ' . $this->analyzerTable . ' VALUES ' . implode(', ', $chunk);
             $this->dumpQueries[] = $query;
         }
@@ -65,48 +62,44 @@ abstract class AnalyzerTable extends AnalyzerDump {
 
         $result = $this->rawQuery();
 
-        if (empty($result)) {
-            return ;
-        }
-
         ++$this->queryCount;
 
-        $c = $result->toArray();
-        if (!is_array($c) || !isset($c[0])) {
+        array_unshift($this->dumpQueries, $this->analyzerSQLTable);
+        array_unshift($this->dumpQueries, "DROP TABLE IF EXISTS {$this->analyzerTable}");
+
+        if ($result->isEmpty()) {
             return ;
         }
+
+        $c = $result->toArray();
 
         $this->processedCount += count($c);
         $this->rowCount       += count($c);
 
         $valuesSQL = array();
-        foreach($c as $row) {
+        foreach ($c as $row) {
             // Possible NULL in row here.
             $valuesSQL[] = "(NULL, '" . implode("', '", array_map(array('\\Sqlite3', 'escapeString'), $row)) . "') \n";
         }
 
         $chunks = array_chunk($valuesSQL, SQLITE_CHUNK_SIZE);
-        foreach($chunks as $chunk) {
+        foreach ($chunks as $chunk) {
             $query = 'INSERT INTO ' . $this->analyzerTable . ' VALUES ' . implode(', ', $chunk);
             $this->dumpQueries[] = $query;
         }
     }
 
     public function execQuery(): int {
-        assert($this->analyzerTable != 'no analyzer table name', 'No table name for ' . static::class);
-        assert($this->analyzerSQLTable != 'no analyzer sql creation', 'No table name for ' . static::class);
-        // table always created, may be empty
-        if (is_array($this->analyzerSQLTable)) {
-            $sql = array_reverse($this->analyzerSQLTable);
-            foreach($sql as $query) {
-                array_unshift($this->dumpQueries, $query);
-            }
-        } else {
-            array_unshift($this->dumpQueries, $this->analyzerSQLTable);
-        }
-        array_unshift($this->dumpQueries, "DROP TABLE IF EXISTS {$this->analyzerTable}");
+        assert($this->analyzerTable !== 'no analyzer table name', 'No table name for ' . static::class);
+        assert($this->analyzerSQLTable !== 'no analyzer sql creation', 'No table name for ' . static::class);
 
-        if (count($this->dumpQueries) >= 3) {
+        // table always created, may be empty
+#        array_unshift($this->dumpQueries, $this->analyzerSQLTable);
+#        array_unshift($this->dumpQueries, "DROP TABLE IF EXISTS {$this->analyzerTable}");
+        
+#        print_r($this->dumpQueries);
+        
+        if (count($this->dumpQueries) >= 2) {
             $this->prepareForDump($this->dumpQueries);
         }
 

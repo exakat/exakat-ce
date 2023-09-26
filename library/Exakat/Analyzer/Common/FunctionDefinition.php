@@ -26,9 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class FunctionDefinition extends Analyzer {
-    protected $functions = array();
+    protected array $functions = array();
 
     public function analyze(): void {
+        if (empty($this->functions)) {
+            return;
+        }
+
         $fullnspath = makeFullNsPath($this->functions);
 
         $this->atomIs('Function')

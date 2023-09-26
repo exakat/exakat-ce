@@ -41,18 +41,12 @@ class UselessCasting extends Analyzer {
                        'T_DOUBLE_CAST'  => 'float'
                   );
 
-        $returnTypes = $this->methods->getFunctionsByReturn(Methods::STRICT);
+        foreach ($casts as $token => $type) {
+            $returnTypes[$type] = $this->readStubs('getFunctionsByReturnType', array($type, Methods::STRICT));
+        }
 
         foreach ($casts as $token => $type) {
-            if (is_array($type)) {
-                $returned = array();
-                foreach ($type as $t) {
-                    $returned[] = $returnTypes[$t];
-                }
-                $returned = array_merge(...$returned);
-            } else {
-                $returned = $returnTypes[$type];
-            }
+            $returned = $returnTypes[$type];
 
             // native PHP functions
             $this->atomIs('Cast')
@@ -111,12 +105,12 @@ GREMLIN
              )
              ->inIs('TYPEHINT')
              ->is('typehint', 'one')
-             ->back('first')
-        ;
+             ->back('first');
         $this->prepareQuery();
 
         // (bool) ($a > 2)
         $this->atomIs('Cast')
+             ->analyzerIsNot('self')
              ->tokenIs('T_BOOL_CAST')
              ->followParAs('CAST')
              ->atomIs('Comparison')
@@ -125,6 +119,7 @@ GREMLIN
 
         // (int) D ; const D = 1;
         $this->atomIs('Cast')
+             ->analyzerIsNot('self')
              ->tokenIs('T_INT_CAST')
              ->outIs('CAST')
              ->outIsIE('CODE')
@@ -134,6 +129,7 @@ GREMLIN
 
         // (int) 100 % 3
         $this->atomIs('Cast')
+             ->analyzerIsNot('self')
              ->tokenIs('T_INT_CAST')
              ->outIs('CAST')
              ->outIsIE('CODE')
@@ -144,6 +140,7 @@ GREMLIN
 
         // (int) $a * 10
         $this->atomIs('Cast')
+             ->analyzerIsNot('self')
              ->tokenIs('T_INT_CAST')
              ->outIs('CAST')
              ->outIsIE('CODE')

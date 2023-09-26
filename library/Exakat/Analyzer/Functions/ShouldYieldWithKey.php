@@ -40,8 +40,8 @@ class ShouldYieldWithKey extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-        // TODO : Yieldfrom may have several levels of yielding. Repeat is necessary
-        // TODO : when Yieldfrom is alone, it should be OK (but not if there are mixed yield from and yield)
+        // @todo : Yieldfrom may have several levels of yielding. Repeat is necessary
+        // @todo : when Yieldfrom is alone, it should be OK (but not if there are mixed yield from and yield)
     }
 }
 

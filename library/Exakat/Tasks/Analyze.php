@@ -38,13 +38,23 @@ use ProgressBar\Manager as ProgressBar;
 use Exakat\Phpexec;
 use Exakat\Log;
 use Exception;
+use Generator;
+use Symfony\Component\Process\Process;
+use Brightzone\GremlinDriver\ServerException;
+use const PARALLEL_WAIT_MS;
 
 class Analyze extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
     private ProgressBar $progressBar;
     private Phpexec $php;
-    private array $analyzed = array();
+    private array $analyzed  = array();
+    private array $analyzers = array();
+    private array $processes = array();
+
+    private array $dependencies = array();
+
+    private string $mode = 'serial';
 
     public function run(): void {
         if (!$this->config->project->validate()) {
@@ -65,8 +75,19 @@ class Analyze extends Tasks {
 
         $this->checkTokenLimit();
 
+        // Forcing mode
+        if ($this->config->loader_mode === 'serial' || $this->config->parallel < 2) {
+            $this->mode = 'serial';
+        } else {
+            $this->mode = 'parallel';
+        }
+
+        $timer = new Timer();
+
         // Take this before we clean it up
         $this->checkAnalyzed();
+
+        $this->logname = $this->config->logFile ?: str_replace(' ', '_', implode('-', $this->config->project_rulesets));
 
         if (!empty($this->config->program)) {
             if (is_array($this->config->program)) {
@@ -76,13 +97,15 @@ class Analyze extends Tasks {
             }
 
             foreach ($analyzersClass as $analyzer) {
-                if (!$this->rulesets->getClass($analyzer)) {
+                if ($this->rulesets->getClass($analyzer) === '') {
                     throw new NoSuchAnalyzer($analyzer, $this->rulesets);
                 }
             }
 
-            if (empty($analyzersClass)) {
-                throw new NeedsAnalyzerThema();
+            // Forcing mode
+            $this->mode = 'serial';
+            if ($this->logname === '') {
+                $this->logname = 'single';
             }
         } elseif (!empty($this->config->project_rulesets)) {
             $ruleset = $this->config->project_rulesets;
@@ -112,101 +135,269 @@ class Analyze extends Tasks {
             }
 
             // @todo : unidentified rules are omitted at execution time
+            // @todo : check that norefresh still works well
             // may be we could spot them here, and fix or report
 
             $this->datastore->addRow('hash', array(implode('-', $this->config->project_rulesets) => count($analyzersClass) ) );
-
-            $this->logname = 'analyze.' . strtolower(str_replace(' ', '_', implode('-', $this->config->project_rulesets)));
-            $this->log = new Log('analyze.' . strtolower(str_replace(' ', '_', implode('-', $this->config->project_rulesets))),
-                "{$this->config->projects_root}/projects/{$this->config->project}");
         } else {
             throw new NeedsAnalyzerThema();
         }
+
+        $this->log = new Log('analyze.' . $this->logname,
+            "{$this->config->projects_root}/projects/{$this->config->project}");
 
         $this->log->log('Analyzing project ' . (string) $this->config->project);
         $this->log->log("Runnable analyzers\t" . count($analyzersClass));
 
         $this->php = exakat('php');
 
-        $analyzers = array();
-        $dependencies = array();
-        foreach ($analyzersClass as $analyzerClass) {
-            $this->fetchAnalyzers($analyzerClass, $analyzers, $dependencies);
-        }
-
-        $analyzerList = sort_dependencies($dependencies);
-        if (empty($analyzerList)) {
-            display("Done\n");
-            return;
-        }
-
+        $original = array_flip($analyzersClass);
         if ($this->config->verbose && !$this->config->quiet) {
-            $this->progressBar = new Progressbar(0, count($analyzerList) + 1, $this->config->screen_cols);
+            $this->progressBar = new Progressbar(0, count($original), $this->config->screen_cols);
         }
 
-        foreach ($analyzerList as $analyzerClass) {
-            if ($this->config->verbose && !$this->config->quiet) {
-                echo $this->progressBar->advance();
+        if (!$this->config->noDependencies) {
+            $analyzersClass = $this->getAndSortDependencies($analyzersClass);
+        } else {
+            $this->dependencies = array_fill_keys($analyzersClass, array());
+        }
+
+        $rounds = 0;
+        while (!empty($this->dependencies)) {
+            $analyzersClass = array_diff($analyzersClass, array_keys($this->analyzers));
+            foreach ($analyzersClass as $analyzer) {
+                if ($this->analyze($analyzer)) {
+                    if ($this->config->verbose && !$this->config->quiet && isset($original[$analyzer])) {
+                        echo $this->progressBar->advance();
+                        unset($original[$analyzer]);
+                    }
+                }
             }
 
-            assert($analyzers[$analyzerClass] !== null, "Unknown analyzer $analyzerClass from dependsOn()\n");
-            $this->analyze($analyzers[$analyzerClass], $analyzerClass);
+            $this->finish();
+            ++$rounds;
+
+            if ($rounds > 10) {
+                display('Stopping dependencies : ' . count($this->dependencies) . ' left : ' . join(', ', $this->dependencies));
+                $this->log->log('Stopping dependencies : ' . count($this->dependencies) . ' left : ' . join(', ', $this->dependencies));
+                $this->log->log(var_export($this->dependencies));
+                break 1;
+            }
+
+            display("$rounds) ==================\n");
         }
 
-        if ($this->config->verbose && !$this->config->quiet) {
-            echo $this->progressBar->advance();
-        }
+        $timer->end();
+        $this->log->log('Duration : ' . number_format($timer->duration(Timer::MS), 2));
+        $this->log->log('Memory : ' . memory_get_usage(true));
+        $this->log->log('Memory peak : ' . memory_get_peak_usage(true));
 
         display("Done\n");
     }
 
-    private function fetchAnalyzers(string $analyzerClass, array &$analyzers, array &$dependencies): void {
-        if (isset($analyzers[$analyzerClass])) {
-            return;
+    private function fetchAnalyzers(string $analyzerClass): Analyzer {
+        if (isset($this->analyzers[$analyzerClass])) {
+            $this->analyzers[$analyzerClass];
         }
 
-        $analyzers[$analyzerClass] = $this->rulesets->getInstance($analyzerClass);
-
-        if ($analyzers[$analyzerClass] === null) {
-            display("No such analyzer as $analyzerClass\n");
-            return;
-        }
+        return $this->rulesets->getInstance($analyzerClass);
+    }
+    /*
 
         if (isset($this->analyzed[$analyzerClass]) &&
             $this->config->noRefresh === true) {
             display("$analyzerClass is already processed\n");
+
             return ;
         }
 
         if (!empty($this->config->rules_version_max) &&
-            version_compare($this->config->rules_version_max,$analyzers[$analyzerClass]->getExakatSince()) < 0) {
+            version_compare($this->config->rules_version_max,$this->analyzers[$analyzerClass]->getExakatSince()) < 0) {
             display("$analyzerClass is too new (rules_version_max: {$this->config->rules_version_max})\n");
             return;
         }
 
         if (!empty($this->config->rules_version_min) &&
-            version_compare($this->config->rules_version_min,$analyzers[$analyzerClass]->getExakatSince()) > 0) {
+            version_compare($this->config->rules_version_min,$this->analyzers[$analyzerClass]->getExakatSince()) > 0) {
             display("$analyzerClass is too old (rules_version_min: {$this->config->rules_version_min})\n");
             return;
         }
 
         if ($this->config->noDependencies === true) {
             $dependencies[$analyzerClass] = array();
-        } else {
-            $dependencies[$analyzerClass] = $analyzers[$analyzerClass]->dependsOn();
-            $diff = array_diff($dependencies[$analyzerClass], array_keys($analyzers));
-            foreach ($diff as $d) {
-                if (!isset($analyzers[$d])) {
-                    $this->fetchAnalyzers($d, $analyzers, $dependencies);
+            return;
+        } 
+        
+        $dependsOn = $this->analyzers[$analyzerClass]->dependsOn();
+        if (empty($dependsOn)) { 
+            $dependencies[$analyzerClass] = $dependsOn;
+            return; 
+        }
+
+        // @todo : move this to a external script : This should not be done beyond development
+        foreach($dependsOn as $e) {
+            assert($this->rulesets->getClass($e) !== '', "No such analyzer as $e in {$analyzerClass}\n");
+        }
+        $dependencies[$analyzerClass] = $dependsOn;
+
+        $diff = array_diff($dependsOn, array_keys($this->analyzers));
+        foreach ($diff as $d) {
+            if (!isset($this->analyzers[$d])) {
+                $this->fetchAnalyzers($d, $dependencies);
+            }
+        }
+    }
+*/
+    private function getAndSortDependencies(array $analyzers): array {
+        $stock = $analyzers;
+
+        while (!empty($stock)) {
+            $analyzerName = array_pop($stock);
+
+            $analyzer = $this->fetchAnalyzers($analyzerName);
+
+            $this->dependencies[$analyzerName] = $analyzer->dependsOn();
+            $stock = array_merge($stock, $analyzer->dependsOn());
+
+            foreach ($analyzer->dependsOn() as $y) {
+                if (!isset($this->dependencies[$y])) {
+                    $this->dependencies[$y] = array();
                 }
+            }
+        }
+
+        $sorted = array();
+        $dep2 = $this->dependencies;
+        foreach ($this->foo($dep2) as $y) {
+            $sorted[] = $y;
+        }
+
+        return $sorted;
+    }
+
+    public function foo(array &$dependencies, $what = null): Generator {
+        foreach ($dependencies as $v => &$d) {
+            if ($what !== null && $v !== $what) {
+                continue;
+            }
+
+            if (empty($d)) {
+                yield $v;
+                unset($dependencies[$v]);
+                continue;
+            }
+
+            foreach ($d as $i => $e) {
+                if (!isset($dependencies[$e])) {
+                    unset($d[$i]);
+                    continue;
+                }
+
+                if (empty($dependencies[$e])) {
+                    yield $e;
+                    unset($d[$i]);
+                    unset($dependencies[$e]);
+                    continue;
+                }
+
+                yield from $this->foo($dependencies, $d[$i]);
+            }
+        }
+
+        if (!empty($dependencies)) {
+            yield from $this->foo($dependencies);
+        }
+    }
+
+    private function analyze(string $analyzerClass): bool {
+        // processing and the list of dependencies
+        if (isset($this->analyzers[$analyzerClass])) {
+            unset($this->dependencies[$analyzerClass]);
+            return false;
+        }
+
+        $analyzer = $this->fetchAnalyzers($analyzerClass);
+
+        if ($this->mode === 'serial') {
+            $this->analyzeSingle($analyzer, $analyzerClass);
+            return true;
+        } else {
+            return $this->analyzeParallel($analyzer, $analyzerClass);
+        }
+    }
+
+    private function monitorProcesses(): void {
+        do {
+            foreach ($this->processes as $id => $p) {
+                if (!$p->isRunning()) {
+                    unset($this->processes[$id]);
+                    $this->analyzers[$id] = 1;
+
+                    // That should always be an empty array
+                    assert(empty($this->dependencies[$id]), "$id is not empty\n");
+                    unset($this->dependencies[$id]);
+
+                    foreach ($this->dependencies as $name => $d) {
+                        foreach ($d as $i => $j) {
+                            if ($j === $id) {
+                                unset($this->dependencies[$name][$i]);
+                            }
+                        }
+                    }
+                }
+            }
+        } while (count($this->processes) >= $this->config->parallel);
+    }
+
+    public function finish(string $analyzerClass = ''): void {
+        $this->monitorProcesses();
+
+        if (empty($analyzerClass)) {
+            // @todo : set a limit for waiting ?
+            while (!empty($this->processes)) {
+                $this->monitorProcesses();
+                usleep(PARALLEL_WAIT_MS);
+            }
+        } else {
+            while (!isset($this->processes[$analyzerClass])) {
+                $this->monitorProcesses();
+                usleep(PARALLEL_WAIT_MS);
             }
         }
     }
 
-    private function analyze(Analyzer $analyzer, string $analyzerClass): int {
+    private function analyzeParallel(Analyzer $analyzer, string $analyzerClass): bool {
+        if (!empty($this->dependencies[$analyzerClass])) {
+            return false;
+        }
+
+        $process = new Process(array('php',
+                                'exakat',
+                                'analyze',
+                                '-p',
+                                $this->config->project,
+                                '-P',
+                                $analyzer->getShortAnalyzer(),
+                                '-v',
+                                '--nodep',
+                                '--norefresh',
+                                '--parallel',
+                                '1',
+                                '--logFile',
+                                $this->logname,
+                                ));
+        $process->start();
+        $this->processes[$analyzerClass] = $process;
+
+        $this->monitorProcesses();
+        return true;
+    }
+
+    private function analyzeSingle(Analyzer $analyzer, string $analyzerClass): int {
         $timer = new Timer();
 
         $lock = new Lock($this->config->tmp_dir, $analyzerClass);
+        // @todo : this doesn't check if the folder is available => fail immediately
         if (!$lock->check()) {
             display("Concurency lock activated for $analyzerClass\n");
 
@@ -215,29 +406,25 @@ class Analyze extends Tasks {
 
         if (isset($this->analyzed[$analyzerClass]) && $this->config->noRefresh === true) {
             display( "$analyzerClass is already processed (1)\n");
+            unset($this->dependencies[$analyzerClass]);
             return $this->analyzed[$analyzerClass];
         }
 
         $analyzer->init();
-
-        if (!(!isset($this->analyzed[$analyzerClass]) ||
-              $this->config->noRefresh !== true)         ) {
-            display("$analyzerClass is already processed (2)\n");
-
-            return $this->analyzed[$analyzerClass];
-        }
 
         $total_results = 0;
         if (!$analyzer->checkPhpVersion($this->config->phpversion)) {
             $analyzerQuoted = $analyzer->getInBaseName();
 
             $analyzer->storeError('Not Compatible With PHP Version', Analyzer::VERSION_INCOMPATIBLE);
+            unset($this->dependencies[$analyzerClass]);
 
             display("$analyzerQuoted is not compatible with PHP version {$this->config->phpversion}. Ignoring\n");
         } elseif (!$analyzer->checkPhpConfiguration($this->php)) {
             $analyzerQuoted = $analyzer->getInBaseName();
 
             $analyzer->storeError('Not Compatible With PHP Configuration', Analyzer::CONFIGURATION_INCOMPATIBLE);
+            unset($this->dependencies[$analyzerClass]);
 
             display( "$analyzerQuoted is not compatible with PHP configuration of this version. Ignoring\n");
         } else {
@@ -259,10 +446,18 @@ class Analyze extends Tasks {
                 $counts = $this->gremlin->query('g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer->getInBaseName() . '").property("count", __.out("ANALYZED").count()).values("count")')->toInt();
                 $this->datastore->addRow('analyzed', array($analyzerClass => $counts ) );
                 $this->checkAnalyzed();
+            } catch (ServerException $e) {
+                $timer->end();
+                display("$analyzerClass : Server running exception\n");
+                display($e->getMessage());
+                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\terror : " . $e->getMessage());
+                $counts = $this->gremlin->query('g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer->getInBaseName() . '").property("count", __.out("ANALYZED").count()).values("count")')->toInt();
+                $this->datastore->addRow('analyzed', array($analyzerClass => $counts ) );
+                $this->checkAnalyzed();
             } catch (Exception $e) {
                 $timer->end();
-                display( "$analyzerClass : generic exception \n");
-                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\texception : " . $e::class . "\terror : " . $e->getMessage());
+                display( "$analyzerClass : generic exception " . get_class($e) . "\n");
+                $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\texception : " . $e::class . "\terror : " . $e->getMessage() . "\tfile : " . $e->getFile() . ':' . $e->getLine());
                 if (!str_contains($e->getMessage(), 'The server exceeded one of the timeout settings ')  ) {
                     display($e->getMessage());
                     $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
@@ -288,7 +483,10 @@ class Analyze extends Tasks {
 
             // This also counts the analysis that don't leave data in the database.
             $this->analyzed[$analyzerClass] = $total_results;
+            unset($this->dependencies[$analyzerClass]);
         }
+
+        $this->analyzers[$analyzerClass] = 1;
 
         $this->checkAnalyzed();
 

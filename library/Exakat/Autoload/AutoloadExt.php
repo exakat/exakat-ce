@@ -44,9 +44,8 @@ class AutoloadExt implements Autoloader {
         // Could we autoload everything ?
     }
 
-    public function autoload(string $name) : void {
-        $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $name);
-        $file = "{$fileName}.php";
+    public function autoload(string $name): void {
+        $file = str_replace(array('Exakat\\', '\\'), array('', DIRECTORY_SEPARATOR), $name) . '.php';
 
         foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$file";
@@ -57,11 +56,11 @@ class AutoloadExt implements Autoloader {
         }
     }
 
-    public function registerAutoload() : void {
+    public function registerAutoload(): void {
         spl_autoload_register(array($this, 'autoload'));
     }
 
-    private function checkDependencies() : void {
+    private function checkDependencies(): void {
         // Report missing extensions, but don't prevent them (some rules may still work, others will be ignored)
         foreach ($this->extensions as $name => $extension) {
             $diff = array_diff($extension->dependsOnExtensions(), array_keys($this->pharList));
@@ -72,11 +71,11 @@ class AutoloadExt implements Autoloader {
         }
     }
 
-    public function getPharList() : array {
+    public function getPharList(): array {
         return array_map('basename', $this->pharList);
     }
 
-    public function getRulesets() : array {
+    public function getRulesets(): array {
         $return = array();
 
         foreach ($this->pharList as $name => $phar) {
@@ -95,7 +94,7 @@ class AutoloadExt implements Autoloader {
         return $return;
     }
 
-    public function getAnalyzers(string $theme = 'All') : array {
+    public function getAnalyzers(string $theme = 'All'): array {
         $return = array();
 
         foreach ($this->pharList as $name => $phar) {
@@ -113,11 +112,11 @@ class AutoloadExt implements Autoloader {
         return $return;
     }
 
-    public function getAllAnalyzers() : array {
+    public function getAllAnalyzers(): array {
         $return = array();
 
         foreach ($this->pharList as $name => $phar) {
-            $fullPath = "phar://$phar/Exakat/Analyzer/analyzers.ini";
+            $fullPath = "phar://$phar/Analyzer/analyzers.ini";
 
             if (!file_exists($fullPath)) {
                 display("Missing analyzers.ini in $name\n");
@@ -132,7 +131,7 @@ class AutoloadExt implements Autoloader {
         return $return;
     }
 
-    public function loadIni(string $name, ?string $libel = self::LOAD_ALL) : array {
+    public function loadIni(string $name, ?string $libel = self::LOAD_ALL): array {
         $return = array();
 
         foreach ($this->pharList as $phar) {
@@ -161,7 +160,7 @@ class AutoloadExt implements Autoloader {
         return array_merge(...$return);
     }
 
-    public function loadJson(string $name, string $libel = self::LOAD_ALL) : array {
+    public function loadJson(string $name, string $libel = self::LOAD_ALL): array {
         $return = array(array());
 
         foreach ($this->pharList as $phar) {
@@ -195,7 +194,7 @@ class AutoloadExt implements Autoloader {
         return array_merge(...$return);
     }
 
-    public function loadData(string $path) : string {
+    public function loadData(string $path): string {
         $return = array();
         foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$path";
@@ -208,7 +207,7 @@ class AutoloadExt implements Autoloader {
         return implode('', $return);
     }
 
-    public function fileExists(string $path) : bool {
+    public function fileExists(string $path): bool {
         foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$path";
 
@@ -220,7 +219,7 @@ class AutoloadExt implements Autoloader {
         return false;
     }
 
-    public function copyFile(string $path, string $to) : void {
+    public function copyFile(string $path, string $to): void {
         foreach ($this->pharList as $phar) {
             $fullPath = "phar://$phar/$path";
 

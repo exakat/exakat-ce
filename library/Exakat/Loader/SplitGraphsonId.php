@@ -32,12 +32,14 @@ use Exakat\Graph\Graph;
 use stdClass;
 use Sqlite3;
 use SplFileObject;
+use Exakat\Loader\Driver\Driver;
+
+// @todo : export process to a separate class, with a fall back on serial and inlined processing.
 
 class SplitGraphsonId extends Loader {
     private const CSV_SEPARATOR = ',';
-    private const LOAD_CHUNK      = 100000;
-    private const LOAD_CHUNK_LINK = 200000;
-    private const LOAD_CHUNK_PROPERTY = 100000;
+    private const LOAD_CHUNK          = 100000;
+    private const DROP_EID_CHUNK      = 100000;
 
     private int $load_chunk = self::LOAD_CHUNK;
 
@@ -48,9 +50,12 @@ class SplitGraphsonId extends Loader {
     private int   $id  = 1;
     private array $ids = array();
 
-    private Graph $graphdb;
+    private Graph  $graphdb;
+    private Driver $driver;
 
     private string $path         = '';
+    private int    $pathPart     = 0;
+    private array  $processes    = array();
     private array  $links        = array();
 
     private int $total           = 0;
@@ -69,9 +74,8 @@ class SplitGraphsonId extends Loader {
         $this->config         = exakat('config');
         $this->graphdb        = exakat('graphdb');
 
-        $this->sqlite3        = $sqlite;
+        $this->sqlite         = $sqlite;
         $this->withWs 	      = $withWs;
-        $this->path           = "{$this->config->tmp_dir}/graphdb.graphson";
 
         $this->dictCode       = new Collector();
 
@@ -79,10 +83,19 @@ class SplitGraphsonId extends Loader {
 
         $this->cleanCsv();
 
-        $jsonText = json_encode($id0->toGraphsonLine($this->id, $this->withWs)) . PHP_EOL;
+        $jsonText = json_encode($id0->toGraphsonLine($this->id, $this->withWs));
         assert(!json_last_error(), 'Error encoding ' . $id0->atom . ' : ' . json_last_error_msg());
 
-        file_put_contents($this->path, $jsonText, \FILE_APPEND);
+        $this->driver = Driver::getInstance($this->config->loader_mode,
+            $this->config->tmp_dir,
+            $this->graphdb,
+            $this->log,
+            (int) $this->config->loader_parallel_max
+        );
+
+        display('Loading with ' . $this->driver->getName() . PHP_EOL);
+
+        $this->driver->saveNodes($jsonText);
 
         ++$this->total;
     }
@@ -92,11 +105,10 @@ class SplitGraphsonId extends Loader {
     }
 
     public function finalize(array $relicat): bool {
-        if ($this->total !== 0) {
-            $this->saveNodes();
-        }
+        $this->driver->saveNodes();
 
         display("Init finalize\n");
+        $this->driver->finish();
 
         $totalDuration = new Timer();
 
@@ -106,9 +118,13 @@ class SplitGraphsonId extends Loader {
         display("Save last nodes\n");
         $this->saveProperties();
         display("Save properties\n");
+        $this->driver->finish();
 
-        // Finish properties
-        $this->graphdb->query('g.V().has("intval", 0).not(has("boolean", true)).property("boolean", false).iterate();');
+        // Finish boolean properties
+        // convert boolean from int to actual type of boolean
+        do {
+            $res = $this->graphdb->query('g.V().has("boolean", within(0, 1)).choose( values("boolean").is(eq(0)), __.property("boolean", false), __.property("boolean", true)).limit(' . self::LOAD_CHUNK . ').count();');
+        } while ($res->toInt() === self::LOAD_CHUNK);
 
         $query = 'g.V().hasLabel("Project").id();';
         $res = $this->graphdb->query($query);
@@ -203,7 +219,7 @@ GREMLIN;
 
         // Read the ID in the database
         $definitionSQL = <<<'SQL'
-SELECT DISTINCT CASE WHEN definitions.id IS NULL THEN definitions2.id ELSE definitions.id END AS definition, GROUP_CONCAT(DISTINCT calls.id) AS call, count(calls.id) AS id
+SELECT DISTINCT CASE WHEN definitions.id IS NULL THEN definitions2.id ELSE definitions.id END AS definition, GROUP_CONCAT(DISTINCT calls.id) AS call
 FROM calls
 LEFT JOIN definitions 
     ON definitions.type       = calls.type       AND
@@ -215,7 +231,7 @@ WHERE (definitions.id IS NOT NULL OR definitions2.id IS NOT NULL) AND
         CASE WHEN definitions.id IS NULL THEN definitions2.id ELSE definitions.id END != calls.id
 GROUP BY definition
 SQL;
-        $res = $this->sqlite3->query($definitionSQL);
+        $res = $this->sqlite->query($definitionSQL);
         // Fast dump, with a write to memory first
         $links = array();
         $chunk = 0;
@@ -224,32 +240,30 @@ SQL;
             if ($row[0] === $row[1]) {
                 continue;
             }
-            $total += $row[2];
-            $chunk += $row[2];
-            unset($row[2]);
 
             $row[0] = $this->ids[$row[0]];
             $r = explode(',', $row[1]);
-            foreach ($r as &$s) {
-                $s = $this->ids[$s];
+            $chunk += count($r);
+            $total += count($r);
+
+            foreach ($r as $s) {
+                $links[] = array('DEFINITION', $row[0], $this->ids[$s]);
+                ++$chunk;
             }
-            unset($s);
-            $row[1] = $r;
-            $links[] = $row;
 
             if ($chunk > $this->load_chunk) {
-                $this->saveLinksRam($links);
+                $this->driver->saveLinkGremlin($links);
                 $links = array();
                 $chunk = 0;
             }
         }
+        $this->driver->finish();
 
         if (empty($total)) {
             display('no definitions');
         } else {
-            display("loading $total definitions");
-            $this->saveLinksRam($links);
-            display("loaded $total definitions");
+            $this->driver->saveLinkGremlin($links);
+            $this->driver->finish();
         }
 
         display('Drop Eid');
@@ -276,41 +290,10 @@ SQL;
             }
             unset($p);
 
-            $chunks = array_chunk($properties, self::LOAD_CHUNK_PROPERTY);
-            foreach ($chunks as $chunk) {
-                $this->savePropertiesGremlin($attribute, $chunk);
-                $e = hrtime(true);
-            }
-        }
-    }
-
-    private function savePropertiesGremlin(string $attribute, array $properties): void {
-        $timer = new Timer();
-        $query = <<<GREMLIN
-g.V(properties).property("$attribute", true).iterate();
-GREMLIN;
-        $this->graphdb->query($query, array('properties' => $properties));
-        $timer->end();
-
-        $this->log("properties\t$attribute\t" . count($properties) . "\t" . $timer->duration());
-    }
-
-    private function saveLinksRam(array $links): void {
-        if (empty($links)) {
-            return;
+            $this->driver->savePropertiesGremlin($attribute, $properties);
         }
 
-        $timer = new Timer();
-        $query = <<<'GREMLIN'
-links.each { link ->
-    g.V(link[1]).addE('DEFINITION').from(V(link[0])).iterate();
-}
-
-GREMLIN;
-        $this->graphdb->query($query, array('links' => $links));
-        $timer->end();
-
-        $this->log("links id finalize\t" . $timer->duration());
+        $this->driver->finish();
     }
 
     private function cleanCsv(): void {
@@ -337,6 +320,14 @@ GREMLIN;
 
             $json[$atom->id] = $atom->toGraphsonLine($this->id, $this->withWs);
 
+            foreach ($atom->properties() as $property) {
+                if (isset($this->tokenCounts[$property])) {
+                    ++$this->tokenCounts[$property];
+                } else {
+                    $this->tokenCounts[$property] = 1;
+                }
+            }
+
             foreach ($atom->boolProperties() as $property) {
                 if (isset($this->properties[$property])) {
                     $this->properties[$property][] = $atom->id;
@@ -354,9 +345,11 @@ GREMLIN;
         $total = 0; // local total
         $append = array();
         foreach ($json as $j) {
-            assert(isset($j->properties['code']), print_r($j, true));
-            $V = $j->properties['code'][0]->value;
-            $j->properties['code'][0]->value = $this->dictCode->get($V);
+//            assert(isset($j->properties['code']), print_r($j, true));
+            if (isset($j->properties['code'])) {
+                $V = $j->properties['code'][0]->value;
+                $j->properties['code'][0]->value = $this->dictCode->get($V);
+            }
 
             if (isset($j->properties['lccode'][0]->value)) {
                 $j->properties['lccode'][0]->value = $this->dictCode->get($j->properties['lccode'][0]->value);
@@ -372,7 +365,6 @@ GREMLIN;
 
             $X = $this->json_encode($j);
             assert(!json_last_error(), $fileName . ' : error encoding normal ' . $j->label . ' : ' . json_last_error_msg() . "\n" . print_r($j, true));
-            $append[] = $X;
 
             if (isset($this->tokenCounts[$j->label])) {
                 ++$this->tokenCounts[$j->label];
@@ -381,42 +373,16 @@ GREMLIN;
             }
             ++$this->total;
 
-            if ($this->total > $this->load_chunk) {
-                file_put_contents($this->path, implode(PHP_EOL, $append) . PHP_EOL, \FILE_APPEND);
-                $this->saveNodes();
-                $append = array();
-            }
+            $this->driver->saveNodes($X);
 
             ++$total;
         }
 
-        if (!empty($append)) {
-            file_put_contents($this->path, implode(PHP_EOL, $append) . PHP_EOL, \FILE_APPEND);
-        }
         $this->totalLink += count($links);
         $this->links[] = $links;
 
-        if ($this->total > $this->load_chunk) {
-            $this->saveNodes();
-        }
-
         $datastore = exakat('datastore');
         $datastore->addRow('dictionary', $this->dictCode->getRecent());
-    }
-
-    private function saveNodes(): void {
-        $size = filesize($this->path);
-        if ($size === 0) {
-            return;
-        }
-
-        $timer = new Timer();
-        $this->graphdb->query("graph.io(IoCore.graphson()).readGraph(\"$this->path\");");
-        unlink($this->path);
-        $timer->end();
-        $this->log("path\t{$this->total}\t$size\t" . $timer->duration());
-
-        $this->total = 0;
     }
 
     private function fetchIds() {
@@ -424,6 +390,8 @@ GREMLIN;
         $res = $this->graphdb->query('g.V().as("id").as("eId").select("id", "eId").by(id).by("eId")');
         $this->ids = $res->toHash('eId', 'id');
         $e = hrtime(true);
+
+        assert($this->ids != array(), 'No ids were fetched from the server. This is not normal.');
     }
 
     private function saveNodeLinks(): void {
@@ -437,34 +405,13 @@ GREMLIN;
 
         // break down property files into small chunks for processing inside 300s.
         $links = array_merge(...$this->links);
-        $chunks = array();
-        $j = 0;
-
-        $chunks = array_chunk($links, self::LOAD_CHUNK_LINK);
-        foreach ($chunks as $i => $chunk) {
-            foreach ($chunk as &$link) {
-                $link[1] = $this->ids[$link[1]];
-                $link[2] = $this->ids[$link[2]];
-            }
-            unset($link);
-
-            $this->saveLinkGremlin(intdiv($i, self::LOAD_CHUNK_LINK), $chunk);
+        foreach ($links as &$link) {
+            $link[1] = $this->ids[$link[1]];
+            $link[2] = $this->ids[$link[2]];
         }
-    }
+        unset($link);
 
-    private function saveLinkGremlin(int $id, array $links): void {
-        $timer = new Timer();
-
-        $query = <<<'GREMLIN'
-links.each { link ->
-    g.V(link[1]).addE(link[0]).to( __.V(link[2])).iterate();
-}
-
-GREMLIN;
-        $this->graphdb->query($query, array('links' => $links));
-        $timer->end();
-
-        $this->log("links\t$id\t" . $timer->duration());
+        $this->driver->saveLinkGremlin($links);
     }
 
     private function json_encode(Stdclass $object): string {
@@ -502,9 +449,14 @@ GREMLIN;
     }
 
     private function dropPropertyeId(): void {
-        $query = 'g.V().properties("eId").drop()';
-        $this->graphdb->query($query);
+        $query = 'g.V().has("eId").count()';
         $res = $this->graphdb->query($query);
+        $times = ceil($res->toInt() / self::DROP_EID_CHUNK);
+
+        $query = 'g.V().has("eId").limit(' . self::DROP_EID_CHUNK . ').properties("eId").drop()';
+        for ($i = 0; $i < $times; ++$i) {
+            $this->graphdb->query($query);
+        }
     }
 }
 

@@ -32,22 +32,10 @@ class Set extends Fileset {
         }
     }
 
-    public function setFiles(array $files) {
+    public function setFiles(array $files): void {
         $this->files = array_intersect(array_merge(...array_values($this->filesets)), $files);
         $this->ignored = array_diff($files, $this->files);
     }
-    /*
-        public function setFiles(array $files) {
-            foreach($files as $file) {
-                $f = basename($file);
-                if (isset($this->names[mb_strtolower($f)])) {
-                    $this->ignored[$file] = "Ignored file ($file)";
-                } else {
-                    $this->files[] = $file;
-                }
-            }
-        }
-        */
 }
 
 ?>

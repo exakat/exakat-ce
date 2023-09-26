@@ -28,6 +28,23 @@ class Text extends Reports {
     public const FILE_FILENAME  = self::STDOUT;
 
     public function _generate(array $analyzerList): string {
+        $results = $this->getResults($analyzerList);
+
+        $text = array();
+        foreach ($results as $file) {
+            foreach ($file['messages'] as $line => $column) {
+                $messages = $column[0];
+                foreach ($messages as $message) {
+                    $text []= $file['filename'] . ':' . $line . "\t" . $message['source'] . "\t" . $message['message'] . "\t" . $message['fullcode'];
+                    $this->count();
+                }
+            }
+        }
+
+        return implode(PHP_EOL, $text);
+    }
+
+    protected function getResults(array $analyzerList): array {
         $analysisResults = $this->dump->fetchAnalysers($analyzerList);
 
         $results = array();
@@ -63,18 +80,7 @@ class Text extends Reports {
             ++$results[ $row['file'] ]['warnings'];
         }
 
-        $text = '';
-        foreach ($results as $file) {
-            foreach ($file['messages'] as $line => $column) {
-                $messages = $column[0];
-                foreach ($messages as $message) {
-                    $text .= $file['filename'] . ':' . $line . "\t" . $message['source'] . "\t" . $message['message'] . "\t" . $message['fullcode'] . "\n";
-                    $this->count();
-                }
-            }
-        }
-
-        return $text;
+        return $results;
     }
 }
 

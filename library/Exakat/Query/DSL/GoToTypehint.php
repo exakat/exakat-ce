@@ -25,27 +25,33 @@ namespace Exakat\Query\DSL;
 
 class GoToTypehint extends DSL {
     public function run(): Command {
-        // todo limit to one type of SOURCE
+        // @todo limit to one type of SOURCE
+
+        // @todo : goToTypehint should be repeated, (case for clone and new )
 
         // constants, variables, static member, variableoboject, etc.
 
         $gremlin = <<<'GREMLIN'
 coalesce(
-    // (new x)
-    __.hasLabel("Parenthesis").out("CODE").hasLabel("New").out("NEW").out("TYPEHINT"),
-    __.hasLabel("Parenthesis").out("CODE").hasLabel("Clone").out("CLONE").out("TYPEHINT"),
+    __.hasLabel("Clone").out("CLONE"),
+    __.hasLabel("New").out("NEW"),
+
+    // (new x)    
+    __.hasLabel("Parenthesis").out("CODE").hasLabel("New").out("NEW"),
+    __.hasLabel("Parenthesis").out("CODE").hasLabel("Clone").out("CLONE"),
 
     __.hasLabel("Variable", "Variableobject", "Variablearray").in("DEFINITION").hasLabel("Parameter").out("TYPEHINT"),
     // depends on Complete/Variabletypehint
     __.hasLabel("Variable", "Variableobject", "Variablearray").in("DEFINITION").hasLabel("Variabledefinition").out("TYPEHINT"),
 
-    __.hasLabel("Member").in("DEFINITION").hasLabel("Propertydefinition").in("PPP").hasLabel("Ppp").out("TYPEHINT"),
-    __.hasLabel("Staticproperty").in("DEFINITION").hasLabel("Propertydefinition").in("PPP").hasLabel("Ppp").out("TYPEHINT"),
+    __.hasLabel("Member", "Staticproperty").in("DEFINITION").hasLabel("Propertydefinition").out("TYPEHINT"),
 
     __.hasLabel("Staticconstant").in("DEFINITION").hasLabel("Constant").out("TYPEHINT"),
     __.hasLabel("Identifier", "Nsname").in("DEFINITION").hasLabel("Constant").out("TYPEHINT"),
 
-    __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in("DEFINITION").hasLabel("Function", "Method", "Magicmethod", "Arrowfunction", "Closure").out("RETURNTYPE")
+    __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in("DEFINITION").hasLabel("Function", "Method", "Magicmethod", "Arrowfunction", "Closure").out("RETURNTYPE"),
+
+    __.hasLabel("This").in("DEFINITION").hasLabel("Class"),
     
 )
 GREMLIN;

@@ -69,10 +69,10 @@ class Query {
             return $this;
         }
 
-        assert(!(empty($this->commands) && empty($this->sides)) || in_array(strtolower($name), array('atomis', 'analyzeris', 'atomfunctionis')), "First step in Query must be atomIs, atomFunctionIs or analyzerIs ($name used)");
+        assert(!(empty($this->commands) && empty($this->sides)) || in_array(strtolower($name), array('atomis', 'analyzeris', 'atomfunctionis', 'addatom')), "First step in Query must be atomIs, atomFunctionIs, addAtom or analyzerIs ($name used)");
 
         $command = $this->queryFactory->factory($name);
-        if (in_array($name, array('not', 'filter', 'optional'), STRICT_COMPARISON)) {
+        if (in_array($name, array('not', 'filter', 'optional', 'sideEffect'), STRICT_COMPARISON)) {
             $chain = $this->prepareSide();
             $last = $command->run($chain);
         } else {
@@ -97,6 +97,10 @@ class Query {
                     $this->raw('sack{m,v -> ++m["processed"]; m;}');
                     break;
 
+                case 'addatom' :
+                    $this->_as('first');
+                    break;
+
                 case 'analyzeris' :
                     $this->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS);
                     $this->commands = array($this->commands[1]);
@@ -113,7 +117,7 @@ class Query {
                 default :
                     if ($this->commands[0]->gremlin === self::STOP_QUERY) {
                         $this->_as('first');
-                    // Keep going
+                        // Keep going
                     } else {
                         assert(false, 'No gremlin optimization : gremlin query "' . $name . '" in analyzer should have use g.V. ! ' . $this->commands[0]->gremlin);
                     }
@@ -232,7 +236,7 @@ class Query {
 
         $sack = self::SACK;
 
-        $this->query = "g{$sack}.V()" . $commands;
+        $this->query = "g{$sack}.V()." . $commands;
     }
 
     public function printRawQuery(): void {
@@ -260,7 +264,7 @@ class Query {
         die(__METHOD__);
     }
 
-    private function prepareSack(array $commands) : string {
+    private function prepareSack(array $commands): string {
         foreach ($commands as $command) {
             if ($command->getSack() === Command::SACK_NONE) {
                 continue;

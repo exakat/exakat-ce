@@ -23,9 +23,13 @@ declare(strict_types = 1);
 
 namespace Exakat\Analyzer\Complete;
 
+use Exakat\Query\DSL\SavePropertyAs;
 
 class PropagateConstants extends Complete {
+    private const MAX_RECURSION = 15;
+
     public function analyze(): void {
+        $this->setDefineConstantAside();
         $this->readConstantValue();
 
         $this->pushConstantValues();
@@ -34,12 +38,23 @@ class PropagateConstants extends Complete {
         $this->setCount($count);
     }
 
+    private function setDefineConstantAside(): void {
+        $this->atomIs('Defineconstant')
+             ->outIs('NAME')
+             ->setProperty('propagated', true);
+        $res = $this->rawQuery();
+
+        display( $res->toInt() . " constants skipped\n");
+    }
+
     private function propagate(int $level = 0): int {
         $total = 0;
 
         //Currently handles + - * / % . << >> ** ()
         //Currently handles intval, boolean, noDelimiter (String)
         //Needs realval, arrayval
+
+        // @todo : handle casts
 
         $total += $this->processAddition();
         $total += $this->processConcatenation();
@@ -56,14 +71,14 @@ class PropagateConstants extends Complete {
         $this->readConstantValue();
         $this->pushConstantValues();
 
-        if ($total > 0 && $level < 15) {
+        if ($total > 0 && $level < self::MAX_RECURSION) {
             $total += $this->propagate($level + 1);
         }
 
         return $total;
     }
 
-    private function readConstantValue() : int {
+    private function readConstantValue(): int {
         display('propagating Constant value in Const');
         // fix path for constants with Const
         // noDelimiter is set at the same moment as boolean and intval. Any of them is the same
@@ -110,9 +125,9 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function pushConstantValues() : int {
+    private function pushConstantValues(): int {
         $this->atomIs(array('Constant', 'Defineconstant'))
-             ->outIs('NAME')
+             ->outIs('VALUE')
              ->is('propagated', true)
              ->savePropertyAs('constante')
              ->back('first')
@@ -144,33 +159,29 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processAddition() : int {
+    private function processAddition(): int {
         display('propagating Constant value in Addition');
         // fix path for constants with Const
         $this->atomIs('Addition')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
              // Split LEFT and RIGHT to ensure left is in 0
              ->filter(
                  $this->side()
                       ->outIs('LEFT')
-                      ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs('intval', 'left')
              )
              ->filter(
                  $this->side()
                       ->outIs('RIGHT')
-                      ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs('intval', 'right')
              )
 
             ->raw(<<<'GREMLIN'
- filter{x.size() == 2; }.
 sideEffect{ 
     if (it.get().value("token") == 'T_PLUS') {
-      i = Long.valueOf(x[0]) + Long.valueOf(x[1]);
+      i = Long.valueOf(left) + Long.valueOf(right);
     } else if (it.get().value("token") == 'T_MINUS') {
-      i = Long.valueOf(x[0]) - Long.valueOf(x[1]);
+      i = Long.valueOf(left) - Long.valueOf(right);
     }
 
     it.get().property("intval", i.toLong()); 
@@ -191,7 +202,7 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processConcatenation() : int {
+    private function processConcatenation(): int {
         display('propagating Constant value in Concatenations');
         $this->atomIs('Concatenation')
              ->hasNo('propagated')
@@ -240,17 +251,13 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processSign() : int {
+    private function processSign(): int {
         display('propagating Constant value in Sign');
         $this->atomIs('Sign')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
-             ->filter(
-                 $this->side()
-                      ->outIs('SIGN')
-                      ->has('intval')
-             )
-             ->raw('sideEffect( __.out("SIGN").sideEffect{ x = it.get().value("intval") }.fold() )')
+             ->outIs('SIGN')
+             ->savePropertyAs('intval', 'x')
+             ->inIs('SIGN')
              ->raw(<<<'GREMLIN'
 sideEffect{ 
         if (it.get().value("token") == 'T_PLUS') {
@@ -275,38 +282,32 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processPower() : int {
+    private function processPower(): int {
         display('propagating Constant value in Power');
 
         // fix path for constants with Const
         $this->atomIs('Power')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
-             ->not(
-                 $this->side()
-                      ->outIs(array('LEFT', 'RIGHT'))
-                      ->hasNo('noDelimiter')
-             )
              // Split LEFT and RIGHT to ensure left is in 0
              ->filter(
                  $this->side()
                       ->outIs('LEFT')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("noDelimiter") ) }.fold()')
+                      ->savePropertyAs('noDelimiter', 'left')
              )
              ->filter(
                  $this->side()
                       ->outIs('RIGHT')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("noDelimiter") ) }.fold()')
+                      ->savePropertyAs('noDelimiter', 'right')
              )
 
             ->raw(<<<'GREMLIN'
- filter{ x.size() == 2; }.
+ filter{ left.isNumber() && right.isNumber(); }.
 sideEffect{ 
     // Using BigInteger was failing with powwer call : the query was stuck until it dies.
-    i = new BigDecimal(x[0]);
-    i = i.power(Float.valueOf(x[1]));
+    i = new BigDecimal(left);
+    i = i.power(Float.valueOf(right));
 
     if (i > (new BigInteger(2)).pow(63)) {
         i = 0;
@@ -331,53 +332,44 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processComparison() : int {
+    private function processComparison(): int {
         display('propagating Constant value in Comparison');
         // fix path for constants with Const
         $this->atomIs('Comparison')
                  ->hasNo('propagated')
-                 ->initVariable('x', '[ ]')
-                 ->not(
-                     $this->side()
-                          ->outIs(array('LEFT', 'RIGHT'))
-                          ->hasNo('intval')
-                 )
                  // Split LEFT and RIGHT to ensure left is in 0
                  ->filter(
                      $this->side()
                           ->outIs('LEFT')
-                          ->has('intval')
-                          ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                          ->savePropertyAs('intval', 'left')
                  )
                  ->filter(
                      $this->side()
                           ->outIs('RIGHT')
-                          ->has('intval')
-                          ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                          ->savePropertyAs('intval', 'right')
                  )
 
              ->raw(<<<'GREMLIN'
- filter{x.size() == 2; }.
 sideEffect{ 
         if (it.get().value("token") == 'T_GREATER') {
-          i = x[0] > x[1];
+          i = left > right;
         } else if (it.get().value("token") == 'T_SMALLER') {
-          i = x[0] < x[1];
+          i = left < right;
         } else if (it.get().value("token") == 'T_IS_GREATER_OR_EQUAL') {
-          i = x[0] >= x[1];
+          i = left >= right;
         } else if (it.get().value("token") == 'T_IS_SMALLER_OR_EQUAL') {
-          i = x[0] <= x[1];
+          i = left <= right;
         } else if (it.get().value("token") == 'T_IS_EQUAL' ||
                    it.get().value("token") == 'T_IS_IDENTICAL') {
-          i = x[0] == x[1];
+          i = left == right;
         } else if (it.get().value("token") == 'T_IS_NOT_EQUAL'||
                    it.get().value("token") == 'T_IS_NOT_IDENTICAL') {
-          i = x[0] != x[1];
+          i = left != right;
         }
 
     it.get().property("intval", i ? 1 : 0); 
     it.get().property("boolean", i != 0);
-    it.get().property("noDelimiter", i.toString()); 
+    it.get().property("noDelimiter", i ? '1' : ''); 
     it.get().property("propagated", true); 
 
     i = null;
@@ -393,58 +385,55 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processLogical() : int {
+    private function processLogical(): int {
         display('propagating Constant value in Logical');
         // fix path for constants with Const
         $this->atomIs(self::LOGICAL_ALL)
                  ->hasNo('propagated')
-                 ->initVariable('x', '[ ]')
-                 ->not(
-                     $this->side()
-                          ->outIs(array('LEFT', 'RIGHT'))
-                          ->hasNo('intval')
-                 )
                  // Split LEFT and RIGHT to ensure left is in 0
                  ->filter(
                      $this->side()
                           ->outIs('LEFT')
-                          ->has('intval')
-                          ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                          ->savePropertyAs('intval', 'left')
                  )
                  ->filter(
                      $this->side()
                           ->outIs('RIGHT')
-                          ->has('intval')
-                          ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                          ->savePropertyAs('intval', 'right')
                  )
 
              ->raw(<<<'GREMLIN'
- filter{x.size() == 2; }.
 sideEffect{ 
       if (it.get().value("token") == 'T_BOOLEAN_AND' ||
           it.get().value("token") == 'T_LOGICAL_AND') {
-        i = (x[0] != 0) && (x[1] != 0);
+        i = (left != 0) && (right != 0);
         s = i ? '1' : '0';
       } else if (it.get().value("token") == 'T_BOOLEAN_OR' ||
                  it.get().value("token") == 'T_LOGICAL_OR') {
-        i = (x[0] != 0) || (x[1] != 0);
+        i = (left != 0) || (right != 0);
         s = i ? '1' : '0';
       } else if (it.get().value("token") == 'T_LOGICAL_XOR') {
-        i = (x[0] != 0) ^ (x[1] != 0);
+        i = (left != 0) ^ (right != 0);
         s = i ? '1' : '0';
       } else if (it.get().value("token") == 'T_AND' ||
                  it.get().value("token") == 'T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG') {
-        i = x[0].toLong() & x[1].toLong();
+        i = left.toLong() & right.toLong();
         s = i.toString();
       } else if (it.get().value("token") == 'T_XOR') {
-        i = x[0].toLong() ^ x[1].toLong();
+        i = left.toLong() ^ right.toLong();
         s = i.toString();
       } else if (it.get().value("token") == 'T_OR') {
-        i = x[0].toLong() | x[1].toLong();
+        i = left.toLong() | right.toLong();
         s = i.toString();
       } else if (it.get().value("token") == 'T_SPACESHIP') {
-          i = x[0] <=> x[1];
-        s = i ? '1' : '0';
+        i = left <=> right;
+        if (i == 1) {
+           s = '1';
+        } else if (i == 0) {
+           s = '0';
+        } else {
+           s = '-1';
+        }
       } else {
         Missing_logical_case_in_constant_propagation();
       }
@@ -465,56 +454,50 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processParenthesis() : int {
+    private function processParenthesis(): int {
         display('propagating Constant value in Parenthesis');
         $this->atomIs('Parenthesis')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
              ->filter(
                  $this->side()
                       ->outIs('CODE')
                       ->has('intval')
+                      ->savePropertyAs('parenthesis')
              )
-             ->raw('where( __.out("CODE").sideEffect{ x = it.get() }.fold() )')
              ->raw(<<<'GREMLIN'
 sideEffect{ 
-    it.get().property("intval", x.value("intval")); 
+    it.get().property("intval", parenthesis.value("intval")); 
     if (it.get().property("boolean") != null) {
-        it.get().property("boolean", x.value("boolean"));
+        it.get().property("boolean", parenthesis.value("boolean"));
     }
-    if ("noDelimiter" in x.keys()) {
+    if ("noDelimiter" in parenthesis.keys()) {
         // Ternary, Comparison
-        it.get().property("noDelimiter", x.value("noDelimiter").toString()); 
+        it.get().property("noDelimiter", parenthesis.value("noDelimiter").toString()); 
     }
     it.get().property("propagated", true); 
 
-    x = null;
+    parenthesis = null;
 }
 GREMLIN
              )
            ->count();
         $res = $this->rawQuery();
 
-        display('propagating ' . $res->toInt() . ' Signs with constants');
+        display('propagating ' . $res->toInt() . ' Parenthesis with constants');
         return $res->toInt();
     }
 
-    private function processNot() : int {
+    private function processNot(): int {
         display('propagating Constant value in Not');
         $this->atomIs('Not')
              ->hasNo('propagated')
-             ->initVariable('x', 0)
              ->filter(
                  $this->side()
                       ->outIs('NOT')
                       ->has('intval')
-             )
-             ->filter(
-                 $this->side()
-                      ->outIs('NOT')
                       ->has('noDelimiter')
+                      ->savePropertyAs(savePropertyAs::ATOM, 'x')
              )
-             ->raw('where( __.out("NOT").sideEffect{ x = it.get() }.fold() )')
              ->raw(<<<'GREMLIN'
 sideEffect{ 
     if (it.get().value("token") == 'T_BANG') {
@@ -541,35 +524,27 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processCoalesce() : int {
+    private function processCoalesce(): int {
         display('propagating Constant value in Coalesce');
         $this->atomIs('Coalesce')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
-             ->not(
-                 $this->side()
-                      ->outIs(array('LEFT', 'RIGHT'))
-                      ->hasNo('intval')
-             )
              // Split LEFT and RIGHT to ensure left is in 0
              ->filter(
                  $this->side()
                       ->outIs('LEFT')
-                      ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs('intval', 'left')
              )
              ->filter(
                  $this->side()
                       ->outIs('RIGHT')
-                      ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs('intval', 'right')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 
-    if (x[0] == 0) {
-      i = x[1];
+    if (left == 0) {
+      i = right;
     } else {
-      i = x[0];
+      i = left;
     }
     
     it.get().property("intval", i); 
@@ -588,45 +563,39 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processTernary() : int {
+    private function processTernary(): int {
         display('propagating Constant value in Ternary');
         $this->atomIs('Ternary')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
-             ->not(
-                 $this->side()
-                      ->outIs(array('CONDITION', 'THEN', 'ELSE'))
-                      ->hasNo('intval')
-             )
              // Split CONDITION, THEN and ELSE to ensure order
              ->filter(
                  $this->side()
                       ->outIs('CONDITION')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get() ) }.fold()')
+                      ->savePropertyAs(savePropertyAs::ATOM, 'condition')
              )
              ->filter(
                  $this->side()
                       ->outIs('THEN')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get() ) }.fold()')
+                      ->savePropertyAs(savePropertyAs::ATOM, '_then')
              )
              ->filter(
                  $this->side()
                       ->outIs('ELSE')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get() ) }.fold()')
+                      ->savePropertyAs(savePropertyAs::ATOM, '_else')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 
-    if (x[0].value("intval") == 0) {
-      if (x[1].label() == 'Void') {
-          i = x[0].value("intval");
+    if (condition.value("intval") == 0) {
+      if (_then.label() == 'Void') {
+          i = condition.value("intval");
       } else {
-          i = x[1].value("intval");
+          i = _then.value("intval");
       }
     } else {
-      i = x[2].value("intval");
+      i = _else.value("intval");
     }
 
     it.get().property("boolean", i != 0);
@@ -645,35 +614,29 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processBitshift() : int {
+    private function processBitshift(): int {
         display('propagating Constant value in Bitshift');
         $this->atomIs('Bitshift')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
-             ->not(
-                 $this->side()
-                      ->outIs(array('LEFT', 'RIGHT'))
-                      ->hasNo('intval')
-             )
              // Split LEFT and RIGHT to ensure left is in 0
              ->filter(
                  $this->side()
                       ->outIs('LEFT')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs(savePropertyAs::ATOM, 'left')
              )
              ->filter(
                  $this->side()
                       ->outIs('RIGHT')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs(savePropertyAs::ATOM, 'right')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 
     if (it.get().value("token") == 'T_SL') {
-      i = x[0] << x[1];
+      i = left.value("intval") << right.value("intval");
     } else if (it.get().value("token") == 'T_SR') {
-      i = x[0] >> x[1];
+      i = left.value("intval") >> right.value("intval");
     }
     
     it.get().property("intval", i); 
@@ -692,48 +655,41 @@ GREMLIN
         return $res->toInt();
     }
 
-    private function processMultiplication() : int {
+    private function processMultiplication(): int {
         display('propagating Constant value in Multiplication');
         $this->atomIs('Multiplication')
-             ->tokenIs('T_PERCENTAGE')
              ->hasNo('propagated')
-             ->initVariable('x', '[ ]')
-             ->not(
-                 $this->side()
-                      ->outIs(array('LEFT', 'RIGHT'))
-                      ->hasNo('intval')
-             )
              // Split LEFT and RIGHT to ensure left is in 0
              ->filter(
                  $this->side()
                       ->outIs('LEFT')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs(savePropertyAs::ATOM, 'left')
              )
              ->filter(
                  $this->side()
                       ->outIs('RIGHT')
                       ->has('intval')
-                      ->raw('sideEffect{ x.add( it.get().value("intval") ) }.fold()')
+                      ->savePropertyAs(savePropertyAs::ATOM, 'right')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 
     if (it.get().value("token") == 'T_STAR') {
-      i = x[0] * x[1];
+       i = left.value("intval") * right.value("intval");
     } else if (it.get().value("token") == 'T_SLASH') {
-      if (x[1] != 0) {
-          i = x[0] / x[1];
+      if (right.value("intval") != 0) {
+          i = left.value("intval") / right.value("intval");
           i = i.setScale(0, BigDecimal.ROUND_HALF_DOWN).toInteger();
       } else {
           i = 0;
       }
     } else if (it.get().value("token") == 'T_PERCENTAGE') {
-      if (x[1] != 0) {
-          i = x[0] % x[1];
+      if (right.value("intval") != 0) {
+          i = left.value("intval") % right.value("intval");
       } else {
           i = 0;
       }
-    } // Final else is an error!
+    } 
     
     it.get().property("intval", i); 
     it.get().property("boolean", i != 0);

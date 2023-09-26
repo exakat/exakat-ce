@@ -23,7 +23,6 @@
 namespace Exakat\Tasks\Helpers;
 
 class Php71 extends Php {
-
     // PHP tokens
     public const T_REQUIRE_ONCE                  = 262;
     public const T_REQUIRE                       = 261;

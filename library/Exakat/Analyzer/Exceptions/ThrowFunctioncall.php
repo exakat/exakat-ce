@@ -38,7 +38,7 @@ class ThrowFunctioncall extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-        // todo : consider typehint : a functioncall may return an exception, a property may be typed Exception.
+        // @todo : consider typehint : a functioncall may return an exception, a property may be typed Exception.
 
         // throw RuntimeException()
         $this->atomIs('Throw')

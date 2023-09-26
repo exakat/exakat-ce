@@ -23,6 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Query\Query;
 
 class IsAnyOf extends DSL {
     public function run(): Command {
@@ -30,6 +31,10 @@ class IsAnyOf extends DSL {
         list($properties, $value) = func_get_args();
 
         assert(is_array($properties), 'Property argument should be an array. ' . gettype($properties) . " was provided\n");
+        if (empty($properties)) {
+            return new Command(Query::STOP_QUERY);
+        }
+
         foreach ($properties as $property) {
             $this->assertProperty($property);
         }

@@ -23,6 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Analyzer\Analyzer;
 
 class NoAtomWithoutPropertyInside extends DSL {
     public function run(): Command {
@@ -32,10 +33,11 @@ class NoAtomWithoutPropertyInside extends DSL {
         assert($this->assertProperty($property));
         $MAX_LOOPING = self::$MAX_LOOPING;
         $linksDown = self::$linksDown;
+        $definitions = makeList(Analyzer::DEFINITIONS);
 
         $gremlin = <<<GREMLIN
 not(
-    where( __.emit( ).repeat( __.out($linksDown).not(hasLabel("Closure", "Classanonymous", "Closure", "Function", "Trait", "Interface")) )
+    where( __.emit( ).repeat( __.out($linksDown).not(hasLabel($definitions)) )
                      .times($MAX_LOOPING)
                      .hasLabel(within(***))
                      .has("$property")

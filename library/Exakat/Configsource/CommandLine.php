@@ -23,12 +23,13 @@
 namespace Exakat\Configsource;
 
 use Exakat\Vcs\Vcs;
-use Exakat\Tasks\Baseline;
 use Exakat\Project;
 use Exakat\Graph\Graph;
+use Exakat\Tasks\Baseline;
+use Exakat\Helpers\Directive;
 
 class CommandLine extends Config {
-    private $booleanOptions = array(
+    private array $booleanOptions = array(
                                  '-v'         => 'verbose',
                                  '-Q'         => 'quick',
                                  '-q'         => 'quiet',
@@ -79,7 +80,7 @@ class CommandLine extends Config {
                                  '-none'      => 'none',
                                  );
 
-    private $valueOptions   = array('-f'             => 'filename',
+    private array $valueOptions   = array('-f'             => 'filename',
                                     '-d'             => 'dirname',
                                     '-p'             => 'project',
                                     '-P'             => 'program',
@@ -105,6 +106,7 @@ class CommandLine extends Config {
                                     '--graphdb'      => 'gremlin',
                                     '-version'       => 'version',
                                     '--version'      => 'version',
+                                    '--parallel'	 => 'parallel',
 
                                     '-baseline-set'  => 'baseline_set',
                                     '--baseline-set' => 'baseline_set',
@@ -115,6 +117,7 @@ class CommandLine extends Config {
                                     '--rules-version-min' => 'rules_version_min',
 
                                     '--inplace'     => 'inplace',
+                                    '--logFile'     => 'logFile',
 
                                     // This one is finally an array
                                     '-c'            => 'configuration',
@@ -122,7 +125,8 @@ class CommandLine extends Config {
                                     '-C'            => 'directives',
                                  );
 
-    public static $commands = array('analyze'       => 1,
+    // @todo : make this more dynamic, fishing list from a common reference
+    public static array $commands = array('analyze'       => 1,
                                     'anonymize'     => 1,
                                     'constantes'    => 1,
                                     'clean'         => 1,
@@ -154,6 +158,7 @@ class CommandLine extends Config {
                                     'show'          => 1,
                                     'baseline'      => 1,
                                     'install'       => 1,
+                                    'mr'            => 1,
                                     );
 
     private array $args = array();
@@ -215,11 +220,10 @@ class CommandLine extends Config {
                         $name  = trim($name, '[]');
                         $value = substr($args[$id + 1], $pos + 1);
 
-                        if (isset($this->config['directives'][$name])) {
-                            $this->config['directives'][$name][] = $value;
-                        } else {
-                            $this->config['directives'][$name] = array($value);
+                        if (!isset($this->config['directives'][$name])) {
+                            $this->config['directives'][$name] = new Directive();
                         }
+                        $this->config['directives'][$name]->add($value);
                         break;
 
                     case 'project' :
@@ -305,6 +309,14 @@ class CommandLine extends Config {
         }
 
         $command = array_shift($args);
+        if ($command === 'mr') {
+            // @todo move this to a specific option -branch2 ?
+            // @todo manage stored dumps (history ? rename, delete, add...)
+
+            $this->config['origin']      = array_shift($args);
+            $this->config['destination'] = array_shift($args);
+        }
+
         if (isset($command, self::$commands[$command])) {
             $this->config['command'] = $command;
 
@@ -338,7 +350,7 @@ class CommandLine extends Config {
             $this->config['project']   = 'onepage';
             $this->config['ruleset']   = 'OneFile';
 
-		// @todo verifier la présence de OnepageJson
+            // @todo verifier la présence de OnepageJson
             $this->config['format']    = array('OnepageJson');
             $this->config['file']      = str_replace('/code/', '/reports/', substr($this->config['filename'], 0, -4));
             $this->config['quiet']     = true;

@@ -26,9 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class Type extends Analyzer {
-    protected $type = null;
+    protected array $type = array();
 
     public function analyze(): void {
+        if (empty($this->type)) {
+            return;
+        }
+
         $this->atomIs($this->type);
         $this->prepareQuery();
     }

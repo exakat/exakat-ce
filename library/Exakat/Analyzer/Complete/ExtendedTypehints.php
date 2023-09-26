@@ -28,6 +28,7 @@ class ExtendedTypehints extends Complete {
         return array('Complete/SetParentDefinition',
                     );
     }
+
     public function analyze(): void {
         // returntype, contravariant (Interface => Class)
         // returntype, contravariant (Interface => Class => subclass)
@@ -37,9 +38,12 @@ class ExtendedTypehints extends Complete {
              ->atomIsNot('Void')
              ->as('result')
              ->inIs('DEFINITION')
+             ->atomIs('Interface')
+             ->outIs('DEFINITION')
+             ->inIs('IMPLEMENTS')
              ->atomIs(array('Interface', 'Class'))
              ->goToAllChildren(self::EXCLUDE_SELF)
-             ->raw('not(where(__.out("DEFINITION").where(eq("result"))))')
+             ->raw('not(where(__.in("DEFINITION").where(eq("result"))))')
              ->addETo('DEFINITION', 'result');
         $this->prepareQuery();
 

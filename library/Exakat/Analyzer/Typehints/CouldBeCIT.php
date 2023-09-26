@@ -79,6 +79,7 @@ class CouldBeCIT extends CouldBeType {
         // $arg instanceof B
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
+             ->analyzerIsNot('self')
              ->as('result')
              ->outIs('DEFINITION')
              ->inIs('VARIABLE')
@@ -90,6 +91,7 @@ class CouldBeCIT extends CouldBeType {
         // foo($arg) { $arg->o; }
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
+             ->analyzerIsNot('self')
              ->as('result')
              ->outIs('DEFINITION')
              ->inIs(array('OBJECT', 'CLASS'))
@@ -100,6 +102,7 @@ class CouldBeCIT extends CouldBeType {
         // throw $arg  (An exception must be an object)
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('ARGUMENT')
+             ->analyzerIsNot('self')
              ->as('result')
              ->outIs('DEFINITION')
              ->inIs('THROW')

@@ -59,6 +59,7 @@ class SetClassRemoteDefinitionWithGlobal extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'method')
               ->addETo('DEFINITION', 'method');
         $this->prepareQuery();
 
@@ -86,6 +87,7 @@ class SetClassRemoteDefinitionWithGlobal extends Complete {
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 
@@ -113,6 +115,7 @@ class SetClassRemoteDefinitionWithGlobal extends Complete {
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 
@@ -140,6 +143,7 @@ class SetClassRemoteDefinitionWithGlobal extends Complete {
               ->outIs('CONST')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
     }

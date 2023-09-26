@@ -28,7 +28,6 @@ use Exakat\Analyzer\Analyzer;
 class UndefinedProperty extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/CreateMagicProperty',
-                     'Complete/VariablesTypehint',
                      'Classes/HasMagicProperty',
                      'Complete/SetClassPropertyDefinitionWithTypehint',
                      'Complete/IsPhpStructure',
@@ -48,7 +47,7 @@ class UndefinedProperty extends Analyzer {
                 $this->side()
                      ->atomIs('Member')
                      ->outIs('MEMBER')
-                     ->atomIsNot('Name')
+                     ->tokenIsNot('T_STRING')
             )
 
             // do not have __get/__set set up (trait or parents or else)
@@ -89,6 +88,20 @@ class UndefinedProperty extends Analyzer {
              ->hasNoTrait()
              ->analyzerIsNot('self')
              ->hasNoIn('DEFINITION') // No definition found
+
+            ->not(
+                $this->side()
+                     ->atomIs('Member')
+                     ->outIs('MEMBER')
+                     ->tokenIsNot('T_STRING')
+            )
+
+            ->not(
+                $this->side()
+                     ->atomIs('Staticproperty')
+                     ->outIs('MEMBER')
+                     ->tokenIsNot('T_VARIABLE')
+            )
 
              ->isNot('isPhp', true)
              ->isNot('isExt', true)

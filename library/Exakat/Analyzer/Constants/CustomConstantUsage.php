@@ -32,29 +32,11 @@ class CustomConstantUsage extends Analyzer {
     }
 
     public function analyze(): void {
-        $exts = $this->rulesets->listAllAnalyzer('Extensions');
-
-        $constants = array();
-        foreach ($exts as $ext) {
-            $inifile = str_replace('Extensions\Ext', '', $ext);
-            $ini = $this->load($inifile, 'constants');
-
-            if (!empty($ini[0])) {
-                $constants[] = $ini;
-            }
-        }
-
-        $constants = array_merge(...$constants);
-        if (empty($constants)) {
-            return;
-        }
-
-        $constants = makeFullNsPath($constants);
-
         // @note NSnamed are OK by default (may be not always!)
         $this->atomIs(self::CONSTANTS_ALL)
              ->analyzerIs('Constants/ConstantUsage')
-             ->fullnspathIsNot($constants)
+             ->isNot('isPhp', true)
+             ->isNot('isExt', true)
              ->inIs('DEFINITION')
              ->atomIs(array('Constant', 'Defineconstant'))
              ->back('first');

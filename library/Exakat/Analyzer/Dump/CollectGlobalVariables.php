@@ -39,9 +39,15 @@ CREATE TABLE globalVariables ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                              )
 SQL;
 
+    public function dependsOn(): array {
+        return array('Complete/Superglobals',
+                     'Complete/GlobalDefinitions',
+                    );
+    }
+
     public function analyze(): void {
-        $this->atomIs('Virtualglobal', self::WITHOUT_CONSTANTS)
-             ->codeIsNot('$GLOBALS', self::TRANSLATE, self::CASE_SENSITIVE)
+        $this->atomIs(array('Virtualglobal', 'Global'), self::WITHOUT_CONSTANTS)
+             ->fullcodeIsNot('$GLOBALS')
              ->outIs('DEFINITION')
              ->savePropertyAs('label', 'type')
              ->outIsIE('DEFINITION')
@@ -61,7 +67,7 @@ coalesce(
 )
 GREMLIN
              )
-             ->getVariable(array('file', 'ligne', 'variable', 'isRead', 'isModified', 'type'));
+             ->getVariable(array('variable', 'file', 'ligne', 'isRead', 'isModified', 'type'));
         $this->prepareQuery();
     }
 }

@@ -44,7 +44,6 @@ class GoToOtherBranch extends DSL {
 
             default:
                 throw new Exception('Wrong number of arguments for goToOtherBranch : ' . func_num_args() . ' provided, 1 or 2 expected.');
-
         }
 
         return new Command('inE().hasLabel(within(***)).as("b1").outV()' . $as . '.outE().hasLabel(within(***)).as("b2").where("b1", neq("b2")).by(label).inV()',

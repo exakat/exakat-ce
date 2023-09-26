@@ -98,7 +98,7 @@ class Sarif extends Reports {
             $result->setRuleId($row['analyzer']);
             $result->setRuleIndex($this->analyzers[$row['analyzer']]);
             $result->setLevel($this->severity2level($severityCache[$row['analyzer']]));
-            $result->addPartialFingerprints(array('primaryLocationLineHash' => $this->fingerprints($row['file'], $row['line'], $row['fullcode'])));
+            $result->addPartialFingerprints(array('primaryLocationLineHash' => $this->fingerprints($row['file'], $row['line'], (string) $row['fullcode'])));
 
             $location = new Location();
             $artifactLocation = new ArtifactLocation();
@@ -140,7 +140,6 @@ class Sarif extends Reports {
             case 'None':
                 $level = 'note';
                 break;
-
         }
 
         return $level;

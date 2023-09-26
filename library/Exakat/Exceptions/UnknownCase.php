@@ -23,7 +23,9 @@
 
 namespace Exakat\Exceptions;
 
-class UnknownCase extends \RuntimeException {
+use RuntimeException;
+
+class UnknownCase extends RuntimeException {
     public function __construct(string $message) {
         parent::__construct("An unexpected situation was met while processing Load : $message\n");
     }

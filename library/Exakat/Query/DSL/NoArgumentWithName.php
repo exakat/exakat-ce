@@ -23,6 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Query\Query;
 
 class NoArgumentWithName extends DSL {
     public function run(): Command {
@@ -30,6 +31,10 @@ class NoArgumentWithName extends DSL {
 
         // Assert parameter name ? It should start with $ and be a variable
 //        $this->assertLink($links);
+
+        if (empty($name)) {
+            return new Command(Query::STOP_QUERY);
+        }
 
         if (is_array($name)) {
             return new Command('not( where( __.out("ARGUMENT").has("rankName", within(***)) ) )', $name);

@@ -49,6 +49,9 @@ const SQLITE_CHUNK_SIZE = 490;
 
 const SQLITE3_BUSY_TIMEOUT = 5000; // ms
 
+const PARALLEL_WAIT_MS      = 100000; 
+
+
 function display(string $text): void {
     global $VERBOSE;
 
@@ -449,9 +452,9 @@ function makeFullNsPath(array|string $functions, bool $constant = \FNP_NOT_CONST
         return $cb($functions);
     } elseif (is_array($functions)) {
         return array_map($cb, $functions);
-    } 
-
-    throw new WrongParameterType(gettype($functions), __METHOD__);
+    } else {
+	    throw new WrongParameterType(gettype($functions), __FUNCTION__);
+    }
 }
 
 function trimOnce(string $string, string $trim = '\'"'): string {
@@ -721,6 +724,24 @@ function exakat(string $what) : mixed {
 
 function flatten(array $array): string {
     return implode('', $array);
+}
+
+function implodeAnd(array $array, string $and = ' and '): string {
+	$last = array_pop($array);
+    return implode(', ', $array).$and.$last;
+}
+
+function array2htmllist(array $array) : string {
+	return '<ul><li>' . implode('</li><li>', $array) . "</li></ul>\n";
+}
+
+function array2tablerow(array $array) : string {
+	foreach($array as &$a) {
+		$a = '<tr><td>'.implode('</td><td>', $a).'</td></tr>';
+	}
+	unset($a);
+
+	return implode(PHP_EOL, $array);
 }
 
 ?>

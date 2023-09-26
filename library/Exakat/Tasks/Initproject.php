@@ -29,12 +29,13 @@ use Exakat\Exceptions\VcsError;
 use Exakat\Project;
 use Exakat\Vcs\Vcs;
 use Exakat\Vcs\None;
+use DateTimeImmutable;
 
 class Initproject extends Tasks {
     public const CONCURENCE = self::ANYTIME;
 
     public function run(): void {
-        if ($this->config->project === 'default') {
+        if ($this->config->project->isDefault()) {
             throw new ProjectNeeded();
         }
 
@@ -99,8 +100,7 @@ class Initproject extends Tasks {
             $vcs = new None($dotProject, "$tmpPath/code");
             $projectName = $project;
         } else {
-            $vcsClass = Vcs::getVcs($this->config);
-            $vcs = new $vcsClass($dotProject, "$tmpPath/code");
+            $vcs = Vcs::getVcs($this->config);
 
             switch ($vcs->getName()) {
                 case 'symlink' :
@@ -228,7 +228,7 @@ class Initproject extends Tasks {
 
             $errorMessage = $e->getMessage();
             $this->datastore->addRow('hash', array('init error' => $errorMessage,
-                                                   'inited'     => date('r')));
+                                                   'inited'     => (new DateTimeImmutable())->format('r')));
             print "An error prevented code initialization: no code was loaded.\n.Error : $errorMessage\n";
 
             file_put_contents("{$this->config->project_dir}/config.ini", $projectConfig->getConfig($this->config->dir_root));
@@ -245,7 +245,7 @@ class Initproject extends Tasks {
                                               ));
 
         $this->datastore->addRow('hash', array('status' => 'Initproject',
-                                               'inited' => date('r')));
+                                               'inited' => (new DateTimeImmutable())->format('r')));
     }
 }
 

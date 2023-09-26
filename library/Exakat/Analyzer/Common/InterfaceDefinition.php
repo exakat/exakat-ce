@@ -26,9 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class InterfaceDefinition extends Analyzer {
-    protected $interfaces = array();
+    protected array $interfaces = array();
 
     public function analyze(): void {
+        if (empty($this->interfaces)) {
+            return;
+        }
+
         $interfaces =  makeFullNsPath($this->interfaces);
 
         $this->atomIs('Interface')

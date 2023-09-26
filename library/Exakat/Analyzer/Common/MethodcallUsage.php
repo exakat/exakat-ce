@@ -26,9 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 class MethodcallUsage extends Analyzer {
-    protected $calledMethods = array();
+    protected array $calledMethods = array();
 
     public function analyze(): void {
+        if (empty($this->calledMethods)) {
+            return;
+        }
+
         // Currently ignoring the object :(
         $calledMethods = array_map('strtolower', $this->calledMethods);
 

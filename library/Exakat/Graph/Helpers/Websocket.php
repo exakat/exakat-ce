@@ -171,7 +171,6 @@ class Websocket {
     }
 
     protected function receive_fragment() {
-
         // Just read the main fragment information first.
         $data = $this->read(2);
 

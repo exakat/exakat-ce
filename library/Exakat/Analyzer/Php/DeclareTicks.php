@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,6 +27,7 @@ use Exakat\Analyzer\Analyzer;
 class DeclareTicks extends Analyzer {
     // Declare( ticks = 3)
     public function analyze(): void {
+        // declare(ticks = 1)
         $this->atomIs('File')
              ->outIs('FILE')
              ->outIs('EXPRESSION')

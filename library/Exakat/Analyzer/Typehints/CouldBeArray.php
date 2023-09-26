@@ -83,6 +83,7 @@ class CouldBeArray extends CouldBeType {
                       ->fullnspathIs('\\array')
              )
              ->outIsIE(array('PPP'))
+             ->analyzerIsNot('self')
              ->as('results')
              ->outIs('DEFINITION')
              ->hasIn('ARGUMENT') // functioncall or array
@@ -91,6 +92,7 @@ class CouldBeArray extends CouldBeType {
         $this->prepareQuery();
 
         $this->atomIs(self::FUNCTIONS_ALL)
+             ->analyzerIsNot('self')
              ->not(
                  $this->side()
                       ->outIs('RETURNTYPE')

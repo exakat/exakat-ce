@@ -24,6 +24,7 @@
 namespace Exakat\Query\DSL;
 
 use Exakat\Query\Query;
+use Exakat\Analyzer\Analyzer;
 
 class AtomInsideWithCall extends DSL {
     public function run(): Command {
@@ -39,12 +40,13 @@ class AtomInsideWithCall extends DSL {
         $MAX_LOOPING  = self::$MAX_LOOPING;
 
         $list = makeList($diff);
+        $definitions = makeList(Analyzer::DEFINITIONS);
 
         $gremlin = <<<GREMLIN
 emit( ).repeat( __.out($linksDown)
                   .coalesce( __.hasLabel("Functioncall").in("DEFINITION").out("BLOCK").out("EXPRESSION"), 
                              __.filter{true})
-                  .not(hasLabel("Closure", "Classanonymous", "Function", "Class", "Trait", "Interface")) 
+                  .not(hasLabel($definitions)) 
             )
             .times($MAX_LOOPING)
             .hasLabel($list)

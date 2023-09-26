@@ -30,6 +30,7 @@ class SelfTransform extends Analyzer {
         // $x = A.$x.$b;
         // First step : marks variables in the right part
         $this->atomIs('Assignation')
+             ->analyzerIsNot('self')
              ->outIs('LEFT')
              ->atomIs(self::CONTAINERS)
              ->savePropertyAs('fullcode', 'left')
@@ -45,6 +46,7 @@ class SelfTransform extends Analyzer {
              ->outIs('LEFT')
              ->atomIs(self::CONTAINERS)
              ->savePropertyAs('fullcode', 'left')
+             ->analyzerIsNot('self')
              ->as('results')
              ->back('first')
 
@@ -58,6 +60,7 @@ class SelfTransform extends Analyzer {
         $this->atomIs('Assignation')
              ->codeIs(array('.=', '+=', '-=', '%=', '&&=', '&=', '*=', '**=', '/='))
              ->outIs('LEFT')
+             ->analyzerIsNot('self')
              ->atomIs(self::CONTAINERS);
         $this->prepareQuery();
     }

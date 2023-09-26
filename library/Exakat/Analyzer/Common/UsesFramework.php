@@ -25,13 +25,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class UsesFramework extends Analyzer {
-    protected $constants  = array();
-    protected $functions  = array();
-    protected $classes    = array();
-    protected $interfaces = array();
-    protected $traits     = array();
-    protected $namespaces = array();
-    protected $enums      = array();
+    protected array $constants  = array();
+    protected array $functions  = array();
+    protected array $classes    = array();
+    protected array $interfaces = array();
+    protected array $traits     = array();
+    protected array $namespaces = array();
+    protected array $enums      = array();
 
     public function analyze(): void {
         $analyzerId = -1;

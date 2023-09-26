@@ -24,289 +24,292 @@ namespace Exakat\Analyzer\Dump;
 
 
 class TypehintingStats extends AnalyzerArrayHashResults {
-	protected string $analyzerName   = 'Typehinting stats';
+    protected string $analyzerName   = 'Typehinting stats';
 
-	public function analyze(): void {
-		//total parameters
-		$this->atomIs('Parameter')
-			 ->count();
-		$totalArguments = $this->rawQuery()->toInt();
+    public function analyze(): void {
+        //total parameters
+        $this->atomIs('Parameter')
+             ->count();
+        $totalArguments = $this->rawQuery()->toInt();
 
-		//total fonctions, closures, etc.
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->not(
-				 $this->side()
-					  ->atomIs('Magicmethod')
-					  ->outIs('NAME')
-					  ->codeIs(array('__destruct', '__construct', '__unset', '__wakeup'), self::TRANSLATE, self::CASE_INSENSITIVE)
-			 )
-			 ->count();
-		$totalFunctions = $this->rawQuery()->toInt();
+        //total fonctions, closures, etc.
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->count();
+        $totalFunctions = $this->rawQuery()->toInt();
 
-		//typehinted
-		$this->atomIs('Parameter')
-			 ->filter(
-				 $this->side()
-					  ->outIs('TYPEHINT')
-					  ->atomIsNot('Void')
-			 )
-			 ->count();
-		$withTypehint = $this->rawQuery()->toInt();
+        //not typehinted
+        $this->atomIs(array('Parameter', 'Function', 'Arrowfunction', 'Method', 'Magicmethod', 'Propertydefinition'))
+             ->inIsIE('PPP')
+             ->outIs(array('RETURNTYPE', 'TYPEHINT'))
+             ->atomIs('Void')
+             ->count();
+        $withoutTypehint = $this->rawQuery()->toInt();
 
-		//typehinted
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->filter(
-				 $this->side()
-					  ->outIs('RETURNTYPE')
-					  ->atomIsNot('Void')
-			 )
-			 ->count();
-		$withReturnTypehint = $this->rawQuery()->toInt();
+        //typehinted
+        $this->atomIs('Parameter')
+             ->filter(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->atomIsNot('Void')
+             )
+             ->count();
+        $withTypehint = $this->rawQuery()->toInt();
 
-		//nullable typehinted
-		$this->atomIs('Parameter')
-			 ->isNullable()
-			 ->count();
-		$argNullable = $this->rawQuery()->toInt();
+        //typehinted
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->filter(
+                 $this->side()
+                      ->outIs('RETURNTYPE')
+                      ->atomIsNot('Void')
+             )
+             ->count();
+        $withReturnTypehint = $this->rawQuery()->toInt();
 
-		//nullable typehinted
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->isNullable()
-			 ->count();
-		$returnNullable = $this->rawQuery()->toInt();
+        //nullable typehinted
+        $this->atomIs('Parameter')
+             ->isNullable()
+             ->count();
+        $argNullable = $this->rawQuery()->toInt();
 
-		//scalar typehint used
-		$this->atomIs('Scalartypehint')
-			 ->fullnspathIsNot('\\null')
-			 ->count();
-		$scalartype = $this->rawQuery()->toInt();
+        //nullable typehinted
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->isNullable()
+             ->count();
+        $returnNullable = $this->rawQuery()->toInt();
 
-		//typehinted
-		$this->atomIs('Scalartypehint')
-			 ->has('fullnspath')
-			 ->fullnspathIsNot('\\null')
-			 ->groupCount('fullnspath')
-			 ->raw('cap("m")');
-		$scalartypes1 = $this->rawQuery()->toArray();
+        //scalar typehint used
+        $this->atomIs('Scalartypehint')
+             ->fullnspathIsNot('\\null')
+             ->count();
+        $scalartype = $this->rawQuery()->toInt();
 
-		//typehinted 2
-		$this->atomIs(array('Identifier', 'Nsname'))
-			 ->fullnspathIs(array('\\resource', '\\mixed', '\\numeric', '\\false', '\\never'))
-			 ->groupCount('fullnspath')
-			 ->raw('cap("m")');
-		$scalartypes2 = $this->rawQuery()->toArray();
+        //typehinted
+        $this->atomIs('Scalartypehint')
+             ->has('fullnspath')
+             ->fullnspathIsNot('\\null')
+             ->groupCount('fullnspath')
+             ->raw('cap("m")');
+        $scalartypes1 = $this->rawQuery()->toArray();
 
-		$scalartypes = ($scalartypes1[0] ?? array()) + ($scalartypes2[0] ?? array());
+        //typehinted 2
+        $this->atomIs(array('Identifier', 'Nsname'))
+             ->fullnspathIs(array('\\resource', '\\mixed', '\\numeric', '\\false', '\\never'))
+             ->groupCount('fullnspath')
+             ->raw('cap("m")');
+        $scalartypes2 = $this->rawQuery()->toArray();
 
-		//typehinted object
-		$this->atomIs('Parameter')
-			 ->outIs('TYPEHINT')
-			 ->atomIs(array('Identifier', 'Nsname'))
-			 ->groupCount('fullnspath')
-			 ->raw('cap("m")');
-		$objecttypes1 = $this->rawQuery()->toArray();
+        $scalartypes = ($scalartypes1[0] ?? array()) + ($scalartypes2[0] ?? array());
 
-		//typehinted object2
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->outIs('RETURNTYPE')
-			 ->atomIs(array('Identifier', 'Nsname'))
-			 ->groupCount('fullnspath')
-			 ->raw('cap("m")');
-		$objecttypes2 = $this->rawQuery()->toArray();
+        //typehinted object
+        $this->atomIs('Parameter')
+             ->outIs('TYPEHINT')
+             ->atomIs(array('Identifier', 'Nsname'))
+             ->groupCount('fullnspath')
+             ->raw('cap("m")');
+        $objecttypes1 = $this->rawQuery()->toArray();
 
-		$objecttypes = ($objecttypes1[0] ?? array()) + ($objecttypes2[0] ?? array());
+        //typehinted object2
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('RETURNTYPE')
+             ->atomIs(array('Identifier', 'Nsname'))
+             ->groupCount('fullnspath')
+             ->raw('cap("m")');
+        $objecttypes2 = $this->rawQuery()->toArray();
 
-		//typehinted class
-		$this->atomIs('Parameter')
-			 ->outIs('TYPEHINT')
-			 ->atomIs(array('Identifier', 'Nsname'))
-			 ->inIs('DEFINITION')
-			 ->atomIs('Class')
-			 ->isNot('abstract', true)
-			 ->count();
-		$classtypes1 = $this->rawQuery()->toInt();
+        $objecttypes = ($objecttypes1[0] ?? array()) + ($objecttypes2[0] ?? array());
 
-		//typehinted class
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->outIs('RETURNTYPE')
-			 ->atomIs(array('Identifier', 'Nsname'))
-			 ->inIs('DEFINITION')
-			 ->atomIs('Class')
-			 ->isNot('abstract', true)
-			 ->count();
-		$classtypes2 = $this->rawQuery()->toInt();
-		$classTypehint = $classtypes1 + $classtypes2;
+        //typehinted class
+        $this->atomIs('Parameter')
+             ->outIs('TYPEHINT')
+             ->atomIs(array('Identifier', 'Nsname'))
+             ->inIs('DEFINITION')
+             ->atomIs('Class')
+             ->isNot('abstract', true)
+             ->count();
+        $classtypes1 = $this->rawQuery()->toInt();
 
-		//typehinted interface
-		$this->atomIs('Parameter')
-			 ->outIs('TYPEHINT')
-			 ->atomIs(array('Identifier', 'Nsname'))
-			 ->inIs('DEFINITION')
-			 ->interfaceLike()
-			 ->count();
-		$interfacetypes1 = $this->rawQuery()->toInt();
+        //typehinted class
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('RETURNTYPE')
+             ->atomIs(array('Identifier', 'Nsname'))
+             ->inIs('DEFINITION')
+             ->atomIs('Class')
+             ->isNot('abstract', true)
+             ->count();
+        $classtypes2 = $this->rawQuery()->toInt();
+        $classTypehint = $classtypes1 + $classtypes2;
 
-		//typehinted class
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->outIs('RETURNTYPE')
-			 ->atomIs(array('Identifier', 'Nsname'))
-			 ->inIs('DEFINITION')
-			 ->interfaceLike()
-			 ->count();
-		$interfacetypes2 = $this->rawQuery()->toInt();
-		$interfaceTypehint = $interfacetypes1 + $interfacetypes2;
+        //typehinted interface
+        $this->atomIs('Parameter')
+             ->outIs('TYPEHINT')
+             ->atomIs(array('Identifier', 'Nsname'))
+             ->inIs('DEFINITION')
+             ->interfaceLike()
+             ->count();
+        $interfacetypes1 = $this->rawQuery()->toInt();
 
-		//typehinted properties
-		$this->atomIs('Ppp')
-			 ->outIs('TYPEHINT')
-			 ->atomIsNot('Void')
-			 ->back('first')
-			 ->outIs('PPP')
-			 ->count();
-		$typedProperties = $this->rawQuery()->toInt();
+        //typehinted class
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('RETURNTYPE')
+             ->atomIs(array('Identifier', 'Nsname'))
+             ->inIs('DEFINITION')
+             ->interfaceLike()
+             ->count();
+        $interfacetypes2 = $this->rawQuery()->toInt();
+        $interfaceTypehint = $interfacetypes1 + $interfacetypes2;
 
-		//total properties
-		$this->atomIs('Propertydefinition')
-			 ->count();
-		$totalProperties = $this->rawQuery()->toInt();
+        //typehinted properties
+        $this->atomIs('Ppp')
+             ->outIs('TYPEHINT')
+             ->atomIsNot('Void')
+             ->back('first')
+             ->outIs('PPP')
+             ->count();
+        $typedProperties = $this->rawQuery()->toInt();
 
-		//union properties
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->is('typehint', 'or')
-			 ->filter(
-				 $this->side()
-					  ->outIs('RETURNTYPE')
-					  ->fullnspathIsNot(array('\\void', '\\null'))
-					  ->count()
-					  ->raw('is(gte(2))')
-			 )
-			 ->count();
-		$unionTypehints1 = $this->rawQuery()->toInt();
+        //total properties
+        $this->atomIs('Propertydefinition')
+             ->count();
+        $totalProperties = $this->rawQuery()->toInt();
 
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->outIs('ARGUMENT')
-			 ->is('typehint', 'or')
-			 ->filter(
-				 $this->side()
-					  ->outIs('TYPEHINT')
-					  ->fullnspathIsNot(array('\\void', '\\null'))
-					  ->count()
-					  ->raw('is(gte(2))')
-			 )
-			 ->count();
-		$unionTypehints2 = $this->rawQuery()->toInt();
+        //union properties
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->is('typehint', 'or')
+             ->filter(
+                 $this->side()
+                      ->outIs('RETURNTYPE')
+                      ->fullnspathIsNot(array('\\void', '\\null'))
+                      ->count()
+                      ->raw('is(gte(2))')
+             )
+             ->count();
+        $unionTypehints1 = $this->rawQuery()->toInt();
 
-		$this->atomIs('Ppp')
-			 ->is('typehint', 'or')
-			 ->filter(
-				 $this->side()
-					  ->outIs('TYPEHINT')
-					  ->fullnspathIsNot(array('\\void', '\\null'))
-					  ->count()
-					  ->raw('is(gte(2))')
-			 )
-			 ->count();
-		$unionTypehints3 = $this->rawQuery()->toInt();
-		$unionTypehints = $unionTypehints1 + $unionTypehints2 + $unionTypehints3;
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('ARGUMENT')
+             ->is('typehint', 'or')
+             ->filter(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->fullnspathIsNot(array('\\void', '\\null'))
+                      ->count()
+                      ->raw('is(gte(2))')
+             )
+             ->count();
+        $unionTypehints2 = $this->rawQuery()->toInt();
 
-		//intersection properties
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->is('typehint', 'and')
-			 ->filter(
-				 $this->side()
-					  ->outIs('RETURNTYPE')
-					  ->fullnspathIsNot(array('\\void', '\\null'))
-					  ->count()
-					  ->raw('is(gte(2))')
-			 )
-			 ->count();
-		$intersectionTypehints1 = $this->rawQuery()->toInt();
+        $this->atomIs('Ppp')
+             ->is('typehint', 'or')
+             ->filter(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->fullnspathIsNot(array('\\void', '\\null'))
+                      ->count()
+                      ->raw('is(gte(2))')
+             )
+             ->count();
+        $unionTypehints3 = $this->rawQuery()->toInt();
+        $unionTypehints = $unionTypehints1 + $unionTypehints2 + $unionTypehints3;
 
-		$this->atomIs(self::FUNCTIONS_ALL)
-			 ->outIs('ARGUMENT')
-			 ->is('typehint', 'and')
-			 ->filter(
-				 $this->side()
-					  ->outIs('TYPEHINT')
-					  ->fullnspathIsNot(array('\\void', '\\null'))
-					  ->count()
-					  ->raw('is(gte(2))')
-			 )
-			 ->count();
-		$intersectionTypehints2 = $this->rawQuery()->toInt();
+        //intersection properties
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->is('typehint', 'and')
+             ->filter(
+                 $this->side()
+                      ->outIs('RETURNTYPE')
+                      ->fullnspathIsNot(array('\\void', '\\null'))
+                      ->count()
+                      ->raw('is(gte(2))')
+             )
+             ->count();
+        $intersectionTypehints1 = $this->rawQuery()->toInt();
 
-		$this->atomIs('Ppp')
-			 ->is('typehint', 'and')
-			 ->filter(
-				 $this->side()
-					  ->outIs('TYPEHINT')
-					  ->fullnspathIsNot(array('\\void', '\\null'))
-					  ->count()
-					  ->raw('is(gte(2))')
-			 )
-			 ->count();
-		$intersectionTypehints3 = $this->rawQuery()->toInt();
-		$intersectionTypehints = $intersectionTypehints1 + $intersectionTypehints2 + $intersectionTypehints3;
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('ARGUMENT')
+             ->is('typehint', 'and')
+             ->filter(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->fullnspathIsNot(array('\\void', '\\null'))
+                      ->count()
+                      ->raw('is(gte(2))')
+             )
+             ->count();
+        $intersectionTypehints2 = $this->rawQuery()->toInt();
 
-		$return = compact('totalArguments',
-						  'totalFunctions',
-						  'withTypehint',
-						  'withReturnTypehint',
-						  'scalartype',
-						  'returnNullable',
-						  'argNullable',
-						  'classTypehint',
-						  'interfaceTypehint',
-						  'typedProperties',
-						  'totalProperties',
-						  'unionTypehints',
-						  'intersectionTypehints'
-						);
-		$return = $return + $scalartypes + $objecttypes;
+        $this->atomIs('Ppp')
+             ->is('typehint', 'and')
+             ->filter(
+                 $this->side()
+                      ->outIs('TYPEHINT')
+                      ->fullnspathIsNot(array('\\void', '\\null'))
+                      ->count()
+                      ->raw('is(gte(2))')
+             )
+             ->count();
+        $intersectionTypehints3 = $this->rawQuery()->toInt();
+        $intersectionTypehints = $intersectionTypehints1 + $intersectionTypehints2 + $intersectionTypehints3;
 
-		$atoms = array('all'			=> self::FUNCTIONS_ALL,
-					   'function'	   => 'Function',
-					   'method'		 => array('Method', 'Magicmethod'),
-					   'closure'		=> 'Closure',
-					   'arrowfunction'  => 'Arrowfunction',
-					   );
+        $return = compact('totalArguments',
+            'totalFunctions',
+            'withoutTypehint',
+            'withTypehint',
+            'withReturnTypehint',
+            'scalartype',
+            'returnNullable',
+            'argNullable',
+            'classTypehint',
+            'interfaceTypehint',
+            'typedProperties',
+            'totalProperties',
+            'unionTypehints',
+            'intersectionTypehints'
+        );
+        $return = $return + $scalartypes + $objecttypes;
 
-		foreach ($atoms as $name => $atom) {
-			//total
-			$this->atomIs($atom)
-				 ->count();
-			$return["{$name}Total"] = $this->rawQuery()->toInt();
+        $atoms = array('all'			=> self::FUNCTIONS_ALL,
+                       'function'	   => 'Function',
+                       'method'		 => array('Method', 'Magicmethod'),
+                       'closure'		=> 'Closure',
+                       'arrowfunction'  => 'Arrowfunction',
+                       );
 
-			//parameter typehinted
-			$this->atomIs($atom)
-				 ->filter(
-					 $this->side()
-						  ->outIs('ARGUMENT')
-						  ->outIs('TYPEHINT')
-						  ->atomIsNot('Void')
-				 )
-				 ->count();
-			$return["{$name}WithTypehint"] = $this->rawQuery()->toInt();
+        foreach ($atoms as $name => $atom) {
+            //total
+            $this->atomIs($atom)
+                 ->count();
+            $return["{$name}Total"] = $this->rawQuery()->toInt();
 
-			//return typehinted
-			$this->atomIs($atom)
-				 ->filter(
-					 $this->side()
-						  ->outIs('RETURNTYPE')
-						  ->atomIsNot('Void')
-				 )
-				 ->count();
-			$return["{$name}WithReturnTypehint"] = $this->rawQuery()->toInt();
-		}
+            //parameter typehinted
+            $this->atomIs($atom)
+                 ->filter(
+                     $this->side()
+                          ->outIs('ARGUMENT')
+                          ->outIs('TYPEHINT')
+                          ->atomIsNot('Void')
+                 )
+                 ->count();
+            $return["{$name}WithTypehint"] = $this->rawQuery()->toInt();
 
-		array_walk($return, function (string &$value, string $key) {
-			$value = array($key, $value);
-		});
-		$return = array_values($return);
-		$this->analyzerValues = $return;
+            //return typehinted
+            $this->atomIs($atom)
+                 ->filter(
+                     $this->side()
+                          ->outIs('RETURNTYPE')
+                          ->atomIsNot('Void')
+                 )
+                 ->count();
+            $return["{$name}WithReturnTypehint"] = $this->rawQuery()->toInt();
+        }
 
-		$this->prepareQuery();
-	}
+        array_walk($return, function (string &$value, string $key) {
+            $value = array($key, $value);
+        });
+        $return = array_values($return);
+        $this->analyzerValues = $return;
+
+        $this->prepareQuery();
+    }
 }
 
 ?>

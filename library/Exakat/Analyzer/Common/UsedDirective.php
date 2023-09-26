@@ -26,9 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class UsedDirective extends Analyzer {
-    protected $directives = array();
+    protected array $directives = array();
 
     public function analyze(): void {
+        if (empty($this->directives)) {
+            return;
+        }
+
         // Processing ini_get_all ?
         // ini_set($var ? )
 

@@ -37,6 +37,7 @@ class FollowClosureDefinition extends Complete {
              ->inIs('NAME')
              ->atomIs('Functioncall')
              ->hasNoIn('DEFINITION')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -48,7 +49,7 @@ class FollowClosureDefinition extends Complete {
              ->outIs('DEFINITION')
              ->inIs('NAME')
              ->atomIs('Functioncall', self::WITHOUT_CONSTANTS)
-             ->hasNoIn('DEFINITION')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -66,6 +67,7 @@ class FollowClosureDefinition extends Complete {
                       ->inIs('DEFINITION')
              )
              ->atomIs(array('Closure', 'Arrowfunction', 'Function'), self::WITH_VARIABLES)
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -81,7 +83,7 @@ class FollowClosureDefinition extends Complete {
              ->inIs('NAME')
              ->inIsIE('CODE')  // parenthesis
              ->atomIs('Functioncall', self::WITHOUT_CONSTANTS)
-             ->hasNoIn('DEFINITION')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 
@@ -99,7 +101,7 @@ class FollowClosureDefinition extends Complete {
              ->outIs('DEFINITION')
              ->inIs('NAME')
              ->atomIs('Functioncall', self::WITHOUT_CONSTANTS)
-             ->hasNoIn('DEFINITION')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 
@@ -132,7 +134,7 @@ class FollowClosureDefinition extends Complete {
              ->outIs('DEFINITION')
              ->inIs('NAME')
              ->atomIs('Functioncall', self::WITHOUT_CONSTANTS)
-             ->hasNoIn('DEFINITION')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 
@@ -161,7 +163,7 @@ class FollowClosureDefinition extends Complete {
              ->outIs('DEFINITION')
              ->inIs('NAME')
              ->atomIs('Functioncall', self::WITHOUT_CONSTANTS)
-             ->hasNoIn('DEFINITION')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 

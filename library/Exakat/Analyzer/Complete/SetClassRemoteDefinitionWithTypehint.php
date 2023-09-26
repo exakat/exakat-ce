@@ -24,13 +24,14 @@ namespace Exakat\Analyzer\Complete;
 
 class SetClassRemoteDefinitionWithTypehint extends Complete {
     public function analyze(): void {
-
         // function bar(A $a) { $a->foo()}; class A { function foo() {}}
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
               ->hasNoIn('DEFINITION')
               ->outIs('METHOD')
-              ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
+              ->outIs('NAME')
+              ->atomIs('Name', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'name')
+              ->inIs('NAME')
               ->inIs('METHOD')
               ->outIs('OBJECT')
               ->atomIs('Variableobject')
@@ -50,9 +51,11 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->goToAllImplements(self::INCLUDE_SELF)
               ->atomIs(array('Class', 'Classanonymous', 'Trait', 'Interface'))
               ->outIs('METHOD')
+              ->atomIs('Method')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -76,9 +79,11 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->goToAllParents(self::INCLUDE_SELF)
               ->atomIs(array('Class', 'Classanonymous'))
               ->outIs('METHOD')
+              ->atomIs('Method')
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -110,6 +115,7 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 
@@ -134,6 +140,7 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 
@@ -155,7 +162,9 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
+              ->atomIs('Propertydefinition')
               ->raw('filter{ it.get().value("propertyname") == name || it.get().value("code") == name;}')
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 
@@ -187,6 +196,7 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'constante')
               ->addETo('DEFINITION', 'constante');
         $this->prepareQuery();
 
@@ -212,6 +222,7 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'constante')
               ->addETo('DEFINITION', 'constante');
         $this->prepareQuery();
 
@@ -233,6 +244,7 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'constante')
               ->addETo('DEFINITION', 'constante');
         $this->prepareQuery();
 
@@ -258,10 +270,12 @@ class SetClassRemoteDefinitionWithTypehint extends Complete {
               // No check on Atom == Class, as it may not exists
               ->goToAllParents(self::INCLUDE_SELF)
               ->outIs(array('METHOD', 'MAGICMETHOD'))
+              ->atomIs(array('Method', 'Magicmethod'))
               ->isNot('visibility', 'private')
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
     }

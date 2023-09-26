@@ -28,10 +28,12 @@ class Intval extends Plugin {
     public $name = 'intval';
     public $type = 'integer';
 
-    private $skipAtoms = array('Trait'         => 1,
-                              'Class'          => 1,
-                              'Classanonymous' => 1,
-                              'Interface'      => 1,
+    private $skipAtoms = array('Trait'          => 1,
+                               'Class'          => 1,
+                               'Enum'           => 1,
+                               'Function'       => 1,
+                               'Classanonymous' => 1,
+                               'Interface'      => 1,
                              );
 
     public function run(Atom $atom, array $extras): void {
@@ -86,20 +88,21 @@ class Intval extends Plugin {
             case 'Float' :
             case 'String' :
             case 'Heredoc' :
-                if (empty($extras)) {
-                    $atom->intval   = (int) trimOnce($atom->code);
-                } else {
-                    $atom->intval   = (int) array_sum(array_column($extras, 'intval'));
-                }
+                $atom->intval = (int) trimOnce($atom->code);
                 break;
 
             case 'Boolean' :
                 $atom->intval = (int) (mb_strtolower(trim($atom->code, '\\')) === 'true');
                 break;
 
-            case 'Staticclass' :
             case 'Identifier'  :
-//            case 'Nsname'      : This leads to a fatal error
+            case 'Nsname'      :
+                if (isset($atom->noDelimiter)) {
+                    $atom->intval = (int) $atom->noDelimiter;
+                }
+                break;
+
+            case 'Staticclass' :
             case 'Self'        :
             case 'Parent'      :
             case 'Magicconstant' :
@@ -117,9 +120,10 @@ class Intval extends Plugin {
 
             case 'Addition' :
                 if ($atom->code === '+') {
-                    $atom->intval = $extras['LEFT']->intval + $extras['RIGHT']->intval;
+                    $atom->intval = (int) ($extras['LEFT']->intval + $extras['RIGHT']->intval);
                 } elseif ($atom->code === '-') {
-                    $atom->intval = $extras['LEFT']->intval - $extras['RIGHT']->intval;
+                    // We need to keep the weird results of converting float to int with PHP
+                    $atom->intval = (int) ($extras['LEFT']->intval - $extras['RIGHT']->intval);
                 }
                 break;
 
@@ -163,7 +167,10 @@ class Intval extends Plugin {
                     $atom->intval = (int) !$extras['NOT']->intval;
                 } elseif ($atom->code === '~') {
                     $atom->intval = ~$extras['NOT']->intval;
+                } else {
+                    assert(false, 'Not is not ! nor ~');
                 }
+
                 break;
 
             case 'Bitwise' :
@@ -242,8 +249,13 @@ class Intval extends Plugin {
                 }
                 break;
 
+            case 'Cast' :
+                $atom->intval = $extras['CAST']->intval;
+                break;
+
+
             default :
-            }
+        }
     }
 }
 

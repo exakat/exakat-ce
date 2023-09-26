@@ -59,7 +59,7 @@ class Bazaar extends Vcs {
         return trim(substr($res, 13), " *\n");
     }
 
-    public function getRevision(): array {
+    public function getRevision(): string {
         $this->check();
 
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} version-info 2>&1 | grep revno");

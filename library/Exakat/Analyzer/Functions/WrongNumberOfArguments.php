@@ -28,9 +28,9 @@ use Exakat\Analyzer\Analyzer;
 class WrongNumberOfArguments extends Analyzer {
     public function dependsOn(): array {
         return array('Complete/PropagateCalls',
+                     'Complete/SetParentDefinition',
                      'Complete/MakeClassMethodDefinition',
                      'Complete/CreateMagicProperty',
-                     'Complete/SetStringMethodDefinition',
                      'Complete/SetArrayClassDefinition',
                      'Complete/FollowClosureDefinition',
                      'Complete/SetClassMethodRemoteDefinition',
@@ -54,8 +54,13 @@ class WrongNumberOfArguments extends Analyzer {
         $argsMins = array();
         $argsMaxs = array();
 
+        $called = array_flip($this->called->getCalledFunctions());
+
         foreach ($functions as $function) {
             $name = makeFullNsPath($function['name']);
+            if (!isset($called[$name])) {
+                continue;
+            }
             $argsMins[$name] = $function['args_min'];
 
             if ($function['args_max'] < \MAX_ARGS) {
@@ -64,100 +69,111 @@ class WrongNumberOfArguments extends Analyzer {
         }
 
         $this->atomFunctionIs(array_keys($argsMins))
-            ->savePropertyAs('fullnspath', 'fnp')
-            ->hasNoVariadicArgument()
-            ->isLessHash('count', $argsMins, 'fnp')
-            ->back('first');
+             ->analyzerIsNot('self')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->hasNoVariadicArgument()
+             ->isLessHash('count', $argsMins, 'fnp')
+             ->back('first');
         $this->prepareQuery();
 
         $this->atomFunctionIs(array_keys($argsMaxs))
-            ->savePropertyAs('fullnspath', 'fnp')
-            ->hasNoVariadicArgument()
-            ->isMoreHash('count', $argsMaxs, 'fnp')
-            ->back('first');
+             ->analyzerIsNot('self')
+             ->savePropertyAs('fullnspath', 'fnp')
+             ->hasNoVariadicArgument()
+             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->back('first');
         $this->prepareQuery();
 
         // this is for custom functions
         // function foo(1, 2)
         $this->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
              ->inIsIE('METHOD') // for methods calls, static or not.
-             ->inIsIE('NEW')
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/VariableArguments')
              ->isMore('args_min', 'args_count')
-             ->back('first');
+             ->back('first')
+             ->inIsIE('NEW')
+             ->analyzerIsNot('self');
         $this->prepareQuery();
 
         // this is for custom functions
         // foo(...[1,2,])
         $this->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->outWithRank('ARGUMENT', 0)
              ->is('variadic', true)
              ->savePropertyAs('count', 'args_count')
              ->back('first')
-             ->inIsIE('NEW')
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/VariableArguments')
              ->isLess('args_max', 'args_count')
-             ->back('first');
+             ->back('first')
+             ->inIsIE('NEW')
+             ->analyzerIsNot('self');
         $this->prepareQuery();
 
         // this is for custom functions
         // foo(...[1,2,])
         $this->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->outWithRank('ARGUMENT', 0)
              ->is('variadic', true)
              ->savePropertyAs('count', 'args_count')
              ->back('first')
-             ->inIsIE('NEW')
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/VariableArguments')
              ->isMore('args_max', 'args_count')
-             ->back('first');
+             ->back('first')
+             ->inIsIE('NEW')
+             ->analyzerIsNot('self');
         $this->prepareQuery();
 
         // new A
         // new A()
         // new class() { function __construct($a) {}}
-        /*        $this->atomIs('New')
-                     ->outIs('NEW')
-                     ->hasNoVariadicArgument()
-                     ->savePropertyAs('count', 'args_count')
-                     ->inIs('DEFINITION')
-                     ->atomIs('Magicmethod')
-                     ->analyzerIsNot('Functions/VariableArguments')
-                     ->isLess('args_min', 'args_count')
-                     ->back('first');
-                $this->prepareQuery();
-        */
-        // this is for custom functions
-        // new class() { function __construct($a) {}}
         $this->atomIs('New')
+             ->analyzerIsNot('self')
              ->outIs('NEW')
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
-             ->outIs('DEFINITION')
+             ->inIs('DEFINITION')
              ->atomIs('Magicmethod')
              ->analyzerIsNot('Functions/VariableArguments')
              ->isLess('args_count', 'args_min')
              ->back('first');
         $this->prepareQuery();
 
-        // new A($a)
-        // new class($a) { function __construct() {}}
+        // this is for custom functions
+        // new class() { function __construct($a) {}}
         $this->atomIs('New')
+             ->analyzerIsNot('self')
              ->outIs('NEW')
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
-             ->outIs('DEFINITION')
+             ->inIs('DEFINITION')
+             ->atomIs('Magicmethod')
+             ->analyzerIsNot('Functions/VariableArguments')
+             ->isMore('args_count', 'args_max')
+             ->back('first');
+        $this->prepareQuery();
+
+        // new A($a)
+        // new class($a) { function __construct() {}}
+        $this->atomIs('New')
+             ->analyzerIsNot('self')
+             ->outIs('NEW')
+             ->hasNoVariadicArgument()
+             ->savePropertyAs('count', 'args_count')
+             ->inIs('DEFINITION')
              ->atomIs('Magicmethod')
              ->analyzerIsNot('Functions/VariableArguments')
              ->isMore('args_count', 'args_max')
@@ -166,6 +182,7 @@ class WrongNumberOfArguments extends Analyzer {
 
         // new classe(...[1,2,])
         $this->atomIs('New')
+             ->analyzerIsNot('self')
              ->outIs('NEW')
              ->outWithRank('ARGUMENT', 0)
              ->is('variadic', true)
@@ -180,6 +197,7 @@ class WrongNumberOfArguments extends Analyzer {
 
         // new self($args)
         $this->atomIs(array('Self', 'Parent'))
+             ->analyzerIsNot('self')
              ->hasIn('NEW')
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
@@ -194,6 +212,7 @@ class WrongNumberOfArguments extends Analyzer {
         $this->prepareQuery();
 
         $this->atomIs(self::FUNCTIONS_CALLS)
+             ->analyzerIsNot('self')
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
@@ -208,6 +227,7 @@ class WrongNumberOfArguments extends Analyzer {
 
         // new self($args)
         $this->atomIs(array('Self', 'Parent'))
+             ->analyzerIsNot('self')
              ->hasIn('NEW')
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
@@ -221,7 +241,7 @@ class WrongNumberOfArguments extends Analyzer {
         $this->prepareQuery();
 
         // new sqlite3()
-        $news = $this->methods->getNewArgsInterval();
+        $news = $this->readStubs('getNewArgsInterval');
         $argsMins = array();
         $argsMaxs = array();
         foreach ($news as $new) {
@@ -232,7 +252,7 @@ class WrongNumberOfArguments extends Analyzer {
             }
         }
 
-        $stubs = exakat('stubs')->getConstructorsArgsInterval();
+        $stubs = $this->readStubs('getConstructorsArgsInterval');
         foreach ($stubs as $stub) {
             list($classe ) = explode('::', $stub['name'], 2);
             $classe = makeFullNsPath($classe);
@@ -244,6 +264,7 @@ class WrongNumberOfArguments extends Analyzer {
         }
 
         $this->atomIs('New')
+             ->analyzerIsNot('self')
              ->outIs('NEW')
              ->savePropertyAs('fullnspath', 'fnp')
              ->hasNoVariadicArgument()
@@ -252,6 +273,7 @@ class WrongNumberOfArguments extends Analyzer {
         $this->prepareQuery();
 
         $this->atomIs('New')
+             ->analyzerIsNot('self')
              ->outIs('NEW')
              ->savePropertyAs('fullnspath', 'fnp')
              ->hasNoVariadicArgument()
@@ -260,28 +282,72 @@ class WrongNumberOfArguments extends Analyzer {
         $this->prepareQuery();
 
         // (new sqlite3())->fetchArray(1,2,3)
-        $methods = $this->methods->getMethodsArgsInterval();
+        $calledClasses = array_flip($this->called->getCalledClasses());
+        $methods = $this->readStubs('getMethodsArgsInterval');
         $argsMins = array();
         $argsMaxs = array();
         foreach ($methods as $method) {
-            $argsMins[makeFullNsPath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_min'];
+            $class = makeFullNsPath($method['class']);
+            if (!isset($calledClasses[$class])) {
+                continue;
+            }
+            $argsMins[$class . '::' . mb_strtolower($method['name'])] = $method['args_min'];
 
             if ($method['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makeFullNsPath($method['class']) . '::' . mb_strtolower($method['name'])] = $method['args_max'];
+                $argsMaxs[$class . '::' . mb_strtolower($method['name'])] = $method['args_max'];
             }
         }
-        $stubs = exakat('stubs')->getMethodsArgsInterval();
-        foreach ($stubs as $methods) {
-            $argsMins[makeFullNsPath($methods['name'])] = $methods['args_min'];
 
-            if ($methods['args_max'] < \MAX_ARGS) {
-                $argsMaxs[makeFullNsPath($methods['name'])] = $methods['args_max'];
+        $stubs = $this->readStubs('getMethodsArgsInterval');
+        foreach ($stubs as $method) {
+            $class = makeFullNsPath($method['class']);
+            if (!isset($calledClasses[$class])) {
+                continue;
+            }
+
+            if (!isset($method['args_min'])) {
+                continue;
+            }
+            if (!isset($method['args_max'])) {
+                continue;
+            }
+
+            $argsMins[$class . '::' . mb_strtolower($method['name'])] = $method['args_min'];
+
+            if ($method['args_max'] < \MAX_ARGS) {
+                $argsMaxs[$class . '::' . mb_strtolower($method['name'])] = $method['args_max'];
             }
         }
-        // tester avec classes, interfaces et traits
-        // tester avec methods statiques
+
+        // @todo tester avec classes, interfaces et traits
+        // @todo tester avec methods statiques
+        // @todo : simplify this analysis, as DEFINITION makes most of the work here
+
+
+        // 'B::C'()
+        $this->atomIs('Functioncall')
+             ->analyzerIsNot('self')
+             ->savePropertyAs('count', 'args_count')
+             ->outIs('NAME')
+             ->atomIs('String')
+             ->inIs('DEFINITION') // might be method, fucntion...
+             ->isLess('args_min', 'args_count')
+             ->back('first');
+        $this->prepareQuery();
+
+        // 'B::C'(1,2,3)
+        $this->atomIs('Functioncall')
+             ->analyzerIsNot('self')
+             ->savePropertyAs('count', 'args_count')
+             ->outIs('NAME')
+             ->atomIs('String')
+             ->inIs('DEFINITION') // might be method, fucntion...
+             ->isMore('args_max', 'args_count')
+             ->back('first');
+        $this->prepareQuery();
 
         $this->atomIs('Methodcall')
+             ->analyzerIsNot('self')
              ->outIs('OBJECT')
              ->goToTypehint()
              ->savePropertyAs('fullnspath', 'fnp')
@@ -303,6 +369,7 @@ class WrongNumberOfArguments extends Analyzer {
         // Method in a trait
         // For traits, one must go to the definition, and find the trait in the class.
         $this->atomIs('Methodcall')
+             ->analyzerIsNot('self')
              ->outIs('OBJECT')
              ->goToTypehint()
              ->inIs('DEFINITION')
@@ -326,6 +393,7 @@ class WrongNumberOfArguments extends Analyzer {
         $this->prepareQuery();
 
         $this->atomIs(self::METHOD_CALLS)
+             ->analyzerIsNot('self')
              ->outIs('OBJECT')
              ->goToTypehint()
              ->savePropertyAs('fullnspath', 'fnp')
@@ -347,6 +415,7 @@ class WrongNumberOfArguments extends Analyzer {
         // Method in a trait
         // For traits, one must go to the definition, and find the trait in the class.
         $this->atomIs('Methodcall')
+             ->analyzerIsNot('self')
              ->outIs('OBJECT')
              ->goToTypehint()
              ->inIs('DEFINITION')
@@ -369,8 +438,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-        // Statimc methods
+        // Static methods
         $this->atomIs('Staticmethodcall')
+             ->analyzerIsNot('self')
              ->outIs('CLASS')
              ->savePropertyAs('fullnspath', 'fnp')
              ->back('first')
@@ -388,7 +458,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
+        // The method is defined inside a trait which is in a stub
         $this->atomIs('Staticmethodcall')
+             ->analyzerIsNot('self')
              ->outIs('CLASS')
              ->inIs('DEFINITION')
              ->goToAllParentsTraits(self::INCLUDE_SELF)
@@ -410,8 +482,8 @@ class WrongNumberOfArguments extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-
         $this->atomIs('Staticmethodcall')
+             ->analyzerIsNot('self')
              ->outIs('CLASS')
              ->savePropertyAs('fullnspath', 'fnp')
              ->back('first')
@@ -430,6 +502,7 @@ class WrongNumberOfArguments extends Analyzer {
         $this->prepareQuery();
 
         $this->atomIs('Staticmethodcall')
+             ->analyzerIsNot('self')
              ->outIs('CLASS')
              ->inIs('DEFINITION')
              ->goToAllParentsTraits(self::INCLUDE_SELF)

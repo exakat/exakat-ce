@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 /*
  * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
@@ -25,16 +25,24 @@ namespace Exakat\Analyzer\Variables;
 use Exakat\Analyzer\Analyzer;
 
 class IsLocalConstant extends Analyzer {
-    public function analyze() : void {
+    public function analyze(): void {
         // function foo() { $a = 1; echo $a; }
         $this->atomIs('Variabledefinition')
-            // written once, read multiple times 
-             ->raw(<<<'GREMLIN'
- where( __.out("DEFINITION").has("isRead", true))
-.where( __.out("DEFINITION").not(where(__.in("POSTPLUSPLUS", "PREPLUSPLUS"))).has("isModified", true).count().is(lte(1)))
-.sideEffect( __.property("isConst", true))
-GREMLIN
-);
+            // written once, read multiple times
+            ->filter(
+                $this->side()
+                     ->outIs('DEFINITION')
+                     ->is('isRead', true)
+            )
+            ->filter(
+                $this->side()
+                     ->outIs('DEFINITION')
+                     ->hasNoIn(array('POSTPLUSPLUS', 'PREPLUSPLUS'))
+                     ->is('isModified', true)
+                     ->count()
+                     ->isLess(2)
+            )
+            ->setProperty('isConst', true);
         $this->prepareQuery();
     }
 }

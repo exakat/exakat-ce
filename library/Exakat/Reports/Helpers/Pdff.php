@@ -186,7 +186,7 @@ class PdffConstant implements PdffHasPhpdoc {
     public function toArray(): array {
         $array = array(
             'name'       => $this->name,
-            'phpdoc'     => $this->phpdoc,
+            'phpdoc'     => array(),
             'expression' => $this->expression,
             'value'      => $this->value,
         );
@@ -234,7 +234,7 @@ class PdffClassConstant implements PdffHasAttribute, PdffHasPhpdoc {
             'expression' => $this->expression,
             'final'      => $this->final,
             'visibility' => $this->visibility,
-            'phpdoc'     => $this->phpdoc,
+            'phpdoc'     => array(),
             'attributes' => array(),
         );
 
@@ -266,7 +266,7 @@ class PdffClassCase implements PdffHasPhpdoc {
         $array = array(
             'name'       => $this->name,
             'value'      => $this->value,
-            'phpdoc'     => $this->phpdoc,
+            'phpdoc'     => array(),
         );
 
         foreach (array('phpdoc') as $type) {
@@ -381,6 +381,9 @@ class PdffTypehint {
     private $typehint        = '';
 
     public function __construct(string $typehint) {
+        if (in_array($typehint, array('false', 'string', 'int', 'null', 'array', 'float', 'object', 'bool', 'mixed', 'true'), true)) {
+            $typehint = '\\' . $typehint;
+        }
         $this->typehint       = $typehint;
     }
 
@@ -464,12 +467,12 @@ class PdffParameter implements PdffHasAttribute, PdffHasTypehint, PdffHasPhpdoc 
             'default'       => $this->default,
             'expression'    => $this->expression,
             'typehinttype'  => $this->typehinttype,
-            'phpdoc'        => $this->phpdoc,
+            'phpdoc'        => array(),
             'typehints'     => array(),
             'attributes'    => array(),
         );
 
-        foreach (array('typehints', 'attributes') as $type) {
+        foreach (array('typehints', 'attributes', 'phpdoc') as $type) {
             foreach ($this->$type as $name => $pdff) {
                 $array[$type][$name] = $pdff->toArray();
             }
@@ -509,7 +512,7 @@ class PdffInterface implements PdffHasMethod, PdffHasConstant, PdffHasPhpdoc {
     public function toArray(): array {
         $array = array(
             'name'         => $this->name,
-            'phpdoc'       => $this->phpdoc,
+            'phpdoc'       => array(),
             'extends'      => array(),
             'constants'    => array(),
             'methods'      => array(),
@@ -557,7 +560,7 @@ class PdffTrait implements PdffHasMethod, PdffHasProperty, PdffHasPhpdoc {
     public function toArray(): array {
         $array = array(
             'name'         => $this->name,
-            'phpdoc'       => $this->phpdoc,
+            'phpdoc'       => array(),
             'uses'         => array(),
             'properties'   => array(),
             'methods'      => array(),
@@ -674,9 +677,9 @@ class PdffMethod implements PdffHasAttribute, PdffHasTypehint, PdffHasPhpdoc, Pd
     public function toArray(): array {
         $array = array(
             'name'               => $this->name,
-            'phpdoc'             => $this->phpdoc,
+            'phpdoc'             => array(),
+            'visibility'         => $this->visibility,
             'attributes'         => array(),
-            'visibility'         => $this->phpdoc,
             'parameters'         => array(),
             'totalParameters'    => $this->totalParameters,
             'optionalParameters' => $this->optionalParameters,
@@ -824,6 +827,7 @@ class PdffClass implements PdffHasProperty, PdffHasMethod, PdffHasAttribute, Pdf
             'extends'         => $this->extends,
             'constants'       => array(),
             'properties'      => array(),
+            'methods'         => array(),
             'uses'            => array(),
             'usesOptions'     => $this->usesOptions,
             'attributes'      => array(),

@@ -27,11 +27,11 @@ class FileExtensions extends Fileset {
     private array $extensions   = array();
 
     public function __construct(array $extensions) {
-        // todo : checks this
+        // @todo : checks the content of this array before usage
         $this->extensions = $extensions;
     }
 
-    public function setFiles(array $files) {
+    public function setFiles(array $files): void {
         foreach ($files as $file) {
             $ext = pathinfo($file, PATHINFO_EXTENSION);
             if (in_array(mb_strtolower($ext), $this->extensions)) {

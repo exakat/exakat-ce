@@ -29,7 +29,23 @@ class Values extends DSL {
 
         assert($this->assertProperty($property));
 
-        return new Command("values(\"$property\")");
+        if (is_array($property)) {
+            $as = array();
+            $select = array();
+            $by = array();
+            foreach ($property as $id => $p) {
+                $as[] = 'as("values' . $id . '")';
+                $select[] = '"values' . $id . '"';
+                $by[] = 'by("' . $p . '")';
+            }
+            $command = implode('.', $as) . '.local( __.select(' . implode(', ', $select) . ').' . implode('.', $by) . '.fold())';
+        } elseif (is_string($property)) {
+            $command = "values(\"$property\")";
+        } else {
+            assert(false, 'Wrong type for property : ' . gettype($property));
+        }
+
+        return new Command($command);
     }
 }
 ?>

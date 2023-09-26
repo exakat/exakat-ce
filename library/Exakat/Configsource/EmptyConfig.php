@@ -29,7 +29,7 @@ class EmptyConfig extends Config {
         return null;
     }
 
-    public function get(string $index) : mixed {
+    public function get(string $index): mixed {
         if ($index === 'project') {
             return new Project();
         }

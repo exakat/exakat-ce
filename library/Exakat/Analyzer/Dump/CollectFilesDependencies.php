@@ -37,6 +37,8 @@ SQL;
 
 
     public function analyze(): void {
+        // Skipping normal/magic method/property call : They already depends on new
+
         // Direct inclusion
         $this->atomIs('Include', self::WITHOUT_CONSTANTS)
              ->outIs('ARGUMENT')
@@ -71,16 +73,12 @@ SQL;
         $this->atomIs('Interface', self::WITHOUT_CONSTANTS)
              ->_as('classe')
              ->_as('type')
-             ->raw(<<<'GREMLIN'
-repeat( __.inE().not(hasLabel("DEFINITION")).outV() ).until(hasLabel("File"))
-GREMLIN
-             )
+             ->goToInstruction('File')
              ->_as('file')
-             ->raw(<<<'GREMLIN'
-select("classe").out("EXTENDS")
-.repeat( __.inE().not(hasLabel("DEFINITION")).outV() ).until(hasLabel("File"))
-GREMLIN
-             )
+             ->back('classe')
+             ->outIs('EXTENDS')
+             ->outIs('DEFINITION')
+             ->goToInstruction('File')
              ->_as('include')
              ->select(array('file'    => 'fullcode',
                                          'include' => 'fullcode',
@@ -89,8 +87,7 @@ GREMLIN
         $this->prepareQuery();
 
         // Finding typehint
-        $this->atomIs(self::FUNCTIONS_ALL, self::WITHOUT_CONSTANTS)
-             ->outIs('ARGUMENT')
+        $this->atomIs(array('Parameter', 'Ppp'), self::WITHOUT_CONSTANTS)
              ->outIs('TYPEHINT')
              ->fullnspathIsNot(self::SCALAR_TYPEHINTS)
              ->inIs('DEFINITION')
@@ -209,9 +206,7 @@ GREMLIN
                             ));
         $this->prepareQuery();
 
-        // Skipping normal method/property call : They actually depends on new
-        // Magic methods : todo!
-        // instanceof ?
+        // @todo instanceof ?
     }
 }
 

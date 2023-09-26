@@ -22,6 +22,8 @@
 
 namespace Exakat\Tasks\Helpers;
 
+use Exakat\Exceptions\LoadError;
+
 class AnonymousNames {
     private int $anonymousNames = 0;
 

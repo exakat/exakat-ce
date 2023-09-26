@@ -31,33 +31,33 @@ class CreateMagicMethod extends Complete {
     }
 
     public function analyze(): void {
-
         // Missing : typehinted properties, return typehint, clone
+
+        // @todo : make more tests with hierarchy : __call() in parent, or definition in parents...
 
         // link to __call
         $this->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
-             ->hasNoIn('DEFINITION')
-              ->outIs('OBJECT')
-              // Others are possible too : $a[1], $b->c, D::$a
-             ->atomIs(array('Variableobject', 'This'), self::WITHOUT_CONSTANTS)
+             ->not(
+                 $this->side()
+                      ->inIs('DEFINITION')
+                      ->atomIs(array('Method', 'Magicmethod'))
+             )
+             ->outIs('OBJECT')
+             ->goToTypehint()
 
-             // For variables
              ->optional(
                  $this->side()
                       ->inIs('DEFINITION')
-                      ->atomIs('Parametername', self::WITHOUT_CONSTANTS)
-                      ->inIs('NAME')
-                      ->outIs('TYPEHINT')
+                      ->atomIs('Class', self::WITHOUT_CONSTANTS)
              )
+//             ->goToAllParentsTraits(self::INCLUDE_SELF)
 
-              ->inIs('DEFINITION')
-              ->atomIs('Class', self::WITHOUT_CONSTANTS)
-              ->goToAllParentsTraits(self::INCLUDE_SELF)
-              ->outIs('MAGICMETHOD')
-              ->outIs('NAME')
-              ->codeIs('__call', self::TRANSLATE, self::CASE_INSENSITIVE)
-              ->inIs('NAME')
-              ->addETo('DEFINITION', 'first');
+             ->outIs('MAGICMETHOD')
+             ->outIs('NAME')
+             ->codeIs('__call', self::TRANSLATE, self::CASE_INSENSITIVE)
+             ->inIs('NAME')
+             ->addETo('DEFINITION', 'first')
+        ;
         $this->prepareQuery();
 
         // link to __callStatic

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,11 +25,11 @@ namespace Exakat\Analyzer\Dump;
 use Exakat\Dump\Dump;
 
 abstract class AnalyzerArrayHashResults extends AnalyzerDump {
-    protected $storageType = self::QUERY_PHP_ARRAYS;
+    protected int $storageType = self::QUERY_PHP_ARRAYS;
 
-    protected $analyzerValues = array();
+    protected array $analyzerValues = array();
 
-    protected $dumpQueries = array();
+    protected array $dumpQueries = array();
 
     public function prepareQuery(): void {
         ++$this->queryId;
@@ -38,13 +38,15 @@ abstract class AnalyzerArrayHashResults extends AnalyzerDump {
         $this->rowCount       += count($this->analyzerValues);
 
         $valuesSQL = array();
-        foreach($this->analyzerValues as list($key, $value)) {
-            if (empty($key)) { continue; }
+        foreach ($this->analyzerValues as list($key, $value)) {
+            if (empty($key)) {
+                continue;
+            }
             $valuesSQL[] = "('{$this->analyzerName}', '" . \Sqlite3::escapeString((string) $key) . "', '" . \Sqlite3::escapeString((string) $value) . "') \n";
         }
 
         $chunks = array_chunk($valuesSQL, SQLITE_CHUNK_SIZE);
-        foreach($chunks as $chunk) {
+        foreach ($chunks as $chunk) {
             $query = 'INSERT INTO hashResults ("name", "key", "value") VALUES ' . implode(', ', $chunk);
             $this->dumpQueries[] = $query;
         }

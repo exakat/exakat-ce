@@ -1,0 +1,27 @@
+Question plutôt PHP : 
+
+Je travaille sur un dictionnaire PHP : le principe est de rassembler tout le vocabulaire utilisé couramment en PHP, pour y associer une ou plusieurs definitions. Le but est de pouvoir se servir du dictionnaire quand certains termes apparaissent dans des articles (ou le manuel PHP) et ne sont pas immediatement clairs. 
+
+J'ai deja une version publiée, disponible https://php-dictionary.readthedocs.io/en/latest/dictionary.html
+
+Quelles notions manquent, et meriteraient d'être ajoutée? 
+
+Le dictionnaire est en anglais, le temps d'avoir une version assez stable. Le francais sera la première traduction.
+
+
+Salut Benoit,
+
+Je travaille actuellement sur un dictionnaire PHP, en complément de la documentation, avec une liste de concepts, mot, expression reliés à PHP, et dont les définitions ne sont pas toujours faciles à trouver dans le manuel lui-même.
+Je pense que c'est un bon outil pour mieux maitriser la plate-forme, et en apprendre davantage.
+Le premier jet est ici : https://php-dictionary.readthedocs.io/en/latest/
+Je suis preneur de ton avis sur le contenu comme la forme.
+J'aimerai pouvoir inclure tous les mots qui seront dans le guide de migration vers la 8.2
+Merci :)
+
+Dictionaire PHP 
+
+Je travaille actuellement sur un dictionnaire PHP, en complément de la documentation. Il contient une liste de concepts, mot, expression reliés à PHP, et dont les définitions ne sont pas toujours faciles à trouver dans le manuel lui-même.
+Le premier jet est ici : https://php-dictionary.readthedocs.io/en/latest/
+Y a-t-il des définitions qui manquent? 
+Je suis preneur de vos avis sur le contenu comme la forme.
+Merci :)

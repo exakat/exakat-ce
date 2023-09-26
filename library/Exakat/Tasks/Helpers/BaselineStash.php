@@ -25,8 +25,8 @@ namespace Exakat\Tasks\Helpers;
 use Exakat\Config;
 
 class BaselineStash {
-	public const BASELINE_NONE   = 'none';
-	public const BASELINE_ALWAYS = 'always';
+    public const BASELINE_NONE   = 'none';
+    public const BASELINE_ALWAYS = 'always';
 
     public const NO_BASELINE     = '';
 
@@ -134,12 +134,12 @@ class BaselineStash {
 
         // full name in use
         if (file_exists("{$this->baselineDir}/{$this->baselineStrategy}.sqlite")) {
-            return "{$this->baselineDir}/{$this->baseline_strategy}.sqlite";
+            return "{$this->baselineDir}/{$this->baselineStrategy}.sqlite";
         }
 
         // dump-xxx-AAAAAAA.sqlite name
         if (file_exists("{$this->baselineDir}/dump-\d+-{$this->baselineStrategy}.sqlite")) {
-            return "{$this->baselineDir}/{$this->baseline_strategy}.sqlite";
+            return "{$this->baselineDir}/{$this->baselineStrategy}.sqlite";
         }
 
         return self::NO_BASELINE;

@@ -67,7 +67,7 @@ class Clean extends Tasks {
         }
 
         if (!file_exists(dirname($this->config->code_dir))) {
-            throw new NoSuchProject($this->config->project);
+            throw new NoSuchProject((string) $this->config->project);
         }
 
         display( "Cleaning project {$this->config->project}\n");

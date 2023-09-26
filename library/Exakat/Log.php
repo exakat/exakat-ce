@@ -22,14 +22,16 @@
 
 namespace Exakat;
 
-use Exakat\Helpers\Timer;
 use SplFileObject;
+use RuntimeException;
+use DatetimeImmutable;
+use Exakat\Helpers\Timer;
 
 class Log {
     private string 		 	$name;
-    private ?SplFileObject	$log;
+    private ?SplFileObject	$log    = null;
     private Timer  			$timer;
-    private string 		 	$first = '';
+    private string 		 	$first  = '';
 
     public function __construct(string $name = '', string $dir = '.') {
         $this->name = $name;
@@ -39,18 +41,21 @@ class Log {
             $this->name = substr($this->name, 0, 240) . '-' . crc32($this->name);
         }
 
+		// @todo : add log messages, this is not normal
         if (!file_exists("$dir/log/")) { return ; }
         if (!is_dir("$dir/log/")) { return ; }
-        if (file_exists("$dir/log/{$this->name}.log")) {
-            $this->log = new SplFileObject("$dir/log/{$this->name}.log", 'a');
-            $this->first = "$this->name resuming on " . date('r');
-        } else {
-            $this->log = new SplFileObject("$dir/log/{$this->name}.log", 'w+');
-            $this->first = "{$this->name} created on " . date('r');
-        }
-        if (!$this->log) {
+
+		try {
+	        if (file_exists("$dir/log/{$this->name}.log")) {
+    	        $this->log = new SplFileObject("$dir/log/{$this->name}.log", 'a');
+        	    $this->first = "$this->name resuming on " . (new DatetimeImmutable())->format('r');
+	        } else {
+    	        $this->log = new SplFileObject("$dir/log/{$this->name}.log", 'a');
+            	$this->first = "{$this->name} created on " . (new DatetimeImmutable())->format('r');
+        	}
+        } catch (RuntimeException $e) {
             display("Couldn\'t create log in $dir/log/");
-            $this->log = null;
+            $this->log = null;        
         }
 
         $this->timer = new Timer();
@@ -63,10 +68,7 @@ class Log {
         
         $this->timer->end();
 
-        $this->log('Duration : ' . number_format($this->timer->duration(Timer::MS), 2));
-        $this->log('Memory : ' . memory_get_usage(true));
-        $this->log('Memory peak : ' . memory_get_peak_usage(true));
-        $this->log("{$this->name} closed on " . date('r'));
+        $this->log("{$this->name} closed on " . (new DatetimeImmutable())->format('r'));
 
         $this->log = null;
     }

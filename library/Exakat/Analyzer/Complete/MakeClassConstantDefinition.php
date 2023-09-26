@@ -25,6 +25,7 @@ namespace Exakat\Analyzer\Complete;
 class MakeClassConstantDefinition extends Complete {
     public function dependsOn(): array {
         return array('Complete/SetParentDefinition',
+                     'Complete/CreateDefaultValues',
                     );
     }
 
@@ -36,16 +37,17 @@ class MakeClassConstantDefinition extends Complete {
              ->savePropertyAs('code', 'name')
              ->back('first')
              ->outIs('CLASS')
-             ->atomIs(array('Identifier', 'Nsname', 'Self', 'Static'), self::WITHOUT_CONSTANTS)
+             ->atomIs(array('Identifier', 'Nsname', 'Self', 'Static', 'This'), self::WITHOUT_CONSTANTS)
              ->inIs('DEFINITION')
              ->atomIs(array('Class', 'Classanonymous', 'Interface'), self::WITHOUT_CONSTANTS)
-             ->goToAllParents(self::INCLUDE_SELF)
+             ->goToAllParentsTraits(self::INCLUDE_SELF)
              ->outIs('CONST')
              ->atomIs('Const', self::WITHOUT_CONSTANTS)
              ->outIs('CONST')
              ->outIs('NAME')
              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
              ->inIs('NAME')
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -67,6 +69,7 @@ class MakeClassConstantDefinition extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -77,7 +80,7 @@ class MakeClassConstantDefinition extends Complete {
               ->savePropertyAs('code', 'name')
               ->back('first')
               ->outIs('CLASS')
-              ->atomIs(array('Identifier', 'Nsname', 'Self', 'Static', 'Parent'), self::WITHOUT_CONSTANTS)
+              ->atomIs(array('Identifier', 'Nsname', 'Self', 'Static', 'Parent', 'This'), self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullnspath', 'classe')
               ->inIs('DEFINITION')
               ->atomIs(array('Class', 'Classanonymous', 'Interface'), self::WITHOUT_CONSTANTS)
@@ -89,6 +92,7 @@ class MakeClassConstantDefinition extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -111,6 +115,7 @@ class MakeClassConstantDefinition extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -133,11 +138,58 @@ class MakeClassConstantDefinition extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
-
         $this->prepareQuery();
 
-        // @todo : handle the cases with PHP / stub definitions
+        // $a = new a; $a::Constante -> class x { const Constante}
+        $this->atomIs('Staticconstant', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
+              ->outIs('CONSTANT')
+              ->savePropertyAs('code', 'name')
+              ->back('first')
+              ->outIs('CLASS')
+              ->atomIs(array('Variable', 'Member', 'Staticproperty'))
+              ->inIs('DEFINITION')
+              ->outIs('DEFAULT')
+              ->atomIs('New')
+              ->outIs('NEW')
+              ->inIs('DEFINITION')
+              ->atomIs(array('Class', 'Classanonymous', 'Interface'), self::WITHOUT_CONSTANTS)
+              ->goToAllParents(self::INCLUDE_SELF)
+              ->outIs('CONST')
+              ->atomIs('Const', self::WITHOUT_CONSTANTS)
+              ->isNot('visibility', 'private')
+              ->outIs('CONST')
+              ->outIs('NAME')
+              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
+              ->addETo('DEFINITION', 'first');
+        $this->prepareQuery();
+
+        // class x { echo self::A; } class b extends a { const A = 1;}
+        $this->atomIs('Staticconstant', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
+              ->outIs('CONSTANT')
+              ->savePropertyAs('code', 'name')
+              ->back('first')
+              ->outIs('CLASS')
+              ->atomIs(array('Static', 'This'))
+              ->inIs('DEFINITION')
+              ->atomIs(array('Class', 'Classanonymous', 'Interface'), self::WITHOUT_CONSTANTS)
+              ->is('abstract', true)
+              ->goToAllChildren(self::INCLUDE_SELF)
+              ->outIs('CONST')
+              ->atomIs('Const', self::WITHOUT_CONSTANTS)
+              ->isNot('visibility', 'private')
+              ->outIs('CONST')
+              ->outIs('NAME')
+              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
+              ->addETo('DEFINITION', 'first');
+        $this->prepareQuery();
     }
 }
 

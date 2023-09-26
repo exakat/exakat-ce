@@ -46,22 +46,23 @@ abstract class Reports {
                                           'Facetedjson', 'Json', 'Onepagejson', 'Marmelab', 'Simpletable', 'Exakatyaml',
                                           'Codeflower', 'Dependencywheel', 'Phpcity', 'Sarb',
                                           'Exakatvendors', 'Topology',
-                                          'Migration73', 'Migration74', 'Migration80', 'Migration81', 'Migration82',
+                                          'Migration73', 'Migration74', 'Migration80', 'Migration81', 'Migration82', 'Migration83',
                                           'Meters', 'Perrule',
-                                          'CompatibilityPHP56', 'CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81',
+                                          'CompatibilityPHP56', 'CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81', 'CompatibilityPHP82', 'CompatibilityPHP83',
                                           'Compatibility',
-                                          'Unused',
+                                          'Unused', 'History',
+                                          'NoOneLiners',
                                           //'DailyTodo',
                                           );
 
     protected array $themesToShow = array('CompatibilityPHP56', //'CompatibilityPHP53', 'CompatibilityPHP54', 'CompatibilityPHP55',
-                                    	  'CompatibilityPHP70', 'CompatibilityPHP71', 'CompatibilityPHP72', 'CompatibilityPHP73',
-                                    	  'CompatibilityPHP74',
-                                    	  'CompatibilityPHP80',
-                                    	  'CompatibilityPHP81',
-                                    	  'Dead code', 'Security', 'Analyze', 'Inventories',
-                                    	  'Dump',
-                                    	  );
+                                          'CompatibilityPHP70', 'CompatibilityPHP71', 'CompatibilityPHP72', 'CompatibilityPHP73',
+                                          'CompatibilityPHP74',
+                                          'CompatibilityPHP80',
+                                          'CompatibilityPHP81',
+                                          'Dead code', 'Security', 'Analyze', 'Inventories',
+                                          'Dump',
+                                          );
 
     private int 			$count = 0;
 
@@ -72,7 +73,7 @@ abstract class Reports {
     protected Dump $dump;
 
     protected Datastore $datastore;
-    protected ?Rulesets $rulesets = null;
+    protected Rulesets $rulesets;
 
     protected array $options   = array();
 
@@ -85,10 +86,10 @@ abstract class Reports {
         $this->options   = $this->config->$format ?? array();
         $this->docs      = exakat('docs');
 
+        $this->rulesets  = exakat('rulesets');
+
         if (file_exists($this->config->dump)) {
             $this->dump      = Dump::factory($this->config->dump);
-
-            $this->rulesets  = exakat('rulesets');
 
             // Default analyzers
             $analyzers = array_merge($this->rulesets->getRulesetsAnalyzers($this->config->project_results ?? array()),
@@ -109,20 +110,19 @@ abstract class Reports {
     public function generate(string $folder, string $name= 'table'): string {
         if (empty($name)) {
             // FILE_FILENAME is defined in the children class
-            $name = $this::FILE_FILENAME;
+            $name = static::FILE_FILENAME;
         }
 
         $rulesets = $this->config->project_rulesets;
-
-        if (!empty($rulesets)) {
+        if (!empty($this->config->program)) {
+            $list = makeArray($this->config->program);
+        } elseif (!empty($rulesets)) {
             if ($missing = $this->checkMissingRulesets()) {
                 print "Can't produce " . static::class . ' format. There are ' . count($missing) . ' missing rulesets : ' . implode(', ', $missing) . ".\n";
                 return '';
             }
 
             $list = $this->rulesets->getRulesetsAnalyzers($rulesets);
-        } elseif (!empty($this->config->program)) {
-            $list = makeArray($this->config->program);
         } else {
             $list = $this->rulesets->getRulesetsAnalyzers($this->themesToShow);
         }
@@ -135,7 +135,7 @@ abstract class Reports {
         } elseif ($name === self::INLINE) {
             return $final;
         } else {
-            file_put_contents("$folder/$name." . $this::FILE_EXTENSION, $final);
+            file_put_contents("$folder/$name." . static::FILE_EXTENSION, $final);
             return '';
         }
     }

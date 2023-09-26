@@ -33,10 +33,10 @@ class DSLFactory {
     public const VARIABLE_WRITE = true;
     public const VARIABLE_READ  = false;
 
-    private   array $availableAtoms         = array();
-    private   array $availableLinks         = array();
-    private   array $availableFunctioncalls = array();
-    private   array $availableVariables     = array(); // This one is per query
+    private array $availableAtoms         = array();
+    private array $availableLinks         = array();
+    private array $availableFunctioncalls = array();
+    private array $availableVariables     = array(); // This one is per query
     protected array $availableLabels        = array(); // This one is per query
     protected array $ignoredcit             = array();
     protected array $ignoredfunctions       = array();
@@ -48,13 +48,12 @@ class DSLFactory {
     protected string $analyzerQuoted         = '';
     protected int $MAX_LOOPING               = Analyzer::MAX_LOOPING;
 
-    public function __construct(string $analyzer,
-        array $dependsOn = array()) {
+    public function __construct(string $analyzer, array $dependsOn = array()) {
         $this->dependsOn = $dependsOn;
         $this->analyzerQuoted = $analyzer;
 
 
-        $this->dictCode  = exakat('dictionary');
+        $this->dictCode  = Dictionary::getInstance();
         $this->datastore = exakat('datastore');
 
         $this->linksDown = GraphElements::linksAsList();
@@ -65,9 +64,12 @@ class DSLFactory {
             $this->availableAtoms = array('Project',
                                           'File',
                                           'Virtualproperty',
+                                          'Virtualglobal',
+                                          'Virtualmethod',
+                                          'Void',
+
                                           'Analysis',
                                           'Noresult',
-                                          'Void',
                                           'Identifier',
                                           'Scalartypehint',  // This one may be added by Complete/Returntype
                                           );

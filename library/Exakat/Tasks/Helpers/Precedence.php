@@ -29,7 +29,7 @@ class Precedence {
     public const WITHOUT_SELF = false;
 
     private $precedence  = array();
-    private $definitions = array(
+    protected $definitions = array(
                         'T_OBJECT_OPERATOR'             => 0,
                         'T_DOUBLE_COLON'                => 0,
                         'T_DOLLAR'                      => 0,
@@ -67,10 +67,11 @@ class Precedence {
 
                         'T_PLUS'                        => 18,
                         'T_MINUS'                       => 18,
-                        'T_DOT'                         => 18, // Changed at constructor time for 21
 
                         'T_SR'                          => 20,
                         'T_SL'                          => 20,
+
+                        'T_DOT'                         => 21,
 
                         'T_IS_SMALLER_OR_EQUAL'         => 30,
                         'T_IS_GREATER_OR_EQUAL'         => 30,
@@ -124,14 +125,14 @@ class Precedence {
                         'T_YIELD'                       => 110,
                         'T_YIELD_FROM'                  => 110,
 
-                        'T_ECHO'                        => 110,
-                        'T_HALT_COMPILER'               => 110,
-                        'T_PRINT'                       => 110,
-                        'T_INCLUDE'                     => 110,
-                        'T_INCLUDE_ONCE'                => 110,
-                        'T_REQUIRE'                     => 110,
-                        'T_REQUIRE_ONCE'                => 110,
-                        'T_DOUBLE_ARROW'                => 110,
+                        'T_ECHO'                        => 111,
+                        'T_HALT_COMPILER'               => 111,
+                        'T_PRINT'                       => 111,
+                        'T_INCLUDE'                     => 111,
+                        'T_INCLUDE_ONCE'                => 111,
+                        'T_REQUIRE'                     => 111,
+                        'T_REQUIRE_ONCE'                => 111,
+                        'T_DOUBLE_ARROW'                => 111,
 
                         'T_RETURN'                      => 121,
                         'T_THROW'                       => 121,
@@ -153,16 +154,19 @@ class Precedence {
 
     private static $cache = array();
 
+    public static function getInstance(string $phpVersion): self {
+        $class = str_replace('\\Php', '\\Precedence', $phpVersion);
+        assert(class_exists($class), "No such Precedence for $phpVersion\n");
+
+        return new $class($phpVersion);
+    }
+
     public function __construct(string $phpVersion) {
         foreach ($this->definitions as $name => $priority) {
             // Skip unknown tokens from other versions
             if (defined("$phpVersion::$name")) {
                 $this->precedence[constant("$phpVersion::$name")] = $priority;
             }
-        }
-
-        if (substr($phpVersion, -2) === '80') {
-            $this->precedence[constant("$phpVersion::T_DOT")] = 21;
         }
 
         foreach ($this->precedence as $k1 => $p1) {

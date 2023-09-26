@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class Extension extends Analyzer {
-    protected $source = '';
+    protected string $source = '';
 
     public function dependsOn(): array {
         return array('Classes/ClassUsage',
@@ -188,7 +188,7 @@ abstract class Extension extends Analyzer {
     }
 
     private function processClasses(array $classes): void {
-        $usedClasses = array_values(array_intersect(self::getCalledClasses(), $classes));
+        $usedClasses = array_values(array_intersect($this->called->getCalledClasses(), $classes));
         if (empty($usedClasses)) {
             return;
         }
@@ -233,7 +233,7 @@ abstract class Extension extends Analyzer {
     }
 
     private function processInterfaces(array $interfaces): void {
-        $usedInterfaces = array_values(array_intersect(self::getCalledinterfaces(), $interfaces));
+        $usedInterfaces = array_values(array_intersect($this->called->getCalledinterfaces(), $interfaces));
         if (empty($usedInterfaces)) {
             return;
         }
@@ -244,7 +244,7 @@ abstract class Extension extends Analyzer {
     }
 
     private function processEnums(array $enums): void {
-        $usedEnums = array_values(array_intersect(self::getCalledEnums(), $enums));
+        $usedEnums = array_values(array_intersect($this->called->getCalledEnums(), $enums));
         if (empty($usedEnums)) {
             return;
         }
@@ -255,7 +255,7 @@ abstract class Extension extends Analyzer {
     }
 
     private function processTraits(array $traits): void {
-        $usedTraits = array_values(array_intersect(self::getCalledTraits(), $traits));
+        $usedTraits = array_values(array_intersect($this->called->getCalledTraits(), $traits));
         if (empty($usedTraits)) {
             return;
         }
@@ -266,7 +266,7 @@ abstract class Extension extends Analyzer {
     }
 
     private function processNamespaces(array $namespaces): void {
-        $usedNamespaces = array_values(array_intersect($this->getCalledNamespaces(), $namespaces));
+        $usedNamespaces = array_values(array_intersect($this->called->getCalledNamespaces(), $namespaces));
         if (empty($usedNamespaces)) {
             return;
         }
@@ -277,7 +277,7 @@ abstract class Extension extends Analyzer {
     }
 
     private function processDirectives(array $directives): void {
-        $usedDirectives = array_values(array_intersect(self::getCalledDirectives(), $directives));
+        $usedDirectives = array_values(array_intersect($this->called->getCalledDirectives(), $directives));
         if (empty($usedDirectives)) {
             return;
         }
@@ -318,7 +318,7 @@ abstract class Extension extends Analyzer {
         }
 
         // Properties, with typehints (parameters and properties)
-        // TODO : Properties with returntypes, local new.
+        // @todo : Properties with returntypes, local new.
 
         $propertiesHash = array();
         foreach (array_filter($properties) as $p) {
@@ -348,7 +348,7 @@ abstract class Extension extends Analyzer {
         }
 
         // Properties, with typehints (parameters and properties)
-        // TODO : Properties with returntypes, local new.
+        // @todo : Properties with returntypes, local new.
         $propertiesHash = array();
         foreach (array_filter($staticproperties) as $p) {
             list($class, $property) = explode('::', $p, 2);
@@ -373,7 +373,7 @@ abstract class Extension extends Analyzer {
         }
 
         // Methods, with typehints (parameters and properties)
-        // TODO : Methods with returntypes, local new.
+        // @todo : Methods with returntypes, local new.
         $methodsHash = array();
         foreach (array_filter($methods) as $m) {
             list($class, $method) = explode('::', $m, 2);

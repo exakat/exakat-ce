@@ -39,6 +39,10 @@ class All extends Fileset {
         }, $this->files);
         chdir($d);
     }
+
+    public function setFiles(array $files): void {
+        // nothing, really
+    }
 }
 
 ?>

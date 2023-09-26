@@ -147,7 +147,7 @@ class Git extends Vcs {
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} rev-parse HEAD 2>&1");
         return trim($res);
     }
-
+    
     public function getInstallationInfo(): array {
         $this->check();
         $stats = array('installed' => $this->installed === true ? 'Yes' : 'No',
@@ -169,12 +169,13 @@ class Git extends Vcs {
         $name = $this->shell("{$this->executable} config user.name");
         $email = $this->shell("{$this->executable} config user.email");
 
-        $status = array('vcs'       => 'git',
-                        'branch'    => $this->getBranch(),
-                        'revision'  => $this->getRevision(),
-                        'updatable' => true,
-                        'name'      => $name,
-                        'email  '   => $email,
+        $status = array('vcs'        => 'git',
+                        'branch'     => $this->getBranch(),
+                        'revision'   => $this->getRevision(),
+                        'vcs_update' => $this->getLastCommitDate(),
+                        'updatable'  => true,
+                        'name'       => $name,
+                        'email  '    => $email,
                        );
 
         return $status;

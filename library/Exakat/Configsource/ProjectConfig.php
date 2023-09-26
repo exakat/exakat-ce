@@ -29,31 +29,31 @@ use Exakat\Vcs\Vcs;
 class ProjectConfig extends Config {
     private string  $projects_root = '.';
 
-    protected array $config = array('phpversion'          => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
-                              'project_name'        => '',
-                              'project_url'         => '',
-                              'project_vcs'         => 'git',
-                              'project_description' => '',
-                              'project_branch'      => '',
-                              'project_tag'         => '',
-                              'project_rulesets'    => array(),
-                              'project_reports'     => array(),
+    protected array $config = array('phpversion'    	  => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
+                                      'project_name'        => '',
+                                      'project_url'         => '',
+                                      'project_vcs'         => 'git',
+                                      'project_description' => '',
+                                      'project_branch'      => '',
+                                      'project_tag'         => '',
+                                      'project_rulesets'    => array(),
+                                      'project_reports'     => array(),
 
-                              'file_extensions'     => array('php',
-                                                             'php3',
-                                                             'inc',
-                                                             'tpl',
-                                                             'phtml',
-                                                             'tmpl',
-                                                             'phps',
-                                                             'ctp',
-                                                             'module',
-                                                             ),
-                              'include_dirs'        => array(),
-                              'ignore_dirs'         => array(),
-                              'ignore_rules'        => array(),
-                              'stubs'               => array(),
-                              );
+                                      'file_extensions'     => array('php',
+                                                                     'php3',
+                                                                     'inc',
+                                                                     'tpl',
+                                                                     'phtml',
+                                                                     'tmpl',
+                                                                     'phps',
+                                                                     'ctp',
+                                                                     'module',
+                                                                     ),
+                                      'include_dirs'        => array(),
+                                      'ignore_dirs'         => array(),
+                                      'ignore_rules'        => array(),
+                                      'stubs'               => array(),
+                                      );
 
     public function __construct(string $projects_root) {
         $this->projects_root = "$projects_root/projects/";
@@ -351,7 +351,7 @@ INI;
         return $name . '[] = "' . implode("\";\n{$name}[] = \"", $array) . "\";\n";
     }
 
-    public function __get(string $name) : mixed {
+    public function __get(string $name): mixed {
         if (isset($this->config[$name])) {
             return $this->config[$name];
         } else {

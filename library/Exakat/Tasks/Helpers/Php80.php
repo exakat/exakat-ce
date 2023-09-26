@@ -24,7 +24,6 @@ namespace Exakat\Tasks\Helpers;
 
 
 class Php80 extends Php {
-
     // PHP tokens
     public const T_THROW                                            = 258;
     public const T_INCLUDE                                          = 260;

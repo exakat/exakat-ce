@@ -24,12 +24,22 @@
 namespace Exakat\Analyzer\Interfaces;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Stubs\Stubs;
 
 class IsExtInterface extends Analyzer {
     public function analyze(): void {
-        $interfaces = array_merge(exakat('phpCore')->getInterfaceList(),
-            exakat('phpExtensions')->getInterfaceList(),
+        $phpCore = new Stubs($this->config->dir_root . '/data/core/',
+            $this->config->php_core ?? array(),
         );
+
+        $phpExtensions = new Stubs($this->config->dir_root . '/data/extensions/',
+            $this->config->php_extensions ?? array(),
+        );
+
+        $interfaces = array_merge($phpCore->getInterfaceList(),
+            $phpExtensions->getInterfaceList(),
+        );
+
         if (empty($interfaces)) {
             return;
         }

@@ -33,6 +33,11 @@ class Whitespace {
     public string $toargs               ;
     public string $endargs              ;
     public string $totype               ;
+    public string $ellipsis             ;
+    public string $noscream             ;
+    public string $readonly             ;
+
+    public string $init                 ;
 
     public string $toextends            ;
     public array  $toextendsseparator    = array();

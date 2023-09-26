@@ -24,7 +24,6 @@
 namespace Exakat\Exceptions;
 
 use RuntimeException;
-use Exception;
 
 class ProjectTooLarge extends RuntimeException {
     public function __construct(int $nb_tokens, int $limit) {

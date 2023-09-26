@@ -32,16 +32,19 @@ use Exakat\GraphElements;
 use Exakat\Exceptions\GremlinException;
 use Exakat\Exceptions\NoSuchAnalyzer;
 use Exakat\Exceptions\UnknownDsl;
-use Exakat\Query\Query;
+use Exakat\Query\Multiple;
 use Exakat\Datastore;
 use Exakat\Project;
+use Exakat\Helpers\Called;
 use Exakat\Graph\Helpers\GraphResults;
 use Exakat\Query\DSL\Command;
 use Exakat\Phpexec;
 use Exakat\Fileset\{IgnoreDirs, FileExtensions, Namespaces};
 use Exakat\Stubs\PdffReader;
 use Exakat\Stubs\StubsInterface;
+use Exakat\Stubs\Stubs;
 use stdClass;
+use Exakat\Helpers\Directive;
 
 abstract class Analyzer {
     // Query types
@@ -72,23 +75,18 @@ abstract class Analyzer {
 
     private array $filters          = array(); // list of filters for files and namespaces
 
-    private array $queries          = array();
-    private Query $query                     ;
+    private array    $queries          = array();
+    private Multiple $query;
 
     public Config $config ;
 
-    private static ?array $calledClasses         = null;
-    private static ?array $calledInterfaces      = null;
-    private static ?array $calledTraits          = null;
-    private static ?array $calledEnums           = null;
-    private static ?array $calledNamespaces      = null;
-    private static ?array $calledDirectives      = null;
+    protected Called $called;
 
     private static array $pdffCache = array();
     private static array $jsonCache = array();
     private static array $iniCache  = array();
 
-    private   string $analyzer         = '';       // Current class of the analyzer (called from below)
+    private string $analyzer         = '';       // Current class of the analyzer (called from below)
     protected string $shortAnalyzer    = '';
     protected string $analyzerQuoted   = '';
     protected int    $analyzerId       = 0;
@@ -176,9 +174,10 @@ abstract class Analyzer {
     public const CLASS_ELEMENTS   = array('METHOD', 'MAGICMETHOD', 'PPP', 'CONST', 'USE');
     public const CLASS_METHODS    = array('METHOD', 'MAGICMETHOD');
 
-    public const ATTRIBUTE_ATOMS  = array('Ppp', 'Method', 'Magicmethod', 'Propertydefinition', 'Class', 'Function', 'Closure', 'Arrowfunction', 'Const', 'Parameter');
+    public const ATTRIBUTE_ATOMS  = array('Ppp', 'Method', 'Magicmethod', 'Propertydefinition', 'Class', 'Function', 'Closure', 'Arrowfunction', 'Const', 'Parameter', 'Enumcase', 'Enum', 'Interface', 'Trait');
+    public const DEFINITIONS      = array('Closure', 'Classanonymous', 'Function', 'Class', 'Trait', 'Interface', 'Enum');
 
-    public const FUNCTIONS_CALLS  = array('Functioncall', 'Newcall', 'Newcallname', 'Methodcall', 'Staticmethodcall');
+    public const FUNCTIONS_CALLS  = array('Functioncall', 'Newcall', 'Newcallname', 'Methodcall', 'Staticmethodcall', 'Self', 'Parent'); // @todo check for self parent and static
     public const CALLS            = array('Functioncall', 'Methodcall', 'Staticmethodcall' );
     public const METHOD_CALLS     = array('Methodcall', 'Staticmethodcall' );
     public const FUNCTIONS_USAGE  = array('Functioncall', 'Methodcall', 'Staticmethodcall', 'Eval', 'Echo', 'Print', 'Unset' );
@@ -197,13 +196,18 @@ abstract class Analyzer {
     public const TYPEHINTABLE     = array('Parameter', 'Ppp', 'Function', 'Closure', 'Method', 'Magicmethod', 'Arrowfunction');
     public const TYPE_LINKS       = array('TYPEHINT', 'RETURNTYPE');
 
-    public const SCALAR_TYPEHINTS = array('\\int', '\\\float', '\\object', '\\bool', '\\string', '\\array', '\\callable', '\\iterable', '\\void');
+    public const SCALAR_TYPEHINTS = array('\\int', '\\\float', '\\object', '\\bool', '\\string', '\\array', '\\callable', '\\iterable', '\\void', '\\never');
 
-    public const INCLUDE_SELF = false;
-    public const EXCLUDE_SELF = true;
+    public const LEFT_RIGHT       = array('LEFT', 'RIGHT');
+
+    public const INCLUDE_SELF     = false;
+    public const EXCLUDE_SELF     = true;
 
     public const CONTEXT_IN_CLOSURE = 1;
     public const CONTEXT_OUTSIDE_CLOSURE = 2;
+
+    protected const REDUCE_VALUE = true;
+    protected const REDUCE_KEY   = false;
 
     public const MAX_LOOPING   = 15;    // hard limit for do...while when navigating the tree
     public const MAX_SEARCHING = 8;     // hard limit for searching the tree (failing the rest is not bad)
@@ -217,10 +221,16 @@ abstract class Analyzer {
     protected Graph $gremlin;
     protected Dictionary $dictCode;
 
+    protected Stubs		$stubs		 ;
+    protected Stubs		$phpCore	 ;
+    protected Stubs		$extensions	 ;
+    private bool		$initedStubs = false;
+
     protected string $linksDown;
 
     public function __construct() {
         assert(func_num_args() === 0, 'Too many arguments for ' . static::class);
+
         $this->analyzer       = static::class;
         $this->analyzerQuoted = self::getName($this->analyzer);
         $this->shortAnalyzer  = str_replace('\\', '/', substr($this->analyzer, 16));
@@ -228,10 +238,11 @@ abstract class Analyzer {
         $this->config    = exakat('config');
         $this->rulesets  = exakat('rulesets');
         $this->gremlin   = exakat('graphdb');
+        $this->called    = new Called($this->gremlin);
         $this->datastore = exakat('datastore');
         $this->datastore->reuse();
 
-        $this->dictCode  = exakat('dictionary');
+        $this->dictCode  = Dictionary::getInstance();
         $docs            = exakat('docs');
 
         if (!str_contains($this->analyzer, '\\Common\\')  ) {
@@ -255,19 +266,22 @@ abstract class Analyzer {
             foreach ($parameters as $parameter) {
                 assert(isset($this->{$parameter['name']}), "Missing definition for library/Exakat/Analyzer/$this->analyzerQuoted.php :\nprotected \$$parameter[name] = '" . ($parameter['default'] ?? '') . "';\n");
                 if (isset($this->config->directives[$parameter['name']])) {
-                    $value = $this->config->directives[$parameter['name']][0];
+                    $value = $this->config->directives[$parameter['name']];
 
                     if (!isset($parameter['default'])) {
                         continue;
                     }
+                    /*
                 } elseif (isset($this->config->{$this->analyzerQuoted}[$parameter['name']])) {
                     $value = $this->config->{$this->analyzerQuoted}[$parameter['name']];
 
                     if (!isset($parameter['default'])) {
                         continue;
                     }
+                    */
                 } elseif (isset($parameter['default'])) {
-                    $value = $parameter['default'];
+                    $value = new Directive();
+                    $value->add($parameter['default']);
                 } else {
                     // Else, we reuse the default values in the code
                     continue;
@@ -275,42 +289,45 @@ abstract class Analyzer {
 
                 switch ($parameter['type']) {
                     case 'integer':
-                        $this->{$parameter['name']} = (int) $value;
+                        $this->{$parameter['name']} = (int) $value->single();
+                        break;
+
+                    case 'string':
+                        $this->{$parameter['name']} = (string) $value->single();
                         break;
 
                     case 'data':
+                        $value = $value->single();
                         if (is_string($value)) {
                             if (substr($value, -4) === 'json') {
                                 $this->{$parameter['name']} = $this->loadJson($value);
-                            } elseif (substr($dataFile, -3) === 'ini') {
+                            } elseif (substr($value, -3) === 'ini') {
                                 $this->{$parameter['name']} = $this->loadIni($value);
                             }
                         }
                         break;
 
                     case 'ini_hash':
-                        $this->{$parameter['name']} = parse_ini_string($value)[$parameter['name']] ?? array();
+                        $this->{$parameter['name']} = parse_ini_string($value->single())[$parameter['name']] ?? array();
                         break;
 
                     case 'json':
-                        $this->{$parameter['name']} = json_decode($value);
+                        $this->{$parameter['name']} = json_decode($value->single(), true, 3, JSON_OBJECT_AS_ARRAY);
                         break;
 
                     case 'array':
-                        $value = explode(',', $value);
+                        $value = explode(',', $value->single());
                         $this->{$parameter['name']} = array_map('trim', $value);
 
                         break;
 
                     default :
-                    // Nothing, really
-                    }
+                        // Nothing, really
+                }
             }
         }
 
         $this->linksDown = GraphElements::linksAsList();
-
-        $this->methods = exakat('methods');
 
         $this->initNewQuery();
     }
@@ -359,6 +376,7 @@ GREMLIN;
 g.V({$this->analyzerId}).property("count", -2).outE("ANALYZED").drop()
 GREMLIN;
                 $this->gremlin->query($query);
+                assert(!empty($this->analyzerId), self::class . ' was inited with Id ' . var_export($this->analyzerId, true) . ', already in. Can\'t save with that!');
             } else {
                 $resId = $this->gremlin->getId();
 
@@ -379,6 +397,7 @@ GREMLIN;
                 $this->analyzerId = $res->toInt();
 
                 self::$rulesId[$this->shortAnalyzer] = $this->analyzerId;
+                assert(!empty($this->analyzerId), self::class . ' was inited with Id ' . var_export($this->analyzerId, true) . ', all new. Can\'t save with that!');
             }
         } else {
             $this->analyzerId = $analyzerId;
@@ -392,16 +411,21 @@ GREMLIN;
     }
 
     public function setAnalyzer(string $analyzer): void {
-        $this->analyzer = $this->rulesets->getClass($analyzer);
-        if ($this->analyzer === false) {
+        $className = $this->rulesets->getClass($analyzer);
+        if ($className === '') {
             throw new NoSuchAnalyzer($analyzer, $this->rulesets);
         }
+        $this->analyzer = $className;
         $this->analyzerQuoted = self::getName($this->analyzer);
         $this->shortAnalyzer  = str_replace('\\', '/', substr($this->analyzer, 16));
     }
 
     public function getInBaseName(): string {
         return $this->analyzerQuoted;
+    }
+
+    public function getShortAnalyzer(): string {
+        return $this->shortAnalyzer;
     }
 
     public static function getName(string $classname): string {
@@ -415,7 +439,7 @@ GREMLIN;
              ->outIs('ANALYZED')
              ->raw(<<<GREMLIN
  sideEffect{ line = it.get().value("line");
-             fullcode = it.get().value("fullcode");
+             fullcode = it.get().label() == 'Sequence' ? ' { /**/ } ' : it.get().value("fullcode");
              file="None"; 
              theFunction = ""; 
              theClass=""; 
@@ -466,92 +490,6 @@ GREMLIN
         return true;
     }
 
-    public function getCalledClasses(): array {
-        if (self::$calledClasses === null) {
-            $news = $this->query('g.V().hasLabel("New").out("NEW").not(where( __.in("DEFINITION"))).values("fullnspath")')
-                         ->toArray();
-            $staticcalls = $this->query('g.V().hasLabel("Staticconstant", "Staticmethodcall", "Staticproperty", "Instanceof", "Catch").out("CLASS").not(where( __.in("DEFINITION"))).values("fullnspath")')
-                                ->toArray();
-            $typehints   = $this->query('g.V().hasLabel("Method", "Magicmethod", "Closure", "Function").out("ARGUMENT").out("TYPEHINT").not(where( __.in("DEFINITION"))).values("fullnspath")')
-                                ->toArray();
-            $returntype  = $this->query('g.V().hasLabel("Method", "Magicmethod", "Closure", "Function").out("RETURNTYPE").not(where( __.in("DEFINITION"))).values("fullnspath")')
-                                ->toArray();
-            self::$calledClasses = array_unique(array_merge($staticcalls,
-                $news,
-                $typehints,
-                $returntype));
-        }
-
-        return self::$calledClasses;
-    }
-
-    public function getCalledInterfaces(): array {
-        if (self::$calledInterfaces === null) {
-            self::$calledInterfaces = $this->query('g.V().hasLabel("Analysis").has("analyzer", "Interfaces/InterfaceUsage").out("ANALYZED").values("fullnspath")')
-                                           ->toArray();
-        }
-
-        return self::$calledInterfaces;
-    }
-
-    public function getCalledEnums(): array {
-        if (self::$calledEnums === null) {
-            self::$calledEnums = $this->query('g.V().hasLabel("Analysis").has("analyzer", "Php/EnumUsage").out("ANALYZED").values("fullnspath")')
-                                           ->toArray();
-        }
-
-        return self::$calledEnums;
-    }
-
-    public function getCalledTraits(): array {
-        if (self::$calledTraits === null) {
-            $query = <<<'GREMLIN'
-g.V().hasLabel("Analyzer")
-     .has("analyzer", "Traits/TraitUsage")
-     .out("ANALYZED")
-     .values("fullnspath")
-GREMLIN;
-            self::$calledTraits = $this->query($query)
-                                       ->toArray();
-        }
-
-        return self::$calledTraits;
-    }
-
-    public function getCalledNamespaces(): array {
-        if (self::$calledNamespaces === null) {
-            $query = <<<'GREMLIN'
-g.V().hasLabel("Namespace")
-     .values("fullnspath")
-     .unique()
-GREMLIN;
-            self::$calledNamespaces = $this->query($query)
-                                           ->toArray();
-        }
-
-        return self::$calledNamespaces;
-    }
-
-    public function getCalledDirectives(): array {
-        if (self::$calledDirectives === null) {
-            $query = <<<'GREMLIN'
-g.V().hasLabel("Analysis")
-     .has("analyzer", "Php/DirectivesUsage")
-     .out("ANALYZED")
-     .out("ARGUMENT")
-     .has("rank", 0)
-     .hasLabel("String")
-     .has("noDelimiter")
-     .values("noDelimiter")
-     .unique()
-GREMLIN;
-            self::$calledDirectives = $this->query($query)
-                                           ->toArray();
-        }
-
-        return self::$calledDirectives;
-    }
-
     public function checkPhpVersion(string $version): bool {
         return checkVersionRange($this->phpVersion, $version);
     }
@@ -559,7 +497,7 @@ GREMLIN;
     // @doc return the list of dependences that must be prepared before the execution of an analyzer
     // @doc by default, nothing.
     public function dependsOn(): array {
-        return $this->dependsOn ?? array();
+        return array();
     }
 
     public function query(string $queryString, array $arguments = array()): GraphResults {
@@ -580,7 +518,6 @@ GREMLIN;
 
     public function run(): int {
         $this->analyze();
-
         $this->execQuery();
 
         return $this->rowCount;
@@ -643,7 +580,7 @@ GREMLIN;
         }
     }
 
-    public function storeError(string $error = 'An error happened', int $error_type = self::UNKNOWN_COMPATIBILITY) : void {
+    public function storeError(string $error = 'An error happened', int $error_type = self::UNKNOWN_COMPATIBILITY): void {
         $query = <<<GREMLIN
 g.addV('Noresult').property('code',                              0)
                   .property('fullcode',                          '$error')
@@ -683,7 +620,7 @@ GREMLIN;
         return $result;
     }
 
-    public function printRawQuery() : void {
+    public function printRawQuery(): void {
         $this->query->prepareRawQuery();
         print $this->query->getQuery();
 
@@ -693,7 +630,7 @@ GREMLIN;
     }
 
     private function initNewQuery(): void {
-        $this->query = new Query((count($this->queries) + 1),
+        $this->query = new Multiple((count($this->queries) + 1),
             new Project('test'),
             $this->analyzerQuoted,
             $this->config->executable,
@@ -704,6 +641,7 @@ GREMLIN;
     public function execQuery(): int {
         if (empty($this->queries)) {
             $this->gremlin->query("g.V({$this->analyzerId}).property(\"count\", __.V({$this->analyzerId}).out(\"ANALYZED\").count())", array());
+
             return 0;
         }
 
@@ -731,7 +669,7 @@ GREMLIN;
         return $this->rowCount;
     }
 
-    protected function loadIni(string $file, string $index = null) : array|stdClass {
+    protected function loadIni(string $file, string $index = null): array|stdClass {
         assert(substr($file, -4) === '.ini', "Trying to loadIni on a non INI file : $file");
         $fullpath = "{$this->config->dir_root}/data/$file";
 
@@ -745,7 +683,7 @@ GREMLIN;
 
         if (file_exists($fullpath)) {
             $ini = (object) parse_ini_file($fullpath, \INI_PROCESS_SECTIONS);
-        } elseif (($this->config->ext !== null) && ($iniString = $this->config->ext->loadData("data/$file")) != '') {
+        } elseif (($iniString = $this->config->ext->loadData("data/$file")) != '') {
             $ini = (object) parse_ini_string($iniString, \INI_PROCESS_SECTIONS);
         } elseif (($this->config->extension_dev !== null) &&
                   file_exists("{$this->config->extension_dev}/data/$file")) {
@@ -766,14 +704,14 @@ GREMLIN;
         return self::$iniCache[$fullpath];
     }
 
-    protected function loadJson(string $file, string $property = null) : array|stdClass {
+    protected function loadJson(string $file, string $property = null): array|stdClass {
         assert(substr($file, -5) === '.json', "Trying to loadIni on a non JSON file : $file");
         $fullpath = "{$this->config->dir_root}/data/$file";
 
         if (!isset(self::$jsonCache[$fullpath])) {
             if (file_exists($fullpath)) {
                 $json = json_decode(file_get_contents($fullpath), \JSON_OBJECT);
-            } elseif (($this->config->ext !== null) && !empty($jsonString = $this->config->ext->loadData("data/$file"))) {
+            } elseif (!empty($jsonString = $this->config->ext->loadData("data/$file"))) {
                 $json = json_decode($jsonString, \JSON_OBJECT);
             } elseif (($this->config->extension_dev !== null) && !empty($jsonString = $this->config->dev->loadData("data/$file"))) {
                 $json = json_decode($jsonString, \JSON_OBJECT);
@@ -827,7 +765,7 @@ GREMLIN;
         return self::$pdffCache[$fullpath];
     }
 
-    protected function load(string $file, string $property = null) : array|stdClass {
+    protected function load(string $file, string $property = null): array|stdClass {
         $inifile = "{$this->config->dir_root}/data/$file.ini";
         if (file_exists($inifile)) {
             $ini = $this->loadIni("$file.ini", $property);
@@ -860,7 +798,7 @@ GREMLIN;
         }
     }
 
-    public function __call(string $name, array $args) : self {
+    public function __call(string $name, array $args): self {
         if ($this->query->canSkip()) {
             return $this;
         }
@@ -872,9 +810,7 @@ GREMLIN;
         } catch (UnknownDsl $e) {
             $this->query->StopQuery();
             $rank = $this->queryId + 1;
-            assert(false, "Found an unknown DSL '$name', in {$this->shortAnalyzer}#{$rank}. Aborting query\n");
-            display("Found an unknown DSL '$name', in {$this->shortAnalyzer}#{$rank}. Aborting query\n");
-            // @todo : This needs to be logged!
+            throw new UnknownDsl("Found an unknown DSL '$name', in {$this->shortAnalyzer}#{$rank}. Aborting query\n");
         }
 
         return $this;
@@ -890,7 +826,7 @@ GREMLIN;
         file_put_contents($this->config->tmp_dir . '/dump-' . $id . '.php', $export);
     }
 
-    public function tailQuery(bool $analyzed) : void {
+    public function tailQuery(bool $analyzed): void {
         if ($analyzed === self::LINK_ANALYZED) {
             $analyzed = ".addE(\"ANALYZED\").from(__.V({$this->analyzerId}))";
         } else {
@@ -911,16 +847,41 @@ GREMLIN
         );
     }
 
-    protected function readStubs(string $method, array $args = array()) : array {
+    protected function initStubs(): void {
+        $this->stubs = new Stubs(dirname($this->config->ext_root) . '/stubs/',
+            $this->config->stubs,
+        );
+        $this->phpCore = new Stubs($this->config->dir_root . '/data/core/',
+            $this->config->php_core ?? array(),
+        );
+        $this->extensions = new Stubs($this->config->dir_root . '/data/extensions/',
+            $this->config->php_extensions ?? array(),
+        );
+
+        $this->initedStubs = true;
+    }
+
+    protected function readStubs(string $method, array $args = array()): array {
         assert(method_exists(StubsInterface::class, $method), "No such method as '$method' to read stubs files\n");
 
-        $stubs      = exakat('stubs');
-        $phpCore    = exakat('phpCore');
-        $extensions = exakat('phpExtensions');
-        return array_merge($phpCore   ->$method(...$args),
-            $extensions->$method(...$args),
-            $stubs     ->$method(...$args),
+        if (!$this->initedStubs) {
+            $this->initStubs();
+        }
+
+        return array_merge($this->phpCore   ->$method(...$args),
+            $this->extensions->$method(...$args),
+            $this->stubs     ->$method(...$args),
         );
+    }
+
+    protected function reduceStubs(array $stubs, string $whichMethod, bool $keyOrValue = self::REDUCE_VALUE): array {
+        if ($keyOrValue === self::REDUCE_VALUE) {
+            assert(method_exists($this->called, $whichMethod), "No such method as $whichMethod. Should be \$getCalledClasses(), or else.");
+
+            return array_intersect($stubs, $this->called->$whichMethod());
+        }
+
+        assert(false, 'No processing yet for REDUCE_KEY.');
     }
 }
 ?>

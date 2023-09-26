@@ -35,6 +35,7 @@ class CollectTypehints extends DSL {
  where( 
     __.sideEffect{ {$variable} = []; }
       .out("TYPEHINT", "RETURNTYPE")
+      .order().by("rank")
       .has("fullnspath")
       .sideEffect{ {$variable}.add(it.get().value("fullnspath")) ; }
       .fold() 

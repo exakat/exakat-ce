@@ -30,14 +30,13 @@ class Select extends DSL {
         $by     = array();
         $select = array();
         foreach ($values as $k => $v) {
-            assert(in_array($k, $this->availableLabels, \STRICT_COMPARISON), "No such step as '$k'");
-
             if (is_int($k)) {
                 $select[] = "by(constant($v))";
             } elseif ($v === 'id') {
                 $select[] = $k;
                 $by[]     = 'by(id())';
             } elseif (in_array($v, self::PROPERTIES, \STRICT_COMPARISON)) {
+                assert(in_array($k, $this->availableLabels, \STRICT_COMPARISON), "No such step as '$k'");
                 // Use a local property
                 $select[] = $k;
                 $by[]     = "by(\"$v\")";

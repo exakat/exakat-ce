@@ -24,13 +24,33 @@
 namespace Exakat\Query\DSL;
 
 class CountArrayDimension extends DSL {
+    public const UP = 1;
+    public const DOWN = 2;
+
     public function run(): Command {
-        list($variable) = func_get_args();
+        switch (func_num_args()) {
+            case 2:
+                list($variable, $order) = func_get_args();
+                assert( in_array($order, array(self::UP, self::DOWN)), '');
+                break;
+
+            default:
+                list($variable) = func_get_args();
+                $order = self::DOWN;
+                break;
+        }
+
 
         $this->assertVariable($variable, self::VARIABLE_WRITE);
 
-        $command = new Command('sideEffect{ ' . $variable . ' = 0; }
-.repeat( __.in("VARIABLE", "APPEND").hasLabel("Array", "Arrayappend").sideEffect{ l = l + 1;}).emit()');
+        if ($order === self::UP) {
+            $command = new Command('sideEffect{ ' . $variable . ' = 0; }
+.repeat( __.in("VARIABLE", "APPEND").hasLabel("Array", "Arrayappend").sideEffect{  ' . $variable . ' =  ' . $variable . ' + 1;}).until( __.not(__.in("VARIABLE", "APPEND")))');
+        } elseif ($order === self::DOWN) {
+            $command = new Command('sideEffect{ ' . $variable . ' = 0; }
+.repeat( __.out("VARIABLE", "APPEND").sideEffect{' . $variable . ' =  ' . $variable . ' + 1;}).until(__.not(hasLabel("Array", "Arrayappend")))'
+            );
+        }
 
         return $command;
     }

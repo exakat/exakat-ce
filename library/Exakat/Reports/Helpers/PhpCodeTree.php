@@ -115,7 +115,7 @@ class PhpCodeTree {
         }
     }
 
-    public function get(string $what) : string {
+    public function get(string $what): string {
         if (!property_exists($this, $what)) {
             return '';
         }

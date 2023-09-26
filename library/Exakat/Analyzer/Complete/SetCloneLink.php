@@ -34,16 +34,19 @@ class SetCloneLink extends Complete {
         // clone (new x)
         // $a = new x; clone $a;
         $this->atomIs('Clone', self::WITHOUT_CONSTANTS)
-              ->outIs('CLONE')
-              ->atomIs('New', self::WITH_VARIABLES)
-              ->outIs('NEW')
+              ->outIsIE('CLONE') // case of multiple clones
+              ->goToTypehint()
               ->inIs('DEFINITION')
               ->atomIs(array('Class', 'Classanonymous'), self::WITHOUT_CONSTANTS)
               ->outIs('MAGICMETHOD')
               ->outIs('NAME')
               ->codeIs('__clone', self::TRANSLATE, self::CASE_INSENSITIVE)
               ->inIs('NAME')
-              ->addETo('DEFINITION', 'first');
+              ->hasNoLinkYet('DEFINITION', 'first')
+              ->savePropertyAs('fullnspath', 'fnp')
+              ->addETo('DEFINITION', 'first')
+              ->back('first')
+              ->raw('sideEffect{ it.get().property("fullnspath", fnp); }');
         $this->prepareQuery();
     }
 }

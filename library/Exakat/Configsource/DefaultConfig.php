@@ -22,8 +22,9 @@
 
 namespace Exakat\Configsource;
 
-use Exakat\Config as Configuration;
 use Exakat\Project;
+use Exakat\Loader\Driver\Driver;
+use Exakat\Config as Configuration;
 
 class DefaultConfig extends Config {
     protected array $config  = array( // directives with boolean value
@@ -144,8 +145,17 @@ class DefaultConfig extends Config {
                                'project_rulesets'    => array(),
 
                                'inside_code'          => Configuration::WITH_PROJECTS,
+                               'loader_mode'          => Driver::DEFAULT,
+                               'loader_parallel_max'  => 4,
 
                                'php_extensions'       => array('all'),
+
+                               'parallel'			  => 1,
+
+                               'origin'               => '<origin>',
+                               'destination'		  => '<destination>',
+
+                               'logFile'              => '', // Name of the logging file
                               );
 
     public function __construct() {

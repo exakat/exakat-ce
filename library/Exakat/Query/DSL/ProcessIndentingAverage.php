@@ -23,6 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Query\Query;
 
 class ProcessIndentingAverage extends DSL {
     public function run(): Command {

@@ -25,6 +25,7 @@ namespace Exakat\Tasks;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Reports\Reports;
 use Exakat\Vcs\Vcs;
+use Exakat\Vcs\Vcs\None;
 use Exakat\Exakat;
 
 class Status extends Tasks {
@@ -62,7 +63,7 @@ class Status extends Tasks {
         }
 
         if (!file_exists($this->config->project_dir)) {
-            throw new NoSuchProject($project);
+            throw new NoSuchProject((string) $project);
         }
 
         if ($this->datastore->getHash('exakat_version') === null) {
@@ -112,18 +113,17 @@ class Status extends Tasks {
             $status['status'] = empty($inited) ? 'Init phase' : 'Not running';
         }
 
-        if (($vcsClass = Vcs::getVcs($this->config)) === 'None') {
+        if (($vcs = Vcs::getVcs($this->config)) instanceof None) {
             $status['hash']      = 'None';
             $status['updatable'] = 'N/A';
         } else {
-            $vcs = new $vcsClass((string) $this->config->project, $this->config->code_dir);
             $status = array_merge($status, $vcs->getStatus());
         }
 
         $status['updatable'] = $status['updatable'] === true ? 'Yes' : 'No';
 
         // Check the logs
-        $errors = $this->getErrors($this->config->project_dir);
+        $errors = $this->getErrors();
         if (!empty($errors)) {
             $status['errors'] = $errors;
         }
@@ -178,7 +178,7 @@ class Status extends Tasks {
         print $text;
     }
 
-    private function getErrors(string $path): array {
+    private function getErrors(): array {
         $errors = array();
 
         // Init error

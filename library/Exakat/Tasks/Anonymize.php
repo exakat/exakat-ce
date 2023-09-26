@@ -64,16 +64,16 @@ class Anonymize extends Tasks {
                     }
                 }
                 display("Anonymized $total files\n");
-            } elseif (($project = $this->config->project) !== 'default') {
+            } elseif (!($project = $this->config->project)->isDefault()) {
                 display("Anonymizing project $project\n");
                 $dir = $this->config->projects_root . '/projects/' . $project . '/' . $project;
 
                 if (!file_exists($this->config->projects_root . '/projects/' . $project)) {
-                    throw new NoSuchProject($project);
+                    throw new NoSuchProject((string) $project);
                 }
 
                 if (!file_exists($this->config->projects_root . '/projects/' . $project . '/code')) {
-                    throw new NoCodeInProject($project);
+                    throw new NoCodeInProject((string) $project);
                 }
 
                 $files = $this->datastore->getCol('files', 'file');

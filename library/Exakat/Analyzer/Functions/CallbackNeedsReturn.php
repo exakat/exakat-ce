@@ -45,21 +45,20 @@ class CallbackNeedsReturn extends Analyzer {
                   )
         );
 
-        $returningFunctions = $this->methods->getFunctionsByReturn();
-        $voidReturningFunctions = array_merge($returningFunctions['void'],
-            array_map(function (string $x) : string {
-                return trim($x, '\\');
-            }, $returningFunctions['void'])
-        );
+        $returningFunctions = $this->readStubs('getFunctionsByReturnType', array('\\void'));
+        $voidReturningFunctions = array_map(function (string $x): string {
+            return trim($x, '\\');
+        }, $returningFunctions);
 
         foreach ($ini as $position => $functions) {
             $rank = substr($position, 9);
             if ($rank[0] === '_') {
-                list(, $rank) = explode('_', $position);
+                list(, $rank) = explode('_', $position, 2);
             }
 
             //Any callback style : string, array, closure...
             $this->atomFunctionIs($functions)
+                 ->analyzerIsNot('self')
                  ->outWithRank('ARGUMENT', $rank)
                  ->atomIs(array('Closure', 'String', 'Arrayliteral', 'Arrowfunction', 'Concatenation'), self::WITH_CONSTANTS)
                  ->optional(
@@ -95,6 +94,7 @@ class CallbackNeedsReturn extends Analyzer {
 
             //the callback declares void as return type
             $this->atomFunctionIs($functions)
+                 ->analyzerIsNot('self')
                  ->outWithRank('ARGUMENT', $rank)
                  // Could be : string, array, closure, arrow-function,
                  ->inIs('DEFINITION')
@@ -107,6 +107,7 @@ class CallbackNeedsReturn extends Analyzer {
             $this->atomFunctionIs($functions)
                  ->outWithRank('ARGUMENT', $rank)
                  ->atomIs('String', self::WITH_CONSTANTS)
+                 ->analyzerIsNot('self')
                  ->noDelimiterIs($voidReturningFunctions, self::CASE_INSENSITIVE);
             $this->prepareQuery();
 

@@ -24,32 +24,34 @@ namespace Exakat\Analyzer\Complete;
 
 class OverwrittenProperties extends Complete {
     public function analyze(): void {
-
         // class x { protected $p = 1;}
         // class xx extends x { protected $p = 1;}
         $this->atomIs(array('Propertydefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('propertyname', 'name')
-              ->inIs('PPP')
-              ->inIs('PPP')
-              ->atomIs(self::CLASSES_TRAITS)
-              ->goToAllParentsTraits(self::INCLUDE_SELF) // also covers local traits
-              ->outIs('PPP')
-              ->outIs('PPP')
-              ->atomIs(array('Propertydefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
-              ->samePropertyAs('propertyname', 'name',  self::CASE_SENSITIVE)
-              ->distinctFrom('first')					// to skip self links
-              ->as('origin')
-              ->addEFrom('OVERWRITE', 'first');
+             ->hasNoOut('OVERWRITE')
+             ->savePropertyAs('propertyname', 'name')
+             ->inIs('PPP')
+             ->inIs('PPP')
+             ->atomIs(self::CLASSES_TRAITS)
+             ->goToAllParentsTraits(self::EXCLUDE_SELF) // also covers local traits
+             ->outIs('PPP')
+             ->outIs('PPP')
+             ->atomIs(array('Propertydefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
+             ->samePropertyAs('propertyname', 'name',  self::CASE_SENSITIVE)
+             ->as('origin')
+             ->hasNoLinkYet('OVERWRITE', 'first')
+             ->addEFrom('OVERWRITE', 'first');
         $this->prepareQuery();
 
         // synch properties/virtual properties visibility
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
               ->inIs('PPP')
+              // private, public : No need to propagate.
               ->is('visibility', 'protected')
               ->back('first')
               ->inIs('OVERWRITE')
               ->atomIs('Virtualproperty')
               ->inIs('PPP')
+              ->isNot('visibility', 'protected')
               ->raw(<<<'GREMLIN'
  property("visibility", "protected")
 .sideEffect{ it.get().property("fullcode", it.get().property("fullcode").value().toString().replace("public ", "protected "));}

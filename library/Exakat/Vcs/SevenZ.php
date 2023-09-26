@@ -25,7 +25,7 @@ namespace Exakat\Vcs;
 use Exakat\Exceptions\HelperException;
 
 class SevenZ extends Vcs {
-    private $executable = '7z';
+    private string $executable = '7z';
 
     public function __construct(string $destination, string $project_root) {
         parent::__construct($destination, $project_root);

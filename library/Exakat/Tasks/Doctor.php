@@ -31,6 +31,7 @@ use Exakat\Exceptions\HelperException;
 use Exakat\Exceptions\NoSuchReport;
 use Exakat\Tasks\Helpers\ReportConfig;
 use Symfony\Component\Yaml\Yaml as Symfony_Yaml;
+use Exakat\Stubs\Stubs;
 
 class Doctor extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -133,7 +134,9 @@ class Doctor extends Tasks {
             $stats['exakat']['extensions']  = $list;
         }
 
-        $stubs = exakat('stubs');
+        $stubs = new Stubs(dirname($this->config->ext_root) . '/stubs/',
+            $this->config->stubs,
+        );
         $files = $stubs->getFile();
         $stats['exakat']['stubs'] = makeList($files, '');
 
@@ -156,7 +159,7 @@ class Doctor extends Tasks {
         $stats['PHP']['pcre.jit']               = (ini_get('pcre.jit') ? 'On' : 'Off') . ' (Must be off on PHP 7.3 and OSX)';
 
         // java
-        $res = shell_exec('java -version 2>&1');
+        $res = shell_exec('java -version 2>&1') ?? '';
         if (stripos($res, 'command not found') !== false) {
             $stats['java']['installed'] = 'No';
             $stats['java']['installation'] = 'No java found. Please, install Java Runtime (SRE) 1.7 or above from java.com web site.';
@@ -173,9 +176,13 @@ class Doctor extends Tasks {
         $stats['java']['$JAVA_HOME'] = getenv('JAVA_HOME') ? getenv('JAVA_HOME') : '<none>';
         $stats['java']['$JAVA_OPTIONS'] = getenv('JAVA_OPTIONS') ?? ' (set $JAVA_OPTIONS="-Xms32m -Xmx****m", with **** = RAM in Mb. The more the better.';
 
-        $stats['tinkergraphv3'] = Graph::getConnexion($this->config, 'TinkergraphV3')->getInfo();
-        $stats['gsneo4jv3']     = Graph::getConnexion($this->config, 'GSNeo4jV3')->getInfo();
-        $stats['nogremlin']     = Graph::getConnexion($this->config, 'NoGremlin')->getInfo();
+        foreach (Graph::DRIVERS as $name => $driver) {
+            $stats[$name] = Graph::getConnexion($this->config, $driver)->getInfo();
+        }
+
+        $stats['loader']['mode'] = $this->config->loader_mode;
+        $stats['loader']['parallel max'] = $this->config->loader_parallel_max ?? 'N/A';
+
 
         if ($this->config->project !== null) {
             $stats['project']['name']             = $this->config->project_name;
@@ -228,7 +235,7 @@ class Doctor extends Tasks {
             file_put_contents("{$this->config->projects_root}/config/exakat.ini", $ini);
         }
 
-        $this->checkInstall($graphdb);
+        $this->gremlin->setConfigFile();
 
         // projects
         if (file_exists("{$this->config->projects_root}/projects/")) {
@@ -259,59 +266,9 @@ class Doctor extends Tasks {
             shell_exec('php exakat init -p test' . $id . '');
 
             rename("{$this->config->projects_root}/projects/test$id", "{$this->config->projects_root}/projects/test");
-            unset($init);
-            unset($initConfig);
         }
 
         return $stats;
-    }
-
-    private function checkInstall(string $graphdb): void {
-        if ($graphdb === 'gsneo4j') {
-            if (file_exists("{$this->config->projects_root}/{$this->config->gsneo4j_folder}/conf/neo4j-empty.properties")) {
-                $properties = file_get_contents("{$this->config->projects_root}/{$this->config->gsneo4j_folder}/conf/neo4j-empty.properties");
-                $properties = preg_replace("#gremlin.neo4j.directory=.*\n#s", "gremlin.neo4j.directory=db/neo4j\n", $properties);
-                file_put_contents("{$this->config->projects_root}/{$this->config->gsneo4j_folder}/conf/neo4j-empty.properties", $properties);
-            }
-
-            $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->gsneo4j_folder}");
-        } elseif ($graphdb === 'tinkergraph') {
-            $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->tinkergraph_folder}");
-        } elseif ($graphdb === 'gsneo4jv3') {
-            $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->tinkergraph_folder}");
-        } elseif ($graphdb === 'tinkergraphv3') {
-            $this->checkGremlinServer("{$this->config->projects_root}/{$this->config->tinkergraph_folder}");
-        } elseif ($graphdb === 'nogremlin') {
-            // Nothing to do
-        } else {
-            assert(false, "No preprocessing for $graphdb");
-        }
-    }
-
-    private function checkGremlinServer(string $path): void {
-        if (!file_exists($path)) {
-            return;
-        }
-
-        if (!file_exists("$path/db")) {
-            mkdir("$path/db", 0755);
-        }
-
-        $gremlinJar = glob("{$this->config->gsneo4j_folder}/lib/gremlin-core-*.jar");
-        $gremlinVersion = empty($gremlinJar) ? '' : substr(basename(array_pop($gremlinJar)), 13, -4);
-
-        if (version_compare('3.4.0', $gremlinVersion) < 0) {
-            $version = '.3.4';
-        } elseif (version_compare('3.3.0', $gremlinVersion) < 0) {
-            $version = '.3.3';
-        } elseif (version_compare('3.2.0', $gremlinVersion) < 0) {
-            $version = '.3.2';
-        } else {
-            print "Warning : Wrong Gremlin version found : $gremlinVersion read. Possible version range from 3.2.0 to 3.4.0.";
-            return;
-        }
-
-        exakat('graphdb')->setConfigFile();
     }
 
     private function checkPHPs(array $config): array {

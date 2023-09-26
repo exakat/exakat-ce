@@ -26,9 +26,10 @@ namespace Exakat\Query\DSL;
 use Exakat\Query\Query;
 
 class FollowParAs extends DSL {
-    public const FOLLOW_ALL        = 0;
-    public const FOLLOW_NONE       = 1;
-    public const FOLLOW_PARAS_ONLY = 2;
+    public const FOLLOW_ALL           = 0;
+    public const FOLLOW_NONE          = 1;
+    public const FOLLOW_PARAS_ONLY    = 2;
+    public const FOLLOW_PARAS_TERNARY = 3;
 
     public function run(): Command {
         $this->assertArguments(1, func_num_args(), __METHOD__);
@@ -53,7 +54,17 @@ class FollowParAs extends DSL {
                 $follow = '';
                 break 1;
 
+            case self::FOLLOW_PARAS_TERNARY:
+                $out = 'identity().';
+                $labels = ', "Ternary", "Coalesce"';
+                $follow = ', 
+                __.hasLabel("Ternary").where(__.out("THEN").not(hasLabel("Void"))).out("THEN", "ELSE"), 
+                __.hasLabel("Ternary").where(__.out("THEN").    hasLabel("Void" )).out("CONDITION", "ELSE"), 
+                __.hasLabel("Coalesce").out("RIGHT", "LEFT")';
+                break 1;
+
             default:
+                // Default uses incoming links
                 $this->assertLink($out);
                 $out = $this->normalizeLinks($out);
 

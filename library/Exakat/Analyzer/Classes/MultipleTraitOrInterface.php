@@ -27,7 +27,8 @@ use Exakat\Analyzer\Analyzer;
 class MultipleTraitOrInterface extends Analyzer {
     public function analyze(): void {
         // interfaces
-        $this->atomIs('Class')
+        $this->atomIs(self::CLASSES_ALL)
+             ->analyzerIsNot('self')
              ->raw(<<<'GREMLIN'
 where( __.sideEffect{counts = [:]}
          .out("IMPLEMENTS")
@@ -48,7 +49,8 @@ GREMLIN
         $this->prepareQuery();
 
         // traits
-        $this->atomIs('Class')
+        $this->atomIs(self::CLASSES_ALL)
+             ->analyzerIsNot('self')
              ->raw(<<<'GREMLIN'
 where( __.sideEffect{counts = [:]}
          .out("USE").hasLabel("Usetrait").out("USE")

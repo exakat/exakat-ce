@@ -33,6 +33,7 @@ use Exakat\Reports\Reports as Reports;
 use Exakat\Tasks\Helpers\ReportConfig;
 use Exakat\Helpers\Timer;
 use Exakat\Dump\Dump;
+use Exakat\Log;
 
 class Report extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -47,7 +48,7 @@ class Report extends Tasks {
         }
 
         if (!file_exists($this->config->project_dir)) {
-            throw new NoSuchProject($this->config->project);
+            throw new NoSuchProject((string) $this->config->project);
         }
 
         if (!file_exists($this->config->datastore)) {
@@ -58,19 +59,27 @@ class Report extends Tasks {
             throw new NoDump((string) $this->config->project);
         }
 
-        $rulesets = $this->config->project_rulesets;
-        $unknown = array();
-        foreach ($rulesets as $ruleset) {
-            if ($ruleset === 'None') {
-                // this one is empty on purpose
-                continue;
+        $this->log = new Log ('reports',
+            "{$this->config->projects_root}/projects/{$this->config->project}");
+
+        if (!empty($this->config->program)) {
+            $rulesets = $this->config->program;
+        } else {
+            $rulesets = $this->config->project_rulesets;
+
+            $unknown = array();
+            foreach ($rulesets as $ruleset) {
+                if ($ruleset === 'None') {
+                    // this one is empty on purpose
+                    continue;
+                }
+                if ( empty($this->rulesets->getRulesetsAnalyzers(array($ruleset) ) ) ) {
+                    $unknown[] = $ruleset;
+                }
             }
-            if ( empty($this->rulesets->getRulesetsAnalyzers(array($ruleset) ) ) ) {
-                $unknown[] = $ruleset;
+            if (!empty($unknown)) {
+                throw new NoSuchRuleset(implode(', ', $unknown), $this->rulesets->getSuggestionRuleset($unknown));
             }
-        }
-        if (!empty($unknown)) {
-            throw new NoSuchRuleset(implode(', ', $unknown), $this->rulesets->getSuggestionRuleset($unknown));
         }
 
         $dump = Dump::factory($this->config->dump, Dump::READ);
@@ -118,7 +127,6 @@ class Report extends Tasks {
 
         $timer->end();
 
-        $end = microtime(true);
         display('Processing time : ' . number_format($timer->duration(), 2) . 's');
 
         $this->datastore->addRow('hash', array($reportConfig->getFormat() => $reportConfig->getFile() ));

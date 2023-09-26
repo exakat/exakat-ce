@@ -38,7 +38,8 @@ class SolveTraitMethods extends Complete {
               ->inIs('AS')
 
               ->outIs('NAME')
-              ->atomIs('Nsname', self::WITHOUT_CONSTANTS)
+              ->outIsIE('METHOD')
+              ->atomIs(array('Identifier', 'Nsname'), self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'methode')
               ->back('first')
               ->outIs('USE')
@@ -60,6 +61,7 @@ class SolveTraitMethods extends Complete {
               ->samePropertyAs('lccode', 'methode_target', self::CASE_INSENSITIVE)
 
               ->back('results')
+              ->hasNoLinkYet('DEFINITION', 'definition')
               ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
 
@@ -93,6 +95,7 @@ class SolveTraitMethods extends Complete {
               ->samePropertyAs('lccode', 'methode')
 
               ->back('results')
+              ->hasNoLinkYet('DEFINITION', 'definition')
               ->addEFrom('DEFINITION', 'definition');
         $this->prepareQuery();
     }

@@ -47,10 +47,12 @@ class SamePropertyAs extends DSL {
         }
         $this->assertVariable($name);
 
-        if ($property === 'label') {
-            return new Command('has("' . $property . '").filter{ it.get().label() == ' . $name . '}');
+        if ($property === SavePropertyAs::ATOM) {
+            return new Command('filter{ ' . $name . ' == it.get(); }');
+        } elseif ($property === 'label') {
+            return new Command('filter{ it.get().label() == ' . $name . '}');
         } elseif ($property === 'id') {
-            return new Command('has("' . $property . '").filter{ it.get().id() == ' . $name . '}');
+            return new Command('filter{ it.get().id() == ' . $name . '}');
         } elseif ($property === 'self') {
             assert(false, 'Dont use self with property');
         } elseif ($property === SavePropertyAs::ATOM) {

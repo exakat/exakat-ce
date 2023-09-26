@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 
 class HasNoVariadicArgument extends DSL {
     public function run(): Command {
-        return new Command('not(has("variadic", true))');
+        return new Command('not(where(__.out("ARGUMENT").has("variadic", true)))');
     }
 }
 ?>

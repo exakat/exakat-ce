@@ -23,6 +23,7 @@
 namespace Exakat\Analyzer\Php;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Query\DSL\FollowParAs;
 
 class IsAWithString extends Analyzer {
     public function dependsOn(): array {
@@ -32,20 +33,22 @@ class IsAWithString extends Analyzer {
     }
 
     public function analyze(): void {
+        $functions = array('\\is_a',
+                           '\\is_subclass_of',
+                          );
         // is_a('a', 'b');
-        $this->atomFunctionIs(array('\\is_a',
-                                    '\\is_subclass_of',
-                                   ))
+        $this->atomFunctionIs($functions)
              ->noChildWithRank('ARGUMENT', 2)
              ->outWithRank('ARGUMENT', 0)
+             ->followParAs(FollowParAs::FOLLOW_PARAS_TERNARY)
              ->atomIs('String', self::WITH_CONSTANTS)
              ->back('first');
         $this->prepareQuery();
 
+        // @todo : check for the third argument's value to be false
+
         // is_a('a', 'b', false);
-        $this->atomFunctionIs(array('\\is_a',
-                                    '\\is_subclass_of',
-                                   ))
+        $this->atomFunctionIs($functions)
              ->outWithRank('ARGUMENT', 2)
              ->is('boolean', false)
              ->back('first')

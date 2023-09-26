@@ -29,14 +29,6 @@ class Encoding extends Plugin {
         }
 
         switch ($atom->atom) {
-            case 'Identifier' :
-                $atom->encoding = mb_detect_encoding($atom->noDelimiter) ?: '';
-                if ($atom->encoding === 'UTF-8') {
-                    $blocks = unicode_blocks($atom->noDelimiter);
-                    $atom->block = array_keys($blocks)[0] ?? '';
-                }
-                break;
-
             case 'String' :
                 // Case of a Quoted string " $a "
                 if (!empty($extras)) {
@@ -52,9 +44,11 @@ class Encoding extends Plugin {
                 }
                 break;
 
+            case 'Identifier' :
+            case 'Nsname' :
             default :
-            // Nothing, really
-            }
+                // Nothing, really
+        }
     }
 }
 

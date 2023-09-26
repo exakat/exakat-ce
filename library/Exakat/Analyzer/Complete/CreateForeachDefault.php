@@ -42,6 +42,8 @@ class CreateForeachDefault extends Complete {
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
              ->outIs('ARGUMENT')
              ->outIsIE('VALUE')
+             // avoud doubles
+             ->hasNoLinkYet('DEFAULT', 'v')
              ->as('string')
              ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');
@@ -62,6 +64,7 @@ class CreateForeachDefault extends Complete {
              ->atomIs('Arrayliteral')
              ->outIs('ARGUMENT')
              ->outIsIE('VALUE')
+             ->hasNoLinkYet('DEFAULT', 'v')
              ->as('string')
              ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');
@@ -80,6 +83,7 @@ class CreateForeachDefault extends Complete {
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
              ->outIs('ARGUMENT')
              ->outIs('INDEX')
+             ->hasNoLinkYet('DEFAULT', 'v')
              ->as('string')
              ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');
@@ -99,6 +103,7 @@ class CreateForeachDefault extends Complete {
              ->outIs('DEFAULT')
              ->outIs('ARGUMENT')
              ->outIs('INDEX')
+             ->hasNoLinkYet('DEFAULT', 'v')
              ->as('string')
              ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');

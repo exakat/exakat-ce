@@ -50,6 +50,7 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -74,6 +75,7 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->outIs('PPP')
               ->atomIs('Propertydefinition')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
 

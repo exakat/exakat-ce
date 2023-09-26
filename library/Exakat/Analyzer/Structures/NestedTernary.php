@@ -27,16 +27,17 @@ use Exakat\Analyzer\Analyzer;
 use Exakat\Query\DSL\FollowParAs;
 
 class NestedTernary extends Analyzer {
-    protected $minNestedTernary = 2;
+    protected int $minNestedTernary = 2;
 
     public function analyze(): void {
         if ($this->minNestedTernary < 2) {
-            display('minNesterTernary is too low. Make it 2 or more. ');
+            display('minNestedTernary is too low. It must be it 2 or more. Omitting.');
 
             return;
         }
         //$a ? $b : $c ? $d : $e
         $this->atomIs('Ternary');
+
         for ($i = 0; $i < $this->minNestedTernary - 1; ++$i) {
             $this->outIs(array('THEN', 'ELSE'))
                  ->followParAs(FollowParAs::FOLLOW_PARAS_ONLY) // for parenthesis and assignations

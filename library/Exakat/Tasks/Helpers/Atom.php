@@ -23,6 +23,7 @@
 namespace Exakat\Tasks\Helpers;
 
 use stdClass;
+use const STRICT_COMPARISON;
 
 class Atom extends AtomInterface {
     public const STRING_MAX_SIZE = 500;
@@ -39,55 +40,8 @@ class Atom extends AtomInterface {
         die("Fatal error : trying to set '$name' property on " . self::class);
     }
 
-    public function __get(string $name) : mixed {
+    public function __get(string $name): mixed {
         die("Fatal error : trying to get '$name' property on " . self::class);
-    }
-
-    public function toArray(): array {
-        if (strlen($this->code) > self::STRING_MAX_SIZE) {
-            $this->code = substr($this->code, 0, self::STRING_MAX_SIZE) . '...[ total ' . strlen($this->code) . ' chars]';
-        }
-        if (strlen($this->lccode) > self::STRING_MAX_SIZE) {
-            $this->lccode = substr($this->lccode, 0, self::STRING_MAX_SIZE) . '...[ total ' . strlen($this->lccode) . ' chars]';
-        }
-        if (strlen($this->fullcode) > self::STRING_MAX_SIZE) {
-            $this->fullcode = substr($this->fullcode, 0, self::STRING_MAX_SIZE) . '...[ total ' . strlen($this->fullcode) . ' chars]';
-        }
-
-        $this->lccode        = $this->protectString(mb_strtolower($this->code));
-        $this->code          = $this->protectString($this->code       );
-        $this->fullcode      = $this->protectString($this->fullcode   );
-        $this->fullnspath    = $this->protectString($this->fullnspath );
-        $this->strval        = $this->protectString($this->strval     );
-        $this->noDelimiter   = $this->protectString($this->noDelimiter);
-        $this->visibility    = $this->protectString($this->visibility );
-
-        $this->alternative   = $this->alternative ? 1 : null;
-        $this->reference     = $this->reference ? 1 : null;
-        $this->heredoc       = $this->heredoc ? 1 : null;
-        $this->variadic      = $this->variadic ? 1 : null;
-        $this->final         = $this->final ? 1 : null;
-        $this->abstract      = $this->abstract ? 1 : null;
-        $this->readonly      = $this->readonly ? 1 : null;
-        $this->static        = $this->static ? 1 : null;
-        $this->absolute      = $this->absolute ? 1 : null;
-        $this->constant      = $this->constant ? 1 : null;
-        $this->boolean       = $this->boolean ? 1 : null;
-        $this->enclosing     = $this->enclosing ? 1 : null;
-        $this->bracket       = $this->bracket ? 1 : null;
-        $this->flexible      = $this->flexible ? 1 : null;
-        $this->close_tag     = $this->close_tag ? 1 : null;
-
-        if ($this->intval > 2147483647) {
-            $this->intval = 2147483647;
-        }
-        if ($this->intval < -2147483648) {
-            $this->intval = -2147483648;
-        }
-
-        $this->globalvar     = !$this->globalvar ? null : $this->globalvar;
-
-        return (array) $this;
     }
 
     public function toGraphsonLine(int &$id, bool $withWs = self::WITHOUT_WS): stdClass {
@@ -95,6 +49,7 @@ class Atom extends AtomInterface {
                                'args_min',
                                'count',
                                'intval',
+                               'boolean',
                                );
 
         $falseValues = array('globalvar',
@@ -103,12 +58,73 @@ class Atom extends AtomInterface {
         $properties = array();
 
         // The array list the properties that will be kept (except for default)
-        $atomsValues = array('Sequence' => array('code'        => 0,
-                                                 'line'        => 0,
+        $atomsValues = array('Sequence' => array('line'        => 0,
+                                                 'code'  	   => 0,
+                                                 'rank'        => 0,
                                                  'position'    => 0,
                                                  'count'       => 0,
-                                                 'fullcode'    => 0,
+                                                 'eId'         => 0,
+                                                 ),
+
+                            'Comparison'=> array('line'        => 0,
+                                                 'intval'      => 0,
+                                                 'constant'    => 0,
                                                  'rank'        => 0,
+                                                 'noDelimiter' => 0,
+                                                 'boolean'     => 0,
+                                                 'fullcode'    => 0,
+                                                 'code'  	   => 0,
+                                                 'token'       => 0,
+                                                 'eId'         => 0,
+                                                 ),
+
+                            'Spaceship' => array('fullcode'    => 0,
+                                                 'boolean'     => 0,
+                                                 'constant'    => 0,
+                                                 'code'  	   => 0,
+                                                 'intval'      => 0,
+                                                 'noDelimiter' => 0,
+                                                 'line'        => 0,
+                                                 'rank'        => 0,
+                                                 'token'       => 0,
+                                                 'eId'         => 0,
+                                                 ),
+
+
+                            'Class'     => array('line'        => 0,
+                                                 'count'       => 0,
+                                                 'code'        => 0,
+                                                 'fullcode'    => 0,
+                                                 'fullnspath'  => 0,
+                                                 'rank'  	   => 0,
+                                                 'eId'         => 0,
+                                                 ),
+
+                            'Interface' => array('line'        => 0,
+                                                 'code'        => 0,
+                                                 'rank'        => 0,
+                                                 'fullcode'    => 0,
+                                                 'fullnspath'  => 0,
+                                                 'eId'         => 0,
+                                                 ),
+
+                            'Trait'     => array('line'        => 0,
+                                                 'code'        => 0,
+                                                 'fullcode'    => 0,
+                                                 'fullnspath'  => 0,
+                                                 'rank'  	   => 0,
+                                                 'eId'         => 0,
+                                                 ),
+
+                            'Function'  => array('line'        => 0,
+                                                 'count'       => 0,
+                                                 'fullcode'    => 0,
+                                                 'typehint'    => 0,
+                                                 'code'        => 0,
+                                                 'args_max'    => 0,
+                                                 'args_min'    => 0,
+                                                 'fullnspath'  => 0,
+                                                 'rank'  	   => 0,
                                                  'eId'         => 0,
                                                  ),
 
@@ -123,7 +139,6 @@ class Atom extends AtomInterface {
                                                  'constant'    => 0,
                                                  'enclosing'   => 0,
                                                  'final'       => 0,
-                                                 'boolean'     => 0,
                                                  'bracket'     => 0,
                                                  'close_tag'   => 0,
                                                  'trailing'    => 0,
@@ -146,8 +161,12 @@ class Atom extends AtomInterface {
                             );
 
         // for cobbler only
-        if ($withWs === AtomInterface::WITH_WS) {
-            $atomsValues['Sequence']['ws'] = 0;
+        if ($withWs === self::WITH_WS) {
+            foreach ($atomsValues as &$value) {
+                $value['ws'] = 0;
+            }
+            unset($value);
+            unset($atomsValues['to_skip']['ws']);
         } else {
             $atomsValues['to_skip']['ws'] = 0;
         }
@@ -157,8 +176,6 @@ class Atom extends AtomInterface {
         } else {
             $list = array_diff_key((array) $this, $atomsValues['to_skip']);
         }
-
-        $properties['lccode'] = array( new Property($id++, mb_strtolower((string) $this->code)) );
 
         foreach ($list as $l => $value) {
             if ($value === null) {
@@ -174,12 +191,8 @@ class Atom extends AtomInterface {
                 $value = $this->ws->toJson();
             }
 
-            if (!in_array($l, array('noDelimiter', 'lccode', 'code', 'fullcode', 'ws')) &&
+            if (!in_array($l, array('noDelimiter', 'fullcode', 'ws')) &&
                 $value === '') {
-                continue;
-            }
-
-            if ($value === false) {
                 continue;
             }
 
@@ -187,7 +200,19 @@ class Atom extends AtomInterface {
                 $value = (integer) $value;
             }
 
+            if ($value === false) {
+                continue;
+            }
+
+            if ($l === 'visibility' && empty($value)) {
+                continue;
+            }
+
             $properties[$l] = array( new Property($id++, $value) );
+        }
+
+        if (isset($properties['code'])) {
+            $properties['lccode'] = array( new Property($id++, mb_strtolower((string) $this->code)) );
         }
 
         $object = array('id'         => $this->id,
@@ -198,6 +223,10 @@ class Atom extends AtomInterface {
                         );
 
         return (object) $object;
+    }
+
+    public function properties(): array {
+        return array_keys(array_filter((array) $this));
     }
 
     public function boolProperties(): array {
@@ -211,7 +240,6 @@ class Atom extends AtomInterface {
                  'constant',
                  'enclosing',
                  'final',
-                 'boolean',
                  'bracket',
                  'close_tag',
                  'trailing',
@@ -228,7 +256,7 @@ class Atom extends AtomInterface {
                  'isStub',
                  'isConst',
                                ) as $property) {
-            if ($this->$property == true) {
+            if ($this->$property === true) {
                 $return[] = $property;
             }
         }
@@ -236,12 +264,8 @@ class Atom extends AtomInterface {
         return $return;
     }
 
-    private function protectString(string $code): string {
-        return addcslashes($code , '\\"');
-    }
-
     public function isA(array $atoms): bool {
-        return in_array($this->atom, $atoms, \STRICT_COMPARISON);
+        return in_array($this->atom, $atoms, STRICT_COMPARISON);
     }
 }
 

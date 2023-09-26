@@ -22,6 +22,9 @@
 
 namespace Exakat\Tasks\Helpers;
 
+use const STRICT_COMPARISON;
+use Exakat\Stubs\Stubs;
+
 class IsPhp extends Plugin {
     public $name = 'isPhp';
     public $type = 'boolean';
@@ -31,14 +34,17 @@ class IsPhp extends Plugin {
     private array $phpInterfaces       = array();
     private array $phpEnums            = array();
     private array $phpClassConstants   = array();
-    private array $phpClassMethods     = array();
-    private array $phpClassProperties  = array();
+    private array $phpStaticMethods    = array();
+    private array $phpStaticProperties = array();
     private array $phpTraits           = array();
 
     public function __construct() {
         parent::__construct();
 
-        $php = exakat('phpCore');
+        $config = exakat('config');
+        $php = new Stubs($config->dir_root . '/data/core/',
+            $config->php_core ?? array(),
+        );
         $this->phpConstants = $php->getConstantList();
         $this->phpConstants = makeFullNsPath($this->phpConstants, \FNP_CONSTANT);
 
@@ -59,9 +65,9 @@ class IsPhp extends Plugin {
 
         $this->phpClassConstants        = array_merge($php->getClassConstantList(),
             $php->getEnumCasesList());
-        $this->phpClassStaticProperties = $php->getClassStaticPropertyList();
-        $this->phpClassMethods          = $php->getClassMethodList();
-        $this->phpClassStaticMethods    = $php->getClassStaticMethodList();
+        $this->phpStaticProperties      = $php->getClassStaticPropertyList();
+        $this->phpStaticMethods         = $php->getClassMethodList();
+        $this->phpStaticMethods         = $php->getClassStaticMethodList();
     }
 
     public function run(Atom $atom, array $extras): void {
@@ -72,14 +78,14 @@ class IsPhp extends Plugin {
             case 'Methodcall' :
                 $path = makeFullNsPath($extras['OBJECT']->fullnspath ?? self::NOT_PROVIDED);
                 $method = mb_strtolower(substr($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, 0, strpos($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, '(') ?: 0));
-                if (in_array($method, $this->phpClassMethods[$path] ?? array(), \STRICT_COMPARISON)) {
+                if (in_array($method, $this->phpStaticMethods[$path] ?? array(), STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
                 break;
 
             case 'Member' :
                 $path = makeFullNsPath($extras['OBJECT']->fullnspath ?? self::NOT_PROVIDED);
-                if (in_array($extras['MEMBER']->code ?? self::NOT_PROVIDED, $this->phpClassProperties[$path] ?? array(), \STRICT_COMPARISON)) {
+                if (in_array($extras['MEMBER']->code ?? self::NOT_PROVIDED, $this->phpStaticProperties[$path] ?? array(), STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
                 break;
@@ -92,7 +98,7 @@ class IsPhp extends Plugin {
                 $path = makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED);
                 $method = mb_strtolower(substr($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, 0, strpos($extras['METHOD']->fullcode ?? self::NOT_PROVIDED, '(') ?: 0));
 
-                if (in_array($path . '::' . $method, $this->phpClassStaticMethods, \STRICT_COMPARISON)) {
+                if (in_array($path . '::' . $method, $this->phpStaticMethods, STRICT_COMPARISON)) {
                     $extras['CLASS']->isPhp = true;
                     $atom->isPhp = true;
                 }
@@ -104,7 +110,7 @@ class IsPhp extends Plugin {
                     $this->phpTraits,
                     $this->phpInterfaces,
                     $this->phpEnums,
-                ), \STRICT_COMPARISON)) {
+                ), STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                     $extras['CLASS']->isPhp = true;
                 }
@@ -113,17 +119,17 @@ class IsPhp extends Plugin {
             case 'Staticproperty' :
                 $path = makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED);
                 // @todo : this won't work, due tu [$path]
-                if (in_array($extras['MEMBER']->code ?? self::NOT_PROVIDED, $this->phpClassProperties[$path] ?? array(), \STRICT_COMPARISON)) {
+                if (in_array($extras['MEMBER']->code ?? self::NOT_PROVIDED, $this->phpStaticProperties[$path] ?? array(), STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
 
-                if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->phpStaticProperties ?? array(), \STRICT_COMPARISON)) {
+                if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->phpStaticProperties ?? array(), STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
                 break;
 
             case 'Staticconstant' :
-                if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->phpClassConstants, \STRICT_COMPARISON)) {
+                if (in_array($atom->fullnspath ?? self::NOT_PROVIDED, $this->phpClassConstants, STRICT_COMPARISON)) {
                     $extras['CLASS']->isPhp = true;
                     $atom->isPhp = true;
                 }
@@ -133,13 +139,13 @@ class IsPhp extends Plugin {
                 if (empty($path)) {
                     break;
                 }
-                if (in_array(makeFullNsPath($path), $this->phpFunctions, \STRICT_COMPARISON)) {
+                if (in_array(makeFullNsPath($path), $this->phpFunctions, STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
                 break;
 
             case 'String' :
-                if (in_array(makeFullNsPath($atom->noDelimiter), $this->phpFunctions, \STRICT_COMPARISON)) {
+                if (in_array(makeFullNsPath($atom->noDelimiter), $this->phpFunctions, STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
                 break;
@@ -157,13 +163,13 @@ class IsPhp extends Plugin {
 
                     switch ($extra->use) {
                         case 'function':
-                            if (in_array(makeFullNsPath($extra->fullnspath), $this->phpFunctions, \STRICT_COMPARISON)) {
+                            if (in_array(makeFullNsPath($extra->fullnspath), $this->phpFunctions, STRICT_COMPARISON)) {
                                 $extra->isPhp = true;
                             }
                             break;
 
                         case 'const':
-                            if (in_array(makeFullNsPath($extra->fullnspath, \FNP_CONSTANT), $this->phpConstants, \STRICT_COMPARISON)) {
+                            if (in_array(makeFullNsPath($extra->fullnspath, \FNP_CONSTANT), $this->phpConstants, STRICT_COMPARISON)) {
                                 $extra->isPhp = true;
                             }
                             break;
@@ -173,7 +179,7 @@ class IsPhp extends Plugin {
                                 $this->phpTraits,
                                 $this->phpInterfaces,
                                 $this->phpEnums,
-                            ), \STRICT_COMPARISON)) {
+                            ), STRICT_COMPARISON)) {
                                 $extra->isPhp = true;
                             }
                     }
@@ -183,7 +189,7 @@ class IsPhp extends Plugin {
             case 'Class' :
                 if (isset($extras['ATTRIBUTE'])) {
                     foreach ($extras['ATTRIBUTE'] as $extra) {
-                        if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->phpClasses, \STRICT_COMPARISON)) {
+                        if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->phpClasses, STRICT_COMPARISON)) {
                             $extra->isPhp = true;
                         }
                     }
@@ -191,12 +197,12 @@ class IsPhp extends Plugin {
                 // Fallthrough is OK
 
             case 'Classanonymous' :
-                if (in_array($extras['EXTENDS']->fullnspath ?? self::NOT_PROVIDED, $this->phpClasses, \STRICT_COMPARISON)) {
+                if (in_array($extras['EXTENDS']->fullnspath ?? self::NOT_PROVIDED, $this->phpClasses, STRICT_COMPARISON)) {
                     $extras['EXTENDS']->isPhp = true;
                 }
 
                 foreach ($extras['IMPLEMENTS'] ?? array() as $implements) {
-                    if (in_array($implements->fullnspath ?? self::NOT_PROVIDED, $this->phpInterfaces, \STRICT_COMPARISON)) {
+                    if (in_array($implements->fullnspath ?? self::NOT_PROVIDED, $this->phpInterfaces, STRICT_COMPARISON)) {
                         $implements->isPhp = true;
                     }
                 }
@@ -204,7 +210,7 @@ class IsPhp extends Plugin {
 
             case 'Interface' :
                 foreach ($extras['EXTENDS'] as $extra) {
-                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->phpInterfaces, \STRICT_COMPARISON)) {
+                    if (in_array($extra->fullnspath ?? self::NOT_PROVIDED, $this->phpInterfaces, STRICT_COMPARISON)) {
                         $extra->isPhp = true;
                     }
                 }
@@ -230,11 +236,11 @@ class IsPhp extends Plugin {
 
                     if (in_array(makeFullNsPath($path), array_merge($this->phpClasses,
                         $this->phpInterfaces,
-                    ), \STRICT_COMPARISON)) {
+                    ), STRICT_COMPARISON)) {
                         $extra->isPhp = true;
                     }
 
-                    if (in_array(makeFullNsPath($path), $this->phpInterfaces, \STRICT_COMPARISON)) {
+                    if (in_array(makeFullNsPath($path), $this->phpInterfaces, STRICT_COMPARISON)) {
                         $extra->isPhp = true;
                     }
                 }
@@ -245,13 +251,13 @@ class IsPhp extends Plugin {
                 if (in_array(makeFullNsPath($extras['CLASS']->fullnspath ?? self::NOT_PROVIDED), array_merge($this->phpClasses,
                     $this->phpInterfaces,
                     $this->phpEnums,
-                ), \STRICT_COMPARISON)) {
+                ), STRICT_COMPARISON)) {
                     $extras['CLASS']->isPhp = true;
                 }
                 break;
 
             case 'Newcallname' :
-                if (in_array(makeFullNsPath($atom->fullnspath), $this->phpClasses, \STRICT_COMPARISON)) {
+                if (in_array(makeFullNsPath($atom->fullnspath), $this->phpClasses, STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
                 break;
@@ -261,7 +267,7 @@ class IsPhp extends Plugin {
                     break;
                 }
                 // Warning : atom->fullnspath for classes (no fallback)
-                if (in_array(makeFullNsPath($atom->fullnspath), $this->phpClasses, \STRICT_COMPARISON)) {
+                if (in_array(makeFullNsPath($atom->fullnspath), $this->phpClasses, STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
                 break;
@@ -274,12 +280,11 @@ class IsPhp extends Plugin {
                 }
 
                 if ($atom->use === 'const') {
-                    if (in_array($path, $this->phpConstants, \STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false                ) {
+                    if (in_array($atom->fullnspath, $this->phpConstants, STRICT_COMPARISON)) {
                         $atom->isPhp = true;
                     }
                 } elseif ($atom->use === 'function') {
-                    if (in_array($path, $this->phpFunctions, \STRICT_COMPARISON) &&
+                    if (in_array($path, $this->phpFunctions, STRICT_COMPARISON) &&
                         strpos($atom->fullcode, '\\', 1) === false                ) {
                         $atom->isPhp = true;
                     }
@@ -289,13 +294,12 @@ class IsPhp extends Plugin {
                         $this->phpTraits,
                         $this->phpEnums,
                     );
-                    if (in_array($path, $cit, \STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false                ) {
+                    if (in_array($atom->fullnspath, $cit, STRICT_COMPARISON)) {
                         $atom->isPhp = true;
                     }
                 } else {
                     // This is the default behavior
-                    if (in_array($path, $this->phpConstants, \STRICT_COMPARISON) &&
+                    if (in_array($path, $this->phpConstants, STRICT_COMPARISON) &&
                         strpos($atom->fullcode, '\\', 1) === false) { // No extra \\, besides the first one
                         $atom->isPhp = true;
                     }
@@ -313,8 +317,8 @@ class IsPhp extends Plugin {
                 break;
 
             default :
-            // Nothing
-            }
+                // Nothing
+        }
     }
 
     private function checkType(array $extras): void {
@@ -323,7 +327,7 @@ class IsPhp extends Plugin {
                 $this->phpTraits,
                 $this->phpEnums,
                 $this->phpInterfaces,
-            ), \STRICT_COMPARISON)) {
+            ), STRICT_COMPARISON)) {
                 $extra->isPhp = true;
                 continue;
             }
@@ -342,7 +346,7 @@ class IsPhp extends Plugin {
                 $this->phpTraits,
                 $this->phpEnums,
                 $this->phpInterfaces,
-            ), \STRICT_COMPARISON)) {
+            ), STRICT_COMPARISON)) {
                 $extra->isPhp = true;
             }
         }

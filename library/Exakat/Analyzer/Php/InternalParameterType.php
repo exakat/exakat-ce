@@ -25,7 +25,7 @@ use Exakat\Analyzer\Analyzer;
 
 class InternalParameterType extends Analyzer {
     public function analyze(): void {
-        $args = $this->methods->getInternalParameterType();
+        $args = exakat('methods')->getInternalParameterType();
 
         $typeConversion = array('string'   => array('Magicconstant', 'Heredoc', 'String'),
                                 'float'    => 'Float',
@@ -49,6 +49,7 @@ class InternalParameterType extends Analyzer {
                 }
 
                 $this->atomFunctionIs($functions)
+                     ->analyzerIsNot('self')
                      ->isAnyOf(array('isPhp', 'isExt'), true)
                      ->outWithRank('ARGUMENT', $position)
 

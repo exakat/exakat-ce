@@ -57,13 +57,13 @@ class CreateDefaultValues extends Complete {
                  $this->side()
                       ->atomIs('Variable')
                       ->inIs('DEFINITION')
-                      ->raw('is(eq("first"))')
+                      ->isEqual('first')
              )
 
              ->not(
                  $this->side()
                       ->inIs('DEFAULT')
-                      ->raw('where(eq("first"))')
+                      ->isEqual('first')
              )
 
              ->addEFrom('DEFAULT', 'first');
@@ -81,6 +81,11 @@ class CreateDefaultValues extends Complete {
              ->codeIs(array('==', '!=', '===', '!==', ), self::TRANSLATE, self::CASE_SENSITIVE)
              ->outIs(array('LEFT', 'RIGHT'))
              ->atomIs(array('Integer', 'String'), self::WITH_CONSTANTS)
+             ->not(
+                 $this->side()
+                      ->inIs('DEFAULT')
+                      ->isEqual('first')
+             )
              ->addEFrom('DEFAULT', 'first');
         $this->prepareQuery();
 
@@ -101,7 +106,7 @@ class CreateDefaultValues extends Complete {
              ->not(
                  $this->side()
                       ->inIs('DEFAULT')
-                      ->raw('is(neq("first"))')
+                      ->isNotEqual('first')
              )
              ->addEFrom('DEFAULT', 'first');
         $this->prepareQuery();
@@ -118,7 +123,7 @@ class CreateDefaultValues extends Complete {
              ->not(
                  $this->side()
                       ->inIs('DEFAULT')
-                      ->raw('is(neq("first"))')
+                      ->isNotEqual('first')
              )
              ->atomIsNot('Void')
              ->addEFrom('DEFAULT', 'first');

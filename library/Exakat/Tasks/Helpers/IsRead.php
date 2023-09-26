@@ -319,7 +319,7 @@ class IsRead extends Plugin {
 //            case 'Empty' :isset() doesn't read the variable. Just checks its existence
             default :
 //            print $atom->atom.PHP_EOL;
-            }
+        }
     }
 }
 

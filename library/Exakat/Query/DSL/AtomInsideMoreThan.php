@@ -24,10 +24,11 @@
 namespace Exakat\Query\DSL;
 
 use Exakat\Query\Query;
+use Exakat\Analyzer\Analyzer;
 
 class AtomInsideMoreThan extends DSL {
     public function run(): Command {
-        if (func_get_args() === 2) {
+        if (func_num_args() === 2) {
             list($atoms, $times) = func_get_args();
         } else {
             $atoms = func_get_arg(0);
@@ -42,10 +43,11 @@ class AtomInsideMoreThan extends DSL {
 
         $linksDown = self::$linksDown;
         $MAX_LOOPING  = self::$MAX_LOOPING;
+        $definitions = makeList(Analyzer::DEFINITIONS);
 
         $gremlin = <<<GREMLIN
 where(
-    __.emit( ).repeat( __.out({$linksDown}).not(hasLabel("Closure", "Classanonymous", "Function", "Class", "Trait", "Interface")) ).times($MAX_LOOPING)
+    __.emit( ).repeat( __.out({$linksDown}).not(hasLabel($definitions)) ).times($MAX_LOOPING)
       .hasLabel(within(***))
       .count().is(gt($times))
 )

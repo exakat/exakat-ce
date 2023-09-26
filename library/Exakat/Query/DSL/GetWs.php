@@ -31,7 +31,6 @@ class GetWs extends DSL {
         // @todo check the elements from WS first
         // @todo : initialize the variables
         $code = array();
-        $arguments = array();
         foreach ($values as $element => $variable) {
             $code[] = "$variable = j[\"$element\"];";
         }

@@ -28,7 +28,6 @@ use Exakat\Analyzer\Analyzer;
 use Exakat\Query\DSL\DSLFactory;
 use Exakat\Query\DSL\Command;
 use Exakat\Project;
-use Exakat\Phpexec;
 
 class Query2 extends Query {
     private const SACK = '.withSack(["m":[], "processed":0, "total":0])';
@@ -144,7 +143,7 @@ class Query2 extends Query {
                 default :
                     if ($this->commands[0]->gremlin === self::STOP_QUERY) {
                         $this->_as('first');
-                    // Keep going
+                        // Keep going
                     } else {
                         assert(false, 'No gremlin optimization : gremlin query "' . $name . '" in analyzer should have use g.V. ! ' . $this->commands[0]->gremlin);
                     }
@@ -249,7 +248,7 @@ class Query2 extends Query {
         die(__METHOD__);
     }
 
-    private function prepareSack(array $commands) : string {
+    private function prepareSack(array $commands): string {
         foreach ($commands as $command) {
             if ($command->getSack() === Command::SACK_NONE) {
                 continue;

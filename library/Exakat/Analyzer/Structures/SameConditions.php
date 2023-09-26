@@ -30,12 +30,14 @@ class SameConditions extends Analyzer {
         // if ($a || $b) {} elseif ($a1) {} else {}
         $this->atomIs('Ifthen')
              ->outIs('CONDITION')
+             /*
              ->optional(
                  $this->side()
                       ->atomIs('Logical')
                       ->codeIs(array('||', 'or'), self::TRANSLATE, self::CASE_INSENSITIVE)
                       ->goToAllRight()
              )
+             */
              ->followParAs(FollowParAs::FOLLOW_NONE)
              ->savePropertyAs('fullcode', 'condition')
              ->as('results')

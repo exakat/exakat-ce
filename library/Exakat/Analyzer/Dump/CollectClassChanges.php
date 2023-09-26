@@ -80,16 +80,14 @@ SQL;
               ->notSamePropertyAs('fullcode', 'default1', self::CASE_SENSITIVE) // test
               ->savePropertyAs('fullcode', 'default2') // collect
 
-              ->raw(<<<'GREMLIN'
-map{["type": 'Constant Value',
-      "name":name,
-      "parent":class2,
-      "parentValue":name + " = " + default2,
-      "class":class1,
-      "classValue":name + " = " + default1];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Constant Value"',
+                  'name' => 'name',
+                  'parent' => 'class2',
+                  'parentValue' => "name + ' = ' + default2",
+                  'class' => 'class1',
+                  'classValue' => "name + ' = ' + default1",
+              ));
         $this->prepareQuery();
 
         // Class constants with different visibility
@@ -116,27 +114,27 @@ GREMLIN
               ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
 
-              ->raw(<<<'GREMLIN'
-map{["type": "Constant Visibility",
-      "name":name,
-      "parent":class2,
-      "parentValue":visibility2 + ' ' + name,
-      "class":class1,
-      "classValue":visibility1 + ' ' + name];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Constant Visibility"',
+                  'name' => 'name',
+                  'parent' => 'class2',
+                  'parentValue' => "visibility2 + ' ' + name",
+                  'class' => 'class1',
+                  'classValue' => "visibility1 + ' ' + name",
+              ));
+
         $this->prepareQuery();
 
         // Comparing Methods : return type, visibility, argument's type, default, name
 
         // Methods with different signatures : argument's type, default, name
         // Upgrade this with separate queries for each element.
+
         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
               ->inIs('NAME')
-              ->raw('sideEffect{ signature1 = []; it.get().vertices(OUT, "ARGUMENT").sort{it.value("rank")}.each{ signature1.add(it.value("fullcode"));} }')
+              ->collectArguments('signature1')
 
               ->inIs('METHOD')
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
@@ -148,22 +146,21 @@ GREMLIN
               ->outIs('NAME')
               ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
               ->inIs('NAME')
-              ->raw('sideEffect{ signature2 = []; it.get().vertices(OUT, "ARGUMENT").sort{it.value("rank")}.each{ signature1.add(it.value("fullcode"));} }.filter{ signature2 != signature1; }')
+              ->collectArguments('signature2')
+              ->notSameVariableAs('signature1', 'signature2')
 
               ->inIs('METHOD')
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'class2') // another class
 
-              ->raw(<<<'GREMLIN'
-map{["type": "Method Signature",
-      "name":name,
-      "parent":class2,
-      "parentValue":"function " + name + "(" + signature2.join(", ") + ")",
-      "class":class1,
-      "classValue":"function " + name + "(" + signature1.join(", ") + ")"];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Method Signature"',
+                  'name' => 'name',
+                  'parent' => 'class2',
+                  'parentValue' => "\"function \" + name + '(' + signature2.join(', ') + ')'",
+                  'class' => 'class1',
+                  'classValue' => "\"function \" + name + '(' + signature1.join(', ') + ')'",
+              ));
         $this->prepareQuery();
 
         // Methods with different visibility
@@ -175,47 +172,40 @@ GREMLIN
               ->back('first')
               ->inIs('OVERWRITE')
               ->savePropertyAs('visibility', 'visibility2')
-              ->raw('filter{visibility1  != visibility2;}')
+              ->notSameVariableAs('visibility1', 'visibility2')
               ->inIs('METHOD')
               ->savePropertyAs('fullcode', 'name2')
-              ->raw(<<<'GREMLIN'
-map{ ["type": "Method Visibility",
-      "name":fnp.tokenize('::')[1],
-      "parent":name1,
-      "parentValue":visibility2 + ' ' + fnp.tokenize('::')[1],
-      "class":name2,
-      "classValue":visibility1 + ' ' + fnp.tokenize('::')[1]];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Method Visibility"',
+                  'name' => 'fnp.tokenize(\'::\')[1]',
+                  'parent' => 'name1',
+                  'parentValue' => "visibility2 + ' ' + fnp.tokenize('::')[1]",
+                  'class' => 'name2',
+                  'classValue' => "visibility1 + ' ' + fnp.tokenize('::')[1]",
+              ));
         $this->prepareQuery();
 
-        // Methods with different visibility
+        // Methods with different return types
         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('fullnspath', 'fnp')
-              ->outIs('RETURNTYPE')
-              ->savePropertyAs('fullnspath', 'fnp1')
-              ->inIs('RETURNTYPE')
+              ->savePropertyAs('fullnspath', 'method1')
+              ->collectTypehints('returntype1')
               ->inIs(array('METHOD', 'MAGICMETHOD'))
               ->savePropertyAs('fullcode', 'name1')
               ->back('first')
               ->inIs('OVERWRITE')
-              ->outIs('RETURNTYPE')
-              ->savePropertyAs('fullnspath', 'fnp2')
-              ->inIs('RETURNTYPE')
-              ->raw('filter{fnp1  != fnp2;}')
+              ->savePropertyAs('fullnspath', 'method2')
+              ->collectTypehints('returntype2')
+              ->notSameVariableAs('returntype1', 'returntype2')
               ->inIs('METHOD')
               ->savePropertyAs('fullcode', 'name2')
-              ->raw(<<<'GREMLIN'
-map{ ["type": "Method Returntype",
-      "name":fnp.tokenize('::')[1],
-      "parent":name1,
-      "parentValue":fnp1 + ' ' + fnp.tokenize('::')[1],
-      "class":name2,
-      "classValue":fnp2 + ' ' + fnp.tokenize('::')[1]];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Method Returntype"',
+                  'name' => 'method1.tokenize(\'::\')[1]',
+                  'parent' => 'name1',
+                  'parentValue' => "method2.tokenize('::')[1] + ' : ' + returntype2",
+                  'class' => 'name2',
+                  'classValue' => "method1.tokenize('::')[1] + ' : ' + returntype1",
+              ));
         $this->prepareQuery();
 
         // Comparing Properties
@@ -223,7 +213,9 @@ GREMLIN
 
         // Property with different default value
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
+              ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
+              ->inIs('NAME')
               ->outIs('DEFAULT')
               ->hasNoIn('RIGHT') // find an explicit default
               ->savePropertyAs('fullcode', 'default1')
@@ -245,21 +237,21 @@ GREMLIN
               ->inIs('PPP')
               ->savePropertyAs('fullcode', 'class2')
 
-              ->raw(<<<'GREMLIN'
-map{ ["type": "Member Default",
-      "name":name,
-      "parent":class2,
-      "parentValue":name + ' = ' + default2,
-      "class":class1,
-      "classValue":name + ' = ' + default1];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Method Default"',
+                  'name' => 'name',
+                  'parent' => 'class2',
+                  'parentValue' => "name + ' = ' + default2",
+                  'class' => 'class1',
+                  'classValue' => "name + ' = ' + default1",
+              ));
         $this->prepareQuery();
 
         // Property with different visibility
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
+              ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
+              ->inIs('NAME')
               ->inIs('PPP')
               ->savePropertyAs('visibility', 'visibility1')
               ->inIs('PPP')
@@ -274,49 +266,44 @@ GREMLIN
               ->outIs('PPP')
               ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
 
-              ->raw(<<<'GREMLIN'
-map{ ["type": "Member Visibility",
-      "name":name,
-      "parent":class2,
-      "parentValue":visibility2 + ' ' + name,
-      "class":class1,
-      "classValue":visibility1 + ' ' + name];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Method Visibility"',
+                  'name' => 'name',
+                  'parent' => 'class2',
+                  'parentValue' => 'visibility2 + name',
+                  'class' => 'class1',
+                  'classValue' => 'visibility1 + name',
+              ));
         $this->prepareQuery();
 
         // Property with different typehint
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
+              ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
+              ->inIs('NAME')
               ->inIs('PPP')
-              ->outIs('TYPEHINT')
-              ->savePropertyAs('fullnspath', 'fnp1')
-              ->inIs('TYPEHINT')
+              ->collectTypehints('types1')
               ->inIs('PPP')
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'class1')
-              ->goToAllParents(self::EXCLUDE_SELF)
+
+              ->back('first')
+              ->inIs('OVERWRITE')
+
+              ->inIs('PPP')
+              ->collectTypehints('types2')
+              ->notSameVariableAs('types1', 'types2')
+              ->inIs('PPP')
               ->savePropertyAs('fullcode', 'class2')
 
-              ->outIs('PPP')
-              ->outIs('TYPEHINT')
-              ->savePropertyAs('fullnspath', 'fnp2')
-              ->inIs('TYPEHINT')
-              ->raw('filter{fnp1  != fnp2;}')
-              ->outIs('PPP')
-              ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
-
-              ->raw(<<<'GREMLIN'
-map{ ["type": "Member Typehint",
-      "name":name,
-      "parent":class2,
-      "parentValue":fnp2 + ' ' + name,
-      "class":class1,
-      "classValue":fnp1 + ' ' + name];
-}
-GREMLIN
-              );
+              ->selectMap(array(
+                  'type' => '"Method Type"',
+                  'name' => 'name',
+                  'parent' => 'class2',
+                  'parentValue' => "types2.join('|') + ' ' + name",
+                  'class' => 'class1',
+                  'classValue' => "types1.join('|') + ' ' + name",
+              ));
         $this->prepareQuery();
     }
 }

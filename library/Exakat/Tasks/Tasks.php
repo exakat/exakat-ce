@@ -54,8 +54,6 @@ abstract class Tasks {
     public const  NONE    = 1;
     public const  ANYTIME = 2;
     public const  DUMP    = 3;
-    public const  QUEUE   = 4;
-    public const  SERVER  = 5;
 
     public const IS_SUBTASK     = true;
     public const IS_NOT_SUBTASK = false;
@@ -74,11 +72,7 @@ abstract class Tasks {
 
         if (static::CONCURENCE !== self::ANYTIME && $subTask === self::IS_NOT_SUBTASK) {
             if (self::$semaphore === self::NO_SEMAPHORE) {
-                if (static::CONCURENCE === self::QUEUE) {
-                    self::$semaphorePort = $this->config->concurencyCheck;
-                } elseif (static::CONCURENCE === self::SERVER) {
-                    self::$semaphorePort = $this->config->concurencyCheck + 1;
-                } elseif (static::CONCURENCE === self::DUMP) {
+				if (static::CONCURENCE === self::DUMP) {
                     self::$semaphorePort = $this->config->concurencyCheck + 2;
                 } else {
                     self::$semaphorePort = $this->config->concurencyCheck + 3;
@@ -96,13 +90,8 @@ abstract class Tasks {
             $this->logname = strtolower(substr(static::class, strrpos(static::class, '\\') + 1));
         }
 
-        if ($this->logname !== self::LOG_NONE) {
-            $this->log = new Log($this->logname,
-                "{$this->config->projects_root}/projects/{$this->config->project}");
-        }
-
         if ($this->config->inside_code === Config::INSIDE_CODE ||
-            $this->config->project !== 'default') {
+            $this->config->project->isDefault()) {
             if (!file_exists($this->config->tmp_dir) &&
                      file_exists(dirname($this->config->tmp_dir)) ) {
                 mkdir($this->config->tmp_dir, 0700);
@@ -111,7 +100,7 @@ abstract class Tasks {
             mkdir("{$this->config->projects_root}/projects/", 0700);
         }
 
-        if ($this->config->project !== 'default') {
+        if ($this->config->project->isDefault()) {
             $this->datastore = exakat('datastore');
         }
 
@@ -129,11 +118,11 @@ abstract class Tasks {
     }
 
     protected function checkTokenLimit(): void {
-        $nb_tokens = $this->datastore->getHash('tokens');
+        $nb_tokens = (int) $this->datastore->getHash('tokens');
 
         if ($nb_tokens > $this->config->token_limit) {
             $this->datastore->addRow('hash', array('token error' => "Project too large ($nb_tokens / {$this->config->token_limit})"));
-            throw new ProjectTooLarge($nb_tokens, $this->config->token_limit);
+            throw new ProjectTooLarge($nb_tokens, (int) $this->config->token_limit);
         }
     }
 
@@ -158,7 +147,7 @@ abstract class Tasks {
     }
 
     protected function removeSnitch(): void {
-        if ($this->path !== null) {
+        if (!empty($this->path)) {
             unlink($this->path);
         }
     }

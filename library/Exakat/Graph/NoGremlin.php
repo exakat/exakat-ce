@@ -25,6 +25,8 @@ namespace Exakat\Graph;
 use Exakat\Graph\Helpers\GraphResults;
 
 class NoGremlin extends Graph {
+    public const CONFIG_PREFIX     = 'tinkergraphv3';
+
     public function query(string $query, array $params = array(),array $load = array()): GraphResults {
         return new GraphResults();
     }
@@ -34,6 +36,9 @@ class NoGremlin extends Graph {
     }
 
     public function init(): void {
+        $this->host   = 'no gremlin used';
+        $this->port   = 'no gremlin used';
+        $this->folder = 'no gremlin used';
     }
 
     public function start(): void {

@@ -32,16 +32,26 @@ abstract class Graph {
     public const UNCHECKED   = 0;
     public const UNAVAILABLE = 2;
 
-    protected int $status           = self::UNCHECKED;
+    public const DRIVERS = array('tinkergraph' => 'TinkergraphV3',
+                                 'gsneo4j'	   => 'GSNeo4jV3',
+                                 'nogremlin'   => 'NoGremlin',
+                                );
+
+    protected int    $status           = self::UNCHECKED;
+    protected string $path             = '';
+
+    protected string $host             = '';
+    protected string $port             = '';
+    protected string $folder           = '';
 
     public const GRAPHDB = array('nogremlin',
                                  'gsneo4jV3',
                                  'tinkergraphv3',
-                                 'tinkergraph',
                                  );
 
     public function __construct(Config $config) {
         $this->config = $config;
+        $this->path = $this->config->projects_root . '/' . $this->config->{static::CONFIG_PREFIX . '_folder'};
     }
 
     abstract public function query(string $query, array $params = array(),array $load = array()): GraphResults;
@@ -88,11 +98,6 @@ abstract class Graph {
     }
 
     public static function getConnexion(Config $config, string $gremlin): self {
-        if ($gremlin === null) {
-            $config = exakat('config');
-            $gremlin = $config->gremlin;
-        }
-
         $graphDBClass = "\\Exakat\\Graph\\$gremlin";
         assert(class_exists($graphDBClass), "No such class as $gremlin\n");
 
@@ -100,7 +105,25 @@ abstract class Graph {
     }
 
     public function setConfigFile(): void {
-        // This is intentionnaly empty
+        if (!file_exists($this->path)) {
+            return;
+        }
+
+        if (!file_exists($this->path . '/db')) {
+            mkdir($this->path . '/db', 0755);
+        }
+    }
+
+    public function getHost(): string {
+        return $this->host;
+    }
+
+    public function getPort(): string {
+        return $this->port;
+    }
+
+    public function getFolder(): string {
+        return $this->folder;
     }
 }
 

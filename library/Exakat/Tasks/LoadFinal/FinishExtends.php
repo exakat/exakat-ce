@@ -25,21 +25,24 @@ namespace Exakat\Tasks\LoadFinal;
 use Exakat\Analyzer\Analyzer;
 
 class FinishExtends extends LoadFinal {
+    private $times = 10;
+
     public function run(): void {
         $query = $this->newQuery('Extends to all parents');
         $query->atomIs(array('Class', 'Classanonymous', 'Interface'), Analyzer::WITHOUT_CONSTANTS)
             // Reach first parent
               ->outIs('EXTENDS')
               ->inIs('DEFINITION')
-              ->raw(<<<'GREMLIN'
+              ->raw(<<<GREMLIN
 as("gotoallparents").emit( )
 .repeat( __.out("EXTENDS")
            .in("DEFINITION")
            .hasLabel("Class", "Classanonymous", "Interface", "Trait")
-           .where(neq("first"))
-           .simplePath().from("gotoallparents").by('fullnspath')
+// This seems to generate random results
+//           .simplePath().from("gotoallparents").by('fullnspath')
+           .simplePath()
         )
-        .times(5)
+        .times($this->times)
         .hasLabel("Class", "Classanonymous", "Interface", "Trait")
 GREMLIN
               )
@@ -49,6 +52,7 @@ GREMLIN
                         ->inIs('EXTENDS')
                         ->raw('where(eq("first"))')
               )
+              ->hasNoLinkYet('EXTENDS', 'first')
               ->addEFrom('EXTENDS', 'first', array('extra' => 'true'))
               ->returnCount();
         $query->prepareRawQuery();
@@ -60,15 +64,16 @@ GREMLIN
             // Reach first parent parents, which may be classes
               ->outIs(array('IMPLEMENTS', 'EXTENDS'))
               ->inIs('DEFINITION')
-              ->raw(<<<'GREMLIN'
+              ->raw(<<<GREMLIN
 as("gotoallparents").emit( )
 .repeat( __.out("EXTENDS", "IMPLEMENTS")
            .in("DEFINITION")
            .hasLabel("Class", "Classanonymous", "Interface")
-           .where(neq("first"))
-           .simplePath().from("gotoallparents")
+// These steps makes the query go random
+//           .simplePath().from("gotoallparents").by('fullnspath')
+           .simplePath()
         )
-        .times(5)
+        .times($this->times)
         .hasLabel("Class", "Classanonymous", "Interface")
         .where(neq("first"))
 GREMLIN
@@ -79,6 +84,7 @@ GREMLIN
                         ->inIs(array('IMPLEMENTS', 'EXTENDS'))
                         ->raw('where(eq("first"))')
               )
+              ->hasNoLinkYet('IMPLEMENTS', 'first')
               ->addEFrom('IMPLEMENTS', 'first', array('extra' => 'true'))
               ->returnCount();
         $query->prepareRawQuery();
@@ -88,27 +94,30 @@ GREMLIN
         $query = $this->newQuery('Use trait to all parents');
         $query->atomIs(array('Class', 'Classanonymous', 'Trait'), Analyzer::WITHOUT_CONSTANTS)
             // find all class first
-              ->raw(<<<'GREMLIN'
+              ->raw(<<<GREMLIN
 optional(
     __.as("gotoallparentsclass").emit( )
 .repeat( __.out("EXTENDS")
            .in("DEFINITION")
            .hasLabel("Class")
-           .simplePath().from("gotoallparentsclass")
+// These steps makes the query go random
+//           .simplePath().from("gotoallparentsclass").by('fullnspath')
+			.simplePath()
         )
-        .times(5)
+        .times($this->times)
         .hasLabel("Class", "Trait")
     )
 GREMLIN
               )
-              ->raw(<<<'GREMLIN'
+              ->raw(<<<GREMLIN
 as("gotoallparents").emit( )
 .repeat( __.out("USE").out("USE")
            .in("DEFINITION")
            .hasLabel("Trait")
-           .simplePath().from("gotoallparents")
+//           .simplePath().from("gotoallparents").by("fullnspath")
+           .simplePath()
         )
-        .times(5)
+        .times($this->times)
         .hasLabel("Trait", "Class")
 GREMLIN
               )
@@ -118,6 +127,7 @@ GREMLIN
                         ->inIs('USE')
                         ->raw('where(eq("first"))')
               )
+              ->hasNoLinkYet('EXTENDS', 'first')
               ->addEFrom('USE', 'first', array('extra' => 'true'))
               ->returnCount();
         $query->prepareRawQuery();

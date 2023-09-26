@@ -35,11 +35,11 @@ class Fullnspaths {
                             'class'          => array(),
                             );
 
-    public function set(string $type, string $name, Atom $path): void {
+    public function set(string $type, string $name, AtomInterface $path): void {
         $this->uses[$type][$name] = $path;
     }
 
-    public function get(string $type, string $name): ?Atom {
+    public function get(string $type, string $name): ?AtomInterface {
         return $this->uses[$type][$name] ?? null;
     }
 }

@@ -86,9 +86,7 @@ class MultipleConstantDefinition extends Analyzer {
 
     private function CsCisCollisions(array $csDefinitions, array $cisDefinitions): array {
         return array_merge( array_intersect($csDefinitions, $cisDefinitions),
-            array_intersect($csDefinitions, array_map(function (string $x): string {
-                return strtoupper($x);
-            }, $cisDefinitions) ) );
+            array_intersect($csDefinitions, array_map('strtoupper', $cisDefinitions) ) );
     }
 
     private function applyToCisDefine(array $array): void {

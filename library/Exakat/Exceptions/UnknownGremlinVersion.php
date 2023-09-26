@@ -23,7 +23,9 @@
 
 namespace Exakat\Exceptions;
 
-class UnknownGremlinVersion extends \RuntimeException {
+use RuntimeException;
+
+class UnknownGremlinVersion extends RuntimeException {
     public function __construct(string $version) {
         parent::__construct( "Unknown Gremlin version installed : '$version'\n");
     }

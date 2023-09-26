@@ -28,6 +28,7 @@ class ShouldMakeTernary extends Analyzer {
     public function analyze(): void {
         // if ($a) $b = 2; else $b = 3;
         $this->atomIs('Ifthen')
+             ->tokenIsNot('T_ELSEIF')
              ->outIs('THEN')
              ->is('count', 1)
              ->outWithRank('EXPRESSION', 0)

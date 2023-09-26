@@ -45,7 +45,7 @@ class IgnoreDirs extends Fileset {
         }
     }
 
-    public function setFiles(array $files) {
+    public function setFiles(array $files): void {
         foreach ($files as $file) {
             $found = false;
             foreach ($this->ignoreDirs as $ignore) {

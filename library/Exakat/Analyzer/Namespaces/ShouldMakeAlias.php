@@ -26,7 +26,8 @@ use Exakat\Analyzer\Analyzer;
 
 class ShouldMakeAlias extends Analyzer {
     public function analyze(): void {
-        // No namespace ?
+        // use A\B\C;
+        // new A\B\C;
         $this->atomIs(array('Nsname', 'Newcall'))
              ->tokenIs(array('T_NS_SEPARATOR', 'T_NAME_RELATIVE', 'T_NAME_FULLY_QUALIFIED', 'T_NAME_QUALIFIED'))
              ->hasNoIn(array('USE', 'NAME'))

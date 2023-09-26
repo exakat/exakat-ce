@@ -33,6 +33,7 @@ class InvalidRegex extends Analyzer {
     public function analyze(): void {
         $functionList = makeFullNsPath(UnknownPregOption::$functions);
 
+        // preg_match('/a}/')
         $this->atomFunctionIs($functionList)
              ->outWithRank('ARGUMENT', 0)
              ->atomIs('String', self::WITH_CONSTANTS)
@@ -52,6 +53,7 @@ GREMLIN
              );
         $regexSimple = $this->rawQuery();
 
+        // preg_match('/a'. C . '}/')
         $this->atomFunctionIs($functionList)
              ->outWithRank('ARGUMENT', 0)
              ->atomIs(array('String', 'Concatenation'), self::WITH_CONSTANTS)

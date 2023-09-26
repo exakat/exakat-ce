@@ -90,8 +90,7 @@ class Nullval extends Plugin {
                 break;
 
             default :
-
-            }
+        }
     }
 }
 

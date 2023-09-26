@@ -48,12 +48,14 @@ class Files extends Tasks {
             // OK
         } elseif (!empty($this->config->filename)) {
             // OK
-        } elseif ($this->config->project === 'default') {
-            throw new ProjectNeeded();
         } elseif (!file_exists($this->config->project_dir)) {
-            throw new NoSuchProject($this->config->project);
+            throw new NoSuchProject((string) $this->config->project);
         } elseif (!file_exists($this->config->code_dir)) {
-            throw new NoCodeInProject($this->config->project);
+            throw new NoCodeInProject((string) $this->config->project);
+        }
+
+        if (!file_exists($this->config->tmp_dir)) {
+            mkdir($this->config->tmp_dir, 0755);
         }
 
         $this->checkComposer($this->config->code_dir);
@@ -170,7 +172,6 @@ class Files extends Tasks {
                 break 1;
             }
         }
-        // TODO : log it when
 
         foreach ($files as $file) {
             include $file;

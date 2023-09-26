@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2019 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,26 +26,18 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class ScalarTypehintUsage extends Analyzer {
-    protected $phpVersion = '7.0+';
+    protected string $phpVersion = '7.0+';
 
     public function analyze(): void {
         $scalars = $this->loadIni('php_scalar_types.ini', 'types');
         $scalars = array_values(array_diff($scalars, array('\array', '\callable', )));
 
-        // in Arguments
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
+        // in Arguments and return
+        $this->atomIs(self::TYPEHINTABLE)
              ->as('results')
-             ->outIs('TYPEHINT')
+             ->outIs(self::TYPE_LINKS)
              ->fullnspathIs($scalars)
              ->back('results');
-        $this->prepareQuery();
-
-        // in Return
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('RETURNTYPE')
-             ->fullnspathIs($scalars)
-             ->back('first');
         $this->prepareQuery();
     }
 }

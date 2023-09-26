@@ -102,17 +102,18 @@ __.sideEffect{ typehints = []; }
                 break;
 
             case "\\\\false":
-                result = !($types in ["Boolean"]) || (fqn2 == "\\\\true"); 
+                result = !($types in ["Boolean"]) || (binding.hasVariable('fqn2') && fqn2 == "\\\\true"); 
                 break;
     
             case "\\\\void":
             case "\\\\resource":
-                false;
+                result = false;
+                break;
 
             // This is actually the case for all others types, so classes and interfaces
             // we may also end up with any new PHP native type there. 
             default:   
-                result = !($types in ["New"]) || (fqn != typehint)
+                result = !($types in ["New"]) || (fqn != typehint);
         }
         
         if (typehinttype == "one") {

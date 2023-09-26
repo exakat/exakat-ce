@@ -23,17 +23,8 @@
 namespace Exakat\Tasks\LoadFinal;
 
 use Exakat\Analyzer\Analyzer;
-use Exakat\Data\Methods;
 
 class FinishIsModified extends LoadFinal {
-    protected Methods $methods;
-
-    public function __construct() {
-        parent::__construct();
-
-        $this->methods = exakat('methods');
-    }
-
     public function run(): void {
         $variables = array('Variable',
                            'Variableobject',

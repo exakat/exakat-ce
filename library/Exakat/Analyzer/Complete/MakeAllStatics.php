@@ -34,6 +34,7 @@ class MakeAllStatics extends Complete {
              ->inIs('DEFINITION')
              ->atomIs('Class')
              ->goToAllChildren(self::EXCLUDE_SELF)
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
 
@@ -48,18 +49,21 @@ class MakeAllStatics extends Complete {
              ->inIs('USE')
 
              ->atomIs(self::CLASSES_ALL)
+             ->hasNoLinkYet('DEFINITION', 'first')
              ->addEFrom('DEFINITION', 'first');
         $this->prepareQuery();
 
         // static::X -> all children classes
         $this->atomIs('New')
              ->outIs('NEW')
+             ->outIsIE('NAME')
              ->tokenIs('T_STATIC')
              ->as('results')
              ->goToClass()
 
              ->goToAllChildren(self::INCLUDE_SELF) // static are not link when in a new
-             ->addEFrom('DEFINITION', 'results');
+             ->hasNoLinkYet('DEFINITION', 'results')
+             ->addETo('DEFINITION', 'results');
         $this->prepareQuery();
 
         // static::X -> all children classes via a trait
@@ -75,6 +79,7 @@ class MakeAllStatics extends Complete {
 
              ->atomIs(self::CLASSES_ALL)
 
+             ->hasNoLinkYet('DEFINITION', 'results')
              ->addEFrom('DEFINITION', 'results');
         $this->prepareQuery();
     }

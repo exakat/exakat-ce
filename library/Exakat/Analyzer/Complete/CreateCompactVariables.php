@@ -42,7 +42,11 @@ class CreateCompactVariables extends Complete {
               ->outIs(array('DEFINITION', 'ARGUMENT', 'USE'))
               ->atomIs(array('Variabledefinition', 'Globaldefinition', 'Staticdefinition', 'Parameter'), self::WITHOUT_CONSTANTS)
               ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
-              ->addETo('DEFINITION', 'varInString');
+              ->as('var')
+              ->back('varInString')
+
+              ->hasNoLinkYet('DEFINITION', 'var')
+              ->addEFrom('DEFINITION', 'var');
         $this->prepareQuery();
     }
 }

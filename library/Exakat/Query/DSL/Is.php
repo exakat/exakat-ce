@@ -38,6 +38,8 @@ class Is extends DSL {
                 return new Command('filter{ it.get().vertices(IN, "ARGUMENT").next().value("count") == it.get().value("rank") + 1}');
             } elseif ($value === '2last') {
                 return new Command('filter{ it.get().vertices(IN, "ARGUMENT").next().value("count") == it.get().value("rank") + 2}');
+            } elseif (is_array($value)) {
+                return new Command('has("' . $property . '", within(***))', array(array_values($value)));
             } else {
                 return new Command('has("rank", ' . (int) $value . ')');
             }
@@ -54,7 +56,7 @@ class Is extends DSL {
         } elseif (is_string($value)) {
             return new Command('has("' . $property . '", ***)', array($value));
         } elseif (is_array($value)) {
-            return new Command('has("' . $property . '", within(***))', array($value));
+            return new Command('has("' . $property . '", within(***))', array(array_values($value)));
         } else {
             assert(false, 'Not understood type for is : ' . gettype($value));
         }

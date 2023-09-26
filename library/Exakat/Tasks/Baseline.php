@@ -26,6 +26,7 @@ use Exakat\Exceptions\NoSuchProject;
 use Exakat\Tasks\Helpers\BaselineStash;
 use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Exceptions\InvalidProjectName;
+use DateTimeImmutable;
 
 class Baseline extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -57,7 +58,7 @@ class Baseline extends Tasks {
 
     private function list(): void {
         if (!file_exists($this->config->project_dir)) {
-            throw new NoSuchProject($this->config->project);
+            throw new NoSuchProject((string) $this->config->project);
         }
 
         $list = glob($this->config->project_dir . '/baseline/*.sqlite');
@@ -73,7 +74,7 @@ class Baseline extends Tasks {
                 $id = ' ';
                 $name = basename($l, '.sqlite');
             }
-            $date = date('Y-m-d', filemtime($l));
+            $date = (new DateTimeImmutable(filemtime($l)))->format('Y-m-d');
             printf(self::FORMAT, $id, $name, $date);
         }
 

@@ -42,9 +42,16 @@ class RegexIs extends DSL {
             return new Command('has("code", within(***) )', array($values));
         }
 
-        return new Command(<<<GREMLIN
+        if (str_contains($regex, ' + ')) {
+            return new Command(<<<GREMLIN
 has("$property")
 .filter{ (it.get().value("$property") =~ "$regex").asBoolean(); }
+GREMLIN
+            );
+        } else {
+        }
+        return new Command(<<<GREMLIN
+has("$property", TextP.regex("$regex"))
 GREMLIN
         );
     }

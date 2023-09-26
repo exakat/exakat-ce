@@ -83,12 +83,16 @@ GREMLIN;
         } elseif ($flags === Analyzer::WITH_CONSTANTS) {
             // arrays, members, static members are not supported
             $gremlin = <<<GREMLIN
-union( __.identity(), 
+union( __.identity().
+		// With relay definitions
+		repeat(
+			__.optional(
+				__.hasLabel("Identifier", "Nsname", "Staticconstant").in("DEFINITION").out("VALUE")
+			)
+		).times($MAX_SEARCHING), 
        __.repeat(
             __.timeLimit($TIME_LIMIT).hasLabel("Identifier", "Nsname", "Staticconstant", "Variable" , "Ternary", "Coalesce", "Parenthesis", "Functioncall", "Methodcall", "Staticmethodcall")
-            .union( __.hasLabel("Identifier", "Nsname", "Staticconstant").in("DEFINITION").out("VALUE"),
-            
-                      // local variable
+            .union(   // local variable
                       __.hasLabel("Variable").not(__.in("LEFT").hasLabel("Assignation")).in("DEFINITION").hasLabel('Variabledefinition').has("isConst").optional( __.out("DEFINITION").hasLabel("Staticdefinition")).out("DEFAULT").not(hasLabel("Functioncall", "Methodcall", "Staticmethodcall")),
                       
                       // literal value, passed as an argument (Method, closure, function)
@@ -108,7 +112,7 @@ union( __.identity(),
 					  // \$a = A
                       __.hasLabel("Assignation").out("RIGHT"),
             
-                      __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in('DEFINITION').where( __.out("RETURNTYPE").hasLabel("Void")).out('RETURNED').not(hasLabel("Functioncall", "Methodcall", "Staticmethodcall"))
+                      __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in('DEFINITION').where( __.out("RETURNTYPE").hasLabel("Void")).out('RETURNED').not(hasLabel("Functioncall", "Methodcall", "Staticmethodcall")),
                       )
             ).times($MAX_SEARCHING).emit()
 )

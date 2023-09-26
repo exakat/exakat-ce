@@ -25,6 +25,7 @@ namespace Exakat\Query\DSL;
 
 use Exakat\Query\Query;
 use Exakat\Analyzer\Analyzer;
+use Exakat\Exceptions\QueryException;
 
 class IsNotHash extends DSL {
     public function run(): Command {
@@ -40,7 +41,7 @@ class IsNotHash extends DSL {
                 break;
 
             default:
-                assert(false, 'Wrong number of arguments for ' . __METHOD__);
+                throw new QueryException('Wrong number of arguments for ' . __METHOD__);
         }
 
         if (empty($hash)) {

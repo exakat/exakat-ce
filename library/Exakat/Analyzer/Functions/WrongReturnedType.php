@@ -35,6 +35,7 @@ class WrongReturnedType extends Analyzer {
                      'Complete/SetClassRemoteDefinitionWithParenthesis',
                      'Complete/SetClassRemoteDefinitionWithReturnTypehint',
                      'Complete/SetClassRemoteDefinitionWithTypehint',
+                     'Complete/VariableTypehint',
                     );
     }
 

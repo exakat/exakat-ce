@@ -26,9 +26,13 @@ namespace Exakat\Analyzer\Common;
 use Exakat\Analyzer\Analyzer;
 
 abstract class ClassDefinition extends Analyzer {
-    protected $classes = array();
+    protected array $classes = array();
 
     public function analyze(): void {
+        if (empty($this->classes)) {
+            return;
+        }
+
         $classes = makeFullNsPath($this->classes);
 
         $this->atomIs('Class')

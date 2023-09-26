@@ -80,6 +80,13 @@ class MustReturn extends Analyzer {
              ->back('first')
              ->outIs('RETURNED')
              ->atomIs('Void')
+             ->not(
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->is('count', 1)
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Throw')
+             )
              ->back('first');
         $this->prepareQuery();
 

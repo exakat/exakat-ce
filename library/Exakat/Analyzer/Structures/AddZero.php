@@ -77,6 +77,14 @@ class AddZero extends Analyzer {
              ->samePropertyAs('fullcode', 'varname')
              ->back('results');
         $this->prepareQuery();
+
+        // +$a
+        $this->atomIs('Sign')
+             ->codeIs('+')
+             ->outIs('SIGN')
+             ->atomIs(array('Variable', 'Member', 'Staticproperty', 'Nsname', 'Identifier', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+             ->back('first');
+        $this->prepareQuery();
     }
 }
 

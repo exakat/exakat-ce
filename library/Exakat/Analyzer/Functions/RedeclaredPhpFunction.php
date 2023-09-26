@@ -24,11 +24,20 @@
 namespace Exakat\Analyzer\Functions;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Stubs\Stubs;
 
 class RedeclaredPhpFunction extends Analyzer {
     public function analyze(): void {
-        $functions = array_merge(exakat('phpCore')->getFunctionList(),
-            exakat('phpExtensions')->getFunctionList(),
+        $phpCore = new Stubs($this->config->dir_root . '/data/core/',
+            $this->config->php_core ?? array(),
+        );
+
+        $phpExtensions = new Stubs($this->config->dir_root . '/data/extensions/',
+            $this->config->php_extensions ?? array(),
+        );
+
+        $functions = array_merge($phpCore->getFunctionList(),
+            $phpExtensions->getFunctionList(),
         );
 
         $this->atomIs('Function')

@@ -72,7 +72,6 @@ class CouldBeString extends CouldBeType {
              ->analyzerIsNot('self')
              ->outIs('RETURNED')
              ->followParAs(FollowParAs::FOLLOW_NONE)
-             ->analyzerIsNot('self')
              ->atomIs('Assignation')
              ->codeIs(array('.='))
              ->back('first');

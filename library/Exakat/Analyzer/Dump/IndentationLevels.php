@@ -32,7 +32,7 @@ class IndentationLevels extends AnalyzerHashAnalyzer {
              ->processLevels();
         $results = $this->rawQuery();
 
-        $counts = array_count_values(array_merge(...$results->toArray()) ?? array());
+        $counts = array_count_values(array_merge(...$results->toArray()) ?: array());
         foreach ($counts  as $key => $value) {
             $this->analyzerValues[] = array($this->shortAnalyzer, $key, $value);
         }

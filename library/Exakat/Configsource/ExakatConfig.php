@@ -30,17 +30,17 @@ use Exakat\Exceptions\NoPhpBinary;
 class ExakatConfig extends Config {
     private string $projects_root = '';
 
-    private array $gremlins = array( 'tinkergraphv3' => 'TinkergraphV3',
-                              		 'gsneo4jv3'     => 'GSNeo4jV3',
-                              		 'nogremlin'     => 'NoGremlin',
-                              		 );
+    private array $gremlins = array('tinkergraphv3' => 'TinkergraphV3',
+                                    'gsneo4jv3'     => 'GSNeo4jV3',
+                                    'nogremlin'     => 'NoGremlin',
+                                   );
 
-    private array $loaders = array( 'tinkergraphv3' => 'SplitGraphsonId',
-                         		     'gsneo4jv3'     => 'SplitGraphsonId',
-                         		     'nogremlin'     => 'None',
-                         		     );
+    private array $loaders = array('tinkergraphv3' => 'SplitGraphsonId',
+                                   'gsneo4jv3'     => 'SplitGraphsonId',
+                                   'nogremlin'     => 'None',
+                                   );
 
-    // todo : list the authorized values here.
+    // @todo : list the authorized values here.
 
     public function __construct(string $projects_root) {
         $this->projects_root = $projects_root;
@@ -102,7 +102,6 @@ class ExakatConfig extends Config {
                 if ($this->config[$folder][0] !== '/') {
                     $this->config[$folder] = "{$this->projects_root}/{$this->config[$folder]}";
                 }
-                $this->config[$folder] = realpath($this->config[$folder]);
             }
         }
 
@@ -188,14 +187,12 @@ class ExakatConfig extends Config {
         return str_replace($currentDir, '.', $configFile);
     }
 
-    public function __get(string $name) : mixed {
+    public function __get(string $name): mixed {
         if (isset($this->config[$name])) {
             return $this->config[$name];
         } else {
             return null;
         }
-
-        return $return;
     }
 }
 

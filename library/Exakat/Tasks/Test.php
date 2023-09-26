@@ -32,9 +32,9 @@ class Test extends Tasks {
 
     public function run(): void {
         // Check for requested file
-        if (!empty($this->config->filename) && !file_exists($this->config->filename[0])) {
+        if (!empty($this->config->filename) && !file_exists(realpath($this->config->filename[0]))) {
             throw new NoSuchFile($this->config->filename[0]);
-        } elseif (!empty($this->config->dirname) && !file_exists($this->config->dirname)) {
+        } elseif (!empty($this->config->dirname) && !file_exists(realpath($this->config->dirname))) {
             throw new NoSuchDir($this->config->filename);
         }
 
@@ -76,12 +76,14 @@ class Test extends Tasks {
                         3 => 'test',
                         4 => '--load-dump',
                         5 => '-u',
+                        6 => '-T',
+                        7 => 'None',
                         );
         $configThema = new Config($args);
 
-        $analyze = new Dump(self::IS_SUBTASK);
-        $analyze->setConfig($configThema);
-        $analyze->run();
+        $dump = new Dump(self::IS_SUBTASK);
+        $dump->setConfig($configThema);
+        $dump->run();
 
         $results = new Results(self::IS_SUBTASK);
         $results->run();

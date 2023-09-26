@@ -22,7 +22,6 @@
 
 namespace Exakat\Reports\Helpers;
 
-use Exakat\Exakat;
 
 class Mermaid {
     private $links   = array();
@@ -47,7 +46,7 @@ class Mermaid {
         $this->options[$what][$name] = $value;
     }
 
-    public function __toString() : string {
+    public function __toString(): string {
         $atoms = array();
 
         foreach ($this->nodes as $id => $label) {
@@ -63,9 +62,6 @@ class Mermaid {
             }
         }
         $links = implode(PHP_EOL, $links);
-
-        $date = date('r');
-        $version = Exakat::VERSION;
 
         $options = 'graph [' . $this->toStyle($this->options['graph'] ?? array()) . '];' . PHP_EOL .
                    'node [' . $this->toStyle($this->options['node'] ?? array()) . '];' . PHP_EOL .

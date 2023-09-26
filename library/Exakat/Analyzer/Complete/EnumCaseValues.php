@@ -44,7 +44,8 @@ class EnumCaseValues extends Analyzer {
              ->outIs('OBJECT')
              ->atomIs('Staticconstant')
              ->inIs('DEFINITION')
-             ->outIs('DEFAULT')
+             ->atomIs('Enumcase')
+             ->outIs('VALUE')
              ->addEFrom('DEFINITION', 'value')
              ->back('first');
         $this->prepareQuery();
@@ -62,7 +63,7 @@ class EnumCaseValues extends Analyzer {
              ->outIs('OBJECT')
              ->atomIs('Staticconstant')
              ->inIs('DEFINITION')
-             ->outIs('DEFAULT')
+             ->outIs('VALUE')
              ->addEFrom('DEFINITION', 'value')
              ->back('first');
         $this->prepareQuery();

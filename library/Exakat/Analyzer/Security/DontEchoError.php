@@ -120,6 +120,7 @@ class DontEchoError extends Analyzer {
         // ini_set('display_error', 1)
         $this->atomFunctionIs('\\ini_set')
              ->outWithRank('ARGUMENT', 0)
+             ->atomIs(self::STRINGS_ALL, self::WITH_CONSTANTS)
              ->has('noDelimiter')
              ->noDelimiterIs('display_errors')
              ->back('first')

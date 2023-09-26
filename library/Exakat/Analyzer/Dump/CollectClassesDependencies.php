@@ -22,8 +22,6 @@
 
 namespace Exakat\Analyzer\Dump;
 
-#use Exakat\Analyzer\Analyzer;
-
 class CollectClassesDependencies extends AnalyzerTable {
     protected string $analyzerName = 'classesDependencies';
 
@@ -34,16 +32,15 @@ CREATE TABLE classesDependencies ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                                    including STRING,
                                    including_name STRING,
                                    including_type STRING,
+                                   type STRING,
                                    included STRING,
                                    included_name STRING,
-                                   included_type STRING,
-                                   type STRING
+                                   included_type STRING
                                   )
 SQL;
 
 
     public function analyze(): void {
-
         // Finding extends and implements for classes and interfaces
         $this->atomIs(array('Class', 'Interface'), self::WITHOUT_CONSTANTS)
              ->raw('sideEffect{ calling_type = it.get().label().toLowerCase(); }')
@@ -73,9 +70,9 @@ GREMLIN
              );
         $this->prepareQuery();
 
-        // Finding typehint
+        // Finding type
         $this->atomIs('Parameter', self::WITHOUT_CONSTANTS)
-             ->outIs('TYPEHINT')
+             ->outIsIE('TYPEHINT')
              ->atomIs(self::STATIC_NAMES)
              ->inIs('DEFINITION')
              ->atomIs(array('Class', 'Interface'))
@@ -96,7 +93,7 @@ GREMLIN
 map{ ["calling":calling, 
       "calling_name":calling_name, 
       "calling_type":calling_type, 
-      "type":"typehint", 
+      "type":"type", 
       "called":called, 
       "called_name":called_name, 
       "called_type":called_type, 
@@ -108,7 +105,7 @@ GREMLIN
 
         // returntypes
         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
-             ->outIs('RETURNTYPE')
+             ->outIsIE('RETURNTYPE')
              ->atomIs(self::STATIC_NAMES)
              ->inIs('DEFINITION')
              ->atomIs(array('Class', 'Interface'), self::WITHOUT_CONSTANTS)
@@ -129,7 +126,7 @@ GREMLIN
 map{ ["calling":calling, 
       "calling_name":calling_name, 
       "calling_type":calling_type, 
-      "type":"typehint", 
+      "type":"type", 
       "called":called, 
       "called_name":called_name, 
       "called_type":called_type, 
@@ -138,10 +135,10 @@ GREMLIN
              );
         $this->prepareQuery();
 
-        // typehinted properties
+        // typed properties
         $this->atomIs(array('Class', 'Trait'), self::WITHOUT_CONSTANTS)
              ->outIs('PPP')
-             ->outIs('TYPEHINT')
+             ->outIsIE('TYPEHINT')
              ->atomIs(self::STATIC_NAMES)
              ->inIs('DEFINITION')
              ->atomIs(array('Class', 'Interface'), self::WITHOUT_CONSTANTS)
@@ -160,7 +157,7 @@ GREMLIN
 map{ ["calling":calling, 
       "calling_name":calling_name, 
       "calling_type":calling_type, 
-      "type":"typehint", 
+      "type":"type", 
       "called":called, 
       "called_name":called_name, 
       "called_type":called_type, 
@@ -258,9 +255,67 @@ GREMLIN
              );
         $this->prepareQuery();
 
-        // Skipping normal method/property call : They actually depends on new
-        // Magic methods : todo!
-        // instanceof ?
+        // Attributes
+        $this->atomIs(array('Class'), self::WITHOUT_CONSTANTS)
+             ->raw('sideEffect{ type = "attribute"; }')
+
+             ->savePropertyAs('fullnspath', 'calling')
+             ->raw('sideEffect{ calling_type = it.get().label().toLowerCase(); }')
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'calling_name')
+             ->back('first')
+
+             ->outIs('ATTRIBUTE')
+             ->savePropertyAs('fullnspath', 'called')
+             ->outIs('NAME')
+             ->raw('sideEffect{ called_type = "class"; }')
+             ->savePropertyAs('fullcode', 'called_name')
+
+             ->raw(<<<'GREMLIN'
+map{ ["calling":calling, 
+      "calling_name":calling_name, 
+      "calling_type":calling_type, 
+      "type":type, 
+      "called":called, 
+      "called_name":called_name, 
+      "called_type":called_type, 
+           ]; }
+GREMLIN
+             );
+        $this->prepareQuery();
+
+        // Instanceof
+        // catch
+        $this->atomIs(array('Instanceof', 'Catch'))
+             ->raw('sideEffect{ type = it.get().label().toLowerCase(); }')
+
+             ->goToInstruction(self::CIT)
+             ->savePropertyAs('fullnspath', 'calling')
+             ->raw('sideEffect{ calling_type = it.get().label().toLowerCase(); }')
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'calling_name')
+             ->back('first')
+
+             ->outIs('CLASS')
+             ->inIs('DEFINITION')
+             ->atomIs(array('Class', 'Interface'), self::WITHOUT_CONSTANTS)
+             ->savePropertyAs('fullnspath', 'called')
+             ->raw('sideEffect{ called_type = it.get().label().toLowerCase(); }')
+             ->outIs('NAME')
+             ->savePropertyAs('fullcode', 'called_name')
+
+             ->raw(<<<'GREMLIN'
+map{ ["calling":calling, 
+      "calling_name":calling_name, 
+      "calling_type":calling_type, 
+      "type":type, 
+      "called":called, 
+      "called_name":called_name, 
+      "called_type":called_type, 
+           ]; }
+GREMLIN
+             );
+        $this->prepareQuery();
     }
 }
 

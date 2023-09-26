@@ -91,18 +91,6 @@ class Methods {
         return $return;
     }
 
-    public function getFunctionsArgsInterval(): array {
-        $query = 'SELECT class, name, args_min, args_max FROM methods WHERE Class = "PHP"';
-        $res = $this->sqlite->query($query);
-        $return = array();
-
-        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
-            $return[] = $row;
-        }
-
-        return $return;
-    }
-
     public function getNewArgsInterval(): array {
         $query = 'SELECT class, args_min, args_max FROM methods WHERE Class != "PHP" AND name = "__construct"';
         $res = $this->sqlite->query($query);
@@ -117,7 +105,7 @@ class Methods {
 
     public function getFunctionsLastArgsNotBoolean(): array {
         $clauses = array();
-        foreach (self::ARGS_COL as $position => $name) {
+        foreach (array_keys(self::ARGS_COL) as $position) {
             $max = $position + 1;
             $clauses[] = "(args_max = $max AND not instr(arg$position, 'bool') AND arg$position != '')";
         }
@@ -138,7 +126,7 @@ WHERE methods.class = "PHP" AND
 
     public function getFunctionsReferenceArgs(): array {
         $clauses = array();
-        foreach (self::ARGS_COL as $position => $name) {
+        foreach (array_keys(self::ARGS_COL) as $position) {
             $clauses[] = "SELECT name AS function, $position AS position FROM args_is_ref WHERE Class = 'PHP' AND arg$position = 'reference'";
         }
 
@@ -297,35 +285,6 @@ SQL;
         return $return;
     }
 
-    public function getFunctionsByArgType(string $typehint = 'int', bool $strict = self::STRICT): array {
-        $return = array_fill(0, 10, array());
-
-        if ($strict === self::LOOSE) {
-            $search = " LIKE '%$typehint%'";
-        } elseif ($strict === self::STRICT) {
-            $search = " = '$typehint'";
-        } else {
-            // Default is strict
-            $search = " = '$typehint'";
-        }
-
-        $clauses = array();
-        foreach (self::ARGS_COL as $position => $name) {
-            $max = $position + 1;
-            $clauses[] = "SELECT name AS function, $position AS position FROM args_type WHERE Class = 'PHP' AND arg$position $search";
-        }
-
-        $query = implode(' UNION ', $clauses);
-
-        $res = $this->sqlite->query($query);
-
-        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
-            array_collect_by($return, (int) $row['position'], '\\' . mb_strtolower($row['function']));
-        }
-
-        return $return;
-    }
-
     public function getBugFixes(): array {
         $return = array();
 
@@ -374,33 +333,6 @@ SQL;
         return $return;
     }
 
-    public function getFunctionsByReturnType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array {
-        $return = array();
-
-        if ($singleTypeOnly === self::STRICT) {
-            $where = ' AND return NOT LIKE "%,%"';
-        } else {
-            $where = '';
-        }
-
-        $query = <<<SQL
-SELECT return, lower(GROUP_CONCAT('\' || name)) AS functions 
-    FROM args_type 
-    WHERE class='PHP'         AND 
-          return LIKE '%$type%' AND
-          return IS NOT NULL $where
-    GROUP BY return
-SQL;
-        $res = $this->sqlite->query($query);
-
-        while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
-            $return[] = explode(',', $row['functions']);
-        }
-
-        $return = array_merge(...$return);
-
-        return $return;
-    }
 
     public function getArgsByType(string $type = 'int', bool $not = self::DIRECT): array {
         $return = array_fill(0, 12, array());
@@ -428,11 +360,10 @@ SQL;
         while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
             $function = $row['function'];
             unset($row['function']);
-            foreach ($row as $arg => $typed) {
-                $arg = $arg[3];
-                if (!empty($typed)) {
-                    $return[$arg][] = $function;
-                }
+            $list = array_filter($row);
+            foreach ($list as $arg => $typed) {
+                $arg = substr($arg, 3);
+                $return[$arg][] = $function;
             }
         }
 

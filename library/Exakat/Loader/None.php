@@ -25,9 +25,10 @@ namespace Exakat\Loader;
 
 use Exakat\Tasks\Helpers\Atom;
 use Sqlite3;
+use Exakat\Tasks\Helpers\AtomInterface;
 
 class None extends Loader {
-    public function __construct(Sqlite3 $sqlite, Atom $id0) {
+    public function __construct(Sqlite3 $sqlite, Atom $id0, bool $withWs = AtomInterface::WITHOUT_WS) {
     }
 
     public function finalize(array $relicat): bool {

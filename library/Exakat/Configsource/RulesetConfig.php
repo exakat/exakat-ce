@@ -42,7 +42,7 @@ class RulesetConfig extends Config {
             return;
         }
 
-        $this->remoteIniFile = false;
+        $this->remoteIniFile = '';
     }
 
     public function loadConfig(Project $project): ?string {

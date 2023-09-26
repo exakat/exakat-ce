@@ -34,14 +34,26 @@ class UndefinedConstants extends Analyzer {
     public function analyze(): void {
         // A::Undefined
         $this->atomIs('Staticconstant')
+            // the name of the class is not known
+             ->not(
+                 $this->side()
+                      ->outIs('CLASS')
+                      ->atomIs(self::CONTAINERS)
+                      ->goToTypehint()
+                      ->atomIs('Void')
+             )
              ->analyzerIsNot('Classes/DefinedConstants')
              ->isNot('isPhp', true)
              ->isNot('isExt', true)
              ->isNot('isStub', true)
 
-             // cases for array $a[1]
+             // skip arrayes like $a[1]::A
              ->outIs('CLASS')
              ->atomIsNot('Array')
+             ->back('first')
+
+             ->outIs('CONSTANT')
+             ->atomIsNot('Block')
              ->back('first');
         $this->prepareQuery();
     }

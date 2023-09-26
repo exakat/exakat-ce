@@ -25,15 +25,14 @@ namespace Exakat\Analyzer\Php;
 use Exakat\Analyzer\Analyzer;
 
 class MissingSubpattern extends Analyzer {
-    private $pregFunctions = array('\\preg_match_all',
-                                    '\\preg_match',
-                                    '\\preg_replace',
-                                    '\\preg_replace_callback',
-                                    '\\preg_relace_callback_array',
-                                    );
+    private array $pregFunctions = array('\\preg_match_all',
+                                         '\\preg_match',
+                                         '\\preg_replace',
+                                         '\\preg_replace_callback',
+                                         '\\preg_relace_callback_array',
+                                         );
 
     public function analyze(): void {
-
         //preg_match('/(a)b?/', 'adc', $r)
         $this->atomFunctionIs($this->pregFunctions)
              ->hasChildWithRank('ARGUMENT', 2) // subpatterns are captured

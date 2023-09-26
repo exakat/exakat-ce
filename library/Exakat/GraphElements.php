@@ -233,7 +233,9 @@ abstract class GraphElements {
                                         'RETURNED',
                                         'OVERWRITE'
                                        );
+
     public static $LINKS_DOWN = array('APPEND',
+	                                  'ATTRIBUTE',
                                       'ARGUMENT',
                                       'AS',
                                       'BLOCK',
@@ -250,7 +252,9 @@ abstract class GraphElements {
                                       'CONSTANT',
                                       'CONTINUE',
                                       'DEFAULT',
+  									  // DEFINITION is excluded
                                       'EXPRESSION',
+                                      'EXTENDS',
                                       'ELSE',
                                       'FILE',
                                       'FINAL',
@@ -291,7 +295,13 @@ abstract class GraphElements {
                                       'YIELD',
                                 );
 
-    public static $ATOMS_VIRTUAL = array('Project', 'File', 'Virtualproperty', 'Virtualglobal', 'Void');
+    public static $ATOMS_VIRTUAL = array('Project', 
+    								     'File', 
+    								     'Virtualmethod', 
+    								     'Virtualproperty', 
+    								     'Virtualglobal', 
+    								     'Void',
+    								     );
     public static $LINKS_VIRTUAL = array('PROJECT', 'FILE', 'RETURNED');
 
     public static $ATOMS_LINKS = array('Addition'                  => array('LEFT', 'RIGHT'),
@@ -416,6 +426,63 @@ abstract class GraphElements {
                                        'Yield'                     => array('YIELD'),
                                        'Yieldfrom'                 => array('YIELD'),
                                 );
+
+	public const PROPERTIES = array(
+										'id',
+										'atom',
+										'code',
+										'lccode',
+										'fullcode',
+										'line',
+										'token',
+										'rank',
+										'rankName',
+										'alternative',
+										'delimiter',
+										'noDelimiter',
+										'count',
+										'fullnspath',
+										'alias',
+										'origin',
+										'encoding',
+										'block',
+										'intval',
+										'strval',
+										'boolean',
+										'enclosing',
+										'bracket',
+										'flexible',
+										'close_tag',
+										'propertyname',
+										'constant',
+										'binaryString',
+										'visibility',
+										'args_max',
+										'args_min',
+										'reference',
+										'heredoc',
+										'variadic',
+										'absolute',
+										'globalvar',
+										'final',
+										'isNull',
+										'abstract',
+										'readonly',
+										'static',
+										'noscream',
+										'trailing',
+										'isRead',
+										'isModified',
+										'isPhp',
+										'isExt',
+										'isStub',
+										'isConst',
+										'use',
+										'typehint',
+										);
+
+    public Whitespa $ws ;
+    public int $eId;
 
     public static function linksAsList(): string {
         return makeList(self::$LINKS);

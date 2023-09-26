@@ -37,43 +37,49 @@ class InterfaceUsage extends Analyzer {
 
         $this->atomIs('Class')
              ->outIs('IMPLEMENTS')
+             ->analyzerIsNot('self')
              ->atomIs(self::STATIC_NAMES)
              ->fullnspathIs($interfaces);
         $this->prepareQuery();
 
         $this->atomIs('Interface')
              ->outIs('EXTENDS')
+             ->analyzerIsNot('self')
              ->atomIs(self::STATIC_NAMES)
-             ->fullnspathIs($interfaces);
+             ->fullnspathIs($interfaces)
+             ->analyzerIsNot('self');
         $this->prepareQuery();
 
-        $this->atomIs('Instanceof')
+        // @todo : shall skip traits and enums too ?
+        $classes = $this->readStubs('getClassList');
+        $classes = $this->reduceStubs($classes, 'getCalledClasses', self::REDUCE_VALUE);
+
+        $this->atomIs(array('Instanceof', 'Catch', 'Staticconstant', 'Staticclass'))
              ->outIs('CLASS')
+             ->analyzerIsNot('self')
              ->atomIs(self::STATIC_NAMES)
-             ->fullnspathIs($interfaces);
+             ->fullnspathIs($interfaces)
+             ->fullnspathIsNot($classes);
         $this->prepareQuery();
 
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
+        $this->atomIs('Parameter')
              ->outIs('TYPEHINT')
+             ->analyzerIsNot('self')
              ->has('line')
              ->atomIs(self::STATIC_NAMES)
              ->tokenIsNot(array('T_ARRAY', 'T_CALLABLE'))
-             ->fullnspathIs($interfaces);
+             ->fullnspathIs($interfaces)
+             ->fullnspathIsNot($classes);
         $this->prepareQuery();
 
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
+             ->analyzerIsNot('self')
              ->has('line')
              ->atomIs(self::STATIC_NAMES)
              ->tokenIsNot(array('T_ARRAY', 'T_CALLABLE'))
-             ->fullnspathIs($interfaces);
-        $this->prepareQuery();
-
-        $this->atomIs('Staticconstant')
-             ->outIs('CLASS')
-             ->atomIs(self::STATIC_NAMES)
-             ->fullnspathIs($interfaces);
+             ->fullnspathIs($interfaces)
+             ->fullnspathIsNot($classes);
         $this->prepareQuery();
     }
 }

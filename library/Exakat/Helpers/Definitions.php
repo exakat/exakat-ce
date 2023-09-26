@@ -44,14 +44,14 @@ class Definitions {
         if (file_exists($config->dir_root . '/data/' . $path . '.ini')) {
             $ini = parse_ini_file($config->dir_root . '/data/' . $path . '.ini');
 
-            if ($ini === null) {
+            if ($ini === false) {
                 $this->isValid = false;
             }
             $this->ini = $ini;
         } elseif (file_exists($config->dir_root . '/data/' . $path . '.json')) {
             $ini = json_decode(file_get_contents($config->dir_root . '/data/' . $path . '.json'), \JSON_ASSOCIATIVE);
 
-            if ($ini === null) {
+            if ($ini === false) {
                 $this->isValid = false;
             }
             $this->ini = $ini;

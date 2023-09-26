@@ -43,21 +43,14 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             return;
         }
 
-        // A garder. liste de résultats
-        if (is_array($data)) {
-            if (!isset($data[0]) || ($data[0] === null)) {
-                $this->type = self::EMPTY;
-                $this->data = null;
-            } else {
-                $this->type = self::ARRAY;
-                $this->data = $data;
-                $this->checkArray();
-            }
-
-            return;
+        if (!isset($data[0])) {
+            $this->type = self::EMPTY;
+            $this->data = null;
+        } else {
+            $this->type = self::ARRAY;
+            $this->data = $data;
+            $this->checkArray();
         }
-
-        assert(false, 'Could not understand GraphResults incoming data');
     }
 
     private function checkArray(): void {
@@ -75,7 +68,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         unset($data);
     }
 
-    public function deHash(array $extra = null) : void {
+    public function deHash(array $extra = null): void {
         if (empty($this->data)) {
             return;
         }
@@ -95,7 +88,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         $this->data = $result;
     }
 
-    public function string2Array(array $extra = null) : void {
+    public function string2Array(array $extra = null): void {
         if (empty($this->data)) {
             return;
         }
@@ -111,6 +104,10 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
         }
 
         $this->data = $result;
+    }
+
+    public function isEmpty(): bool {
+        return $this->type === self::EMPTY;
     }
 
     public function toArray(): array {
@@ -163,7 +160,7 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
     }
 
     #[\ReturnTypeWillChange]
-    public function offsetGet(mixed $offset) : mixed {
+    public function offsetGet(mixed $offset): mixed {
         return $this->data[$offset];
     }
 
@@ -182,12 +179,12 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
     }
 
     #[\ReturnTypeWillChange]
-    public function current() : mixed {
+    public function current(): mixed {
         return current($this->data);
     }
 
     #[\ReturnTypeWillChange]
-    public function key() : mixed {
+    public function key(): mixed {
         if ($this->type === self::ARRAY) {
             return key($this->data);
         }

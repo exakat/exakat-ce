@@ -23,6 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Exceptions\QueryException;
 
 class IsLess extends DSL {
     public function run(): Command {
@@ -42,7 +43,7 @@ class IsLess extends DSL {
                 return new Command("is(lt($g1))");
 
             default:
-                assert(false, 'Wrong number of argument for ' . __METHOD__ . '. 2 or 1 are expected, ' . func_num_args() . ' provided');
+                throw new QueryException('Wrong number of argument for ' . __METHOD__ . '. 2 or 1 are expected, ' . func_num_args() . ' provided');
         }
     }
 

@@ -43,6 +43,7 @@ class CollectOut extends DSL {
 where( 
     __.sideEffect{ $variable = []; }
       .out("$out")
+      .has("$property")
       .sideEffect{ $variable.add(it.get().value("$property")) ; }
       .fold() 
 ) 

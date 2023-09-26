@@ -41,12 +41,11 @@ class SetClassRemoteDefinitionWithReturnTypehint extends Complete {
                        ->atomIs(array('Propertydefinition', 'Variabledefinition', 'Globaldefinition', 'Staticdefinition'), self::WITHOUT_CONSTANTS)
                        ->outIs('DEFINITION')
               )
-              ->inIs('OBJECT')
+              ->inIs(array('OBJECT', 'CLASS'))
               ->outIs('METHOD')
-              ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
+              ->atomIs(array('Methodcallname', 'Staticmethodcall'), self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'name')
               ->inIs('METHOD')
-              ->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
               ->hasNoIn('DEFINITION')
               ->as('method')
               ->back('first')
@@ -59,6 +58,7 @@ class SetClassRemoteDefinitionWithReturnTypehint extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'method')
               ->addETo('DEFINITION', 'method');
         $this->prepareQuery();
 
@@ -90,8 +90,10 @@ class SetClassRemoteDefinitionWithReturnTypehint extends Complete {
              ->outIs('PPP')
              ->outIs('PPP')
              ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+             ->hasNoLinkYet('DEFINITION', 'member')
              ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
+
 
         // $b = foo(); $b->p; function foo() : C {}
         $this->atomIs('Member', self::WITHOUT_CONSTANTS)
@@ -105,7 +107,7 @@ class SetClassRemoteDefinitionWithReturnTypehint extends Complete {
               ->inIs('DEFINITION')
               ->atomIs(array('Variabledefinition', 'Parametername', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
               ->outIs('DEFAULT')
-              ->atomIs('Functioncall', self::WITHOUT_CONSTANTS)
+              ->atomIs(self::FUNCTIONS_CALLS, self::WITHOUT_CONSTANTS)
               ->inIs('DEFINITION')
               ->outIs('RETURNTYPE')
               ->inIs('DEFINITION')
@@ -114,6 +116,34 @@ class SetClassRemoteDefinitionWithReturnTypehint extends Complete {
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
+              ->addETo('DEFINITION', 'member');
+        $this->prepareQuery();
+
+        // $b = foo(); $b::p; function foo() : C {}
+        $this->atomIs('Staticproperty', self::WITHOUT_CONSTANTS)
+              ->as('member')
+              ->hasNoIn('DEFINITION')
+              ->outIs('MEMBER')
+              ->savePropertyAs('code', 'name')
+              ->inIs('MEMBER')
+              ->outIs('CLASS')
+              ->optional(
+                  $this->side()
+                       ->inIs('DEFINITION')
+                       ->atomIs(array('Propertydefinition', 'Variabledefinition', 'Globaldefinition', 'Staticdefinition'), self::WITHOUT_CONSTANTS)
+                       ->outIs('DEFAULT')
+              )
+              ->atomIs(self::FUNCTIONS_CALLS, self::WITHOUT_CONSTANTS)
+              ->inIs('DEFINITION')
+              ->outIs('RETURNTYPE')
+              ->inIs('DEFINITION')
+              ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
+              ->outIs('PPP')
+              ->outIs('PPP')
+              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'member')
               ->addETo('DEFINITION', 'member');
         $this->prepareQuery();
     }

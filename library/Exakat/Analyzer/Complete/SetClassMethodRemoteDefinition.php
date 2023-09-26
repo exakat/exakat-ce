@@ -22,6 +22,8 @@
 
 namespace Exakat\Analyzer\Complete;
 
+use Exakat\Query\DSL\SavePropertyAs;
+
 class SetClassMethodRemoteDefinition extends Complete {
     public function dependsOn(): array {
         return array('Complete/SetParentDefinition',
@@ -34,7 +36,7 @@ class SetClassMethodRemoteDefinition extends Complete {
               ->hasNoIn('DEFINITION')
               ->outIs('METHOD')
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
-              ->savePropertyAs('lccode', 'name')
+              ->savePropertyAs(SavePropertyAs::ATOM, 'methodName')
               ->inIs('METHOD')
               ->outIs(array('CLASS', 'OBJECT'))
               // Handles variables as object
@@ -46,19 +48,15 @@ class SetClassMethodRemoteDefinition extends Complete {
               )
               ->inIs('DEFINITION')
               ->atomIs(self::CLASSES_TRAITS, self::WITHOUT_CONSTANTS)
-              ->goToAllParents(self::INCLUDE_SELF)
-              ->outIs(array('METHOD', 'MAGICMETHOD'))
-              ->outIs('NAME')
-              ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
-              ->inIs('NAME')
-              ->as('origin')
-              ->dedup(array('first', 'origin'))
+              ->goToFirstParent('methodName')
+
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
 
         // class x { use t} trait t {function foo() {}} x::foo();
         $this->atomIs('Staticmethod', self::WITHOUT_CONSTANTS)
-              ->hasNoIn('DEFINITION')
+             // No test on DEFINITION
               ->outIs('METHOD')
               ->atomIs(array('Identifier', 'Nsname'), self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'name')
@@ -71,6 +69,7 @@ class SetClassMethodRemoteDefinition extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
     }

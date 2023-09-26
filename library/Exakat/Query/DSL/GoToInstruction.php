@@ -30,7 +30,7 @@ class GoToInstruction extends DSL {
         if (func_num_args() === 1) {
             list($atoms) = func_get_args();
         } else {
-            $atoms = 'Namespaces';
+            $atoms = array('Namespace');
         }
 
         $this->assertAtom($atoms);
@@ -47,10 +47,10 @@ class GoToInstruction extends DSL {
         $linksDown = self::$linksDown;
 
         $gremlin = <<<GREMLIN
-repeat( __.in({$linksDown})).until(hasLabel(within(***)) )
+repeat( __.in($linksDown)).emit(hasLabel(within(***))).until(hasLabel(within(***)) )
           .hasLabel(within(***))
 GREMLIN;
-        return new Command($gremlin, array($atomAndFile, $diff));
+        return new Command($gremlin, array($diff, $atomAndFile, $diff));
     }
 }
 ?>

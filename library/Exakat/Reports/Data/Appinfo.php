@@ -51,11 +51,13 @@ class Appinfo extends Data {
                             'Labels'                        => 'Php/Labelnames',
                             'Match'                         => 'Php/UseMatch',
 
+                            'Short Ternary'                 => 'Php/ShortTenary',
                             'Coalesce'                      => 'Php/Coalesce',
                             'Coalesce Equal'                => 'Php/CoalesceEqual',
                             'Trailing Comma'                => 'Php/TrailingComma',
                             'Trailing Comma In Use'         => 'Php/UseTrailingUseComma',
                             'PHP 8.0 Variable Syntax'       => 'Php/Php80VariableSyntax',
+
                             'Attributes'                    => 'Php/UseAttributes',
                             'Nested Attributes'             => 'Attributes/NestedAttributes',
 
@@ -140,18 +142,19 @@ class Appinfo extends Data {
                             'Redeclared Custom Functions' => 'Functions/MultipleDeclarations',
                             'Closures'                    => 'Closure',
                             'Arrow functions'             => 'Arrowfunction',
-//                            'Callback'                    => 'Functions/MarkCallable',
                             'first class callable'        => 'Php/FirstClassCallable',
 
-                            'Typehint'                    => 'Functions/Typehints',
-                            'Scalar Typehint'             => 'Php/ScalarTypehintUsage',
-                            'Return Typehint'             => 'Php/ReturnTypehintUsage',
-                            'Nullable Typehint'           => 'Php/UseNullableType',
-                            'Never typehint'              => 'Php/NeverTypehintUsage',
-                            'Mixed Typehint'              => 'Php/MixedUsage',
-                            'PHP 8.0 Scalar Typehints'    => 'Php/Php80OnlyTypeHints',
-                            'PHP 8.0 Union Typehints'     => 'Php/Php80UnionTypehint',
-                            'PHP 8.1 Intersection Typehints' => 'Php/Php81IntersectionTypehint',
+                            'Types'                       => 'Functions/Typehints',
+                            'Scalar Type'                 => 'Php/ScalarTypehintUsage',
+                            'Return Type'                 => 'Php/ReturnTypehintUsage',
+                            'Nullable Type'               => 'Php/UseNullableType',
+                            'Never Type'                  => 'Php/NeverTypeUsage',
+                            'Mixed Type'                  => 'Php/MixedUsage',
+                            'False-True-Null Standalone'  => 'Typehints/FTNStandaloneType',
+                            'PHP 8.0 Scalar Types'        => 'Php/Php80OnlyTypeHints',
+                            'PHP 8.0 Union Types'         => 'Php/Php80UnionTypehint',
+                            'PHP 8.1 Intersection Types'  => 'Php/Php81IntersectionTypehint',
+                            'PHP 8.2 DNF Types'           => 'Php/UseDNF',
                             'Static variables'            => 'Variables/StaticVariables',
 
                             'Function dereferencing'      => 'Structures/FunctionSubscripting',
@@ -232,6 +235,7 @@ class Appinfo extends Data {
                             'Heredoc'             => 'Type/Heredoc',
                             'Nowdoc'              => 'Type/Nowdoc',
                             'Relaxed Heredoc'     => 'Php/FlexibleHeredoc',
+                            '++ on strings'       => 'Php/PlusPlusOnLetters',
                      ),
 
                     'Errors' => array(
@@ -455,7 +459,6 @@ class Appinfo extends Data {
                     ),
 
                     'Frameworks' => array(
-//                            'Cake PHP'             => 'Cakephp/CakePHPUsed',
                             'Codeigniter'          => 'Vendors/Codeigniter',
                             'Concrete5'            => 'Vendors/Concrete5',
                             'Drupal'               => 'Vendors/Drupal',
@@ -468,8 +471,6 @@ class Appinfo extends Data {
                             'Symfony'              => 'Vendors/Symfony',
                             'Typo3'                => 'Vendors/Typo3',
                             'Wordpress'            => 'Vendors/Wordpress',
-//                            'Yii'                  => 'Vendors/Yii',
-//                            'Zend Framework'       => 'ZendF/ZendClasses',
                     )
                 );
 

@@ -23,8 +23,8 @@
 namespace Exakat\Tasks\Helpers;
 
 class StubJson {
-    private $json 		 = null;
-    private string $file = null;
+    private string $json;
+    private string $file;
 
     public function __construct(string $path) {
         $this->json = json_decode(file_get_contents($path) ?? '');

@@ -23,6 +23,11 @@
 namespace Exakat\Analyzer\Complete;
 
 class SetClassPropertyDefinitionWithTypehint extends Complete {
+    public function dependsOn(): array {
+        return array('Complete/CreateDefaultValues',
+                    );
+    }
+
     public function analyze(): void {
         // $object->property->method()
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
@@ -30,6 +35,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->outIs('DEFINITION')
               ->inIs('OBJECT')
               ->atomIs('Methodcall', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
               ->as('call')
               ->outIs('METHOD')
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
@@ -43,6 +49,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->outIs('NAME')
               ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
               ->inIs('NAME')
+              ->hasNoLinkYet('DEFINITION', 'call')
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
 
@@ -52,6 +59,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->outIs('DEFINITION')
               ->inIs('OBJECT')
               ->atomIs('Member', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
               ->as('call')
               ->outIs('MEMBER')
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
@@ -64,6 +72,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'call')
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
 
@@ -73,6 +82,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->outIs('DEFINITION')
               ->inIs('CLASS')
               ->atomIs('Staticconstant', self::WITHOUT_CONSTANTS)
+              ->hasNoIn('DEFINITION')
               ->as('call')
               ->outIs('CONSTANT')
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
@@ -86,6 +96,7 @@ class SetClassPropertyDefinitionWithTypehint extends Complete {
               ->outIs('CONST')
               ->outIs('NAME')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              ->hasNoLinkYet('DEFINITION', 'call')
               ->addETo('DEFINITION', 'call');
         $this->prepareQuery();
     }

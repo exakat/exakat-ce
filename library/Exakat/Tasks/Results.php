@@ -43,7 +43,7 @@ class Results extends Tasks {
         }
 
         if (!file_exists($this->config->project_dir)) {
-            throw new NoSuchProject($this->config->project);
+            throw new NoSuchProject((string) $this->config->project);
         }
 
         if (!file_exists($this->config->datastore)) {
@@ -78,19 +78,19 @@ class Results extends Tasks {
 
         $return = array();
         if ($this->config->style === 'BOOLEAN') {
-            $queryTemplate = <<<GREMLIN
-g.V().hasLabel("Analysis").has("analyzer", "$analyzer").out().count().is(gt(0))
+            $queryTemplate = <<<'GREMLIN'
+g.V().hasLabel("Analysis").has("analyzer", "analyzer").out("ANALYZED").count().is(gt(0))
 GREMLIN;
-            $vertices = $this->gremlin->query($queryTemplate);
+            $vertices = (bool) $this->gremlin->query($queryTemplate, array('analyzers' => $analyzersClass))->toInt();
 
-            $return[] = $vertices[0];
+            $return[] = array($vertices);
         } elseif ($this->config->style === 'COUNTED_ALL') {
-            $queryTemplate = <<<GREMLIN
-g.V().hasLabel("Analysis").has("analyzer", "$analyzer").out().count()
+            $queryTemplate = <<<'GREMLIN'
+g.V().hasLabel("Analysis").has("analyzer", within(analyzers)).out("ANALYZED").count()
 GREMLIN;
-            $vertices = $this->gremlin->query($queryTemplate)->results;
+            $vertices = (int) $this->gremlin->query($queryTemplate, array('analyzers' => $analyzersClass))->toInt();
 
-            $return[] = $vertices[0];
+            $return[] = array($vertices);
         } elseif ($this->config->style === 'ALL') {
             $results = array();
 
@@ -101,21 +101,24 @@ GREMLIN;
 
             $return = array_merge(...$results);
         } elseif ($this->config->style === 'DISTINCT') {
-            $queryTemplate = 'g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer . '").out("ANALYZED").values("code").unique()';
-            $vertices = $this->gremlin->query($queryTemplate)->results;
+            $queryTemplate = 'g.V().hasLabel("Analysis").has("analyzer", within(analyzers)).out("ANALYZED").values("fullcode").unique()';
+            $vertices = $this->gremlin->query($queryTemplate, array('analyzers' => $analyzersClass));
 
             $return = array();
-            foreach ($vertices as $values) {
+            foreach ($vertices->toArray() as $values) {
                 $return[] = array($values);
             }
         } elseif ($this->config->style === 'COUNTED') {
-            $queryTemplate = 'g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer . '").out("ANALYZED").groupCount("m").by("code").cap("m")';
-            $vertices = $this->gremlin->query($queryTemplate)->results;
+            $queryTemplate = 'g.V().hasLabel("Analysis").has("analyzer", within(analyzers)).out("ANALYZED").groupCount("m").by("fullcode").cap("m")';
+            $vertices = $this->gremlin->query($queryTemplate, array('analyzers' => $analyzersClass));
 
             $return = array();
-            foreach ($vertices[0] as $k => $values) {
+            foreach ($vertices->toArray()[0] as $k => $values) {
                 $return[$k] = $values;
             }
+        } else {
+            print "No such style as {$this->config->style}. Aborting\n";
+            return;
         }
 
         if ($this->config->json === true) {

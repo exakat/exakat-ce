@@ -29,7 +29,7 @@ class Filter extends DSL {
         list($filter) = func_get_args();
 
         if (!$filter instanceof Command) {
-            assert(false, 'Not requires a Command object, it received a ' . gettype($filter));
+            assert(false, 'Filter() requires a Command object, it received a ' . gettype($filter));
         }
 
         $filter->gremlin = "where( {$filter->gremlin} )";

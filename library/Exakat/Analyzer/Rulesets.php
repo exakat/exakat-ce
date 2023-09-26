@@ -32,7 +32,7 @@ class Rulesets implements RulesetsInterface {
     private RulesetsDev    $dev   ;
     private RulesetsIgnore $ignore;
 
-    private static $instanciated = array();
+    private static array $instanciated = array();
 
     public function __construct(string $path, Autoloader $dev, array $extra_rulesets = array(), array $ignore_rulesets = array()) {
         $this->main   = new RulesetsMain($path);

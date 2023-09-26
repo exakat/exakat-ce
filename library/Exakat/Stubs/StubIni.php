@@ -83,6 +83,10 @@ class StubIni extends Stubs implements StubsInterface {
         return $this->stub->methods ?? array();
     }
 
+    public function getStaticMethodList(): array {
+        return array();
+    }
+
     public function getFinalClasses(): array {
         return array();
     }
@@ -143,6 +147,10 @@ class StubIni extends Stubs implements StubsInterface {
         return array();
     }
 
+    public function getMethodsReferenceArgs(): array {
+        return array();
+    }
+
     public function getPropertyListWithVisibility(string $visibility): array {
         return array();
     }
@@ -168,6 +176,34 @@ class StubIni extends Stubs implements StubsInterface {
     }
 
     public function getVoidReturningFunctions(): array {
+        return array();
+    }
+
+    public function getNativeMethodArgType(): array {
+        return array();
+    }
+
+    public function getMethodsParameterNames(): array {
+        return array();
+    }
+
+    public function getFunctionsByReturnType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array {
+        return array();
+    }
+
+    public function getFunctionsByArgType(string $type = 'int', bool $singleTypeOnly = self::STRICT): array {
+        return array();
+    }
+
+    public function getNewArgsInterval(): array {
+        return array();
+    }
+
+    public function getFunctionsByReturn(bool $singleTypeOnly = self::LOOSE): array {
+        return array();
+    }
+
+    public function getFunctionsWithOptional(): array {
         return array();
     }
 }

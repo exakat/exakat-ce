@@ -46,6 +46,7 @@ class MakeFunctioncallWithReference extends Complete {
         foreach ($functions as $position => $calls) {
             $this->atomFunctionIs($calls)
                  ->outWithRank('ARGUMENT', $position)
+                 ->isNot('isModified', true)
                  ->setProperty('isModified', true);
             $this->prepareQuery();
         }
@@ -57,6 +58,7 @@ class MakeFunctioncallWithReference extends Complete {
              ->outIs('ARGUMENT')
              ->is('reference', true)
              ->goToParameterUsage()
+             ->isNot('isModified', true)
              ->setProperty('isModified', true);
         $this->prepareQuery();
     }

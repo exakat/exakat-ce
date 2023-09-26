@@ -8,7 +8,7 @@
 {"class":"ReflectionFunctionAbstract", "method":"__construct", "throw":["ReflectionException"]},
 {"class":"ReflectionMethod", "method":"__construct", "throw":["ReflectionException"]},
 {"class":"ReflectionObject", "method":"__construct", "throw":["ReflectionException"]},
-{"class":"ReflectionParameter", "method":"__construct", "throw":["ReflectionException"]},
+{"class":"ReflectionParameter", "method":"__construct", "throw":["ReflectionException", "ValueError"]},
 {"class":"ReflectionProperty", "method":"__construct", "throw":["ReflectionException"]},
 {"class":"Reflector", "method":"__construct", "throw":["ReflectionException"]},
 {"class":"ReflectionException", "method":"__construct", "throw":["ReflectionException"]},
@@ -24,18 +24,41 @@
 {"class":"PDO", "method":"quote", "throw":["PDOexception"]},
 
 {"class":"mysqli", "method":"query", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"commit", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"prepare", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"execute_query", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"rollback", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"real_query", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"real_connect", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"__construct", "throw":["mysqli_sql_exception"]},
+{"class":"mysqli", "method":"reap_async_query", "throw":["mysqli_sql_exception"]},
+
+{"function":"mysqli_query", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_commit", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_prepare", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_execute_query", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_rollback", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_real_query", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_real_connect", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_connect", "throw":["mysqli_sql_exception"]},
+{"function":"mysqli_reap_async_query", "throw":["mysqli_sql_exception"]},
 
 {"class":"Phar", "method":"mungServer", "throw":["UnexpectedValueException"]},
 {"class":"Phar", "method":"webPhar", "throw":["PharException", "UnexpectedValueException"]},
 
 {"class":"Closure", "method":"fromcallable", "throw":["Typerror"]},
 {"class":"ArrayIterator", "method":"__construct", "throw":["InvalidArgumentException"]},
+{"class":"SplFileObject", "method":"__construct", "throw":["RuntimeException", "LogicException"]},
+
+{"class":"Datetime", "method":"__construct", "throw":["Exception"]},
+{"class":"DatetimeImmutable", "method":"__construct", "throw":["Exception"]},
 {"class":"DateTimeZone", "method":"__construct", "throw":["Exception"]},
+{"class":"DateTimeInterval", "method":"__construct", "throw":["Exception"]},
 
 {"class":"ImagickPixel", "method":"getColorCount", "throw":["ImagickPixelException"]},
 {"class":"Imagick", "method":"getimagegreenprimary", "throw":["ImagickException"]},
 
-{"class":"simplexmlelement", "method":"__construct", "throw":["Exception"]},
+{"class":"SimpleXmlElement", "method":"__construct", "throw":["Exception"]},
 
 {"class":"snmp", "method":"__construct", "throw":["Exception"]},
 
@@ -47,5 +70,30 @@
 {"function":"uopz_del_function", "throw":["Exception"]},
 {"function":"json_encode", "throw":["JsonException"]},
 {"function":"json_decode", "throw":["JsonException"]},
-{"function":"int_div", "throw":["DivisionByZero", "ArithmeticError"]}
+{"function":"int_div", "throw":["DivisionByZero", "ArithmeticError"]},
+{"function":"gmp_div_r", "throw":["DivisionByZeroError"]},
+{"function":"gmp_div_qr", "throw":["DivisionByZeroError"]},
+{"function":"gmp_invert", "throw":["DivisionByZeroError"]},
+{"function":"gmp_pown", "throw":["DivisionByZeroError"]},
+{"function":"gmp_mod", "throw":["DivisionByZeroError"]},
+{"function":"gmp_divexact", "throw":["DivisionByZeroError"]},
+{"function":"gmp_div_q", "throw":["DivisionByZeroError"]},
+{"function":"bc_mod", "throw":["DivisionByZeroError", "ValueError"]},
+{"function":"bcpowmod", "throw":["DivisionByZeroError"]},
+
+{"function":"str_split", "throw":["ValueError"]},
+{"function":"max", "throw":["ValueError"]},
+{"function":"min", "throw":["ValueError"]},
+{"function":"strpos", "throw":["ValueError"]},
+{"function":"stripos", "throw":["ValueError"]},
+{"function":"printf", "throw":["ValueError"]},
+{"function":"sprintf", "throw":["ValueError"]},
+{"function":"vprintf", "throw":["ValueError"]},
+
+{"function":"eval", "throw":["ParseError"]},
+{"function":"assert", "throw":["AssertionError"]},
+
+{"operator":"Bitshift", "throw":["ArithmeticError", "ValueError"]},
+{"operator":"Match", "throw":["UnhandledMatchError"]}
+
 ]

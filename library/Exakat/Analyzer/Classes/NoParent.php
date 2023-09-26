@@ -35,6 +35,20 @@ class NoParent extends Analyzer {
              ->back('first')
              ->inIs();
         $this->prepareQuery();
+
+        // trait t { function foo() { parent::fooo(); }}
+        $this->atomIs('Parent')
+             ->goToInstruction(array('Method', 'Magicmethod'))
+             ->inIs(array('METHOD', 'MAGICMETHOD'))
+             ->atomIs(array('Trait'))
+             ->outIs('DEFINITION')
+             ->inIs('USE')
+             ->as('results')
+             ->inIs('USE')
+             ->atomIs(array('Class', 'Classanonymous')) // when used
+             ->hasNoOut('EXTENDS')
+             ->back('results');
+        $this->prepareQuery();
     }
 }
 
