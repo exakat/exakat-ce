@@ -26,7 +26,7 @@ namespace Exakat\Analyzer\Structures;
 use Exakat\Analyzer\Analyzer;
 
 class DereferencingAS extends Analyzer {
-    protected string $phpVersion = '5.3-';
+    protected string $phpVersion = '5.3+';
 
     public function analyze(): void {
         // $x = array(1,2,3)
@@ -34,14 +34,14 @@ class DereferencingAS extends Analyzer {
         $this->atomIs('Assignation')
              ->outIs('RIGHT')
              ->atomIs('Arrayliteral') // or some array-returning function
-             ->raw('filter{ it.out("ARGUMENT").has("atom", "Void").any() == false}')
+             ->isNot('count', 0)
              ->inIs('RIGHT')
              ->outIs('LEFT')
              ->savePropertyAs('code', 'storage')
              ->inIs('LEFT')
              ->nextSibling()
              ->atomIsNot(self::LOOPS_ALL)
-             ->atomInsideNoDefinition('Variable')
+             ->atomInsideNoDefinition('Variablearray')
              ->samePropertyAs('code', 'storage')
              ->inIs('VARIABLE')
              ->atomIs('Array')
@@ -61,7 +61,7 @@ class DereferencingAS extends Analyzer {
              ->inIs('LEFT')
              ->nextSibling()
              ->atomIsNot(self::LOOPS_ALL)
-             ->atomInsideNoDefinition('Variable')
+             ->atomInsideNoDefinition('Variablearray')
              ->samePropertyAs('code', 'storage')
              ->inIs('VARIABLE')
              ->atomIs('Array')

@@ -29,7 +29,7 @@ use Brightzone\GremlinDriver\Connection;
 use Exakat\Helpers\Timer;
 
 class TinkergraphV3 extends Graph {
-    private const SUPPORTED_VERSIONS = array('3.4', '3.5', '3.6');
+    private const SUPPORTED_VERSIONS = array('3.4', '3.5', '3.6', '3.7');
     public const CONFIG_PREFIX     = 'tinkergraphv3';
 
     private string $gremlinVersion = '3.6';
@@ -71,12 +71,12 @@ class TinkergraphV3 extends Graph {
     public function getInfo(): array {
         $stats = array();
 
-        if (empty($this->folder)) {
+        if (empty($this->path)) {
             $stats['configured'] = 'No tinkergraph configured in config/exakat.ini.';
-        } elseif (!file_exists($this->folder)) {
-            $stats['installed'] = 'No (folder : ' . $this->folder . ')';
+        } elseif (!file_exists($this->path)) {
+            $stats['installed'] = 'No (folder : ' . $this->path . ')';
         } else {
-            $stats['installed'] = 'Yes (folder : ' . $this->folder . ')';
+            $stats['installed'] = 'Yes (folder : ' . $this->path . ')';
             $stats['host'] = $this->config->tinkergraphv3_host;
             $stats['port'] = $this->config->tinkergraphv3_port;
 

@@ -3375,6 +3375,8 @@ HTML
         foreach ($res->toArray() as $value) {
             if ($value['key'] === 'withoutTypehint') {
                 $withoutType = (int) $value['value'];
+            } else {
+            	$withoutType = 0;
             }
 
             if (in_array($value['key'], array('totalArguments',

@@ -97,7 +97,7 @@ class Parallel extends Driver {
     public function saveLinkGremlin(array $links): void {
         $chunks = array_chunk($links, self::LOAD_CHUNK_LINK);
 
-        foreach ($chunks as $i => $chunk) {
+        foreach ($chunks as $chunk) {
             $this->saveNodeLinksGremlin($chunk);
         }
     }

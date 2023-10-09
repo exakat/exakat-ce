@@ -180,7 +180,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                       ->outIs('RETURNTYPE')
                       ->fullnspathIsNot(array('\\void', '\\null'))
                       ->count()
-                      ->raw('is(gte(2))')
+                      ->isMore(1)
              )
              ->count();
         $unionTypehints1 = $this->rawQuery()->toInt();
@@ -193,7 +193,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                       ->outIs('TYPEHINT')
                       ->fullnspathIsNot(array('\\void', '\\null'))
                       ->count()
-                      ->raw('is(gte(2))')
+                      ->isMore(1)
              )
              ->count();
         $unionTypehints2 = $this->rawQuery()->toInt();
@@ -205,7 +205,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                       ->outIs('TYPEHINT')
                       ->fullnspathIsNot(array('\\void', '\\null'))
                       ->count()
-                      ->raw('is(gte(2))')
+                      ->isMore(1)
              )
              ->count();
         $unionTypehints3 = $this->rawQuery()->toInt();
@@ -219,7 +219,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                       ->outIs('RETURNTYPE')
                       ->fullnspathIsNot(array('\\void', '\\null'))
                       ->count()
-                      ->raw('is(gte(2))')
+                      ->isMore(1)
              )
              ->count();
         $intersectionTypehints1 = $this->rawQuery()->toInt();
@@ -232,7 +232,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                       ->outIs('TYPEHINT')
                       ->fullnspathIsNot(array('\\void', '\\null'))
                       ->count()
-                      ->raw('is(gte(2))')
+                      ->isMore(1)
              )
              ->count();
         $intersectionTypehints2 = $this->rawQuery()->toInt();
@@ -244,7 +244,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
                       ->outIs('TYPEHINT')
                       ->fullnspathIsNot(array('\\void', '\\null'))
                       ->count()
-                      ->raw('is(gte(2))')
+                      ->isMore(1)
              )
              ->count();
         $intersectionTypehints3 = $this->rawQuery()->toInt();

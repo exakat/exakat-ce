@@ -155,6 +155,9 @@ class IsStub extends Plugin {
                 if (in_array(makeFullNsPath($atom->noDelimiter), $this->stubFunctions, STRICT_COMPARISON)) {
                     $atom->isStub = true;
                 }
+                if (in_array(makeFullNsPath($atom->noDelimiter), $this->stubClasses, STRICT_COMPARISON)) {
+                    $atom->isStub = true;
+                }
                 break;
 
             case 'Ppp' :

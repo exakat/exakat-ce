@@ -29,16 +29,12 @@ class DropElseAfterReturn extends Analyzer {
         //if ($a) { return $a; } else { doSomething(); }
         $this->atomIs('Ifthen')
              ->tokenIsNot('T_ELSEIF')
-             ->raw(<<<'GREMLIN'
-not(
-    where(
-        __.in("EXPRESSION")
-          .has("count", 1)
-          .in("ELSE")
-          .hasLabel("Ifthen")
-    )
-)
-GREMLIN
+             ->not(
+             	$this->side()
+             		 ->inIs('EXPRESSION')
+             		 ->is('count', 1)
+             		 ->inIs('ELSE')
+             		 ->atomIs('Ifthen')
              )
              ->outIs('THEN')
              ->outIs('EXPRESSION')
@@ -52,17 +48,14 @@ GREMLIN
         //if ($a) { doSomething(); } else { return $a; }
         $this->atomIs('Ifthen')
              ->tokenIsNot('T_ELSEIF')
-             ->raw(<<<'GREMLIN'
-not(
-    where(
-        __.in("EXPRESSION")
-          .has("count", 1)
-          .in("ELSE")
-          .hasLabel("Ifthen")
-    )
-)
-GREMLIN
+             ->not(
+             	$this->side()
+             		 ->inIs('EXPRESSION')
+             		 ->is('count', 1)
+             		 ->inIs('ELSE')
+             		 ->atomIs('Ifthen')
              )
+
              ->outIs('ELSE')
              ->outIs('EXPRESSION')
              ->atomIs('Return')

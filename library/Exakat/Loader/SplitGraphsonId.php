@@ -123,7 +123,7 @@ class SplitGraphsonId extends Loader {
         // Finish boolean properties
         // convert boolean from int to actual type of boolean
         do {
-            $res = $this->graphdb->query('g.V().has("boolean", within(0, 1)).choose( values("boolean").is(eq(0)), __.property("boolean", false), __.property("boolean", true)).limit(' . self::LOAD_CHUNK . ').count();');
+            $res = $this->graphdb->query('g.V().has("boolean", within(0, 1)).choose( __.values("boolean").is(eq(0)), __.property("boolean", false), __.property("boolean", true)).limit(' . self::LOAD_CHUNK . ').count();');
         } while ($res->toInt() === self::LOAD_CHUNK);
 
         $query = 'g.V().hasLabel("Project").id();';

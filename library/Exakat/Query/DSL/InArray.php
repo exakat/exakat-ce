@@ -51,7 +51,7 @@ class InArray extends DSL {
 			if ($case === Analyzer::CASE_SENSITIVE) {
 	            return new Command('has("' . $name . '", within(***))', array($value));
 			} else {
-	            return new Command('filter{ it.get().value("' . $name . '").toLowerCase() in ***}', array($value));
+	            return new Command('has("'.$name.'").filter{ it.get().value("' . $name . '").toLowerCase() in ***}', array($value));
 			}
 		}
 

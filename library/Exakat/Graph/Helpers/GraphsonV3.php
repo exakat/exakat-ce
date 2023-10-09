@@ -2,9 +2,9 @@
 
 namespace Exakat\Graph\Helpers;
 
-use Brightzone\GremlinDriver\Serializers\SerializerInterface;
-use Brightzone\GremlinDriver\InternalException;
 use Brightzone\GremlinDriver\RequestMessage;
+use Brightzone\GremlinDriver\InternalException;
+use Brightzone\GremlinDriver\Serializers\SerializerInterface;
 
 /**
  * Gremlin-server PHP JSON Serializer class

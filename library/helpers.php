@@ -207,17 +207,6 @@ function array_groupby(array $array): array {
     return $return;
 }
 
-function array_ungroupby(array $array): array {
-    $return = array();
-    foreach ($array as $k => $v) {
-        foreach ($v as $w) {
-            $return[$w] = $k;
-        }
-    }
-
-    return $return;
-}
-
 function makeList(array $array, string $delimiter = '"'): string {
     return $delimiter . implode("$delimiter, $delimiter", $array) . $delimiter;
 }
@@ -565,26 +554,6 @@ function str2array(string $string, string $delimiter = ','): array {
     return array_map('trim', $array);
 }
 
-// convert a number into its English ordinal name
-function ordinal(int $number): string {
-    $ends = array('th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th');
-    if (($number % 100 >= 11) && ($number % 100 <= 13)) {
-        return "{$number}th";
-    } else {
-        return $number . $ends[$number % 10];
-    }
-}
-
-/*
-array('a/b' => 1 ) to Array
-(
-    [a] => Array
-        (
-            [b] => 1
-        )
-
-)
-*/
 function raiseDimensions(array $array, string $split = '/'): array {
     $return = array();
 
@@ -643,6 +612,7 @@ function checkVersionRange(string $range, string $version): bool {
     return false;
 }
 
+/*
 function sort_dependencies(array $array, int $level = 0): array {
     $return = array();
     $next = array();
@@ -673,6 +643,7 @@ function sort_dependencies(array $array, int $level = 0): array {
 
     return $return;
 }
+*/
 
 function filter_analyzer(string $analyzer): int {
     return preg_match('#^\w+/\w+$#', $analyzer);

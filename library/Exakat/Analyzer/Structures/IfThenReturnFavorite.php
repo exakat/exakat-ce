@@ -47,7 +47,7 @@ GREMLIN;
 
         $this->atomIs('Return')
              ->raw($choose)
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw('groupCount("gf").cap("gf")');
         $types = $this->rawQuery()->toArray()[0] ?? array();
         unset($types['none']);
 
@@ -71,7 +71,7 @@ GREMLIN;
         if (empty($types)) {
             return;
         }
-        $types = array_keys($types)[0];
+        $types = array_keys($types);
 
         $this->atomIs('Return')
              ->raw($choose)

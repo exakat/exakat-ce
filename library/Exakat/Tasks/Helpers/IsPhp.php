@@ -148,6 +148,9 @@ class IsPhp extends Plugin {
                 if (in_array(makeFullNsPath($atom->noDelimiter), $this->phpFunctions, STRICT_COMPARISON)) {
                     $atom->isPhp = true;
                 }
+                if (in_array(makeFullNsPath($atom->noDelimiter), $this->phpClasses, STRICT_COMPARISON)) {
+                    $atom->isPhp = true;
+                }
                 break;
 
             case 'Ppp' :

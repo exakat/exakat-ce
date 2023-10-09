@@ -55,7 +55,7 @@ class IsEqual extends DSL {
         // It is an array
         if (is_array($value)) {
             // @todo : also checks for the content of the array : type is int? string ? hash?
-            return new Command('is(within(***))', array_values($value));
+            return new Command('is(within(***))', array(array_values($value)));
         }
 
         // It is a gremlin variable

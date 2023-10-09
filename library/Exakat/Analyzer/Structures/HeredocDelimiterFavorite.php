@@ -27,8 +27,7 @@ use Exakat\Analyzer\Analyzer;
 class HeredocDelimiterFavorite extends Analyzer {
     public function analyze(): void {
         $this->atomIs('Heredoc')
-             ->raw('map{ it.get().value("delimiter").trim(); }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw('groupCount("gf").by("delimiter").cap("gf")');
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -60,7 +59,7 @@ class HeredocDelimiterFavorite extends Analyzer {
         }
 
         $this->atomIs(array('Heredoc'))
-             ->raw('filter{ it.get().value("delimiter").trim() in *** }', $types);
+        	 ->is('delimiter', array_keys($types));
         $this->prepareQuery();
     }
 }

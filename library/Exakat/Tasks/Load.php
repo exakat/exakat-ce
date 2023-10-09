@@ -649,7 +649,7 @@ $this->phptokens::T_YIELD,
                     if ($this->processFile($filename, '')) {
                         $this->loader->finalize($this->relicat);
                     } else {
-                        print "Error while loading the file.\n";
+                        print "Error while finalize the file.\n";
                     }
                 } catch (NoFileToProcess $e) {
                     $this->datastore->ignoreFile($filename, $e->getMessage());
@@ -3033,7 +3033,7 @@ $this->phptokens::T_YIELD,
             return $arguments;
         }
 
-        // case strlen(...)
+        // case strlen(...) with ellipsis
         if ( $this->nextIs(array($this->phptokens::T_ELLIPSIS)) &&
              $this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS,
                                  $this->phptokens::T_CLOSE_BRACKET), 2)) {
@@ -3101,7 +3101,6 @@ $this->phptokens::T_YIELD,
             $this->popExpression();
             if (!empty($rankName)) {
                 $index->rankName = '$' . $rankName;
-                $index->fullcode = $rankName . ' : ' . $index->fullcode;
             }
 
             $this->checkPhpdoc();
@@ -3124,7 +3123,7 @@ $this->phptokens::T_YIELD,
                     $this->calls->addCall(Calls::A_CLASS, $this->currentClassTrait->getCurrent()->fullnspath, $index);
                 }
 
-                $fullcode[] = $index->fullcode;
+                $fullcode[] = (empty($index->rankName) ? '' : trim($index->rankName, '$') . ' : ' ) . $index->fullcode;
                 $arguments->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
                 $argumentsList[] = $index;
 
@@ -3155,7 +3154,7 @@ $this->phptokens::T_YIELD,
 
                 $this->addLink($arguments, $index, 'ARGUMENT');
 
-                $fullcode[] = $index->fullcode;
+                $fullcode[] = (empty($index->rankName) ? '' : trim($index->rankName, '$') . ' : ' ) . $index->fullcode;
                 $argumentsList[] = $index;
             } else {
                 $fullcode[] = ' ';
@@ -3170,7 +3169,7 @@ $this->phptokens::T_YIELD,
 
             $this->addLink($arguments, $index, 'ARGUMENT');
 
-            $fullcode[] = $index->fullcode;
+            $fullcode[] = (empty($index->rankName) ? '' : trim($index->rankName, '$') . ' : ' ) . $index->fullcode;
             $argumentsList[] = $index;
         }
 
@@ -4200,6 +4199,7 @@ $this->phptokens::T_YIELD,
                                                               $this->phptokens::T_CLOSE_PARENTHESIS,
                                                               $this->phptokens::T_DOC_COMMENT,
                                                               ));
+                    $element->ws->closing = $this->tokens[$this->id][4];
                 } else {
                     $element->ws->operator = '';
                     $default = $this->addAtomVoid();
@@ -4768,8 +4768,9 @@ $this->phptokens::T_YIELD,
 
         if ($strictTypes === true) {
             $fullcode = $this->tokens[$current][1] . ' (' . implode(', ', $fullcode) . ') ';
+            $declare->ws->endargs = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $this->moveToNext(); // skip ;
 
-            $this->moveToNext();
             $isColon = false;
         } else {
             $isColon = $this->whichSyntax($current, $this->id + 1);

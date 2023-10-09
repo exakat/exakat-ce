@@ -178,9 +178,9 @@ class Appinfo extends Data {
                             'Class aliases'              => 'Classes/ClassAliasUsage',
 
                             'Abstract classes'           => 'Classes/Abstractclass',
-                            'Interfaces'                 => 'Interfaces/Interfacenames',
-                            'Traits'                     => 'Traits/Traitnames',
-                            'Enums'                      => 'Php/EnumUsage',
+                            'Interfaces'                 => 'Interfaces',
+                            'Traits'                     => 'Trait',
+                            'Enums'                      => 'Enum',
 
                             'Static properties'          => 'Classes/StaticProperties',
                             'Readonly properties'        => 'Classes/ReadonlyUsage',
@@ -190,9 +190,12 @@ class Appinfo extends Data {
                             'Final methods'              => 'Classes/Finalmethod',
 
                             'Class constants'            => 'Classes/ConstantDefinition',
+                            'Trait constants'            => 'Traits/ConstantsInTraits',
                             'Overwritten constants'      => 'Classes/OverwrittenConst',
                             'Constant visibility'        => 'Classes/ConstVisibilityUsage',
                             'Final constants'            => 'Php/FinalConstant',
+                            'Dynamic class constants'    => 'Classes/NewDynamicConstantSyntax',
+                            'Enum Case In Constants'     => 'Php/UseEnumCaseInConstantExpression',
 
                             'Magic methods'              => 'Classes/MagicMethod',
                             'Cloning'                    => 'Classes/CloningUsage',

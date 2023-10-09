@@ -42,7 +42,7 @@ GREMLIN;
         $this->atomIs(array('Comparison'))
              ->tokenIs(array('T_EQUAL', 'T_IS_IDENTICAL', 'T_IS_NOT_EQUAL', 'T_IS_NOT_IDENTICAL', ))
              ->raw($mapping)
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw('groupCount("gf").cap("gf")');
         $types = $this->rawQuery()->toArray()[0] ?? array();
         if (empty($types)) {
             return;
@@ -72,7 +72,7 @@ GREMLIN;
         $this->atomIs(array('Comparison'))
              ->tokenIs(array('T_EQUAL', 'T_IS_IDENTICAL', 'T_IS_NOT_EQUAL', 'T_IS_NOT_IDENTICAL', ))
              ->raw($mapping)
-             ->raw('where(is(within(***)))', $types)
+             ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
     }

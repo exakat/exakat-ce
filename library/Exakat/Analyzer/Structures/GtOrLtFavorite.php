@@ -33,11 +33,10 @@ class GtOrLtFavorite extends Analyzer {
         }
 
         $mapping = <<<'GREMLIN'
-if (it.get().value("code").toLong() in ***) {
-    x2 = '>';
-} else {
-    x2 = '<';
-}
+choose( __.has("code", within(***)), 
+	constant(">"),
+	constant("<")
+)
 GREMLIN;
         $storage = array('>'  => '>',
                          '<'  => '<',
@@ -45,8 +44,8 @@ GREMLIN;
 
         $this->atomIs('Comparison')
              ->codeIs(array('>=', '>', '<', '<='))
-             ->raw('map{ ' . $mapping . ' }', $codeInt)
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw($mapping, $codeInt)
+             ->raw('groupCount("gf").cap("gf")');
         $types = $this->rawQuery()->toArray()[0] ?? array();
 
         $store = array();
@@ -72,8 +71,8 @@ GREMLIN;
 
         $this->atomIs('Comparison')
              ->codeIs(array('>=', '>', '<', '<='))
-             ->raw('map{ ' . $mapping . ' }', $codeInt)
-             ->raw('filter{ x2 in ***}', $types)
+             ->raw($mapping, $codeInt)
+             ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
     }

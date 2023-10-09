@@ -26,8 +26,8 @@ use Exakat\Configsource\CommandLine;
 use DateTimeImmutable;
 
 class Exakat {
-	public const VERSION = '2.5.3';
-	public const BUILD = 1479;
+	public const VERSION = '2.6.0';
+	public const BUILD = 1483;
 	
 	private Config $config;
 

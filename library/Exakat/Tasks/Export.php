@@ -65,7 +65,7 @@ class Export extends Tasks {
         }
 
         if (version_compare($gremlinVersion, '3.4.0') >= 0) {
-            $queryTemplate = 'g.E().not(has("extra")).as("e").outV().as("outV").select("e").inV().as("inV").select("e", "inV", "outV").by(valueMap(true).by(unfold())).by(id()).by(id())';
+            $queryTemplate = 'g.E().not(has("extra")).as("e").outV().as("outV").select("e").inV().as("inV").select("e", "inV", "outV").by(__.valueMap(true).by(__.unfold())).by(__.id()).by(__.id())';
         } else {
             $queryTemplate = 'g.E()';
         }

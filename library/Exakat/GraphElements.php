@@ -481,9 +481,6 @@ abstract class GraphElements {
 										'typehint',
 										);
 
-    public Whitespa $ws ;
-    public int $eId;
-
     public static function linksAsList(): string {
         return makeList(self::$LINKS);
     }

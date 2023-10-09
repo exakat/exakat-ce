@@ -22,9 +22,10 @@
 
 namespace Exakat\Tasks;
 
-use Exakat\Analyzer\Rulesets;
+use Exakat\Vcs\None;
 use Exakat\Exakat;
 use Exakat\Helpers\Timer;
+use Exakat\Analyzer\Rulesets;
 use Exakat\Exceptions\MissingGremlin;
 use Exakat\Exceptions\InvalidProjectName;
 use Exakat\Exceptions\NoCodeInProject;
@@ -37,7 +38,6 @@ use Exakat\Tasks\Helpers\ReportConfig;
 use Exception;
 use Symfony\Component\Process\Process;
 use Exakat\Vcs\Vcs;
-use Exakat\Vcs\Vcs\None;
 use Exakat\Log;
 use const PARALLEL_WAIT_MS;
 

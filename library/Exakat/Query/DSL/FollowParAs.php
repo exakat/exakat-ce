@@ -87,7 +87,7 @@ class FollowParAs extends DSL {
       .coalesce(__.hasLabel("Parenthesis").out("CODE"), 
                 __.hasLabel("Assignation").out("RIGHT")$follow
       )
-).until(__.not(hasLabel("Parenthesis", "Assignation", $labels)))
+).until(__.not(hasLabel("Parenthesis", "Assignation" $labels)))
 .not(hasLabel("Parenthesis" $labels))
 .not(hasLabel("Assignation").has("token", "T_EQUAL"))
 GREMLIN

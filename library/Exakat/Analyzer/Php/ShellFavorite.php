@@ -78,7 +78,7 @@ GREMLIN;
         $this->atomIs(array('Functioncall', 'Shell'))
              ->raw('or( hasLabel("Shell"), has("fullnspath", within("\\\\exec", "\\\\shell_exec")))')
              ->raw($mapping)
-             ->raw('where(is(within(***)))', array_keys($types))
+             ->isEqual(array_keys($types))
              ->back('first');
         $this->prepareQuery();
     }

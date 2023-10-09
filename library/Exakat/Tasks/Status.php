@@ -22,11 +22,11 @@
 
 namespace Exakat\Tasks;
 
-use Exakat\Exceptions\NoSuchProject;
-use Exakat\Reports\Reports;
-use Exakat\Vcs\Vcs;
-use Exakat\Vcs\Vcs\None;
 use Exakat\Exakat;
+use Exakat\Vcs\Vcs;
+use Exakat\Vcs\None;
+use Exakat\Reports\Reports;
+use Exakat\Exceptions\NoSuchProject;
 
 class Status extends Tasks {
     public const CONCURENCE = self::ANYTIME;

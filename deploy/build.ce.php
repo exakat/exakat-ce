@@ -396,6 +396,6 @@ print number_format(($end - $begin) / 1000000).' ms'.PHP_EOL;
 print shell_exec('php ' . PHAR_NAME).PHP_EOL;
 
 //copy(PHAR_NAME, '../exakatGithubAction/exakat.phar');
-//copy(PHAR_NAME, '../docker/exakat.phar');
+copy(PHAR_NAME, '../exakat-docker/exakat.ce.phar');
 
 ?>

@@ -73,7 +73,7 @@ GREMLIN;
              ->tokenIs(array('T_LOGICAL_AND', 'T_LOGICAL_XOR', 'T_LOGICAL_OR',
                              'T_BOOLEAN_AND',                  'T_BOOLEAN_OR', ))
              ->raw($mapping, $operators)
-             ->raw('where(is(within(***)))', $types)
+             ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
     }

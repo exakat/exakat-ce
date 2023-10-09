@@ -22,13 +22,12 @@
 
 namespace Exakat;
 
-use Exakat\Analyzer\Rulesets;
-use Exakat\Data\Methods;
-use Exakat\Exceptions\NoPhpBinary;
-use Exakat\Graph\Graph;
-use Exakat\Reports\Helpers\Docs;
-use Exakat\Stubs\Stubs;
 use Exakat\Config;
+use Exakat\Graph\Graph;
+use Exakat\Data\Methods;
+use Exakat\Analyzer\Rulesets;
+use Exakat\Reports\Helpers\Docs;
+use Exakat\Exceptions\NoPhpBinary;
 
 class Container {
     private bool $verbose    = false;

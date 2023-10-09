@@ -22,10 +22,10 @@
 
 namespace Exakat\Analyzer\Complete;
 
-
 class ExtendedTypehints extends Complete {
     public function dependsOn(): array {
         return array('Complete/SetParentDefinition',
+        			 'Complete/VariableTypehint',
                     );
     }
 
@@ -38,41 +38,34 @@ class ExtendedTypehints extends Complete {
              ->atomIsNot('Void')
              ->as('result')
              ->inIs('DEFINITION')
-             ->atomIs('Interface')
+             ->atomIs(array('Interface', 'Class')) //@todo Why do I need a double calll here ? 
+             ->goToAllChildren(self::INCLUDE_SELF)
              ->outIs('DEFINITION')
-             ->inIs('IMPLEMENTS')
+             ->inIs(array('IMPLEMENTS', 'EXTENDS'))
              ->atomIs(array('Interface', 'Class'))
-             ->goToAllChildren(self::EXCLUDE_SELF)
-             ->raw('not(where(__.in("DEFINITION").where(eq("result"))))')
+             ->goToAllChildren(self::INCLUDE_SELF)
+             ->raw('dedup().not(where(__.in("DEFINITION").where(eq("result"))))')
              ->addETo('DEFINITION', 'result');
         $this->prepareQuery();
 
         // arguments
-        $this->atomIs(self::FUNCTIONS_ALL)
-             ->outIs('ARGUMENT')
-             ->outIs('TYPEHINT')
-             ->atomIsNot('Void')
-             ->as('result')
-             ->inIs('DEFINITION')
-             ->atomIs(array('Interface', 'Class'))
-             ->goToAllChildren(self::EXCLUDE_SELF)
-             ->raw('not(where(__.out("DEFINITION").where(eq("result"))))')
-             ->addETo('DEFINITION', 'result');
-        $this->prepareQuery();
-
         // properties
-        $this->atomIs('Ppp')
+        $this->atomIs(array('Parameter', 'Ppp'))
              ->outIs('TYPEHINT')
              ->atomIsNot('Void')
              ->as('result')
              ->inIs('DEFINITION')
              ->atomIs(array('Interface', 'Class'))
-             ->goToAllChildren(self::EXCLUDE_SELF)
-             ->raw('not(where(__.out("DEFINITION").where(eq("result"))))')
+             ->goToAllChildren(self::INCLUDE_SELF)
+             ->outIs('DEFINITION')
+             ->inIs(array('IMPLEMENTS', 'EXTENDS'))
+             ->atomIs(array('Interface', 'Class'))
+             ->goToAllChildren(self::INCLUDE_SELF)
+             ->raw('dedup().not(where(__.out("DEFINITION").where(eq("result"))))')
              ->addETo('DEFINITION', 'result');
         $this->prepareQuery();
 
-        // variables?
+        // No need for variables : they already have it done with VariableTypehint
 
         // special case for static (PHP 8.0)
     }

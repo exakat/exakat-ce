@@ -75,7 +75,7 @@ GREMLIN;
              ->outIs(array('RETURNTYPE', 'TYPEHINT'))
              ->fullcodeIs(array('?', 'null'), self::CASE_INSENSITIVE)
              ->raw('map{ ' . $mapping . ' }')
-             ->raw('filter{ x2 in ***}', $types)
+             ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
     }

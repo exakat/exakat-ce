@@ -151,6 +151,9 @@ class IsExt extends Plugin {
                 if (in_array(makeFullNsPath($atom->noDelimiter), $this->extFunctions, STRICT_COMPARISON)) {
                     $atom->isExt = true;
                 }
+                if (in_array(makeFullNsPath($atom->noDelimiter), $this->extClasses, STRICT_COMPARISON)) {
+                    $atom->isExt = true;
+                }
                 break;
 
             case 'Ppp' :

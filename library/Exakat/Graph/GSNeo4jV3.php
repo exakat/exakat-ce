@@ -30,12 +30,13 @@ use Brightzone\GremlinDriver\ServerException;
 use Exakat\Exceptions\UnknownGremlinVersion;
 
 class GSNeo4jV3 extends Graph {
-    public const GREMLIN_VERSIONS  = array('3.4', '3.5', '3.6');
+    public const GREMLIN_VERSIONS  = array('3.4', '3.5', '3.6', '3.7');
     public const CONFIG_PREFIX     = 'gsneo4jv3';
 
     public const GREMLIN_PLUGINS_COUNTS  = array('3.4' => 72,
                                                  '3.5' => 72,
                                                  '3.6' => 106,
+                                                 '3.7' => 106,
                                                  );
     private string     $gremlinVersion = '3.6';
     private Connection $db;
@@ -43,30 +44,30 @@ class GSNeo4jV3 extends Graph {
     public function getInfo(): array {
         $stats = array();
 
-        if (empty($this->folder)) {
+        if (empty($this->path)) {
             $stats['configured'] = 'No gsneo4jv3_folder configured in config/exakat.ini.';
-        } elseif (!file_exists($this->folder)) {
-            $stats['installed'] = 'No (folder : ' . $this->folder . ')';
-        } elseif (!file_exists($this->folder . '/ext/neo4j-gremlin/')) {
-            $stats['installed'] = 'Partially (missing neo4j folder : ' . $this->folder . ')';
+        } elseif (!file_exists($this->path)) {
+            $stats['installed'] = 'No (folder : ' . $this->path . ')';
+        } elseif (!file_exists($this->path . '/ext/neo4j-gremlin/')) {
+            $stats['installed'] = 'Partially (missing neo4j folder : ' . $this->path . ')';
         } else {
-            $stats['installed'] = "Yes (folder : {$this->folder})";
+            $stats['installed'] = "Yes (folder : {$this->path})";
             $stats['host'] = $this->config->gsneo4jv3_host;
             $stats['port'] = $this->config->gsneo4jv3_port;
 
-            $plugins = glob("{$this->folder}/ext/neo4j-gremlin/plugin/*.jar");
+            $plugins = glob("{$this->path}/ext/neo4j-gremlin/plugin/*.jar");
             if (!in_array(count($plugins), self::GREMLIN_PLUGINS_COUNTS)) {
                 $stats['grapes failed'] = 'Partially installed neo4j plugin. Please, check installation docs, and "grab" again : some of the files are missing for neo4j.';
             }
 
-            $gremlinJar = glob("{$this->folder}/lib/gremlin-core-*.jar");
+            $gremlinJar = glob("{$this->path}/lib/gremlin-core-*.jar");
             $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
             preg_match('/gremlin-core-([0-9.]+)\.\d+.jar/', $gremlinVersion, $r);
             $gremlinVersion = $r[1] ?? 'unknown gremlin version';
             $stats['gremlin version'] = $gremlinVersion;
             $this->gremlinVersion = $gremlinVersion;
 
-            $neo4jJar = glob("{$this->folder}/ext/neo4j-gremlin/lib/neo4j-*.jar");
+            $neo4jJar = glob("{$this->path}/ext/neo4j-gremlin/lib/neo4j-*.jar");
             $neo4jJar = array_filter($neo4jJar, function (string $x): int {
                 return preg_match('#/neo4j-\d\.\d\.\d\.jar#', $x);
             });
@@ -76,8 +77,8 @@ class GSNeo4jV3 extends Graph {
             $neo4jVersion = substr($neo4jVersion, 6, -4);
             $stats['neo4j version'] = $neo4jVersion;
 
-            if (file_exists("{$this->folder}/db/gsneo4jv3.pid")) {
-                $stats['running'] = 'Yes (PID : ' . trim(file_get_contents("{$this->folder}/db/gsneo4jv3.pid")) . ')';
+            if (file_exists("{$this->path}/db/gsneo4jv3.pid")) {
+                $stats['running'] = 'Yes (PID : ' . trim(file_get_contents("{$this->path}/db/gsneo4jv3.pid")) . ')';
             }
         }
 
@@ -97,7 +98,7 @@ class GSNeo4jV3 extends Graph {
 
         $gremlinJar = glob("{$this->folder}/lib/gremlin-core-*.jar");
         $gremlinVersion = basename(array_pop($gremlinJar) ?? '');
-        // 3.4/3.5
+        // 3.4/3.5/3.6
         preg_match('/gremlin-core-([0-9.]+)\.\d+.jar/', $gremlinVersion, $r);
         $gremlinVersion = $r[1] ?? 'unknown gremlin version';
         $stats['gremlin version'] = $gremlinVersion;

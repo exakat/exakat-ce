@@ -51,7 +51,7 @@ abstract class Graph {
 
     public function __construct(Config $config) {
         $this->config = $config;
-        $this->path = $this->config->projects_root . '/' . $this->config->{static::CONFIG_PREFIX . '_folder'};
+        $this->path = $this->config->{static::CONFIG_PREFIX . '_folder'};
     }
 
     abstract public function query(string $query, array $params = array(),array $load = array()): GraphResults;

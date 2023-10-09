@@ -64,7 +64,7 @@ class VariableTypehint extends Analyzer {
                       ->atomIsNot('Void')
                       // Skips self transforming variables
                       // removes multiple assignations when they are of the same type
-                      ->raw('groupCount().by(choose(label())
+                      ->raw('groupCount().by(__.choose(__.label())
 			     .option("Integer",         constant("int"))
 //			     .option("Addition",        constant("int"))
 			     .option("Multiplication",  constant("int"))

@@ -57,7 +57,6 @@ class WrongTypeForNativeFunction extends Analyzer {
         }
         $returntypes['null']    = $this->readStubs('getFunctionsByReturnType', array('null' ,  Methods::LOOSE));
         $returntypes['false']   = $this->readStubs('getFunctionsByReturnType', array('false' , Methods::LOOSE));
-        ;
 
         $returnOtherTypes = array();
         foreach ($returntypes as $type => $functions) {

@@ -388,3 +388,11 @@ postconditions
 invariants
 programmatically
 phpdoc
+traversable
+throwable
+codebase
+codebases
+zval
+decrypting
+intersectional
+DNF

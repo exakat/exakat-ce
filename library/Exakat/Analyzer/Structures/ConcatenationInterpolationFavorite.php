@@ -26,16 +26,12 @@ use Exakat\Analyzer\Analyzer;
 
 class ConcatenationInterpolationFavorite extends Analyzer {
     public function analyze(): void {
-        $mapping = <<<'GREMLIN'
-x2 = it.get().label();
-GREMLIN;
         $storage = array('concatenation'  => 'Concatenation',
                          'string'         => 'String');
 
         $this->atomIs(array('Concatenation', 'String'))
              ->hasOut('CONCAT') // Obvious for concat, selective for String
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw('groupCount("gf").by(label).cap("gf")');
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -65,11 +61,8 @@ GREMLIN;
         }
         $types = array_keys($types);
 
-        $this->atomIs(array('Concatenation', 'String'))
-             ->hasOut('CONCAT') // Obvious for concat, selective for String
-             ->raw("sideEffect{ $mapping }")
-             ->raw('filter{ x2 in ***}', $types)
-             ->back('first');
+        $this->atomIs($types)
+             ->hasOut('CONCAT'); // Obvious for concat, selective for String;
         $this->prepareQuery();
     }
 }
