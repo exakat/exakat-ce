@@ -172,7 +172,6 @@ class Export extends Tasks {
 
         if ($filenames = $this->config->filename) {
             foreach ($filenames as $filename) {
-                $filename = array_pop($filenames);
                 if (in_array('Dot', $this->config->project_reports, STRICT_COMPARISON)) {
                     $fp = fopen($filename . '.dot', 'w+');
                 } elseif (in_array('Vis', $this->config->project_reports, STRICT_COMPARISON)) {

@@ -55,12 +55,12 @@ SQL;
     }
 
     public function analyze(): void {
-    	// function foo() { a::C(); }
-    	$calls = array_merge(self::FUNCTIONS_CALLS,
-    						 array(	'Member',
-    						 		'Staticproperty',
-    						 )
-    	);
+        // function foo() { a::C(); }
+        $calls = array_merge(self::FUNCTIONS_CALLS,
+            array(	'Member',
+                   'Staticproperty',
+            )
+        );
 
         $this ->atomIs($calls, self::WITHOUT_CONSTANTS)
 //              ->has('fullnspath')

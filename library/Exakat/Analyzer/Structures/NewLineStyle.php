@@ -36,7 +36,7 @@ class NewLineStyle extends Analyzer {
                               __.hasLabel("String").not(where(__.in("CONCAT").hasLabel("String", "Heredoc"))).has("noDelimiter", "\\\\n")
                              )')
              ->raw($mapping)
-             ->raw('groupCount("gf").cap("gf")');
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {

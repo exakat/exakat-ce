@@ -44,7 +44,7 @@ class Diplomat extends Emissary {
     }
 
     public function dependsOnAnalysis(): array {
-        return array('CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81',
+        return array('CompatibilityPHP80', 'CompatibilityPHP81', 'CompatibilityPHP82',
                      'Appinfo',
                      'Analyze',
                      );

@@ -25,7 +25,7 @@ namespace Exakat\Tasks;
 class Install extends Tasks {
     public const CONCURENCE = self::NONE;
 
-    public const TINKERGRAPH_VERSION = '3.6.1';
+    public const TINKERGRAPH_VERSION = '3.7.0';
 
     public function run(): void {
         $error = array();
@@ -38,10 +38,10 @@ class Install extends Tasks {
         }
 
         $res = shell_exec('zip -help 2>&1') ?? '';
-        if (!str_contains($res, 'Zip 3.0')  ) {
-            $error[] = 'Please install Zip 3.0 or more recent';
-        } else {
+        if (str_contains($res, 'Zip 3.0')  ) {
             print "Zip : OK\n";
+        } else {
+            $error[] = 'Please install Zip 3.0 or more recent';
         }
 
         if (!empty($error)) {

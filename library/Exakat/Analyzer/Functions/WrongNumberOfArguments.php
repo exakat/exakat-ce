@@ -61,7 +61,11 @@ class WrongNumberOfArguments extends Analyzer {
             if (!isset($called[$name])) {
                 continue;
             }
-            $argsMins[$name] = $function['args_min'];
+            if ($function['name'] === '\array_keys') {
+	            $argsMins[$name] = 1;
+            } else {
+	            $argsMins[$name] = $function['args_min'];
+            }
 
             if ($function['args_max'] < \MAX_ARGS) {
                 $argsMaxs[$name] = $function['args_max'];
@@ -360,9 +364,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isLessHash('count', $argsMins, 'fnp')
+             ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
 
@@ -386,9 +390,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isLessHash('count', $argsMins, 'fnp')
+             ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
 
@@ -406,9 +410,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
 
@@ -432,9 +436,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
 
@@ -452,9 +456,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isLessHash('count', $argsMins, 'fnp')
+             ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
 
@@ -476,9 +480,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isLessHash('count', $argsMins, 'fnp')
+             ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
 
@@ -495,9 +499,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
 
@@ -518,9 +522,9 @@ class WrongNumberOfArguments extends Analyzer {
              ->savePropertyAs('fullcode', 'name')
              ->inIs('NAME')
 
-             ->raw('sideEffect{ fnp = fnp + "::" + name.toLowerCase(); }')
+			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
-             ->isMoreHash('count', $argsMaxs, 'fnp')
+             ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');
         $this->prepareQuery();
     }

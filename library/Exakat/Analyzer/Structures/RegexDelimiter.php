@@ -42,7 +42,7 @@ class RegexDelimiter extends Analyzer {
              ->noDelimiterIsNot('')
              ->raw(pregOptionE::FETCH_DELIMITER)
              ->raw('map{ delimiter; }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -82,7 +82,8 @@ class RegexDelimiter extends Analyzer {
              ->tokenIs(array('T_CONSTANT_ENCAPSED_STRING', 'T_ENCAPSED_AND_WHITESPACE'))
              ->noDelimiterIsNot('')
              ->raw(pregOptionE::FETCH_DELIMITER)
-             ->raw('filter{ delimiter in *** }', $types)
+             ->raw('map{ delimiter; }')
+             ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
     }

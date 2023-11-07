@@ -91,6 +91,7 @@ $links
     private function toStyle(array $array = array()): string {
         $return = array();
         foreach ($array as $name => $value) {
+        	assert(is_string($value), "Some value is not passed to toStyle in  Mermaid report");
             $value = addslashes((string) $value);
             $return[] = "$name=\"$value\"";
         }

@@ -42,7 +42,7 @@ coalesce(
     __.hasLabel("New").out("NEW").has("fullnspath").sideEffect{ type = it.get().value("fullnspath");},
     __.hasLabel("Functioncall", "Methodcall", "Staticmethodcall").in("DEFINITION").has("typehint", "one").out("RETURNTYPE").has("fullnspath").sideEffect{ type = it.get().value("fullnspath");},
 
-    __.hasLabel("Variable").in("DEFINITION").optional(__.in("NAME")).has("typehint","one").out("TYPEHINT").has('fullnspath').sideEffect{ type = it.get().values("fullnspath"); },
+    __.hasLabel("Variable").in("DEFINITION").optional(__.in("NAME")).has("typehint","one").out("TYPEHINT").has('fullnspath').sideEffect{ type = it.get().value("fullnspath"); },
     __.hasLabel("Member", "Staticproperty").in("DEFINITION").hasLabel("Propertydefinition").in("PPP").has("typehint","one").out("TYPEHINT").has('fullnspath').sideEffect{ type = it.get().value("fullnspath"); }
 ).sideEffect{ $variable = type; }
 

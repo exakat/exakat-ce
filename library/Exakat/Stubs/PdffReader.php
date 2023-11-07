@@ -373,7 +373,7 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $version => $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
-                    $methods = array_keys((array_filter((array) ($class->methods ?? array()), $filter)));
+                    $methods = array_keys(array_filter((array) ($class->methods ?? array()), $filter));
                     $methods = array_map(static function (string $method) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $method;
                     }, $methods);
@@ -402,7 +402,7 @@ class PdffReader extends Stubs implements StubsInterface {
         foreach ($this->data->versions as $namespaceList) {
             foreach ($namespaceList as $namespace => $namespaceDetails) {
                 foreach ($namespaceDetails->classes as $class) {
-                    $methods = array_column((array_filter((array) ($class->methods ?? array()), $filter)), 'name');
+                    $methods = array_column( array_filter((array) ($class->methods ?? array()), $filter), 'name');
                     $methods = array_map(static function (string $method) use ($namespace, $class): string {
                         return mb_strtolower($namespace . $class->name) . '::' . $method;
                     }, $methods);

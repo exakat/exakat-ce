@@ -30,11 +30,10 @@ class DeclareStrict extends Analyzer {
 
     public function analyze(): void {
         $mapping = <<<'GREMLIN'
-if (it.get().label() == "Sequence") {
-    x2 = "relaxed types";
-} else {
-    x2 = "strict types";
-}
+choose(__.hasLabel("Sequence"), 
+	constant('relaxed types'),
+	constant('strict types'),
+)
 GREMLIN;
         $storage = array('strict types'  => 'strict types',
                          'relaxed types' => 'relaxed types');
@@ -44,14 +43,14 @@ GREMLIN;
              ->outIs('EXPRESSION')
              ->outIs('CODE')
              ->optional(
-             	$this->side()
-             		 ->outIs('EXPRESSION')
-             		 ->atomIs('Declare')
-             		 ->outIs('DECLARE')
-             		 ->fullcodeIs('strict_types = 1')
+                 $this->side()
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Declare')
+                      ->outIs('DECLARE')
+                      ->fullcodeIs('strict_types = 1')
              )
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw($mapping)
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -87,13 +86,13 @@ GREMLIN;
              ->outIs('EXPRESSION')
              ->outIs('CODE')
              ->optional(
-             	$this->side()
-             		 ->outIs('EXPRESSION')
-             		 ->atomIs('Declare')
-             		 ->outIs('DECLARE')
-             		 ->fullcodeIs('strict_types = 1')
+                 $this->side()
+                      ->outIs('EXPRESSION')
+                      ->atomIs('Declare')
+                      ->outIs('DECLARE')
+                      ->fullcodeIs('strict_types = 1')
              )
-             ->raw('map{ ' . $mapping . ' }')
+             ->raw($mapping)
              ->isEqual($types)
              ->back('first');
         $this->prepareQuery();

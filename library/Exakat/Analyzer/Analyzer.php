@@ -360,9 +360,9 @@ GREMLIN;
         if (!empty($double)) {
             $chunks = array_chunk($double, 200);
             foreach ($chunks as $list) {
-                $list = makeList($list);
+                $quotedList = makeList($list);
                 $query = <<<GREMLIN
-g.V({$list}).drop()
+g.V({$quotedList}).drop()
 GREMLIN;
                 $this->gremlin->query($query);
             }

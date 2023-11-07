@@ -31,7 +31,7 @@ class Docs {
     private AutoloadExt $ext;
     private AutoloadDev $dev;
 
-    private static $docs = null;
+    private static array $docs = array();
 
     public function __construct(string $pathToIni, AutoloadExt $ext, AutoloadDev $dev) {
         $this->pathToIni = $pathToIni;

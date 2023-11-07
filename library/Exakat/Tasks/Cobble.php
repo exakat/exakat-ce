@@ -107,7 +107,7 @@ class Cobble extends Tasks {
         }
 
         $loc = $this->datastore->getHash('loc');
-        if (intval($loc) === 0) {
+        if ((int) $loc === 0) {
             throw new NoCodeInProject((string) $this->config->project);
         }
 

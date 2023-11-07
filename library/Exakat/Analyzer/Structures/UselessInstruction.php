@@ -24,6 +24,7 @@
 namespace Exakat\Analyzer\Structures;
 
 use Exakat\Analyzer\Analyzer;
+use Exakat\Query\DSL\FollowParAs;
 
 class UselessInstruction extends Analyzer {
     public function dependsOn(): array {
@@ -42,7 +43,8 @@ class UselessInstruction extends Analyzer {
              ->atomIs(array('Array', 'Addition', 'Multiplication', 'Member', 'Staticproperty', 'Boolean',
                             'Magicconstant', 'Staticconstant', 'Integer', 'Float', 'Sign', 'Nsname',
                             'Identifier', 'String', 'Instanceof', 'Bitshift', 'Comparison', 'Null', 'Logical', 'Bitoperation',
-                            'Heredoc', 'Power', 'Coalesce', 'Ternary', 'Variable', 'Arrayliteral', 'New', 'Match', 'Spaceship'))
+                            'Heredoc', 'Power', 'Coalesce', 'Ternary', 'Variable', 'Arrayliteral', 'New', 'Match', 'Spaceship',
+                            'Clone'))
              ->noAtomInside(array('Functioncall', 'Staticmethodcall', 'Methodcall', 'Assignation', 'Defineconstant'));
         $this->prepareQuery();
 
@@ -181,9 +183,12 @@ class UselessInstruction extends Analyzer {
         $this->prepareQuery();
 
         // New in a clone
-        $this->atomIs(array('New', 'Clone'))
-             ->inIsIE(array('CODE', 'CLONE'))
-             ->atomIs('Clone');
+        $this->atomIs('Clone')
+        	 ->analyzerIsNot('self')
+             ->outIs('CLONE')
+			 ->followParAs(FollowParAs::FOLLOW_PARAS_TERNARY)
+			 ->atomIs(array('New', 'Clone'))
+             ->back('first');
         $this->prepareQuery();
 
         // Empty string in a concatenation

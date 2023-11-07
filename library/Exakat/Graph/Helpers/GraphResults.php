@@ -43,13 +43,13 @@ class GraphResults implements \ArrayAccess, \Iterator, \Countable {
             return;
         }
 
-        if (!isset($data[0])) {
-            $this->type = self::EMPTY;
-            $this->data = null;
-        } else {
+        if (isset($data[0])) {
             $this->type = self::ARRAY;
             $this->data = $data;
             $this->checkArray();
+        } else {
+            $this->type = self::EMPTY;
+            $this->data = null;
         }
     }
 

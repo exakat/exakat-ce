@@ -59,7 +59,7 @@ class HeredocDelimiterFavorite extends Analyzer {
         }
 
         $this->atomIs(array('Heredoc'))
-        	 ->is('delimiter', array_keys($types));
+             ->is('delimiter', array_keys($types));
         $this->prepareQuery();
     }
 }

@@ -38,7 +38,7 @@ class GSNeo4jV3 extends Graph {
                                                  '3.6' => 106,
                                                  '3.7' => 106,
                                                  );
-    private string     $gremlinVersion = '3.6';
+    private string     $gremlinVersion = '3.7';
     private Connection $db;
 
     public function getInfo(): array {
@@ -86,9 +86,9 @@ class GSNeo4jV3 extends Graph {
     }
 
     public function init(): void {
-        $this->host   = $this->config->gsneo4jv3_host;
-        $this->port   = $this->config->gsneo4jv3_port;
-        $this->folder = $this->config->gsneo4jv3_folder;
+        $this->host   = $this->config->gsneo4jv3_host ?? '';
+        $this->port   = $this->config->gsneo4jv3_port ?? '';
+        $this->folder = $this->config->gsneo4jv3_folder ?? '';
 
         if (!file_exists("{$this->folder}/lib/")) {
             // No local production, just skip init.

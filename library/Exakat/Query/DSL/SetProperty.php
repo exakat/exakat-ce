@@ -29,9 +29,11 @@ class SetProperty extends DSL {
 
         $this->assertProperty($property);
         if ($value === true) {
-            return new Command("sideEffect{ it.get().property(\"$property\", true); }");
+            return new Command("property(\"$property\", true)");
         } elseif ($value === false) {
-            return new Command("sideEffect{ it.get().property(\"$property\", false); }");
+            return new Command("property(\"$property\", false)");
+        } elseif (is_int($value)) {
+            return new Command("property(\"$property\", $value)");
         } elseif ($this->isVariable($value)) {
             return new Command("sideEffect{ it.get().property(\"$property\", $value); }");
         } else {

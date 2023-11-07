@@ -23,13 +23,38 @@
 
 namespace Exakat\Query\DSL;
 
+use Exception;
+
 class GroupCount extends DSL {
     public function run(): Command {
-        $this->assertArguments(1, func_num_args(), __METHOD__);
-        list($column) = func_get_args();
+    	switch(func_num_args()) {
+    		case 0: 
+		        return new Command("groupCount()");
+    			
+    		case 1:
+		        list($column) = func_get_args();
+		        
+		        if ($column === 'label') {
+			        return new Command("groupCount().by(label)");		        
+		        }
+		        
+		        if ($column === 'id') {
+			        return new Command("groupCount().by(id)");		        
+		        }
+		        
+		        if (is_string($column)) {
+			        return new Command("groupCount().by(\"$column\")");
+		        }
 
-        $this->assertProperty($column);
-        return new Command("groupCount('m').by('$column')");
+		        if (is_array($column)) {
+			        return new Command("groupCount().by(\"". implode('").by("', $column)."\")");
+		        }
+		        
+		        throw new Exception('Not supported type');
+		        
+		    default:
+		        $this->assertArguments(-1, func_num_args(), __METHOD__);
+    	}
     }
 }
 ?>

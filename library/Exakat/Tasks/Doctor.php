@@ -152,6 +152,7 @@ class Doctor extends Tasks {
         $stats['PHP']['ext/mbstring']           = extension_loaded('mbstring') ? 'Yes' : 'No (Compulsory, add --enable-mbstring to configure)';
         $stats['PHP']['ext/json']               = extension_loaded('json') ? 'Yes' : 'No';
         $stats['PHP']['ext/xmlwriter']          = extension_loaded('xmlwriter') ? 'Yes' : 'No (Optional, used by XML reports)';
+        $stats['PHP']['ext/openssl']            = extension_loaded('openssl') ? 'Yes' : 'No (Optional, used for https access to repositories)';
 
         if (extension_loaded('xdebug') === true) {
             $stats['PHP']['xdebug.max_nesting_level']            = (ini_get('xdebug.max_nesting_level') ) . ' (Must be -1 or more than 1000)';
@@ -181,7 +182,9 @@ class Doctor extends Tasks {
         }
 
         $stats['loader']['mode'] = $this->config->loader_mode;
-        $stats['loader']['parallel max'] = $this->config->loader_parallel_max ?? 'N/A';
+        if ($this->config->loader_mode !== 'Serial') {
+	        $stats['loader']['parallel max'] = $this->config->loader_parallel_max ?? 'N/A';
+        }
 
 
         if ($this->config->project !== null) {

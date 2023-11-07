@@ -25,7 +25,7 @@ namespace Exakat\Analyzer\Complete;
 class ExtendedTypehints extends Complete {
     public function dependsOn(): array {
         return array('Complete/SetParentDefinition',
-        			 'Complete/VariableTypehint',
+                     'Complete/VariableTypehint',
                     );
     }
 
@@ -38,7 +38,7 @@ class ExtendedTypehints extends Complete {
              ->atomIsNot('Void')
              ->as('result')
              ->inIs('DEFINITION')
-             ->atomIs(array('Interface', 'Class')) //@todo Why do I need a double calll here ? 
+             ->atomIs(array('Interface', 'Class')) //@todo Why do I need a double calll here ?
              ->goToAllChildren(self::INCLUDE_SELF)
              ->outIs('DEFINITION')
              ->inIs(array('IMPLEMENTS', 'EXTENDS'))

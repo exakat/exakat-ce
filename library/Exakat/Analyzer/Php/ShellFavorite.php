@@ -45,7 +45,7 @@ GREMLIN;
         $this->atomIs(array('Functioncall', 'Shell'))
              ->raw('or( hasLabel("Shell"), has("fullnspath", within("\\\\exec", "\\\\shell_exec")))')
              ->raw($mapping)
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {

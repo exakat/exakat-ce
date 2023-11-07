@@ -29,41 +29,41 @@ class InArray extends DSL {
     public function run(): Command {
         switch (func_num_args()) {
             case 2:
-		        list($name, $value) = func_get_args();
-		        $case = Analyzer::CASE_SENSITIVE;
+                list($name, $value) = func_get_args();
+                $case = Analyzer::CASE_SENSITIVE;
                 break;
 
             case 3:
-		        list($name, $value, $case) = func_get_args();
-		        if ($case !== Analyzer::CASE_SENSITIVE && $case !== Analyzer::CASE_INSENSITIVE) {
-			        assert(true, 'Third argument must be case sensitivity.');
-		        }
+                list($name, $value, $case) = func_get_args();
+                if ($case !== Analyzer::CASE_SENSITIVE && $case !== Analyzer::CASE_INSENSITIVE) {
+                    assert(true, 'Third argument must be case sensitivity.');
+                }
                 break;
 
             default:
-		        assert(false, 'Wrong number of argument for ' . __METHOD__ . '. 2 or 3 are expected, ' . func_num_args() . ' provided');
+                assert(false, 'Wrong number of argument for ' . __METHOD__ . '. 2 or 3 are expected, ' . func_num_args() . ' provided');
         }
 
-		assert(is_array($value), '2nd argument of '. __METHOD__.' must be an array');
-		$value = array_values($value);
+        assert(is_array($value), '2nd argument of ' . __METHOD__ . ' must be an array');
+        $value = array_values($value);
 
-		if ($this->isProperty($name)) {
-			if ($case === Analyzer::CASE_SENSITIVE) {
-	            return new Command('has("' . $name . '", within(***))', array($value));
-			} else {
-	            return new Command('has("'.$name.'").filter{ it.get().value("' . $name . '").toLowerCase() in ***}', array($value));
-			}
-		}
+        if ($this->isProperty($name)) {
+            if ($case === Analyzer::CASE_SENSITIVE) {
+                return new Command('has("' . $name . '", within(***))', array($value));
+            } else {
+                return new Command('has("' . $name . '").filter{ it.get().value("' . $name . '").toLowerCase() in ***}', array($value));
+            }
+        }
 
-		if ($this->isVariable($name)) {
-			if ($case === Analyzer::CASE_SENSITIVE) {
-	            return new Command('filter{' . $name . ' in ***}', array($value));
-			} else {
-	            return new Command('filter{ ' . $name . '.toLowerCase() in ***}', array($value));
-			}
-		}
+        if ($this->isVariable($name)) {
+            if ($case === Analyzer::CASE_SENSITIVE) {
+                return new Command('filter{' . $name . ' in ***}', array($value));
+            } else {
+                return new Command('filter{ ' . $name . '.toLowerCase() in ***}', array($value));
+            }
+        }
 
-		assert(false, 'Not a property nor a variable in '.__METHOD__);
+        assert(false, 'Not a property nor a variable in ' . __METHOD__);
     }
 }
 ?>

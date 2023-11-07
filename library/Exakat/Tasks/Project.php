@@ -55,7 +55,7 @@ class Project extends Tasks {
     private ?Process $process = null;
 
     private string $mode = 'serial';
-    
+
     private ?Log $finishLog = null;
 
     public function __construct(bool $subTask = self::IS_NOT_SUBTASK) {
@@ -250,7 +250,7 @@ class Project extends Tasks {
         $process->start();
         $this->process = $process;
         // Cheap synchrone run
-		$this->finishProcess();
+        $this->finishProcess();
 
         $this->logTime('Initial dump');
 
@@ -285,6 +285,12 @@ class Project extends Tasks {
             }
         }
         display('Reported project' . PHP_EOL);
+
+		$audit_end = time();
+        $this->datastore->addRow('hash', array('audit_end'       => $audit_end,
+                                               'audit_length'    => $audit_end - $audit_start,
+                                               )
+                                    );
 
         // Reset cache from Rulesets
         Rulesets::resetCache();
@@ -343,9 +349,7 @@ class Project extends Tasks {
             $res = $this->gremlin->query($query);
             $propertiesCount = $res[0];
 
-            $this->datastore->addRow('hash', array('audit_end'       => $audit_end,
-                                                   'audit_length'    => $audit_end - $audit_start,
-                                                   'graphNodes'      => $nodes,
+            $this->datastore->addRow('hash', array('graphNodes'      => $nodes,
                                                    'graphLinks'      => $links,
                                                    'graphProperties' => $properties,
                                                    ...$propertiesCount
@@ -375,6 +379,7 @@ class Project extends Tasks {
         global $VERBOSE;
         $oldVerbose = $VERBOSE;
         $VERBOSE = false;
+
         foreach ($rulesets as $ruleset) {
             $this->addSnitch(array('step'    => 'Analyze : ' . $ruleset,
                                    'project' => $this->config->project));
@@ -405,16 +410,10 @@ class Project extends Tasks {
                 $query = 'g.V().properties().count()';
                 $res = $this->gremlin->query($query);
                 $properties = $res[0];
-                /*                $query = 'g.V().properties().key().groupCount("m").cap("m")';
-                                $res = $this->gremlin->query($query);
-                                $propertiesCount = $res[0];
-                */
-                $this->datastore->addRow('hash', array('audit_end'       => $audit_end,
-                                                       'audit_length'    => $audit_end - $audit_start,
-                                                       'graphNodes'      => $nodes,
+
+                $this->datastore->addRow('hash', array('graphNodes'      => $nodes,
                                                        'graphLinks'      => $links,
                                                        'graphProperties' => $properties,
-//                                                       ...$propertiesCount
                                                        ));
 
                 // finish previous process (if any) before doint another one
@@ -433,6 +432,9 @@ class Project extends Tasks {
                                             ));
                     $process->start();
                     $this->process = $process;
+                    
+                    // Finish this process before going on.
+	                $this->finishProcess();
                 } else {
                     // Skip Dump, as it is auto-saving itself.
                     $dumpConfig = $this->config->duplicate(array('update'               => true,
@@ -465,13 +467,13 @@ class Project extends Tasks {
             if ($this->process->isRunning()) {
                 usleep(PARALLEL_WAIT_MS);
             } else {
-            	if ($this->finishLog === null) {
-			        $this->finishLog = new Log('finish',
-            			                       "{$this->config->projects_root}/projects/{$this->config->project}");
-            	}
-            
+                if ($this->finishLog === null) {
+                    $this->finishLog = new Log('finish',
+                        "{$this->config->projects_root}/projects/{$this->config->project}");
+                }
+
                 // @todo : put this in a log file
-                $this->finishLog->log($this->process->getPid().' '.$this->process->getOutput());
+                $this->finishLog->log($this->process->getPid() . ' ' . $this->process->getOutput());
                 $this->process = null;
             }
         };

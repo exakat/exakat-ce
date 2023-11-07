@@ -395,17 +395,23 @@ abstract class DSL {
             if ($this->isVariable($value)) {
                 return $value;
             } else {
-                return '"' . addslashes($value) . '"';
+                return '"' . addcslashes($value, '$"\'\\') . '"';
             }
-        } elseif (is_int($value)) {
+        } 
+        
+        if (is_int($value)) {
             return (string) $value;
-        } elseif ($value === null) {
+        } 
+        
+        if ($value === null) {
             return 'null';
-        } elseif (is_bool($value)) {
+        } 
+        
+        if (is_bool($value)) {
             return $value ? 'true' : 'false';
-        } else {
-            assert(false, 'Could not process value type : ' . gettype($value));
-        }
+        } 
+        
+        assert(false, 'Could not process value type : ' . gettype($value));
     }
 }
 

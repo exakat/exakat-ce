@@ -38,7 +38,8 @@ class Php80UnionTypehint extends Analyzer {
                  $this->side()
                       ->outIs(self::TYPE_LINKS)
                       ->fullcodeIsNot('?')
-                      ->raw('count().is(gt(1))')
+                      ->count()
+                      ->isMore(1)
              );
         $this->prepareQuery();
     }

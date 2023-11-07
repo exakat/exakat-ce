@@ -30,11 +30,10 @@ class NullTypeFavorite extends Analyzer {
 
     public function analyze(): void {
         $mapping = <<<'GREMLIN'
-if (it.get().value("fullcode") == '?' ) {
-    x2 = '?';
-} else {
-    x2 = 'null';
-}
+choose(__.has("fullcode", '?'), 
+	constant('?'),
+	constant('null')
+)
 GREMLIN;
         $storage = array('?'     => '?',
                          'null'  => 'null',
@@ -43,8 +42,8 @@ GREMLIN;
         $this->atomIs(array('Function', 'Method', 'Magicmethod', 'Arrowfunction', 'Closure', 'Parameter', 'Ppp'))
              ->outIs(self::TYPE_LINKS)
              ->fullcodeIs(array('?', 'null'), self::CASE_INSENSITIVE)
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw($mapping)
+             ->groupCount();
         $types = $this->rawQuery()->toArray()[0] ?? array();
         if (empty($types)) {
             return;
@@ -74,7 +73,7 @@ GREMLIN;
         $this->atomIs(array('Function', 'Method', 'Magicmethod', 'Arrowfunction', 'Closure', 'Parameter', 'Ppp'))
              ->outIs(array('RETURNTYPE', 'TYPEHINT'))
              ->fullcodeIs(array('?', 'null'), self::CASE_INSENSITIVE)
-             ->raw('map{ ' . $mapping . ' }')
+             ->raw($mapping)
              ->isEqual($types)
              ->back('first');
         $this->prepareQuery();

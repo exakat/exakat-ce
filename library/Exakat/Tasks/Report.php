@@ -62,9 +62,7 @@ class Report extends Tasks {
         $this->log = new Log ('reports',
             "{$this->config->projects_root}/projects/{$this->config->project}");
 
-        if (!empty($this->config->program)) {
-            $rulesets = $this->config->program;
-        } else {
+        if (empty($this->config->program)) {
             $rulesets = $this->config->project_rulesets;
 
             $unknown = array();
@@ -80,6 +78,8 @@ class Report extends Tasks {
             if (!empty($unknown)) {
                 throw new NoSuchRuleset(implode(', ', $unknown), $this->rulesets->getSuggestionRuleset($unknown));
             }
+        } else {
+            $rulesets = $this->config->program;
         }
 
         $dump = Dump::factory($this->config->dump, Dump::READ);

@@ -26,10 +26,8 @@ use Exakat\Analyzer\Analyzer;
 
 class ImplodeArgsOrder extends Analyzer {
     public function dependsOn(): array {
-        return array('Variables/IsLocalConstant',
-                     'Complete/CreateDefaultValues',
-                     'Complete/PropagateConstants',
-                     'Variables/SelfTransform',
+        return array('Complete/VariableTypehint',
+                     'Variables/IsLocalConstant',
                     );
     }
 
@@ -39,93 +37,42 @@ class ImplodeArgsOrder extends Analyzer {
         // detect an array in first arg
         // Constants
         $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
+             ->is('count', 2)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 0)
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
              ->back('first');
         $this->prepareQuery();
 
-        // Local variable, argument 0
+        // Local variable, 
         $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
+             ->is('count', 2)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 0)
-             ->atomIs('Variable')
-             ->inIs('DEFINITION')
-             ->outIs('DEFAULT')
-             ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
+             ->atomIs(array('Variable', 'Member', 'Staticproperty', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+             ->getType('type')
+             ->sameVariableAs('type', '\\array')
              ->back('first');
         $this->prepareQuery();
 
-        // Local variable, argument 1 with typehint
+        // detect an array in second arg
+        // Constants
         $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
-             ->analyzerIsNot('self')
-             ->outWithRank('ARGUMENT', 0)
-             ->goToTypehint()
-             ->fullnspathIs('\\array')
-             ->back('first');
-        $this->prepareQuery();
-
-        // Returntype
-        $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
-             ->analyzerIsNot('self')
-             ->outWithRank('ARGUMENT', 0)
-             ->atomIs(self::FUNCTIONS_CALLS)
-             ->inIs('DEFINITION')
-             ->outIs('RETURNTYPE')
-             ->fullnspathIs('\\array')
-             ->back('first');
-        $this->prepareQuery();
-
-        // detect a string in second arg
-        $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
+             ->is('count', 2)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 1)
-             ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
+             ->atomIs(self::STRINGS_ALL, self::WITH_CONSTANTS)
              ->back('first');
         $this->prepareQuery();
 
-        // Local variable, argument 1 with default value
+        // Local variable, 
         $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
+             ->is('count', 2)
              ->analyzerIsNot('self')
              ->outWithRank('ARGUMENT', 1)
-             ->atomIs('Variable')
-             ->filter(
-                 $this->side()
-                     ->inIs('DEFINITION')
-                     ->outIs('DEFAULT')
-                     ->atomIs(self::STRINGS_LITERALS, self::WITH_CONSTANTS)
-                      ->inIs('RIGHT')
-                      ->outIs('LEFT')
-                      ->analyzerIsNot('Variables/SelfTransform')
-             )
-             ->back('first');
-        $this->prepareQuery();
-
-        // Local variable, argument 1 with typehint
-        $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
-             ->analyzerIsNot('self')
-             ->outWithRank('ARGUMENT', 1)
-             ->goToTypehint()
-             ->fullnspathIs('\\string')
-             ->back('first');
-        $this->prepareQuery();
-
-        // Returntype
-        $this->atomFunctionIs($functions)
-             ->isNot('count', 1)
-             ->analyzerIsNot('self')
-             ->outWithRank('ARGUMENT', 1)
-             ->atomIs(self::FUNCTIONS_CALLS)
-             ->inIs('DEFINITION')
-             ->outIs('RETURNTYPE')
-             ->fullnspathIs('\\string')
+             ->atomIs(array('Variable', 'Member', 'Staticproperty', 'Functioncall', 'Methodcall', 'Staticmethodcall'))
+             ->getType('type')
+             ->sameVariableAs('type', '\\string')
              ->back('first');
         $this->prepareQuery();
     }

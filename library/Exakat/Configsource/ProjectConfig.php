@@ -272,7 +272,7 @@ class ProjectConfig extends Config {
                 if (is_array($values)) {
                     $cc .= "{$name}[] = " . implode(";\n{$name}[] = ", $values) . ";\n; default = {$default[$key][$name]}\n";
                 } elseif (is_string($values)) {
-                    if (intval($values) === 0) {
+                    if ((int) $values === 0) {
                         $cc .= "{$name} = \"$values\";\n; default = {$default[$key][$name]}\n";
                     } else {
                         $cc .= "{$name} = $values;\n; default = {$default[$key][$name]}\n";

@@ -32,7 +32,7 @@ class IfThenReturnFavorite extends Analyzer {
                          'none'             => 'none',
                          );
 
-		$choose = <<<'GREMLIN'
+        $choose = <<<'GREMLIN'
 choose(__.out("RETURN").hasLabel("Ternary"),
     constant("ternary"),
     choose(__.in("EXPRESSION").in("THEN").hasLabel("Ifthen").out("ELSE").out("EXPRESSION").hasLabel("Return"),

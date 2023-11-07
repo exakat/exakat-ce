@@ -51,14 +51,14 @@ class NoNullForNative extends Analyzer {
 
         foreach ($acceptNull as $position => $list) {
             foreach ($list as $function) {
-                if (!str_contains($function, '::')  ) {
-                    if (isset($called[$function])) {
-                        $functions[$position][] = $function;
-                    }
-                } else {
+                if (str_contains($function, '::')) {
                     list($class, $method) = explode('::', $function, 2);
                     if (isset($calledClasses[$class])) {
                         $allMethods[$class][$position][] = $method;
+                    }
+                } else {
+                    if (isset($called[$function])) {
+                        $functions[$position][] = $function;
                     }
                 }
             }

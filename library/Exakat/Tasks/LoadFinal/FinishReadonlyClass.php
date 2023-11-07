@@ -27,6 +27,7 @@ use Exakat\Analyzer\Analyzer;
 class FinishReadonlyClass extends LoadFinal {
     public function run(): void {
         // readonly class x { private $p; }
+        // @todo : move this to load.php to skip this query
         $query = $this->newQuery('Readonly from class to properties');
         $query->atomIs(array('Class', 'Classanonymous'), Analyzer::WITHOUT_CONSTANTS)
             // Reach first parent

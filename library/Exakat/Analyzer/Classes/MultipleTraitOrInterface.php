@@ -27,6 +27,8 @@ use Exakat\Analyzer\Analyzer;
 class MultipleTraitOrInterface extends Analyzer {
     public function analyze(): void {
         // interfaces
+        // class x implements i, i, i {}
+        // @todo : review this, as it is not possible since PHP 5.0 
         $this->atomIs(self::CLASSES_ALL)
              ->analyzerIsNot('self')
              ->raw(<<<'GREMLIN'
@@ -49,8 +51,10 @@ GREMLIN
         $this->prepareQuery();
 
         // traits
+        // class x { use t, t, t;}
         $this->atomIs(self::CLASSES_ALL)
              ->analyzerIsNot('self')
+             
              ->raw(<<<'GREMLIN'
 where( __.sideEffect{counts = [:]}
          .out("USE").hasLabel("Usetrait").out("USE")

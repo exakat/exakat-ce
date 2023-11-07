@@ -171,7 +171,7 @@ class Parallel extends Driver {
     }
 
     public function finish(bool $once = false): void {
-        display(count($this->processes) . " process\n");
+        display(count($this->processes) . " process to finish\n");
 
         $this->monitorProcesses();
 
@@ -180,6 +180,8 @@ class Parallel extends Driver {
             $this->monitorProcesses();
             usleep(PARALLEL_WAIT_MS);
         }
+
+        display("Process finished\n");
     }
 
     private function log(string $message): void {

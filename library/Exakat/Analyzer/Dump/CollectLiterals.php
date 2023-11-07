@@ -43,26 +43,17 @@ SQL;
 
             $this->atomIs($type)
                  ->is('constant', true)
-                 ->raw(<<<'GREMLIN'
-sideEffect{ name = it.get().value("fullcode");
-            line = it.get().value('line');
-          }
-GREMLIN
-                 )
+                 ->savePropertyAs('fullcode', 'name')
+                 ->savePropertyAs('line', 'theLine')
                  ->goToFile()
                  ->savePropertyAs('fullcode', 'file')
-                 ->raw(<<<'GREMLIN'
-map{ 
-  x = ['name': name,
-       'file': file,
-       'line': line
-       ];
-}
-GREMLIN
-                 );
+                 ->getVariable(array('name' => 'name',
+                 					 'file' => 'file',
+                 					 'line' => 'theLine',
+                 					 ));
             $this->prepareQuery();
         }
-        
+
         $this->analyzerTable = 'stringEncodings';
         $this->analyzerSQLTable = <<<'SQL'
 CREATE TABLE stringEncodings (  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,21 +65,13 @@ SQL;
 
         // @todo 'Concatenation', 'Heredoc' too
         $this->atomIs('String')
-             ->raw(<<<'GREMLIN'
-map{ 
-    x = ['encoding':it.get().values('encoding')[0]];
-    if (it.get().values('block')[0] != null) {
-        x['block'] = it.get().values('block')[0];
-    } else {
-        x['block'] = '';
-        x['encoding'] = '';
-    }
-    x;
-}
-.unique()
-
-GREMLIN
-             );
+             ->is('constant', true)
+        	 ->savePropertyAs('encoding', 'theEncoding')
+        	 ->savePropertyAs('block', 'theBlock')
+             ->getVariable(array('encoding' => 'theEncoding',
+                 				 'block' => 'theBlock',
+                 			))
+              ->unique();
         $this->prepareQuery();
     }
 
@@ -99,13 +82,21 @@ GREMLIN
 
         $report = array();
 
-        // @todo : we need all the other tables of literals
         $dump = Dump::factory($this->config->dump);
         $r = $dump->fetchTable('literalString', array('name'));
         $report['string'] = $r->toArray();
 
         $r = $dump->fetchTable('literalInteger', array('name'));
         $report['integer'] = $r->toArray();
+
+        $r = $dump->fetchTable('literalFloat', array('name'));
+        $report['float'] = $r->toArray();
+
+        $r = $dump->fetchTable('literalHeredoc', array('name'));
+        $report['heredoc'] = $r->toArray();
+
+        $r = $dump->fetchTable('literalArrayliteral', array('name'));
+        $report['array'] = $r->toArray();
 
         return $report;
     }

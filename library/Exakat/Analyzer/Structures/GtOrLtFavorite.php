@@ -45,7 +45,7 @@ GREMLIN;
         $this->atomIs('Comparison')
              ->codeIs(array('>=', '>', '<', '<='))
              ->raw($mapping, $codeInt)
-             ->raw('groupCount("gf").cap("gf")');
+             ->groupCount();
         $types = $this->rawQuery()->toArray()[0] ?? array();
 
         $store = array();

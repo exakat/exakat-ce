@@ -237,11 +237,11 @@ class CommandLine extends Config {
                         if (empty($this->config['configuration'])) {
                             $this->config['configuration'] = array();
                         }
-                        if (!str_contains($args[$id + 1], '=')  ) {
+                        if (str_contains($args[$id + 1], '=')  ) {
+                            list($name, $value) = explode('=', trim($args[$id + 1]));
+                        } else {
                             $name = trim($args[$id + 1]);
                             $value = '';
-                        } else {
-                            list($name, $value) = explode('=', trim($args[$id + 1]));
                         }
                         if (in_array($name, array('ignore_dirs', 'include_dirs', 'file_extensions'), STRICT_COMPARISON)) {
                             if (!isset($this->config['configuration'][$name])) {

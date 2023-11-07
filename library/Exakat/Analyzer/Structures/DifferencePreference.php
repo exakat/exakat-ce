@@ -35,10 +35,11 @@ class DifferencePreference extends Analyzer {
         $storage = array('!='  => '!=',
                          '<>'  => '<>');
 
+		$mapping = 'choose(__.has("code", within(***)), constant("!="), constant("<>"))';
         $this->atomIs('Comparison')
              ->codeIs(array('!=', '<>'))
-             ->raw('map(choose(__.has("code", within(***)), constant("!="), constant("<>")))', $different)
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw($mapping, $different)
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -70,8 +71,8 @@ class DifferencePreference extends Analyzer {
 
         $this->atomIs('Comparison')
              ->codeIs(array('!=', '<>'))
-             ->raw('map(choose(__.has("code", within(***)), constant("!="), constant("<>")))', $different)
-             ->raw('where(is(within(***)))', array_keys($types))
+             ->raw($mapping, $different)
+             ->isEqual(array_keys($types))
              ->back('first');
         $this->prepareQuery();
     }

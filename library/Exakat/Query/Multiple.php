@@ -42,14 +42,12 @@ class Multiple {
     private const SACK = '.withSack(["m":[], "processed":0, "total":0])';
 
     private int     $id        ;
-    private Project $project   ;
     private string  $analyzer  ;
     private string  $php       ;
     private array   $queries   ;
 
     public function __construct(int $id, Project $project, string $analyzer, string $php, array $dependsOn = array()) {
         $this->id        = $id;
-        $this->project   = $project;
         $this->analyzer  = $analyzer;
         $this->php       = $php;
 

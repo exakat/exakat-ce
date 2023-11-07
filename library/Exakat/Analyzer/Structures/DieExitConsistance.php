@@ -27,15 +27,11 @@ use Exakat\Analyzer\Analyzer;
 
 class DieExitConsistance extends Analyzer {
     public function analyze(): void {
-        $mapping = <<<'GREMLIN'
-x2 = it.get().value("fullnspath");
-GREMLIN;
         $storage = array('die'  => '\die',
                          'exit' => '\exit');
 
         $this->atomIs('Exit')
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->groupCount('fullnspath');
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -66,9 +62,7 @@ GREMLIN;
         $types = array_keys($types);
 
         $this->atomIs('Exit')
-             ->raw('sideEffect{ ' . $mapping . ' }')
-             ->raw('filter{ x2 in ***}', $types)
-             ->back('first');
+             ->fullnspathIs($types);
         $this->prepareQuery();
     }
 }

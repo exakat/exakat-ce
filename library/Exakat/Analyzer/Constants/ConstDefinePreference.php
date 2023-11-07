@@ -35,7 +35,7 @@ GREMLIN;
 
         $this->atomIs(array('Const', 'Defineconstant'))
              ->hasNoIn('CONST')
-             ->raw('groupCount("gf").by(label).cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->groupCount('label');
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -64,10 +64,8 @@ GREMLIN;
         }
         $types = array_keys($types);
 
-        $this->atomIs(array('Const', 'Defineconstant'))
-             ->hasNoIn('CONST')
-             ->raw('filter{ it.get().label() in ***}', $types)
-             ->back('first');
+        $this->atomIs($types)
+             ->hasNoIn('CONST');
         $this->prepareQuery();
     }
 }

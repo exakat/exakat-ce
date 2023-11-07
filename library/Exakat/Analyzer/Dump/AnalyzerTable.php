@@ -52,7 +52,7 @@ abstract class AnalyzerTable extends AnalyzerDump {
         foreach ($c as $row) {
             $valuesSQL[] = "(NULL, '" . implode("', '", array_map(array('\\Sqlite3', 'escapeString'), $row)) . "') \n";
         }
-        
+
         $chunks = array_chunk($valuesSQL, SQLITE_CHUNK_SIZE);
         foreach ($chunks as $chunk) {
             $query = 'INSERT INTO ' . $this->analyzerTable . ' VALUES ' . implode(', ', $chunk);
@@ -95,7 +95,7 @@ abstract class AnalyzerTable extends AnalyzerDump {
     public function execQuery(): int {
         assert($this->analyzerTable !== 'no analyzer table name', 'No table name for ' . static::class);
         assert($this->analyzerSQLTable !== 'no analyzer sql creation', 'No table name for ' . static::class);
-        
+
         if (count($this->dumpQueries) >= 2) {
             $this->prepareForDump($this->dumpQueries);
         }

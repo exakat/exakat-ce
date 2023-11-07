@@ -22,6 +22,7 @@
 
 namespace Exakat\Analyzer\Dump;
 
+use Sqlite3;
 use Exakat\Dump\Dump;
 use Exakat\Reports\Helpers\Results;
 
@@ -39,8 +40,8 @@ abstract class AnalyzerHashAnalyzer extends AnalyzerDump {
         $valuesSQL = array();
         $chunk = 0;
         foreach ($this->analyzerValues as $values) {
-            $values = array_map(array('\\Sqlite3', 'escapeString'), $values);
-            $valuesSQL[] = "('" . join("', '", $values) . "') \n";
+            $values = array_map(array(Sqlite3::class, 'escapeString'), $values);
+            $valuesSQL[] = "(" . makeList($values, "'") . ")";
         }
 
         $chunks = array_chunk($valuesSQL, SQLITE_CHUNK_SIZE);

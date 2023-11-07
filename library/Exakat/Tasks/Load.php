@@ -698,8 +698,6 @@ $this->phptokens::T_YIELD,
 
         $stubs = $this->config->stubs;
 
-        display('Sequential processing');
-
         $this->gremlin = Graph::getConnexion($this->config, $this->config->gremlin);
 
         $nbTokens = $this->runProjectCore($files);
@@ -2004,7 +2002,6 @@ $this->phptokens::T_YIELD,
             $case->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
         }
 
-
         return $case;
     }
 
@@ -2538,7 +2535,7 @@ $this->phptokens::T_YIELD,
         $nsname->fullcode    = $nsname->code;
         $nsname->token       = $token;
         $nsname->absolute    = $absolute;
-        $nsname->ws->opening = $nsname->code;
+        $nsname->ws->opening = '';
         $this->runPlugins($nsname);
 
         return $nsname;
@@ -3084,7 +3081,9 @@ $this->phptokens::T_YIELD,
             if ($this->nextIs(array($this->phptokens::T_COLON ), 2)) {
                 $this->moveToNext();
                 $rankName = $this->tokens[$this->id][1];
+                $rankNameOpening = $this->tokens[$this->id][1].$this->tokens[$this->id][4]; 
                 $this->moveToNext(); // skip :
+                $rankNameOpening .= ':' . $this->tokens[$this->id][4]; 
             }
 
             while (!$this->nextIs(array($this->phptokens::T_COMMA,
@@ -3101,7 +3100,8 @@ $this->phptokens::T_YIELD,
             $this->popExpression();
             if (!empty($rankName)) {
                 $index->rankName = '$' . $rankName;
-            }
+				$index->ws->opening = $rankNameOpening;
+			}
 
             $this->checkPhpdoc();
             while ($this->nextIs(array($this->phptokens::T_COMMA))) {
@@ -3124,7 +3124,8 @@ $this->phptokens::T_YIELD,
                 }
 
                 $fullcode[] = (empty($index->rankName) ? '' : trim($index->rankName, '$') . ' : ' ) . $index->fullcode;
-                $arguments->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $separator = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $arguments->ws->separators[] = $separator;
                 $argumentsList[] = $index;
 
                 $this->moveToNext(); // Skipping the comma ,
@@ -3194,7 +3195,7 @@ $this->phptokens::T_YIELD,
 
         $identifier = $this->addAtom($getFullnspath === self::WITH_FULLNSPATH ? 'Identifier' : 'Name', $this->id);
         $identifier->fullcode    = $this->tokens[$this->id][1];
-        $identifier->ws->opening = $this->tokens[$this->id][1];
+        $identifier->ws->opening = '';
 
         if ($getFullnspath === self::WITH_FULLNSPATH) {
             $this->getFullnspath($identifier, 'const', $identifier);
@@ -3823,8 +3824,8 @@ $this->phptokens::T_YIELD,
             $string->fullnspath = '\\null';
         } else {
             $string = $this->addAtom('Identifier', $this->id);
-            $string->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
-            $string->ws->closing = '';
+            $string->ws->opening = '';
+            $string->ws->closing = $this->tokens[$this->id][4];
         }
 
         $string->fullcode   = $this->tokens[$this->id][1];
@@ -3880,7 +3881,7 @@ $this->phptokens::T_YIELD,
         $this->addLink($plusplus, $previous, 'POSTPLUSPLUS');
 
         $plusplus->fullcode = $previous->fullcode . $this->tokens[$this->id][1];
-        $plusplus->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $plusplus->ws->closing = $this->tokens[$current][1] . $this->tokens[$current][4];
 
         $this->pushExpression($plusplus);
         $this->runPlugins($plusplus, array('POSTPLUSPLUS' => $previous));
@@ -4887,7 +4888,7 @@ $this->phptokens::T_YIELD,
         if ($this->nextIs(array($this->phptokens::T_DEFAULT))) {
             $case = $this->addAtom('Default', $current);
             $case->fullcode = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
-            
+
             $item = null;
             $this->moveToNext();
             $case->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
@@ -5714,7 +5715,6 @@ $this->phptokens::T_YIELD,
             $namespace->ws->closing = '';
         } else {
             // Process block
-
             $block = $this->processFollowingBlock(array($this->phptokens::T_CLOSE_CURLY));
             $this->addLink($namespace, $block, 'BLOCK');
 
@@ -6762,9 +6762,9 @@ $this->phptokens::T_YIELD,
         $operator->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
         $newcall = $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$current][0]), 'NEW', ' ');
         $this->runPlugins($newcall, array());
-        
-        if ($this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT && 
-        	$newcall->fullnspath === $this->currentClassTrait->getCurrent()->fullnspath) {
+
+        if ($this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT &&
+            $newcall->fullnspath === $this->currentClassTrait->getCurrent()->fullnspath) {
             $this->calls->addCall(Calls::METHOD, $this->currentClassTrait->getCurrent()->fullnspath . '::__construct', $newcall);
             $this->currentMethods->addCall('__construct', $newcall);
         }
@@ -7046,7 +7046,6 @@ $this->phptokens::T_YIELD,
             $this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT &&
             ($left->fullnspath === $this->currentClassTrait->getCurrent()->fullnspath ||
             $left->fullnspath === '\\parent')) {
-
             $this->currentMethods->addCall(mb_strtolower($right->code), $static);
         }
 
@@ -7420,10 +7419,11 @@ $this->phptokens::T_YIELD,
     }
 
     private function makePhpdoc(AtomInterface $node): void {
-        foreach ($this->phpDocs as $phpDoc) {
+        foreach ($this->phpDocs as $rank => $phpDoc) {
             $atom = $this->addAtom('Phpdoc', $phpDoc['id']);
             $atom->code = $phpDoc[1];
             $atom->fullcode = $phpDoc[1];
+            $atom->rank = $rank;
             $atom->ws->closing = $phpDoc[4];
             $this->addLink($node, $atom, 'PHPDOC');
         }
@@ -7458,6 +7458,7 @@ $this->phptokens::T_YIELD,
             $this->popExpression();
             $attribute->ws->closing .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
 
+			$attribute->rank = count($this->attributes);
             $this->attributes[] = $attribute;
             $this->moveToNext(); // skip ]
         } while ($this->nextIs(array($this->phptokens::T_COMMA), 0));

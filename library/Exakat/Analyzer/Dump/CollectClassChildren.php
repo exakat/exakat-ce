@@ -29,7 +29,7 @@ class CollectClassChildren extends AnalyzerHashHashResults {
     public function analyze(): void {
         // class a {} class b extends a;
         $this->atomIs('Class')
-             ->raw('groupCount("m").by( __.out("DEFINITION").inE().hasLabel("EXTENDS").not(has("extra", true)).outV().hasLabel("Class").count() ).cap("m")');
+             ->raw('groupCount().by( __.out("DEFINITION").inE().hasLabel("EXTENDS").not(has("extra", true)).outV().hasLabel("Class").count() )');
 
         $this->prepareQuery();
     }

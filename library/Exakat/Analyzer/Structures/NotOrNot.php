@@ -33,7 +33,7 @@ class NotOrNot extends Analyzer {
 
         $this->atomIs('Not')
              ->raw($mapping)
-             ->raw('groupCount("gf").cap("gf")');
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {

@@ -38,9 +38,9 @@ class Dedup extends DSL {
 
         if (is_array($by)) {
             foreach ($by as $b) {
-                assert($this->assertLabel($b));
+                assert($this->assertProperty($b));
             }
-            return new Command('dedup(' . makeList($by) . ')');
+            return new Command('dedup().by("' . implode('").by("', $by) . '")');
         }
 
         assert($this->assertProperty($by));

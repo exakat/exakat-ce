@@ -173,14 +173,14 @@ class Emissary extends Reports {
         $menu = $this->makeMenu();
         $inventories = array();
         foreach ($this->inventories as $fileName => $title) {
-            if (!str_contains($fileName, '/')  ) {
-                $inventory_name = $fileName;
-            } else {
+            if (str_contains($fileName, '/')) {
                 $total = $this->dump->fetchAnalysersCounts(array($fileName))->toInt();
                 if ($total < 1) {
                     continue;
                 }
                 $inventory_name = strtolower(basename($fileName));
+            } else {
+                $inventory_name = $fileName;
             }
             $inventories []= "              <li><a href=\"inventories_$inventory_name.html\"><i class=\"fa fa-circle-o\"></i>$title</a></li>\n";
         }
@@ -592,8 +592,8 @@ HTML;
             if (empty($row['extends'])) {
                 $parents[$row['id']] = array();
             } else {
-                array_collect_by($parents, $row['id'],(intval($row['extends']) > 0 ? $row['extends'] : 'class ' . $row['extends']));
-                array_collect_by($children, ( (int) $row['extends'] > 0 ? $row['extends'] : 'class ' . $row['extends']), $row['id']);
+                array_collect_by($parents, $row['id'], (int) $row['extends'] > 0 ? $row['extends'] : 'class ' . $row['extends']);
+                array_collect_by($children, (int) $row['extends'] > 0 ? $row['extends'] : 'class ' . $row['extends'], $row['id']);
             }
             $names[$row['id']] = $row['type'] . ' ' . $namespaces[$row['namespaceId']] . $row['name'];
         }
@@ -602,8 +602,8 @@ HTML;
         $implements = array();
         foreach ($res_implements as $row) {
             array_collect_by($implements, $row['implementing'], $row);
-            array_collect_by($parents, $row['implementing'], intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements']);
-            array_collect_by($children, intval($row['implements']) > 0 ? $row['implements'] : 'interface ' . $row['implements'], $row['implementing']);
+            array_collect_by($parents, $row['implementing'], (int) $row['implements'] > 0 ? $row['implements'] : 'interface ' . $row['implements']);
+            array_collect_by($children, (int) $row['implements'] > 0 ? $row['implements'] : 'interface ' . $row['implements'], $row['implementing']);
         }
 
         /// Collect classes and interfaces that accept a class as typehint : class C extends B {} => C => [C, B]
@@ -3376,7 +3376,7 @@ HTML
             if ($value['key'] === 'withoutTypehint') {
                 $withoutType = (int) $value['value'];
             } else {
-            	$withoutType = 0;
+                $withoutType = 0;
             }
 
             if (in_array($value['key'], array('totalArguments',
@@ -3415,7 +3415,7 @@ HTML
             }
         }
 
-        $data['no type'] = $withoutType;
+        $data['no type'] = 0;
         arsort($data);
 
         $html = array();
@@ -3746,15 +3746,15 @@ HTML;
             return '-';
         }
 
-        if (!str_contains($cve, ', ')  ) {
-            $cveHtml = '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=' . $cve . '">' . $cve . '</a>';
-        } else {
+        if (str_contains($cve, ', ')  ) {
             $cves = explode(', ', $cve);
             $cveHtml = array();
             foreach ($cves as $cve) {
                 $cveHtml[] = '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=' . $cve . '">' . $cve . '</a>';
             }
             $cveHtml = implode(',<br />', $cveHtml);
+        } else {
+            $cveHtml = '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=' . $cve . '">' . $cve . '</a>';
         }
 
         return $cveHtml;

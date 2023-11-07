@@ -46,7 +46,7 @@ GREMLIN;
              ->atomIs(self::LITERALS)
              ->back('first')
              ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -82,7 +82,7 @@ GREMLIN;
              ->atomIs(self::LITERALS)
              ->back('first')
              ->raw('sideEffect{ ' . $mapping . '; }')
-             ->raw('filter{ x2 in *** ; }', $types)
+             ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
     }

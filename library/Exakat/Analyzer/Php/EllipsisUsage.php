@@ -42,6 +42,9 @@ class EllipsisUsage extends Analyzer {
                             'Identifier',
                             'Nsname',
                             'Parameter',
+                            'Parenthesis',
+                            'New',
+                            'Clone',
                             ))
              ->is('variadic', true);
         $this->prepareQuery();

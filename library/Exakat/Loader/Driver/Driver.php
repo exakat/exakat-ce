@@ -57,10 +57,13 @@ abstract class Driver {
 
         if ($max_parallel == 1) {
             // Fallback to 1 in case of 1 paralell.
+            display('Loading with Serial (Fallback)');
             return new Serial($path, $graphdb, $log);
         } elseif (class_exists($class)) {
+            display('Loading with '.$class);
             return new $class($path, $graphdb, $log, $max_parallel);
         } else {
+            display('Loading with Serial (Default)');
             return new Serial($path, $graphdb, $log);
         }
     }

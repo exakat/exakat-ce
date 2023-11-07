@@ -49,7 +49,7 @@ class SetParentDefinition extends Complete {
 
         // new parent() to __construct
         $this->atomIs('New', self::WITHOUT_CONSTANTS)
-        	 ->outIs('NEW')
+             ->outIs('NEW')
              ->fullnspathIs('\\parent', self::CASE_SENSITIVE)
              ->as('origin')
              ->inIs('DEFINITION')
@@ -58,7 +58,7 @@ class SetParentDefinition extends Complete {
              ->outIs('NAME')
              ->fullcodeIs('__construct', self::CASE_INSENSITIVE)
              ->inIs('NAME')
-//             ->hasNoLinkYet('DEFINITION', 'first') 
+//             ->hasNoLinkYet('DEFINITION', 'first')
 // There is already one DEFINITION for the class
              ->addETo('DEFINITION', 'origin');
         $this->prepareQuery();

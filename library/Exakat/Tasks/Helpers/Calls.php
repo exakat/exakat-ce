@@ -128,10 +128,13 @@ SQL;
         } else {
             $globalpath = $this->makeGlobalPath($fullnspath);
         }
+        
+        $fullnspath = Sqlite3::escapeString($fullnspath);
+        $globalpath = Sqlite3::escapeString($globalpath);
 
         $this->calls[] = "('{$type}',
-                           '{$this->callsSqlite->escapeString($fullnspath)}',
-                           '{$this->callsSqlite->escapeString($globalpath)}',
+                           '{$fullnspath}',
+                           '{$globalpath}',
                            '{$call->atom}',
                            '{$call->id}')";
     }
@@ -180,9 +183,11 @@ SQL;
         foreach ($types as $type) {
             $globalpath = $this->makeGlobalPath($fullnspath);
 
+			$quotedFullnspath = sqlite3::escapeString($fullnspath);
+			$quotedGlobalpath = sqlite3::escapeString($globalpath);
             $this->calls[] = "('$type',
-                               '{$this->callsSqlite->escapeString($fullnspath)}',
-                               '{$this->callsSqlite->escapeString($globalpath)}',
+                               '{$quotedFullnspath}',
+                               '{$quotedGlobalpath}',
                                '{$atom}',
                                '{$call->id}')";
         }
@@ -196,9 +201,11 @@ SQL;
 
         $globalpath = $this->makeGlobalPath($fullnspath);
 
+		$quotedFullnspath = sqlite3::escapeString($fullnspath);
+		$quotedGlobalpath = sqlite3::escapeString($globalpath);
         $this->definitions[] = "('{$type}',
-                                 '{$this->callsSqlite->escapeString($fullnspath)}',
-                                 '{$this->callsSqlite->escapeString($globalpath)}',
+                                 '{$quotedFullnspath}',
+                                 '{$quotedGlobalpath}',
                                  '{$definition->atom}',
                                  '{$definition->id}')";
     }

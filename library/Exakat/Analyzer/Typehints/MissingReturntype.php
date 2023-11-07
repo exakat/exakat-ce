@@ -46,7 +46,7 @@ class MissingReturntype extends Analyzer {
 
              ->collectTypehints('returntypes')
              ->back('first') // important because returntype does change the location with the side effect
-             
+
              ->raw(<<<'GREMLIN'
 or(
     __.filter{!('\\string'  in returntypes); }.in("ANALYZED").has("analyzer", 'Typehints/CouldBeString'),

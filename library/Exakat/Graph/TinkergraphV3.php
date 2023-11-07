@@ -37,9 +37,9 @@ class TinkergraphV3 extends Graph {
     private Connection $db;
 
     public function init(): void {
-        $this->host   = $this->config->tinkergraphv3_host;
-        $this->port   = $this->config->tinkergraphv3_port;
-        $this->folder = $this->config->tinkergraphv3_folder;
+        $this->host   = $this->config->tinkergraphv3_host ?? '';
+        $this->port   = $this->config->tinkergraphv3_port ?? '';
+        $this->folder = $this->config->tinkergraphv3_folder ?? '';
 
         if (!file_exists("{$this->folder}/lib/")) {
             // No local production, just skip init.

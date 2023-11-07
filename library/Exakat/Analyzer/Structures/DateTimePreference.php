@@ -48,7 +48,7 @@ GREMLIN;
 
         $this->atomIs(array('New', 'Functioncall', 'Staticmethodcall'))
              ->raw($mapping)
-             ->raw('groupCount("gf").cap("gf")');
+             ->groupCount();
         $types = $this->rawQuery()
                       ->toArray();
 

@@ -156,10 +156,10 @@ class Analyze extends Tasks {
             $this->progressBar = new Progressbar(0, count($original), $this->config->screen_cols);
         }
 
-        if (!$this->config->noDependencies) {
-            $analyzersClass = $this->getAndSortDependencies($analyzersClass);
-        } else {
+        if ($this->config->noDependencies) {
             $this->dependencies = array_fill_keys($analyzersClass, array());
+        } else {
+            $analyzersClass = $this->getAndSortDependencies($analyzersClass);
         }
 
         $rounds = 0;
@@ -197,7 +197,7 @@ class Analyze extends Tasks {
 
     private function fetchAnalyzers(string $analyzerClass): Analyzer {
         if (isset($this->analyzers[$analyzerClass])) {
-            $this->analyzers[$analyzerClass];
+            return $this->analyzers[$analyzerClass];
         }
 
         return $this->rulesets->getInstance($analyzerClass);
@@ -458,12 +458,12 @@ class Analyze extends Tasks {
                 $timer->end();
                 display( "$analyzerClass : generic exception " . get_class($e) . "\n");
                 $this->log->log("$analyzerClass\t" . ($timer->duration()) . "\texception : " . $e::class . "\terror : " . $e->getMessage() . "\tfile : " . $e->getFile() . ':' . $e->getLine());
-                if (!str_contains($e->getMessage(), 'The server exceeded one of the timeout settings ')  ) {
-                    display($e->getMessage());
-                    $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
-                } else {
+                if (str_contains($e->getMessage(), 'The server exceeded one of the timeout settings ')  ) {
                     $counts = $this->gremlin->query('g.V().hasLabel("Analysis").has("analyzer", "' . $analyzer->getInBaseName() . '").property("count", __.out("ANALYZED").count()).values("count")')->toInt();
                     $this->datastore->addRow('analyzed', array($analyzerClass => $counts ) );
+                } else {
+                    display($e->getMessage());
+                    $this->datastore->addRow('analyzed', array($analyzerClass => 0 ) );
                 }
                 $this->checkAnalyzed();
 

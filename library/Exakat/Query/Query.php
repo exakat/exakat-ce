@@ -69,7 +69,7 @@ class Query {
             return $this;
         }
 
-        assert(!(empty($this->commands) && empty($this->sides)) || in_array(strtolower($name), array('atomis', 'analyzeris', 'atomfunctionis', 'addatom')), "First step in Query must be atomIs, atomFunctionIs, addAtom or analyzerIs ($name used)");
+        assert(!(empty($this->commands) && empty($this->sides)) || in_array(strtolower($name), array('atomis', 'atomisnot', 'analyzeris', 'atomfunctionis', 'addatom')), "First step in Query must be atomIs, atomFunctionIs, addAtom or analyzerIs ($name used)");
 
         $command = $this->queryFactory->factory($name);
         if (in_array($name, array('not', 'filter', 'optional', 'sideEffect'), STRICT_COMPARISON)) {
@@ -92,6 +92,7 @@ class Query {
         if (count($this->commands) === 1 && empty($this->sides)) {
             switch (strtolower($name)) {
                 case 'atomis' :
+                case 'atomisnot' :
                 case 'atomfunctionis' :
                     $this->_as('first');
                     $this->raw('sack{m,v -> ++m["processed"]; m;}');

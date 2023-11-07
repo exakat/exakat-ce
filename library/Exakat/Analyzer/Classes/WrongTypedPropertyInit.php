@@ -99,10 +99,10 @@ class WrongTypedPropertyInit extends Analyzer {
              ->outIs('DEFAULT')
              ->atomIs(array('Integer', 'Float', 'Null', 'Boolean', 'Arrayliteral', 'String', 'New', 'Functioncall'), self::WITH_CONSTANTS)
              ->not(
-             	$this->side()
-             		 ->atomIs('New')
-             		 ->outIs('NEW')
-             		 ->hasNo('fullnspath')             
+                 $this->side()
+                      ->atomIs('New')
+                      ->outIs('NEW')
+                      ->hasNo('fullnspath')
              )
              ->savePropertyAs('label', 'type')
 

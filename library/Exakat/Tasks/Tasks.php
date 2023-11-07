@@ -72,7 +72,7 @@ abstract class Tasks {
 
         if (static::CONCURENCE !== self::ANYTIME && $subTask === self::IS_NOT_SUBTASK) {
             if (self::$semaphore === self::NO_SEMAPHORE) {
-				if (static::CONCURENCE === self::DUMP) {
+                if (static::CONCURENCE === self::DUMP) {
                     self::$semaphorePort = $this->config->concurencyCheck + 2;
                 } else {
                     self::$semaphorePort = $this->config->concurencyCheck + 3;

@@ -403,6 +403,11 @@ function makeArray(mixed $value): array {
 const FNP_CONSTANT     = true;
 const FNP_NOT_CONSTANT = false;
 
+function getIdentifier(string $fullnspath) : string {
+	$bits = explode('\\', $fullnspath);
+	return array_pop($bits);
+}
+
 function makeFullNsPath(array|string $functions, bool $constant = \FNP_NOT_CONSTANT) : mixed {
     // case for classes and functions
     if ($constant === \FNP_NOT_CONSTANT) {

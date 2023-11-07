@@ -31,21 +31,22 @@ class GlobalsVsGlobal extends Analyzer {
         if (empty($globals)) {
             return;
         }
+        
+        $globals = (int) $globals[0];
 
         $mapping = <<<GREMLIN
-if (it.get().value("code") == $globals[0]) { 
-    x2 = "GLOBALS"; 
-} else {
-    x2 = "global"; 
-}
+choose( __.has("code", $globals), 
+	constant("GLOBALS"),
+	constant("global")
+)
 GREMLIN;
         $storage = array('$GLOBALS' => 'GLOBALS',
                          'global'   => 'global');
 
         $this->atomIs(self::VARIABLES_ALL)
-             ->raw('or( has("code", ' . $globals[0] . '), __.in("GLOBAL")) ')
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw('or( has("code", ' . $globals . '), __.in("GLOBAL")) ')
+             ->raw($mapping)
+             ->groupCount();
         $types = $this->rawQuery()->toArray()[0];
 
         $store = array();
@@ -70,9 +71,9 @@ GREMLIN;
         }
 
         $this->atomIs(self::VARIABLES_ALL)
-             ->raw('or( has("code", ' . $globals[0] . '), __.in("GLOBAL")) ')
-             ->raw('sideEffect{ ' . $mapping . ' }')
-             ->raw('filter{ x2 in ***}', $types)
+             ->raw('or( has("code", ' . $globals. '), __.in("GLOBAL")) ')
+             ->raw($mapping)
+             ->isEqual(array_keys($types))
              ->back('first');
         $this->prepareQuery();
     }

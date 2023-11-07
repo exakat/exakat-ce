@@ -104,11 +104,11 @@ class Git extends Vcs {
         $res = $this->shell("cd {$this->destinationFull}/; {$this->executable} branch | grep \\* 2>&1");
         $branch = substr(trim($res), 2);
 
-        if (!str_contains($branch, ' detached at ')  ) {
-            $resInitial = $this->shell("cd {$this->destinationFull}/; {$this->executable} show-ref --heads $branch");
-        } else {
+        if (str_contains($branch, ' detached at ')  ) {
             $resInitial = $this->shell("cd {$this->destinationFull}/; {$this->executable} checkout --quiet; {$this->executable} pull; {$this->executable} branch | grep '* '");
             $branch = '';
+        } else {
+            $resInitial = $this->shell("cd {$this->destinationFull}/; {$this->executable} show-ref --heads $branch");
         }
 
         $this->shell("cd {$this->destinationFull}/;GIT_TERMINAL_PROMPT=0  {$this->executable} checkout $branch --quiet; {$this->executable} pull --quiet");
@@ -147,7 +147,7 @@ class Git extends Vcs {
         $res = $this->shell("cd {$this->destinationFull}; {$this->executable} rev-parse HEAD 2>&1");
         return trim($res);
     }
-    
+
     public function getInstallationInfo(): array {
         $this->check();
         $stats = array('installed' => $this->installed === true ? 'Yes' : 'No',
@@ -195,7 +195,7 @@ class Git extends Vcs {
             }
 
             if (preg_match('#@@ \-(\d+)(,(\d+))? \+(\d+)(,(\d+))?( )@@#', $line, $r, PREG_UNMATCHED_AS_NULL)) {
-                $c = ($r[6] ?? 1) - ($r[3] ?? 1);
+                $c = ((int) $r[6] ?? 1) - ((int) $r[3] ?? 1);
                 if ($c !== 0) {
                     $changes[] = array('file' => $file,
                                        'line' => $r[1],

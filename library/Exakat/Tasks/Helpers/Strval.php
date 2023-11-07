@@ -265,7 +265,7 @@ class Strval extends Plugin {
                 if (isset($this->constants[$atom->fullnspath])) {
                     $atom->noDelimiter = $this->constants[$atom->fullnspath];
                 }
-                $atom->noDelimiter == null;
+                $atom->noDelimiter = null;
                 break;
                 // fallthrough
 

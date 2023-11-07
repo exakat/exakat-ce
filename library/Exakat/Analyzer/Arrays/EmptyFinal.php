@@ -27,21 +27,17 @@ use Exakat\Analyzer\Analyzer;
 class EmptyFinal extends Analyzer {
     public function analyze(): void {
         $mapping = <<<'GREMLIN'
-if( it.get().value('fullcode').toString().reverse().take(4).reverse() == ',  )' ||
-    it.get().value('fullcode').toString().reverse().take(4).reverse() == ',  ]') {
-        x2 = 'trailing';
-    } else {
-        x2 = 'full';
-    }
-    x2;
-     
+choose(__.has("fullcode", regex(",  [\\]\\)]\$")), 
+  constant("trailing"),
+  constant("full")
+)
 GREMLIN;
         $storage = array('Empty'  => 'trailing',
                          'Filled' => 'full');
 
         $this->atomIs('Arrayliteral')
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+			 ->raw($mapping)
+			 ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -70,8 +66,8 @@ GREMLIN;
         $types = array_keys($types);
 
         $this->atomIs('Arrayliteral')
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('filter{ x2 in ***}', $types)
+			 ->raw($mapping)
+             ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
     }

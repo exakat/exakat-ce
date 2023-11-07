@@ -285,12 +285,36 @@ class Dump extends Tasks {
         }
         $this->dump->removeResults($analyzers);
         $filters = array_merge(...$filters);
+        
+        $chunk = $analyzers;
+        $query = $this->newQuery('processMultipleResults ' . $id);
+        $query->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS)
+              ->is('analyzer', $chunk)
+              ->values(array("analysis" => "analyzer",
+              				 "count"    => "count",
+              				 ));
+        $query->prepareRawQuery();
+        $res = $this->gremlin->query($query->getQuery(), $query->getArguments())->toArray();
+        
+        $empties  = array();
+        $unconfig = array();
+        $list     = array();
+        foreach($res as $analysis) {
+        	if ($analysis[0]['valuescount'] == -1 || $analysis[0]['valuescount'] == -2) { 
+        		$unconfig[] = $analysis[0]['valuesanalysis'];
+        	} elseif ($analysis[0]['valuescount'] == 0) { 
+        		$empties[] = $analysis[0]['valuesanalysis'];
+        	} else  {
+        		$list[$analysis[0]['valuesanalysis']] = $analysis[0]['valuescount'];
+        	}
+        }
 
-        $chunks = array_chunk($analyzers, 50);
+		// @todo : this could be optimized by limiting the expected number of results to ~10k each query. 
+        $chunks = array_chunk(array_keys($list), 50);
         // Gremlin only accepts chunks of 255 maximum
 
         $this->log->log('Processing ' . count($chunks) . " of 50\n");
-
+        
         foreach ($chunks as $id => $chunk) {
             $query = $this->newQuery('processMultipleResults ' . $id);
             $query->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS)
@@ -307,10 +331,10 @@ class Dump extends Tasks {
             ->raw(<<<GREMLIN
 where( __.until( hasLabel("Project") ).repeat( 
     __.in($this->linksDown)
-      .sideEffect{ if (it.get().label() in ["Function", "Closure", "Arrowfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
-      .sideEffect{ if (it.get().label() in ["Class", "Trait", "Interface", "Classanonymous"]) { theClass = it.get().value("fullcode")} }
-      .sideEffect{ if (it.get().label() == "Namespace") { theNamespace = it.get().value("fullnspath"); } }
-      .sideEffect{ if (it.get().label() == "File") { file = it.get().value("fullcode")} }
+      .sideEffect( __.hasLabel("Function", "Closure", "Arrowfunction", "Magicmethod", "Method").sideEffect{ theFunction = it.get().value("fullcode")} )
+      .sideEffect( __.hasLabel("Class", "Trait", "Interface", "Enum", "Classanonymous").sideEffect{ theClass = it.get().value("fullcode")} )
+      .sideEffect( __.hasLabel("Namespace").sideEffect{theNamespace = it.get().value("fullnspath"); } )
+      .sideEffect( __.hasLabel("File").sideEffect{ file = it.get().value("fullcode"); } )
        ).fold()
 )
 GREMLIN
@@ -370,23 +394,17 @@ GREMLIN
         $this->log->log(implode(', ', $analyzers) . "\ndumped results $saved");
 
         $error = 0;
-        $emptyResults = $skipAnalysis;
-        foreach ($analyzers as $class) {
-            if (!isset($counts[$class]) || $counts[$class] < 0) {
-                $emptyResults[] = $class;
-                continue;
-            }
+        // @todo : we are loosing the -1 here (in $unconfig). 
+        $emptyResults = array_merge($skipAnalysis, $empties, $unconfig);
+        foreach(array_keys($list) as $class) {
 
             if ($counts[$class] === 0 && !isset($readCounts[$class])) {
-//            	$this->log->log("No results saved for $class\n");
                 display("No results saved for $class\n");
                 $emptyResults[] = $class;
             } elseif ($counts[$class] === ($readCounts[$class] ?? 0)) {
-//            	$this->log->log("All $counts[$class] results saved for $class\n");
                 display("All $counts[$class] results saved for $class\n");
             } else {
                 $this->log->log("results dumped versus expected for $class : {$readCounts[$class]}/{$counts[$class]}");
-//                assert(($counts[$class] ?? 0) === ($readCounts[$class] ?? 0), "'results were not correctly dumped in $class : $readCounts[$class]/$counts[$class]");
                 ++$error;
             }
         }

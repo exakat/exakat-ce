@@ -156,6 +156,7 @@ class Appinfo extends Data {
                             'PHP 8.1 Intersection Types'  => 'Php/Php81IntersectionTypehint',
                             'PHP 8.2 DNF Types'           => 'Php/UseDNF',
                             'Static variables'            => 'Variables/StaticVariables',
+                            'Static Variable Initialisation' => 'Variables/StaticVariableInitialisation',
 
                             'Function dereferencing'      => 'Structures/FunctionSubscripting',
                             'Constant scalar expression'  => 'Structures/ConstantScalarExpression',
@@ -193,6 +194,7 @@ class Appinfo extends Data {
                             'Trait constants'            => 'Traits/ConstantsInTraits',
                             'Overwritten constants'      => 'Classes/OverwrittenConst',
                             'Constant visibility'        => 'Classes/ConstVisibilityUsage',
+                            'Typed visibility'           => 'Classes/TypedClassConstants',
                             'Final constants'            => 'Php/FinalConstant',
                             'Dynamic class constants'    => 'Classes/NewDynamicConstantSyntax',
                             'Enum Case In Constants'     => 'Php/UseEnumCaseInConstantExpression',

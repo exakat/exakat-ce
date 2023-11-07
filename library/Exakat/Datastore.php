@@ -22,12 +22,12 @@
 
 namespace Exakat;
 
-use Exakat\Config;
-use Exakat\Exceptions\WrongNumberOfColsForAHash;
-use Exakat\Exceptions\NoStructureForTable;
-use Exakat\Exceptions\NoSuchHash;
 use Sqlite3;
+use Exakat\Config;
 use DateTimeImmutable;
+use Exakat\Exceptions\NoSuchHash;
+use Exakat\Exceptions\NoStructureForTable;
+use Exakat\Exceptions\WrongNumberOfColsForAHash;
 
 class Datastore {
     public const CREATE = 1;
@@ -544,8 +544,8 @@ SQLITE;
     }
 
     public function ignoreFile(string $file, string $reason = 'unknown'): void {
-        $this->sqliteWrite->query('DELETE FROM files WHERE file = \'' . $this->sqliteWrite->escapeString($file) . '\'');
-        $this->sqliteWrite->query('INSERT INTO ignoredFiles VALUES (NULL, \'' . $this->sqliteWrite->escapeString($file) . '\', "' . $reason . '")');
+        $this->sqliteWrite->query('DELETE FROM files WHERE file = \'' . \Sqlite3::escapeString($file) . '\'');
+        $this->sqliteWrite->query('INSERT INTO ignoredFiles VALUES (NULL, \'' . \Sqlite3::escapeString($file) . '\', "' . $reason . '")');
     }
 
     public function storeQueries(array $queries): int {

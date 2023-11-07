@@ -23,16 +23,16 @@
 
 namespace Exakat\Loader;
 
-use Exakat\Data\Collector;
-use Exakat\Tasks\Helpers\Atom;
-use Exakat\Tasks\Helpers\AtomInterface;
-use Exakat\Helpers\Timer;
+use Sqlite3;
+use stdClass;
+use SplFileObject;
 use Exakat\Config;
 use Exakat\Graph\Graph;
-use stdClass;
-use Sqlite3;
-use SplFileObject;
+use Exakat\Helpers\Timer;
+use Exakat\Data\Collector;
+use Exakat\Tasks\Helpers\Atom;
 use Exakat\Loader\Driver\Driver;
+use Exakat\Tasks\Helpers\AtomInterface;
 
 // @todo : export process to a separate class, with a fall back on serial and inlined processing.
 
@@ -109,15 +109,17 @@ class SplitGraphsonId extends Loader {
 
         display("Init finalize\n");
         $this->driver->finish();
+        display("Finished loadings\n");
 
         $totalDuration = new Timer();
 
-        $this->fetchIds();
         display("Fetch ID\n");
-        $this->saveNodeLinks();
+        $this->fetchIds();
         display("Save last nodes\n");
-        $this->saveProperties();
+        $this->saveNodeLinks();
         display("Save properties\n");
+        $this->saveProperties();
+        display("Finish processes\n");
         $this->driver->finish();
 
         // Finish boolean properties
@@ -390,6 +392,8 @@ SQL;
         $res = $this->graphdb->query('g.V().as("id").as("eId").select("id", "eId").by(id).by("eId")');
         $this->ids = $res->toHash('eId', 'id');
         $e = hrtime(true);
+        
+        display("Loaded ".count($this->ids)." ids\n");
 
         assert($this->ids != array(), 'No ids were fetched from the server. This is not normal.');
     }
