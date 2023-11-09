@@ -77,29 +77,29 @@ class GlobalDefinitions extends Analyzer {
              ->atomIs('String')
              ->values(array('noDelimiter'))
              ->unique();
-        $res = $this->rawQuery();
+        $indexInGlobals = $this->rawQuery();
 
-        if ($res->isEmpty()) {
+        if ($indexInGlobals->isEmpty()) {
             return;
         }
 
         // links between global keywords
-        foreach ($res as list($noDelimiter)) {
+        foreach ($indexInGlobals as list($noDelimiter)) {
             $this->atomIs('Virtualglobal')
                  ->is('fullcode', '$' . $noDelimiter)
                  ->id();
-            $res = $this->rawQuery();
+            $virtualGlobal = $this->rawQuery();
 
             // This prevent duplicates of that node
-            if ($res->isEmpty()) {
+            if ($virtualGlobal->isEmpty()) {
                 // no code, as not available
-                $res = $this->query('g.addV("Virtualglobal")
+                $virtualGlobal = $this->query('g.addV("Virtualglobal")
 				.property("fullcode", "\\$' . $noDelimiter . '")
 				.property("line", 0)
 				.property("extra", true)
 				.id()');
             }
-            $id = $res->toInt();
+            $id = $virtualGlobal->toInt();
 
             $this->atomIs('Phpvariable')
                  ->codeIs('$GLOBALS')
@@ -108,7 +108,7 @@ class GlobalDefinitions extends Analyzer {
                  ->atomIs('String')
                  ->noDelimiterIs($noDelimiter)
                  ->addEFrom('DEFINITION', $id);
-            $res = $this->rawQuery();
+            $this->rawQuery();
         }
     }
 }

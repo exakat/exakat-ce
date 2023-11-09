@@ -48,7 +48,7 @@ class FunctionContext {
         return $this->lastAtom === null ? self::GLOBAL : $this->lastAtom->code;
     }
 
-    public function remove() {
+    public function remove(): void {
         array_pop($this->currentFunction);
         if (empty($this->currentFunction)) {
             $this->lastAtom = null;

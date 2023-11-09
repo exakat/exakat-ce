@@ -31,6 +31,7 @@ class Serial extends Driver {
     private const FINISH			 = null;
 
     private string		  $path;
+    private string		  $installationPath;
     private Graph		  $graphdb;
     private SplFileObject $log;
     private array		  $processes = array();
@@ -42,10 +43,11 @@ class Serial extends Driver {
 
     // @todo : ensure that processes are not mixed between the different loads. One must be finished before the next.
 
-    public function __construct(string $path, Graph $graphdb, SplFileObject $log) {
-        $this->path = $path;
-        $this->graphdb = $graphdb;
-        $this->log = $log;
+    public function __construct(string $path, string $installationPath, Graph $graphdb, SplFileObject $log) {
+        $this->path 			= $path;
+        $this->installationPath = $installationPath;
+        $this->graphdb 			= $graphdb;
+        $this->log 				= $log;
 
         $this->info['loader mode'] = 'serial';
 

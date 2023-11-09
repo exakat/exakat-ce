@@ -42,10 +42,8 @@ class CreateForeachDefault extends Complete {
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
              ->outIs('ARGUMENT')
              ->outIsIE('VALUE')
-             // avoud doubles
+             // avoid doubles
              ->hasNoLinkYet('DEFAULT', 'v')
-             ->as('string')
-             ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');
         $this->prepareQuery();
 
@@ -64,9 +62,8 @@ class CreateForeachDefault extends Complete {
              ->atomIs('Arrayliteral')
              ->outIs('ARGUMENT')
              ->outIsIE('VALUE')
+             // avoid doubles
              ->hasNoLinkYet('DEFAULT', 'v')
-             ->as('string')
-             ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');
         $this->prepareQuery();
 
@@ -83,9 +80,8 @@ class CreateForeachDefault extends Complete {
              ->atomIs('Arrayliteral', self::WITH_CONSTANTS)
              ->outIs('ARGUMENT')
              ->outIs('INDEX')
+             // avoid doubles
              ->hasNoLinkYet('DEFAULT', 'v')
-             ->as('string')
-             ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');
         $this->prepareQuery();
 
@@ -103,14 +99,13 @@ class CreateForeachDefault extends Complete {
              ->outIs('DEFAULT')
              ->outIs('ARGUMENT')
              ->outIs('INDEX')
+             // avoid doubles
              ->hasNoLinkYet('DEFAULT', 'v')
-             ->as('string')
-             ->dedup(array('v', 'string'))
              ->addEFrom('DEFAULT', 'v');
         $this->prepareQuery();
 
         // @todo : with list $a = [1 => [2, 3]]; foreach($a as $k => [$v1, $v2]) {}
-        // @todo : this is getting messup when multiple loops have the same blind variables
+        // @todo : this is getting messup when multiple loops that have the same blind variables
     }
 }
 

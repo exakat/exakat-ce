@@ -70,7 +70,8 @@ class Dump extends Tasks {
     }
 
     public function run(): void {
-        if (!file_exists($this->config->project_dir)) {
+        if (!file_exists($this->config->project_dir) && 
+        	!$this->config->inside_code) {
             throw new NoSuchProject((string) $this->config->project);
         }
 
@@ -482,28 +483,6 @@ GREMLIN
         $this->files = $this->dump->fetchTable('files')->toHash('file', 'id');
     }
 
-    private function collectHashCounts(Query $query, string $name): void {
-        $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
-        $index = $result->toArray()[0] ?? array();
-
-        $toDump = array();
-        foreach ($index as $number => $count) {
-            $toDump[] = array('',
-                              $name,
-                              $number,
-                              $count,
-                             );
-        }
-
-        if (empty($toDump)) {
-            $total = 0;
-        } else {
-            $total = $this->storeToDumpArray('hashResults', $toDump);
-        }
-
-        display( "$name : $total");
-    }
-
     private function collectMissingDefinitions(): void {
         $toDump = array();
 
@@ -824,16 +803,6 @@ GREMLIN
             $timer->end();
             $this->log->log( 'Collected Missing definitions : ' . number_format($timer->duration(Timer::MS), 2) . "ms\n");
         }
-    }
-
-    private function storeToDump(string $table, Query $query): int {
-        $query->prepareRawQuery();
-        if ($query->canSkip()) {
-            return 0;
-        }
-        $result = $this->gremlin->query($query->getQuery(), $query->getArguments());
-
-        return $this->dump->storeInTable($table, $result);
     }
 
     private function storeToDumpArray(string $table, array $result): int {

@@ -541,7 +541,7 @@ GREMLIN
 
     abstract public function analyze(): void ;
 
-    public function printQuery() {
+    public function printQuery() : void {
         $this->query->printQuery();
     }
 
@@ -565,7 +565,7 @@ GREMLIN
         $this->initNewQuery();
     }
 
-    public function storeMissing() {
+    public function storeMissing() : void {
         foreach ($this->missingQueries as $m) {
             $query = <<<GREMLIN
 g.addV().{$m->toAddV()}

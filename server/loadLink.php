@@ -1,16 +1,14 @@
 <?php
 
-if (file_exists('vendor/autoload.php')){
-	include 'vendor/autoload.php';
-} else {
-	include 'phar://exakat.phar/vendor/autoload.php';
-}
+$path        = $argv[1];
+$host        = $argv[2]; 
+$port        = $argv[3]; 
+$includePath = $argv[4];
+
+include $includePath.'/vendor/autoload.php';
 
 use Brightzone\GremlinDriver\Connection;
 
-$path     = $argv[1];
-$host     = $argv[2]; 
-$port     = $argv[3]; 
 
 $query = <<<'GREMLIN'
 new File(file).eachLine {

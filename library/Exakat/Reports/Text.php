@@ -44,6 +44,10 @@ class Text extends Reports {
         return implode(PHP_EOL, $text);
     }
 
+    public function dependsOnAnalysis(): array {
+        return exakat('config')->project_rulesets;
+    }
+
     protected function getResults(array $analyzerList): array {
         $analysisResults = $this->dump->fetchAnalysers($analyzerList);
 

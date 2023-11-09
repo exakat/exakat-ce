@@ -105,7 +105,7 @@ class Report extends Tasks {
         }
     }
 
-    private function format(Reports $report, ReportConfig $reportConfig) {
+    private function format(Reports $report, ReportConfig $reportConfig): void {
         $timer = new Timer();
 
         if ($reportConfig->getFile() === Reports::STDOUT) {

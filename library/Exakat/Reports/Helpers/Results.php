@@ -216,12 +216,14 @@ class Results {
         return $return;
     }
 
-    public function slice(int $begin = 0, int $end = PHP_INT_MAX) {
+    public function slice(int $begin = 0, int $end = PHP_INT_MAX): self {
         if ($this->values === null) {
             $this->load();
         }
 
         $this->values = array_slice($this->values, $begin, $end);
+        
+        return $this;
     }
 
     public function filter(Closure $f): self {

@@ -266,7 +266,7 @@ class Doctor extends Tasks {
                 $id = random_int(0, PHP_INT_MAX);
             } while (file_exists("{$this->config->projects_root}/projects/test$id") && $i < 100);
 
-            shell_exec('php exakat init -p test' . $id . '');
+            shell_exec('php exakat init -p test' . $id);
 
             rename("{$this->config->projects_root}/projects/test$id", "{$this->config->projects_root}/projects/test");
         }

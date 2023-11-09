@@ -71,6 +71,7 @@ use Exakat\Loader\Loader;
 use Exakat\Phpexec;
 
 use const STRICT_COMPARISON;
+use const FNP_NOT_CONSTANT, FNP_CONSTANT;
 
 class Load extends Tasks {
     public const CONCURENCE = self::NONE;
@@ -3731,7 +3732,7 @@ $this->phptokens::T_YIELD,
         } elseif (in_array(mb_strtolower($name->code), array('defined', 'constant'), STRICT_COMPARISON)) {
             if ($argumentsList[0]->constant === self::CONSTANT_EXPRESSION &&
                 !empty($argumentsList[0]->noDelimiter)) {
-                $fullnspath = makeFullNsPath($argumentsList[0]->noDelimiter, \FNP_CONSTANT);
+                $fullnspath = makeFullNsPath($argumentsList[0]->noDelimiter, FNP_CONSTANT);
                 if ($argumentsList[0]->noDelimiter[0] === '\\') {
                     $fullnspath = "\\$fullnspath";
                 }
@@ -5872,12 +5873,12 @@ $this->phptokens::T_YIELD,
                 // use A\B as C
                 $this->moveToNext();
 
-                $fullnspath = makeFullNsPath($namespace->fullcode, $useType === 'const' ? \FNP_CONSTANT : \FNP_NOT_CONSTANT);
+                $fullnspath = makeFullNsPath($namespace->fullcode, $useType === 'const' ? FNP_CONSTANT : FNP_NOT_CONSTANT);
                 $namespace->fullnspath = $fullnspath;
 
                 $this->pushExpression($namespace);
                 $as = $this->processAlias($useType);
-                $as->fullnspath = makeFullNsPath($namespace->fullcode, $useType === 'const');
+                $as->fullnspath = makeFullNsPath($namespace->fullcode, $useType === 'const' ? FNP_CONSTANT : FNP_NOT_CONSTANT);
                 $as->ws->totype = '';
                 $as->rank = $rank;
                 $fullcode[] = $as->fullcode;
@@ -5992,7 +5993,7 @@ $this->phptokens::T_YIELD,
                 $namespace->use    = $useType;
                 $namespace->ws->totype = '';
 
-                $fullnspath = makeFullNsPath($namespace->fullcode, $useType === 'const' ? \FNP_CONSTANT : \FNP_NOT_CONSTANT);
+                $fullnspath = makeFullNsPath($namespace->fullcode, $useType === 'const' ? FNP_CONSTANT : FNP_NOT_CONSTANT);
                 $namespace->fullnspath = $fullnspath;
                 $namespace->origin     = $fullnspath;
 
@@ -7675,19 +7676,19 @@ $this->phptokens::T_YIELD,
             throw new LoadError( "Warning : expression is not empty in $filename : " . count($this->expressions));
         }
 
-        if (($count = $this->contexts->getCount(Context::CONTEXT_NOSEQUENCE)) !== false) {
+        if ($this->contexts->getCount(Context::CONTEXT_NOSEQUENCE) !== false) {
             throw new LoadError( "Warning : context for sequence is not back to 0 in $filename\n");
         }
 
-        if (($count = $this->contexts->getCount(Context::CONTEXT_NEW)) !== false) {
+        if ($this->contexts->getCount(Context::CONTEXT_NEW) !== false) {
             throw new LoadError( "Warning : context for new is not back to 0 in $filename\n");
         }
 
-        if (($count = $this->contexts->getCount(Context::CONTEXT_FUNCTION)) !== false) {
+        if ($this->contexts->getCount(Context::CONTEXT_FUNCTION) !== false) {
             throw new LoadError( "Warning : context for function is not back to 0 in $filename\n");
         }
 
-        if (($count = $this->contexts->getCount(Context::CONTEXT_CLASS)) !== false) {
+        if ($this->contexts->getCount(Context::CONTEXT_CLASS) !== false) {
             throw new LoadError( "Warning : context for class is not back to 0 in $filename\n");
         }
     }
@@ -7725,10 +7726,10 @@ $this->phptokens::T_YIELD,
             return; // Can't be a class anyway.
         }
 
-        $fullnspathClass = makeFullNsPath($argumentsId[0]->noDelimiter, \FNP_NOT_CONSTANT);
+        $fullnspathClass = makeFullNsPath($argumentsId[0]->noDelimiter, FNP_NOT_CONSTANT);
         $argumentsId[0]->fullnspath = $fullnspathClass;
 
-        $fullnspathAlias = makeFullNsPath($argumentsId[1]->noDelimiter, \FNP_NOT_CONSTANT);
+        $fullnspathAlias = makeFullNsPath($argumentsId[1]->noDelimiter, FNP_NOT_CONSTANT);
         $argumentsId[1]->fullnspath = $fullnspathAlias;
 
         $this->calls->addCall(Calls::A_CLASS, $fullnspathClass, $argumentsId[0]);
@@ -7745,7 +7746,7 @@ $this->phptokens::T_YIELD,
             return; // Can't be a constant anyway.
         }
 
-        $fullnspath = makeFullNsPath($name->noDelimiter, \FNP_CONSTANT);
+        $fullnspath = makeFullNsPath($name->noDelimiter, FNP_CONSTANT);
         if ($name->noDelimiter[0] === '\\') {
             // Added a second \\ when the string already has one. Actual PHP behavior
             $fullnspath = "\\$fullnspath";

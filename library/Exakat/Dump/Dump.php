@@ -232,10 +232,7 @@ abstract class Dump {
     public function storeQueries(array $queries): int {
         $this->sqlite->lastErrorCode();
         foreach ($queries as $query) {
-            $res = $this->sqlite->query($query);
-            if ($this->sqlite->lastErrorCode()) {
-                print  $query . PHP_EOL . PHP_EOL;
-            }
+            $this->sqlite->query($query);
         }
 
         return count($queries);

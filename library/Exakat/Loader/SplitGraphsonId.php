@@ -88,6 +88,7 @@ class SplitGraphsonId extends Loader {
 
         $this->driver = Driver::getInstance($this->config->loader_mode,
             $this->config->tmp_dir,
+            $this->config->dir_root,
             $this->graphdb,
             $this->log,
             (int) $this->config->loader_parallel_max
@@ -339,10 +340,9 @@ SQL;
             }
         }
 
-        foreach ($links as &$link) {
+        foreach ($links as $link) {
             $this->tokenCounts[$link[0]] = ($this->tokenCounts[$link[0]] ?? 0) + 1;
         }
-        unset($link);
 
         $total = 0; // local total
         $append = array();

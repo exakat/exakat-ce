@@ -32,7 +32,8 @@ use const PARALLEL_WAIT_MS;
 class Parallel extends Driver {
     private const FINISH			  = null;
 
-    private string		  $path;
+    private string		  $tmpPath;
+    private string		  $installationPath;
     private Graph		  $graphdb;
     private SplFileObject $log;
     private array		  $processes = array();
@@ -45,16 +46,16 @@ class Parallel extends Driver {
 
     // @todo : ensure that processes are not mixed between the different loads. One must be finished before the next.
 
-    public function __construct(string $path, Graph $graphdb, SplFileObject $log, int $max) {
-        $this->path = $path;
-        $this->graphdb = $graphdb;
-        $this->log = $log;
+    public function __construct(string $tmpPath, string $installationPath, Graph $graphdb, SplFileObject $log, int $max) {
+        $this->tmpPath 			= $tmpPath;
+        $this->installationPath = $installationPath;
+        $this->graphdb 			= $graphdb;
+        $this->log 				= $log;
 
         $this->info['loader mode'] = 'parallel';
         $this->info['loader max loaders'] = $this->max;
 
-
-        $this->filePath = "{$this->path}/graphdb." . $this->fragment . '.graphson';
+        $this->filePath = "{$this->tmpPath}/graphdb." . $this->fragment . '.graphson';
     }
 
     public function saveNodes(?string $row = self::FINISH): void {
@@ -76,11 +77,14 @@ class Parallel extends Driver {
         $this->monitorProcesses();
 
         $timer = new Timer();
+        // @todo check that this works with phar
         $process = new Process(array('php',
-                                'server/load.php',
+        						'-r', 
+                                'include("'.$this->installationPath.'/server/load.php");',
                                 $this->filePath,
                                 $this->graphdb->getHost(),
                                 $this->graphdb->getPort(),
+                                $this->installationPath,
                               ));
         $this->processes[] = $process;
         $process->start();
@@ -91,7 +95,7 @@ class Parallel extends Driver {
         $this->append = array();
         $this->total = 0;
         ++$this->fragment;
-        $this->filePath = "{$this->path}/graphdb." . $this->fragment . '.graphson';
+        $this->filePath = "{$this->tmpPath}/graphdb." . $this->fragment . '.graphson';
     }
 
     public function saveLinkGremlin(array $links): void {
@@ -106,7 +110,7 @@ class Parallel extends Driver {
         $timer = new Timer();
 
         ++$this->fragment;
-        $path = "{$this->path}/graphdb." . $this->fragment . '.tmp';
+        $path = "{$this->tmpPath}/graphdb." . $this->fragment . '.tmp';
         foreach ($links as &$link) {
             $link = join(',', $link);
         }
@@ -116,10 +120,12 @@ class Parallel extends Driver {
         $this->monitorProcesses();
 
         $process = new Process(array('php',
-                                'server/loadLink.php',
+        						'-r', 
+                                'include("'.$this->installationPath.'/server/loadLink.php");',
                                 $path,
                                 $this->graphdb->getHost(),
                                 $this->graphdb->getPort(),
+                                $this->installationPath,
                               ));
         $this->processes[] = $process;
         $process->start();
@@ -139,17 +145,19 @@ class Parallel extends Driver {
         $timer = new Timer();
 
         ++$this->fragment;
-        $path = "{$this->path}/graphdb." . $attribute . '.' . $this->fragment . '.tmp';
+        $path = "{$this->tmpPath}/graphdb." . $attribute . '.' . $this->fragment . '.tmp';
         file_put_contents($path, join(',', $chunk));
 
         $this->monitorProcesses();
 
         $process = new Process(array('php',
-                                'server/loadProperty.php',
+        						'-r', 
+                                'include("'.$this->installationPath.'/server/loadProperty.php");',
                                 $attribute,
                                 $path,
                                 $this->graphdb->getHost(),
                                 $this->graphdb->getPort(),
+                                $this->installationPath,
                                 ));
         $this->processes[] = $process;
         $process->start();
@@ -163,6 +171,7 @@ class Parallel extends Driver {
         do {
             foreach ($this->processes as $id => $p) {
                 if (!$p->isRunning()) {
+                	print $this->processes[$id]->getOutput();
                     unset($this->processes[$id]);
                 }
             }

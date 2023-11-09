@@ -1802,7 +1802,7 @@ HTML;
         $info[] = array('Number of lines of code with comments', $this->dump->fetchHash('locTotal')->toString());
 
         $info[] = array('Analysis execution date', date('r', $this->dump->fetchHash('audit_end')->toInt()));
-        $info[] = array('Analysis runtime', duration($this->dump->fetchHash('audit_end')->toString() - $this->dump->fetchHash('audit_start')->toString()));
+        $info[] = array('Analysis runtime', duration($this->dump->fetchHash('audit_end')->toInt() - $this->dump->fetchHash('audit_start')->toInt()));
         $info[] = array('Report production date', date('r', time()));
 
         $php = exakat('php');
@@ -2425,7 +2425,7 @@ HTML;
                 case 'interface' :
                 case 'trait' :
                 case 'enum' :
-                    $location = $row['type'] . ' ' . $cit[$row['type']][$row['type_id']] . '';
+                    $location = $row['type'] . ' ' . $cit[$row['type']][$row['type_id']];
                     break;
 
                 case 'function' :

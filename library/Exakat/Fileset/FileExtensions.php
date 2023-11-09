@@ -27,7 +27,7 @@ class FileExtensions extends Fileset {
     private array $extensions   = array();
 
     public function __construct(array $extensions) {
-        // @todo : checks the content of this array before usage
+        // @todo : checks the content of this array before usage. It should be only strings, and short ones.
         $this->extensions = $extensions;
     }
 

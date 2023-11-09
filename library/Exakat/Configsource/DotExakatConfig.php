@@ -47,7 +47,10 @@ class DotExakatConfig extends Config {
             return self::NOT_LOADED;
         }
 
-        $this->config = parse_ini_file($this->dotExakat);
+		$ini = parse_ini_file($this->dotExakat);
+        $ini['project'] = new Project($ini['project']);
+        $ini['inside_code'] = $this->config['inside_code'];
+        $this->config = $ini;
 
         // removing empty values in the INI file
         foreach ($this->config as &$value) {
@@ -83,6 +86,7 @@ class DotExakatConfig extends Config {
                            'file_extensions'    => array('php', 'php3', 'inc', 'tpl', 'phtml', 'tmpl', 'phps', 'ctp', 'module'),
                            'project_rulesets'   => 'CompatibilityPHP53,CompatibilityPHP54,CompatibilityPHP55,CompatibilityPHP56,CompatibilityPHP70,CompatibilityPHP71,CompatibilityPHP72,CompatibilityPHP73,CompatibilityPHP74,Dead code,Security,Analyze,Preferences,Appinfo,Appcontent',
                            'project_reports'    => array('Text'),
+                           'rulesets'			=> array(),
                         );
 
         foreach ($defaults as $name => $value) {
@@ -121,6 +125,10 @@ class DotExakatConfig extends Config {
         }
 
         return '.exakat.ini';
+    }
+
+    public function getRulesets(): array {
+        return $this->config['rulesets'];
     }
 }
 

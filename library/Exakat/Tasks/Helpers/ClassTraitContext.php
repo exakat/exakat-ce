@@ -63,7 +63,7 @@ class ClassTraitContext {
         }
     }
 
-    public function popContext() {
+    public function popContext(): void {
         $last = array_pop($this->contexts);
         $this->last = end($this->contexts) ?: self::NO_CLASS_TRAIT_CONTEXT;
 

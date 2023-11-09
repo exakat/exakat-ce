@@ -149,6 +149,14 @@ abstract class Vcs {
     public function checkOut(string $next): array {
         return array();
     }
+
+    public function createBranch(string $branch = ''): bool {
+        return false;
+    }
+
+    public function commitFiles(string $message = 'Exakat Cobbler created those files'): bool {
+        return false;
+    }
 }
 
 ?>

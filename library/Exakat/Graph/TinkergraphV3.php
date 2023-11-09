@@ -52,7 +52,6 @@ class TinkergraphV3 extends Graph {
         //gremlin-core-3.4.10.jar
         preg_match('/gremlin-core-([0-9.]+)\.\d+.jar/', $gremlinVersion, $r);
         $gremlinVersion = $r[1] ?? 'unknown gremlin version';
-        $stats['gremlin version'] = $gremlinVersion;
         $this->gremlinVersion = $gremlinVersion;
 
         if (!in_array($this->gremlinVersion, self::SUPPORTED_VERSIONS, STRICT_COMPARISON)) {

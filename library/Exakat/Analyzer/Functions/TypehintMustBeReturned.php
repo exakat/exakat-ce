@@ -30,7 +30,7 @@ class TypehintMustBeReturned extends Analyzer {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
-             ->fullnspathIsNot(array('\\void', '\\never')) // Void cannot be with other typehints
+             ->fullnspathIsNot(array('\\void', '\\never', '\\generator')) // Void cannot be with other typehints
              ->back('first')
              ->isNot('abstract', true)
              // Not an empty block
@@ -62,7 +62,7 @@ class TypehintMustBeReturned extends Analyzer {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
-             ->fullnspathIsNot(array('\\void', '\\never'))
+             ->fullnspathIsNot(array('\\void', '\\never', '\\generator'))
              ->back('first')
              ->isNot('abstract', true)
              ->not(
@@ -83,6 +83,26 @@ class TypehintMustBeReturned extends Analyzer {
                       ->fullnspathIs(array('\\assert', '\\trigger_error'))
              )
              ->hasNoOut('RETURNED')
+             ->back('first');
+        $this->prepareQuery();
+
+        // function foo() : generator { }
+        $this->atomIs(self::FUNCTIONS_ALL)
+             ->outIs('RETURNTYPE')
+             ->fullnspathIs('\\generator')
+             ->back('first')
+             ->isNot('abstract', true)
+             ->not(
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomIs('Void')
+             )
+             // Do not throw nor yield
+             ->not(
+                 $this->side()
+                      ->outIs('BLOCK')
+                      ->atomInsideNoDefinition(array('Throw', 'Yield', 'Yieldfrom'))
+             )
              ->back('first');
         $this->prepareQuery();
     }

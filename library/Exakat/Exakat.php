@@ -27,7 +27,7 @@ use DateTimeImmutable;
 
 class Exakat {
 	public const VERSION = '2.6.1';
-	public const BUILD = 1492;
+	public const BUILD = 1494;
 	
 	private Config $config;
 

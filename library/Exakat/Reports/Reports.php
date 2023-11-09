@@ -149,11 +149,7 @@ abstract class Reports {
     }
 
     public function dependsOnAnalysis(): array {
-        if (empty($this->config->rulesets)) {
-            return array();
-        } else {
-            return $this->config->rulesets;
-        }
+        return array();
     }
 
     public function checkMissingRulesets(): array {

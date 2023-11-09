@@ -144,7 +144,7 @@ class Status extends Tasks {
         $this->display($status, $this->config->json ? self::WITH_JSON : self::WITHOUT_JSON);
     }
 
-    private function display(array $status, int $json = self::WITH_JSON) {
+    private function display(array $status, int $json = self::WITH_JSON) : void {
         // Json publication
         if ($json === self::WITH_JSON) {
             print json_encode($status);

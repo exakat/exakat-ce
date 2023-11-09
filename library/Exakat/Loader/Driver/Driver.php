@@ -44,7 +44,7 @@ abstract class Driver {
 
     abstract public function saveLinkGremlin(array $links): void;
 
-    public static function getInstance(string $driver, string $path, Graph $graphdb, SplFileObject $log, int $max_parallel = 0): self {
+    public static function getInstance(string $driver, string $tmpPath, string $installationPath, Graph $graphdb, SplFileObject $log, int $max_parallel = 0): self {
         $class = __NAMESPACE__ . '\\' . $driver;
 
         if ($max_parallel <= 0) {
@@ -58,13 +58,13 @@ abstract class Driver {
         if ($max_parallel == 1) {
             // Fallback to 1 in case of 1 paralell.
             display('Loading with Serial (Fallback)');
-            return new Serial($path, $graphdb, $log);
+            return new Serial($tmpPath, $installationPath, $graphdb, $log);
         } elseif (class_exists($class)) {
             display('Loading with '.$class);
-            return new $class($path, $graphdb, $log, $max_parallel);
+            return new $class($tmpPath, $installationPath, $graphdb, $log, $max_parallel);
         } else {
             display('Loading with Serial (Default)');
-            return new Serial($path, $graphdb, $log);
+            return new Serial($tmpPath, $installationPath, $graphdb, $log);
         }
     }
 

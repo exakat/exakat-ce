@@ -88,7 +88,8 @@ class Project extends Tasks {
             throw new MissingGremlin();
         }
 
-        if (!file_exists($this->config->project_dir)) {
+        if (!file_exists($this->config->project_dir) && 
+        	!$this->config->inside_code) {
             throw new NoSuchProject((string) $this->config->project);
         }
 
@@ -156,6 +157,7 @@ class Project extends Tasks {
             if (empty($rulesets)) {
                 $rulesets = $reportConfig->getRulesets();
             }
+
             $rulesetsToRun[] = $rulesets;
             $namesToRun[] = $reportConfig->getName();
 
@@ -238,15 +240,20 @@ class Project extends Tasks {
         // Dump is a child process
         // initialization and first collection (action done once)
         display('Initial dump');
-        $process = new Process(array('php',
-                                'exakat',
+        $processCommand = array('php',
+                                $_SERVER['PATH_TRANSLATED'], // exakat, but where it is called and how
                                 'dump',
-                                '-p',
-                                $this->config->project,
                                 '-T',
                                 'First',
                                 '-collect'
-                                ));
+                                );
+
+		if (!$this->config->inside_code) {
+			$processCommand [] = '-p';
+			$processCommand [] = $this->config->project;
+		}
+
+		$process = new Process($processCommand);
         $process->start();
         $this->process = $process;
         // Cheap synchrone run
@@ -420,16 +427,20 @@ class Project extends Tasks {
                 $this->finishProcess();
 
                 if ($this->mode === 'parallel') {
-                    $process = new Process(array('php',
-                                            'exakat',
-                                            'dump',
-                                            '-p',
-                                            $this->config->project,
-                                            '-T',
-                                            $ruleset,
-                                            '-u',
-                                            '-v',
-                                            ));
+        			$processCommand = array('php',
+                                $_SERVER['PATH_TRANSLATED'], // exakat, but where it is called and how
+                                'dump',
+                                '-T',
+                                $ruleset,
+                                '-u'
+                                );
+
+					if (!$this->config->inside_code) {
+						$processCommand [] = '-p';
+						$processCommand [] = $this->config->project;
+					}
+		
+		            $process = new Process($processCommand);
                     $process->start();
                     $this->process = $process;
                     

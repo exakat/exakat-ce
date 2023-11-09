@@ -36,6 +36,7 @@
     "require": {
         "ext-curl": "*",
         "ext-hash": "*",
+        "ext-openssl": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
         "ext-sqlite3": "*",

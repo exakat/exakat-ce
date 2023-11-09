@@ -95,7 +95,7 @@ class PhpCodeTree {
         }
     }
 
-    public function map(string $what, Callable $closure) {
+    public function map(string $what, Callable $closure): void {
         if (!property_exists($this, $what)) {
             return;
         }
@@ -105,7 +105,7 @@ class PhpCodeTree {
         }
     }
 
-    public function reduce(string $what, Callable $closure) {
+    public function reduce(string $what, Callable $closure): void {
         if (!property_exists($this, $what)) {
             return;
         }

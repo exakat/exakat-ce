@@ -303,6 +303,7 @@ class Analyze extends Tasks {
                 yield from $this->foo($dependencies, $d[$i]);
             }
         }
+        unset($d);
 
         if (!empty($dependencies)) {
             yield from $this->foo($dependencies);

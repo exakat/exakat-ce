@@ -381,7 +381,6 @@ function PHPSyntax(string $code): string {
         $php = '<span style="color: #0000BB">' . $php;
     }
     if (substr($php, -17) === '<span style="colo') {
-        //<br /></span><span style="colo
         $php = substr($php, 0, -30);
         $php .= '</span>';
     } else {

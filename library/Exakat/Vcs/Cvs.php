@@ -53,20 +53,6 @@ class Cvs extends Vcs {
         return 'CSV updated to last revision';
     }
 
-    private function getInfo() {
-        $res = trim($this->shell("cd {$this->destinationFull}; {$this->executable} info"));
-
-        if (empty($res)) {
-            $this->info['cvs'] = '';
-
-            return;
-        }
-        foreach (explode("\n", $res) as $info) {
-            list($name, $value) = explode(': ', trim($info));
-            $this->info[$name] = $value;
-        }
-    }
-
     public function getBranch(): string {
         return 'No branch';
     }
