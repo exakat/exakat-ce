@@ -59,6 +59,7 @@ $rulesets = array(
     'First',
 );
 
+/*
 $analyzers = array(
 'Complete/PropagateConstants',
 'Classes/NonPpp',
@@ -307,6 +308,11 @@ $analyzers = array(
 'Variables/Blind',
 'Classes/ExtendsStdclass',
 );
+*/
+
+// automated version of analyzers, based on data/analyzer.sqlite
+$analyzers = glob('library/Exakat/Analyzer/*/*.php');
+$analyzers = array_map(function(string $path) : string { return substr($path, 24, -4); }, $analyzers);
 
 $missing = 0;
 foreach($analyzers as $analyzer) {
