@@ -6,48 +6,21 @@ The Exakat Engine is an automated code reviewing engine for PHP.
 
 ### Quick installation
 
-Copy-paste the following code in your terminal. This was tester on OSX and Linux-debian. 
+Copy-paste the following code in your terminal. This was tested on OSX and Linux-debian. 
 
 ```bash
 mkdir exakat
 cd exakat
-curl -o exakat.phar https://www.exakat.io/versions/index.php?file=latest
-curl -o apache-tinkerpop-gremlin-server-3.4.12-bin.zip https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-3.4.12-bin.zip
-unzip apache-tinkerpop-gremlin-server-3.4.12-bin.zip
-mv apache-tinkerpop-gremlin-server-3.4.12 tinkergraph
-rm -rf apache-tinkerpop-gremlin-server-3.4.12-bin.zip
+curl -O -J 'https://www.exakat.io/versions/index.php?file=latest'
+    
+curl -O -J 'https://www.exakat.io/versions/index.php?file=latest.md5'
+md5sum -c exakat-*.md5
+// Example : 
+// exakat-2.6.0.phar: OK
 
-# Optional : install neo4j engine.
-cd tinkergraph
-./bin/gremlin-server.sh install org.apache.tinkerpop neo4j-gremlin 3.4.12
-cd ..
+mv exakat-*.phar exakat.phar
 
-php exakat.phar doctor
-```
-
-### Installation with the phar
-
-Phar is the recommended installation process.
-
-The Exakat engine is [distributed as a phar archive](https://www.exakat.io/download-exakat/). Phar contains all the needed PHP code to run it. 
-
-The rest of the installation (Gremlin-server) is detailled in the [installation documentation](https://exakat.readthedocs.io/en/latest/Installation.html).
-
-The quick installation guide is the following (command line, MacOS. See docs for more options): 
-
-```bash
-mkdir exakat
-cd exakat
-curl -o exakat.phar https://www.exakat.io/versions/index.php?file=latest
-curl -o apache-tinkerpop-gremlin-server-3.4.12-bin.zip https://www.exakat.io/versions/apache-tinkerpop-gremlin-server-3.4.12-bin.zip
-unzip apache-tinkerpop-gremlin-server-3.4.12-bin.zip
-mv apache-tinkerpop-gremlin-server-3.4.12 tinkergraph
-rm -rf apache-tinkerpop-gremlin-server-3.4.12-bin.zip
-
-# Optional : install neo4j engine.
-cd tinkergraph
-./bin/gremlin-server.sh install org.apache.tinkerpop neo4j-gremlin 3.4.12
-cd ..
+php exakat.phar install -v 
 
 php exakat.phar doctor
 ```
