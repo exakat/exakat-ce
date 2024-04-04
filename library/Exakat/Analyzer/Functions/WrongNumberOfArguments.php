@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,8 +27,7 @@ use Exakat\Analyzer\Analyzer;
 
 class WrongNumberOfArguments extends Analyzer {
     public function dependsOn(): array {
-        return array('Complete/PropagateCalls',
-                     'Complete/SetParentDefinition',
+        return array('Complete/SetParentDefinition',
                      'Complete/MakeClassMethodDefinition',
                      'Complete/CreateMagicProperty',
                      'Complete/SetArrayClassDefinition',
@@ -62,9 +61,9 @@ class WrongNumberOfArguments extends Analyzer {
                 continue;
             }
             if ($function['name'] === '\array_keys') {
-	            $argsMins[$name] = 1;
+                $argsMins[$name] = 1;
             } else {
-	            $argsMins[$name] = $function['args_min'];
+                $argsMins[$name] = $function['args_min'];
             }
 
             if ($function['args_max'] < \MAX_ARGS) {
@@ -95,12 +94,14 @@ class WrongNumberOfArguments extends Analyzer {
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
-             ->inIsIE('METHOD') // for methods calls, static or not.
+             ->back('first')
+
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/VariableArguments')
              ->isMore('args_min', 'args_count')
              ->back('first')
+
              ->inIsIE('NEW')
              ->analyzerIsNot('self');
         $this->prepareQuery();
@@ -114,6 +115,7 @@ class WrongNumberOfArguments extends Analyzer {
              ->is('variadic', true)
              ->savePropertyAs('count', 'args_count')
              ->back('first')
+
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/VariableArguments')
@@ -132,6 +134,7 @@ class WrongNumberOfArguments extends Analyzer {
              ->is('variadic', true)
              ->savePropertyAs('count', 'args_count')
              ->back('first')
+
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
              ->analyzerIsNot('Functions/VariableArguments')
@@ -188,10 +191,12 @@ class WrongNumberOfArguments extends Analyzer {
         $this->atomIs('New')
              ->analyzerIsNot('self')
              ->outIs('NEW')
+             ->as('name')
              ->outWithRank('ARGUMENT', 0)
              ->is('variadic', true)
              ->savePropertyAs('count', 'args_count')
-             ->inIs('ARGUMENT')
+             ->back('name')
+
              ->outIs('DEFINITION')
              ->atomIs('Magicmethod')
              ->analyzerIsNot('Functions/VariableArguments')
@@ -206,7 +211,8 @@ class WrongNumberOfArguments extends Analyzer {
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
-             ->inIsIE('METHOD') // for methods calls, static or not.
+             ->back('first')
+
              ->inIsIE('NEW')
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
@@ -220,7 +226,8 @@ class WrongNumberOfArguments extends Analyzer {
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
-             ->inIsIE('METHOD') // for methods calls, static or not.
+             ->back('first')
+
              ->inIsIE('NEW')
              ->inIs('DEFINITION')
              ->atomIs(self::FUNCTIONS_ALL)
@@ -236,7 +243,8 @@ class WrongNumberOfArguments extends Analyzer {
              ->outIsIE('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
              ->savePropertyAs('count', 'args_count')
-             ->inIsIE('METHOD') // for methods calls, static or not.
+             ->back('first')
+
              ->inIsIE('NEW')
              ->inIs('DEFINITION')
              ->analyzerIsNot('Functions/VariableArguments')
@@ -359,12 +367,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
@@ -385,12 +394,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
@@ -405,12 +415,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');
@@ -431,12 +442,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');
@@ -451,12 +463,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
@@ -475,12 +488,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isLessHash('count', $argsMins, 'methodfnp')
              ->back('first');
@@ -494,12 +508,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');
@@ -517,12 +532,13 @@ class WrongNumberOfArguments extends Analyzer {
 
              ->outIs('METHOD') // for methods calls, static or not.
              ->hasNoVariadicArgument()
+             ->as('name')
 
              ->outIs('NAME')
              ->savePropertyAs('fullcode', 'name')
-             ->inIs('NAME')
+             ->back('name')
 
-			 ->makeMethodFnp('methodfnp', 'fnp', 'name')
+             ->makeMethodFnp('methodfnp', 'fnp', 'name')
 
              ->isMoreHash('count', $argsMaxs, 'methodfnp')
              ->back('first');

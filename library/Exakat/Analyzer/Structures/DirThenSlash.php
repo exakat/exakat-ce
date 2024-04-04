@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ class DirThenSlash extends Analyzer {
              ->outIs('CONCAT')
              ->atomIs('Magicconstant')
              ->is('fullcode', '__DIR__')
-             ->nextSibling('CONCAT')
+             ->nextSibling()
              ->atomIs('String', self::WITH_CONSTANTS)
              ->hasNoOut('CONCAT')
              ->regexIs('noDelimiter', '^[^/]')
@@ -43,7 +43,7 @@ class DirThenSlash extends Analyzer {
              ->outIs('CONCAT')
              ->atomIs('Magicconstant')
              ->is('fullcode', '__DIR__')
-             ->nextSibling('CONCAT')
+             ->nextSibling()
              ->atomIs('String')
              ->hasOut('CONCAT')
              ->outWithRank('CONCAT', 0)
@@ -57,7 +57,7 @@ class DirThenSlash extends Analyzer {
         $this->atomIs('Concatenation')
              ->outIs('CONCAT')
              ->functioncallIs('\\dirname')
-             ->nextSibling('CONCAT')
+             ->nextSibling()
              ->atomIs('String')
              ->hasNoOut('CONCAT')
              ->regexIs('noDelimiter', '^[^/]')
@@ -68,7 +68,7 @@ class DirThenSlash extends Analyzer {
         $this->atomIs('Concatenation')
              ->outIs('CONCAT')
              ->functioncallIs('\\dirname')
-             ->nextSibling('CONCAT')
+             ->nextSibling()
              ->atomIs('String')
              ->hasOut('CONCAT')
              ->outWithRank('CONCAT', 0)

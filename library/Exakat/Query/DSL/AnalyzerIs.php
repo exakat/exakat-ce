@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 namespace Exakat\Query\DSL;
 
 use Exakat\Analyzer\Analyzer;
+use const STRICT_COMPARISON;
 
 class AnalyzerIs extends DSL {
     public function run(): Command {
@@ -31,7 +32,7 @@ class AnalyzerIs extends DSL {
 
         $analyzer = makeArray($analyzer);
 
-        if (($id = array_search('self', $analyzer)) !== false) {
+        if (($id = array_search('self', $analyzer, STRICT_COMPARISON)) !== false) {
             $analyzer[$id] = $this->analyzerQuoted;
         }
         $analyzer = array_map(Analyzer::class . '::getName', $analyzer);

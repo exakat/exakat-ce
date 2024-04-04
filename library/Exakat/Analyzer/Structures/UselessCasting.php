@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,8 +27,14 @@ use Exakat\Data\Methods;
 
 class UselessCasting extends Analyzer {
     public function dependsOn(): array {
-        return array('Complete/PropagateCalls',
-                     'Complete/VariableTypehint',
+        return array('Complete/VariableTypehint',
+                     'Complete/SetClassMethodRemoteDefinition',
+                     'Complete/SetClassRemoteDefinitionWithLocalNew',
+                     'Complete/SetClassRemoteDefinitionWithGlobal',
+                     'Complete/SetClassRemoteDefinitionWithInjection',
+                     'Complete/SetClassRemoteDefinitionWithParenthesis',
+                     'Complete/SetClassRemoteDefinitionWithReturnTypehint',
+                     'Complete/SetClassRemoteDefinitionWithTypehint',
                     );
     }
 
@@ -41,6 +47,7 @@ class UselessCasting extends Analyzer {
                        'T_DOUBLE_CAST'  => 'float'
                   );
 
+        $returnTypes = array();
         foreach ($casts as $token => $type) {
             $returnTypes[$type] = $this->readStubs('getFunctionsByReturnType', array($type, Methods::STRICT));
         }

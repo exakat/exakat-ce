@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -183,7 +183,7 @@ class Doctor extends Tasks {
 
         $stats['loader']['mode'] = $this->config->loader_mode;
         if ($this->config->loader_mode !== 'Serial') {
-	        $stats['loader']['parallel max'] = $this->config->loader_parallel_max ?? 'N/A';
+            $stats['loader']['parallel max'] = $this->config->loader_parallel_max ?? 'N/A';
         }
 
 
@@ -254,10 +254,12 @@ class Doctor extends Tasks {
 
         // stubs
         if (!file_exists($this->config->dir_root . '/stubs')) {
+            // @todo create the stub directory when it is missing
 //            mkdir($this->config->dir_root . '/stubs', 0755);
         }
 
         // projects
+        // @todo : do we need to produce one test<id> project? Just for test?
         if (file_exists('./projects') &&
             !file_exists("{$this->config->projects_root}/projects/test")) {
             $i = 0;

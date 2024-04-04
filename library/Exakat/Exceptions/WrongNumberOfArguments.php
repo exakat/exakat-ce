@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,9 +24,15 @@ declare(strict_types = 1);
 
 namespace Exakat\Exceptions;
 
-class WrongNumberOfArguments extends \RuntimeException {
-    public function __construct(string $method, int $obtained, int $expected) {
-        parent::__construct("$method received $obtained arguments, and expected $expected.", 0, null);
+use RuntimeException;
+
+class WrongNumberOfArguments extends RuntimeException {
+    public function __construct(string $method, int $obtained, int $expected, int $expected_max = -1) {
+        if ($expected_max === -1) {
+            parent::__construct("$method received $obtained arguments, and expected $expected.", 0, null);
+        } else {
+            parent::__construct("$method received $obtained arguments, and expected $expected to $expected_max.", 0, null);
+        }
     }
 }
 

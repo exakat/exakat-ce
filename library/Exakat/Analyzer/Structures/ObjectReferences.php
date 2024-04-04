@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -58,9 +58,11 @@ class ObjectReferences extends Analyzer {
              ->analyzerIsNot('self')
              ->outIs('ARGUMENT')
              ->is('reference', true)
-             ->outIs('TYPEHINT')
-             ->atomIs('Void')
-             ->inIs('TYPEHINT')
+             ->filter(
+                 $this->side()
+                     ->outIs('TYPEHINT')
+                     ->atomIs('Void')
+             )
              ->savePropertyAs('code', 'variable') // Avoid &
              ->not(
                  $this->side()
@@ -73,7 +75,7 @@ class ObjectReferences extends Analyzer {
              )
              ->outIs('DEFINITION')
              ->inIs(array('OBJECT', 'CLASS'))
-             ->atomIs(array('Methodcall', 'Member', 'Staticconstant', 'Staticmethodcall', 'Staticproperty'))
+             ->atomIs(array('Methodcall', 'Member', 'Staticconstant', 'Staticmethodcall', 'Staticproperty', 'Staticclass'))
              ->back('first');
         $this->prepareQuery();
 
@@ -83,11 +85,20 @@ class ObjectReferences extends Analyzer {
              ->is('reference', true)
              ->savePropertyAs('code', 'variable')
              ->back('first')
-             ->outIs('BLOCK')
-             ->atomInsideNoDefinition(array('Methodcall', 'Member'))
-             ->outIs('OBJECT')
-             ->analyzerIsNot('self')
-             ->samePropertyAs('code', 'variable');
+             ->not(
+                 $this->side()
+                     ->outIs('BLOCK')
+                     ->atomInsideNoDefinition(array('Methodcall', 'Member'))
+                     ->outIs('OBJECT')
+                     ->analyzerIsNot('self')
+                     ->samePropertyAs('code', 'variable')
+                     ->is('isModified', true)
+             )
+            ->outIs('BLOCK')
+            ->atomInsideNoDefinition(array('Methodcall', 'Member'))
+            ->outIs('OBJECT')
+            ->analyzerIsNot('self')
+            ->samePropertyAs('code', 'variable');
         $this->prepareQuery();
 
         // @todo &function() { return new A; }

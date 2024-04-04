@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,6 +26,8 @@ use Stdclass;
 use Exakat\Exceptions\NoSuchStub;
 
 class PdffReader extends Stubs implements StubsInterface {
+	// @todo express the structure of the target dataset for SA to work.
+	
     private string $pdffFile    = '';
     private object $data;
 

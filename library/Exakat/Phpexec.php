@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -64,15 +64,15 @@ class Phpexec {
                                            '`'       => 'T_SHELL_QUOTE',
                                            '`_CLOSE' => 'T_SHELL_QUOTE_CLOSE',
                                            '~'       => 'T_TILDE');
-    private static array $tokens    = array();
-    private array $config    = array();
-    private bool $isCurrentVersion = false;
+    private static array $tokens     = array();
+    private array $config            = array();
+    private bool $isCurrentVersion   = false;
     private string $actualVersion    = '';
     private string $requestedVersion = '';
-    private array $error            = array();
+    private array $error             = array();
     private string $version          = '';
 
-    public function __construct(string $phpversion = null, string $pathToBinary = '') {
+    public function __construct(?string $phpversion = null, string $pathToBinary = '') {
         assert($phpversion !== null, "Php version must be a valid version, not $phpversion.");
         assert($pathToBinary !== '', "Path to PHP binary can't be empty for '$phpversion'.");
 
@@ -260,7 +260,7 @@ class Phpexec {
             throw new NoPhpBinary('PHP binary for version ' . $this->requestedVersion . ' doesn\'t have the right middle version : "' . $this->actualVersion . '" is provided. Please, check config/exakat.ini');
         }
 
-        return strpos($res, 'The PHP Group') !== false;
+        return str_contains($res, 'The PHP Group');
     }
 
     public function getActualVersion(): string {
@@ -406,7 +406,9 @@ class Phpexec {
 echo '\\\$config = '.var_export(\\\$results, true).';';
 PHP;
             $readPHPConfig = shell_exec("{$this->phpexec} -r \"$php\" 2>&1") ?? '';
-            if (strpos($readPHPConfig, 'Error') === false ) {
+            if (str_contains($readPHPConfig, 'Error') ) {
+                $this->config = array();
+            } else {
                 try {
                     // @ hides potential errors.
                     @eval($readPHPConfig);
@@ -420,8 +422,6 @@ PHP;
                 } catch(Throwable $t) {
                     $this->config = array();
                 }
-            } else {
-                $this->config = array();
             }
         }
     }

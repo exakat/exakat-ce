@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@ abstract class Data {
     protected string $name = '';
 
     private Sqlite3 $sqlite;
-    private string  $phar_tmp = null;
+    private string  $phar_tmp = '';
 
     public function __construct(string $name) {
         $this->name = $name;
@@ -62,7 +62,7 @@ abstract class Data {
     }
 
     public function __destruct() {
-        if ($this->phar_tmp !== null) {
+        if ($this->phar_tmp !== '') {
             unlink($this->phar_tmp);
         }
     }
@@ -131,7 +131,7 @@ abstract class Data {
         return $return;
     }
 
-    public function getInterfaces(string $component, version $version = null): array {
+    public function getInterfaces(string $component, string $version = null): array {
         // @todo : $component is not used. Is could have been the namespace
         $query = 'SELECT namespaces.name || "\" || cit.name AS interfaceName, version FROM cit 
                     JOIN namespaces 

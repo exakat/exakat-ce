@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,13 +23,13 @@
 
 namespace Exakat\Analyzer;
 
-use Exakat\Autoload\Autoloader;
+use Exakat\Autoload\AutoloadDev;
 
 class RulesetsDev {
     private array $all           = array('All' => array());
     private array $rulesets      = array();
 
-    public function __construct(Autoloader $dev) {
+    public function __construct(AutoloadDev $dev) {
         $this->all      = $dev->getAllAnalyzers() ?: array('All' => array());
         $this->rulesets = array_keys($this->all);
         $id = array_search('All', $this->rulesets);
@@ -63,11 +63,11 @@ class RulesetsDev {
         return preg_grep("#$folder/#", $return);
     }
 
-    public function listAllRulesets(array $ruleset = null): array {
+    public function listAllRulesets(?array $ruleset = null): array {
         return $this->rulesets;
     }
 
-    public function getRulesetsAnalyzers(array $ruleset = null): array {
+    public function getRulesetsAnalyzers(?array $ruleset = null): array {
         if (empty($ruleset)) {
             return array();
         }
@@ -118,7 +118,7 @@ class RulesetsDev {
         });
     }
 
-    public function getClass(string $name): string|bool {
+    public function getClass(string $name): string {
         // accepted names :
         // PHP full name : Analyzer\\Type\\Class
         // PHP short name : Type\\Class
@@ -137,11 +137,11 @@ class RulesetsDev {
             $found = $this->getSuggestionClass($name);
 
             if (empty($found)) {
-                return false; // no class found
+                return ''; // no class found
             }
 
             if (count($found) > 1) {
-                return false;
+                return '';
             }
 
             $class = $found[0];
@@ -150,11 +150,11 @@ class RulesetsDev {
         }
 
         if ($class === null) {
-            return false;
+            return '';
         }
 
         if (!class_exists($class)) {
-            return false;
+            return '';
         }
 
         $actualClassName = new \ReflectionClass($class);
@@ -162,7 +162,7 @@ class RulesetsDev {
             return $class;
         } else {
             // problems with the case
-            return false;
+            return '';
         }
     }
 

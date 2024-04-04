@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -62,6 +62,12 @@ class SelfTransform extends Analyzer {
              ->outIs('LEFT')
              ->analyzerIsNot('self')
              ->atomIs(self::CONTAINERS);
+        $this->prepareQuery();
+
+        // $a++; $b[] = 1;
+        $this->atomIs(array('Preplusplus', 'Postplusplus', 'Arrayappend'))
+             ->outIs(array('PREPLUSPLUS', 'POSTPLUSPLUS', 'APPEND'))
+             ->atomIs(array('Member', 'Variable', 'Variablearray', 'Array', 'Staticproperty'));
         $this->prepareQuery();
     }
 }

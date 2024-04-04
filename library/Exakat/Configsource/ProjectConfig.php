@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -113,7 +113,7 @@ class ProjectConfig extends Config {
 
         // Default behavior to keep exakat running until everyone has a filled file_extension option in config.ini
         if (empty($this->config['file_extensions'])) {
-            $this->config['file_extensions'] = explode(',', 'php,php3,inc,tpl,phtml,tmpl,phps,ctp,module');
+            $this->config['file_extensions'] = array('php', 'php3', 'inc', 'tpl', 'phtml', 'tmpl', 'phps', 'ctp', 'module');
         } elseif (is_string($this->config['file_extensions'] )) {
             $this->config['file_extensions'] = str2array($this->config['file_extensions'] );
         }

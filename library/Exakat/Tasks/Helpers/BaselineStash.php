@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ use Exakat\Config;
 
 class BaselineStash {
     public const BASELINE_NONE   = 'none';
+    public const BASELINE_ONE    = 'one';
     public const BASELINE_ALWAYS = 'always';
 
     public const NO_BASELINE     = '';
@@ -35,13 +36,11 @@ class BaselineStash {
     // 'none', 'always', '<Name>'
     private string $baselineStrategy = self::BASELINE_NONE;
     private string $baselineDir      = '';
-    private string $use              = 'none';
 
 
     public function __construct(Config $config) {
         $this->baselineStrategy  = $config->baseline_set;
         $this->baselineDir       = $config->project_dir . '/baseline';
-        $this->use               = $config->baseline_use;
 
         if (!file_exists($this->baselineDir)) {
             if (!mkdir($this->baselineDir,0700)) {
@@ -50,11 +49,11 @@ class BaselineStash {
         }
     }
 
-    public function copyPrevious(string $previous, string $name = ''): void {
+    public function copyPrevious(string $previous, string $name = ''): string {
         if (!file_exists($previous)) {
             display("No previous audit found. Omitting baseline\n");
 
-            return;
+            return '';
         }
 
         if (!empty($name) && !in_array($name, self::STRATEGIES)) {
@@ -63,12 +62,12 @@ class BaselineStash {
                 display('Could not save the baseline with the name ' . $name);
             }
 
-            return;
+            return '';
         }
 
         if ($this->baselineStrategy === self::BASELINE_NONE) {
             // Nothing to do
-            return;
+            return '';
         }
 
         if ($this->baselineStrategy === self::BASELINE_ALWAYS) {
@@ -90,8 +89,43 @@ class BaselineStash {
                 display('Could not save the baseline with the name ' . $name);
             }
 
-            return;
+            return $sqliteFilePrevious;
         }
+
+        if ($this->baselineStrategy === self::BASELINE_ONE) {
+            $sqliteFilePrevious = $this->baselineDir . '/dump-1.sqlite';
+            if (!copy($previous, $sqliteFilePrevious)) {
+                display('Could not save the baseline with the name ' . $name);
+            }
+
+            return $sqliteFilePrevious;
+        }
+    }
+
+    public function getLastStash(): string {
+        if ($this->baselineStrategy === self::BASELINE_ONE) {
+            $sqliteFilePrevious = $this->baselineDir . '/dump-1.sqlite';
+            return $sqliteFilePrevious;
+        }
+
+        if ($this->baselineStrategy === self::BASELINE_ALWAYS) {
+            $baselines = glob("{$this->baselineDir}/dump-*.sqlite");
+            if (empty($baselines)) {
+                $last_id = 1;
+            } else {
+                usort($baselines, function (string $a, string $b) {
+                    return $b <=> $a;
+                } ); // simplistic reverse sorting
+                $last = $baselines[0];
+                $last_id = preg_match('/dump-(\d+)-/', $last, $r) ? (int) $r[1] : 1;
+            }
+
+            $sqliteFilePrevious = $this->baselineDir . '/dump-' . ($last_id + 1) . '-' . substr(md5($this->baselineDir . ($last_id + 1)), 0, 7) . '.sqlite';
+            return $sqliteFilePrevious;
+        }
+
+        //BASELINE_NONE
+        return '';
     }
 
     public function removeBaseline(string $id): void {

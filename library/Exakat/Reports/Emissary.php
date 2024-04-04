@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -104,7 +104,7 @@ class Emissary extends Reports {
             }
         }
 
-        return $this->namespaceNames[$name] ?? $name;
+        return $this->namespaceNames[$name] ?? $name ?: '\\';
     }
 
     protected function makeMenu(): string {
@@ -236,7 +236,7 @@ class Emissary extends Reports {
         }
 
         if ($missing = $this->checkMissingRulesets()) {
-            print "Can't produce Emissary format. There are " . count($missing) . ' missing rulesets : ' . implode(', ', $missing) . ".\n";
+            print "Can't produce " . fqn2class(static::class) . ' format. There are ' . count($missing) . ' missing rulesets : ' . implode(', ', $missing) . ".\n";
 
             return '';
         }
@@ -308,8 +308,8 @@ class Emissary extends Reports {
     }
 
     protected function setPHPBlocs(string $description): string {
-        $description = preg_replace_callback("#<\?php(.*?)\n\?>#is", function (array $x): string {
-            $return = '<pre style="border: 1px solid #ddd; background-color: #f5f5f5;">&lt;?php ' . PHP_EOL . PHPSyntax($x[1]) . '?&gt;</pre>';
+        $description = preg_replace_callback("#(<\?php.*?\n\?>)#is", function (array $x): string {
+            $return = '<pre style="border: 1px solid #ddd; background-color: #f5f5f5;">' . PHPSyntax($x[1]) . '</pre>';
             return $return;
         }, $description);
 
@@ -317,6 +317,8 @@ class Emissary extends Reports {
     }
 
     protected function generateDocumentation(Section $section): void {
+        static $regex;
+
         $analyzersList = array_merge($this->rulesets->getRulesetsAnalyzers($this->dependsOnAnalysis()));
         $analyzersList = array_unique($analyzersList);
 
@@ -355,13 +357,24 @@ class Emissary extends Reports {
 
             $analyzersDocHTML .= '<p>' . implode(' - ', $badges) . '</p>';
 
-            if (empty($description['seeAlso'][0])) {
-                $description = $description['description'];
+            if (isset($description['code'])) {
+                $code = PHP_EOL . phpsyntax($description['code']) . PHP_EOL;
             } else {
-                $description = $description['description'] . "\nSee also " . implodeAnd($description['seeAlso']);
+                $code = '';
             }
 
-            static $regex;
+            if (empty(array_filter($description['modifications']))) {
+                $modifications = '';
+            } else {
+                $modifications = "\nAlternatives:\n " . array2htmllist(array_filter($description['modifications'])) . PHP_EOL . PHP_EOL;
+            }
+
+            if (empty($description['seeAlso'][0])) {
+                $description = $description['description'] . PHP_EOL . $code . $modifications;
+            } else {
+                $description = $description['description'] . $code . $modifications . "\nSee also " . implodeAnd($description['seeAlso']) . '.';
+            }
+
             if (empty($regex)) {
                 $php_native_functions = parse_ini_file("{$this->config->dir_root}/data/php_functions.ini")['functions'];
                 usort($php_native_functions, function (string $a, string $b): int {
@@ -371,12 +384,16 @@ class Emissary extends Reports {
             }
             $description = preg_replace($regex, '`\1() <https://www.php.net/\1>`_', $description);
 
-            $analyzersDocHTML .= '<p>' . nl2br($this->setPHPBlocs($description)) . '</p>';
+
+            $x = '<p>' . $this->setPHPBlocs($description) . '</p>';
+            $analyzersDocHTML .= $x;
+
             $analyzersDocHTML  = rst2quote($analyzersDocHTML);
             $analyzersDocHTML  = rst2htmlLink($analyzersDocHTML);
             $analyzersDocHTML  = rst2literal($analyzersDocHTML);
             $analyzersDocHTML  = rsttable2html($analyzersDocHTML);
             $analyzersDocHTML  = rstlist2html($analyzersDocHTML);
+
 
             $clearphp = $description['clearphp'] ?? '';
             if (!empty($clearphp)) {
@@ -1430,7 +1447,7 @@ JAVASCRIPTCODE;
     }
 
     public function getNewIssuesFaceted(array $ruleset, string $path): array {
-        $sqlite = new Sqlite3($path);
+        $sqlite = new sqlite3($path);
         $res = $sqlite->query('SELECT count(*) FROM sqlite_master WHERE type = "table" AND name != "sqlite_sequence";');
 
         if ($res === false || $res->fetchArray(\SQLITE3_NUM)[0] < 10) {
@@ -2179,6 +2196,10 @@ HTML;
         $this->generateInventories($section, array('Type/Regex'), 'List of all Regex mentioned in the code.');
     }
 
+    private function generateInventoriesPhpAttributes(Section $section): void {
+        $this->generateInventories($section, array('Attributes/PhpNativeAttributes'), 'List of all PHP native attributes used in the code.');
+    }
+
     private function generateInventoriesSql(Section $section): void {
         $this->generateInventories($section, array('Type/Sql'), 'List of all SQL mentioned in the code.');
     }
@@ -2461,100 +2482,49 @@ HTML;
     }
 
     private function generateExceptionTree(Section $section): void {
+        // @todo : make this based on a data source, to update it more often or adapt it to PHP versions
         $exceptions = array (
-  'Throwable' =>
-  array (
-    'Error' =>
-    array (
-      'ParseError' =>
-      array (
-      ),
-      'TypeError' =>
-      array (
-        'ArgumentCountError' =>
-        array (
-        ),
-      ),
-      'ArithmeticError' =>
-      array (
-        'DivisionByZeroError' =>
-        array (
-        ),
-      ),
-      'AssertionError' =>
-      array (
-      ),
-    ),
-    'Exception' =>
-    array (
-      'ErrorException' =>
-      array (
-      ),
-      'ClosedGeneratorException' =>
-      array (
-      ),
-      'DOMException' =>
-      array (
-      ),
-      'LogicException' =>
-      array (
-        'BadFunctionCallException' =>
-        array (
-          'BadMethodCallException' =>
-          array (
-          ),
-        ),
-        'DomainException' =>
-        array (
-        ),
-        'InvalidArgumentException' =>
-        array (
-        ),
-        'LengthException' =>
-        array (
-        ),
-        'OutOfRangeException' =>
-        array (
-        ),
-      ),
-      'RuntimeException' =>
-      array (
-        'OutOfBoundsException' =>
-        array (
-        ),
-        'OverflowException' =>
-        array (
-        ),
-        'RangeException' =>
-        array (
-        ),
-        'UnderflowException' =>
-        array (
-        ),
-        'UnexpectedValueException' =>
-        array (
-        ),
-        'PDOException' =>
-        array (
-        ),
-      ),
-      'PharException' =>
-      array (
-      ),
-      'ReflectionException' =>
-      array (
-      ),
-    ),
-  ),
-);
-        $list = array();
+  '\throwable' => array('\error', '\exception'),
+  '\error'   => array('\parseerror', '\typeerror', '\argumentcounterror', '\arithmeticerror' , '\assertionerror'),
+  '\arithmeticerror'   => array('\divisionbyzeroerror', ),
+  '\exception'   => array('\errorexception', '\closedgeneratorexception', '\domexception', '\logicexception', '\runtimeexception' ),
+  '\logicexception' => array('\badfunctioncallexception', '\domainexception', '\invalidargumentexception', '\lengthexception', '\outofrangeexception'),
+  '\badfunctioncallexception' => array('\badmethodcallexception'),
+  '\runtimeexception' => array(),
+  '\reflectionexception' => array(),
+  '\pharexception' => array(),
+    );
+        $list = array('\throwable' => 'Throwable',
+                      '\error'     => 'Error',
+                      '\exception' => 'Exception',
+                      '\parseerror' => 'Parseerror',
+                      '\typeerror' => 'TypeError',
+                      '\argumentcounterror' => 'ArgumentCountError',
+                      '\reflectionexception' => 'ReflectionException',
+                      '\pharexception' => 'PharException',
+                      '\errorexception' => 'ErrorException',
+                      '\arithmeticerror' => 'ArithmeticError',
+                      '\divisionbyzeroerror' => 'DivisionByZeroError',
+                      '\assertionerror' => 'AssertionError',
+                      '\badmethodcallexception' => 'BadMethodCallException',
+                      '\runtimeexception' => 'RuntimeException',
+                      '\domexception' => 'DomException',
+                      '\closedgeneratorexception' => 'ClosedGeneratorException',
+                      '\outofrangeexception' => 'OutOfRangeException',
+                      '\lengthexception' => 'LengthException',
+                      '\invalidargumentexception' => 'InvalidArgumentException',
+                      '\domainexception' => 'DomainException',
+                      '\logicexception' => 'LogicException',
+                      '\badfunctioncallexception' => 'BadFunctionCallException',
+                    );
 
         $theTable = '';
         $res = $this->dump->fetchAnalysers(array('Exceptions/DefinedExceptions'));
         foreach ($res->toArray() as $row) {
             if (!preg_match('/ extends (\S+)/', $row['fullcode'], $r)) {
-                print 'no extends in ' . $row['fullcode'] . PHP_EOL;
-                continue;
+                // @todo log this?
+                print('no extends in ' . $row['fullcode'] . PHP_EOL);
+				continue;
             }
 
             $parent = strtolower($r[1]);
@@ -2566,15 +2536,34 @@ HTML;
                 $list[$parent] = array();
             }
 
+            if (!preg_match('/^(abstract )?(final )?class (\S+)/', $row['fullcode'], $r)) {
+                // @todo log this?
+                print('no exception name ' . $row['fullcode'] . PHP_EOL);
+				continue;
+            }
+            $theClass = $row['namespace'].'\\'.strtolower($r[1]);
+            if ($theClass[0] !== '\\') {
+                $theClass = "\\$theClass";
+            }
+
             $class = str_replace(array(' { /**/ }', 'final '), array('', ''), $row['fullcode']);
             $class = preg_replace('/extends .*/', '', $class);
             $class = PHPSyntax($class);
+            // @todo review global namespace display
             $class .= ' (' . $this->getNsName($row['namespace']) . ')';
-            $list[$parent][] = $class;
+            $list[$theClass] = $class;
+            if ($parent === $theClass) {
+            	print_r($row);
+            	die(ici);
+            }
+            if (isset($exceptions[$parent])) {
+                $exceptions[$parent][] = $theClass;
+            } else {
+                $exceptions[$parent] = array($theClass);
+            }
         }
 
-        array_sub_sort($list);
-        $theTable = $this->tree2ul($exceptions, $list);
+        $theTable = $this->tree2ul($exceptions, '\throwable', $list);
 
         $html = $this->getBasedPage($section->source);
         $html = $this->injectBloc($html, 'TITLE', $section->title);
@@ -2609,10 +2598,16 @@ HTML;
         return $return;
     }
 
-    private function pathtree2ul(array $path): string {
+    private function pathtree2ul(array $path, int $level = 0): string {
         if (empty($path)) {
             return '';
         }
+
+        if ($level > 10) {
+        	print "Too deep in pathtree2ul()\n";
+            return '';
+        }
+
         $return = array('<ul>');
 
         foreach ($path as $k => $v) {
@@ -2632,10 +2627,10 @@ HTML;
                         $return []= '<div style="font-weight: bold">' . $k . '</div>';
                     }
                 } else {
-                    $return []= '<div style="font-weight: bold">' . $k . '</div>' . $this->pathtree2ul($v);
+                    $return []= '<div style="font-weight: bold">' . $k . '</div>' . $this->pathtree2ul($v, $level + 1);
                 }
             } else {
-                $return []= '<div style="font-weight: bold">' . $k . '</div>' . $this->pathtree2ul($v);
+                $return []= '<div style="font-weight: bold">' . $k . '</div>' . $this->pathtree2ul($v, $level + 1);
             }
 
             $return []= '</li>';
@@ -2667,30 +2662,31 @@ HTML;
         $this->putBasedPage($section->file, $html);
     }
 
-    private function tree2ul(array $tree,array $display): string {
+    private function tree2ul(array $tree, string $parent, array $display, int $level = 0): string {
         if (empty($tree)) {
             return '';
         }
-        $return = '<ul>';
-
-        foreach ($tree as $k => $v) {
-            $return .= '<li>';
-
-            $parent = '\\' . strtolower((string) $k);
-            if (isset($display[$parent])) {
-                $return .= '<div style="font-weight: bold">' . $k . '</div><ul><li>' . implode('</li><li>', $display[$parent]) . '</li></ul>';
-            } else {
-                $return .= '<div style="font-weight: bold; color: darkgray">' . $k . '</div>';
-            }
-
-            if (is_array($v)) {
-                $return .= $this->tree2ul($v, $display);
-            }
-
-            $return .= '</li>';
+        
+        if ($level > 10) {
+        	print "Too deep : $parent\n";
+            return '';
         }
 
-        $return .= '</ul>';
+        $return = '';
+        $return .= '<div style="font-weight: bold">' . $display[$parent] . '</div><ul>';
+
+        $return2 = array();
+        foreach ($tree[$parent] as $v) {
+            if (empty($tree[$v])) {
+                array_unshift($return2, '<li><div style="font-weight: light">' . $display[$v] . '</div></li>');
+            } else {
+                $return2[] = '<li>';
+                $return2[] = $this->tree2ul($tree, $v, $display, $level + 1);
+                $return2[] = '</li>';
+            }
+        }
+
+        $return .= implode('', $return2) . '</ul>';
 
         return $return;
     }
@@ -3761,15 +3757,24 @@ HTML;
     }
 
     protected function Compatibility(int $count, string $analyzer): string {
-        if ($count === Analyzer::VERSION_INCOMPATIBLE) {
-            return '<i class="fa fa-ban" style="color: orange"></i>';
-        } elseif ($count === Analyzer::CONFIGURATION_INCOMPATIBLE) {
-            return '<i class="fa fa-cogs" style="color: orange"></i>';
-        } elseif ($count === 0) {
-            return '<i class="fa fa-check-square-o" style="color: green"></i>';
-        } else {
-            return '<i class="fa fa-warning" style="color: red"></i>&nbsp;<a href="compatibility_issues.html#analyzer=' . $this->toId($analyzer) . '">' . $count . ' warnings</a>';
+        switch($count) {
+            case Analyzer::VERSION_INCOMPATIBLE:
+                $return = '<i class="fa fa-ban" style="color: orange"></i>';
+                break;
+
+            case Analyzer::CONFIGURATION_INCOMPATIBLE:
+                $return = '<i class="fa fa-cogs" style="color: orange"></i>';
+                break;
+
+            case 0:
+                $return = '<i class="fa fa-check-square-o" style="color: green"></i>';
+                break;
+
+            default:
+                $return = '<i class="fa fa-warning" style="color: red"></i>&nbsp;<a href="compatibility_issues.html#analyzer=' . $this->toId($analyzer) . '">' . $count . ' warnings</a>';
         }
+
+        return $return;
     }
 
     protected function toId(string $name): string {

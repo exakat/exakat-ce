@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ class NativeClassTypeCompatibility extends Analyzer {
 
         if (!empty($returns)) {
             $this->atomIs(self::CLASSES_ALL)
-                 ->initVariable('phplist', $returns, initVariable::TYPE_ARGUMENT)
+                 ->initVariable('phplist', $returns, InitVariable::TYPE_ARGUMENT)
                  ->outIs(array('IMPLEMENTS', 'EXTENDS'))
                  ->savePropertyAs('fullnspath', 'phpnative')
                  ->raw('filter{ phpnative in phplist.keySet(); }')
@@ -68,7 +68,7 @@ class NativeClassTypeCompatibility extends Analyzer {
         $returns = $this->readStubs('getNativeMethodArgType');
         if (!empty($returns)) {
             $this->atomIs(self::CLASSES_ALL)
-                 ->initVariable('phplist', $returns, initVariable::TYPE_ARGUMENT)
+                 ->initVariable('phplist', $returns, InitVariable::TYPE_ARGUMENT)
                  ->outIs(array('IMPLEMENTS', 'EXTENDS'))
                  ->savePropertyAs('fullnspath', 'phpnative')
                  ->raw('filter{ phpnative in phplist.keySet(); }')

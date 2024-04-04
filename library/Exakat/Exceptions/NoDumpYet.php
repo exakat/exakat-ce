@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,10 +24,12 @@
 namespace Exakat\Exceptions;
 
 use Exception;
+use Exakat\Project;
+use RuntimeException;
 
-class NoDumpYet extends \Exception {
-    public function __construct(string $project = '', int $code = 0, Exception $previous = null) {
-        parent::__construct("No results are available for project '$project' yet. May be the analysis is still running.\n", $code, $previous);
+class NoDumpYet extends RuntimeException {
+    public function __construct(Project $project, int $code = 0, ?Exception $previous = null) {
+        parent::__construct("No results are available for project '".(string) $project."' yet. May be the analysis is still running.\n", $code, $previous);
     }
 }
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -184,10 +184,10 @@ class UselessInstruction extends Analyzer {
 
         // New in a clone
         $this->atomIs('Clone')
-        	 ->analyzerIsNot('self')
+             ->analyzerIsNot('self')
              ->outIs('CLONE')
-			 ->followParAs(FollowParAs::FOLLOW_PARAS_TERNARY)
-			 ->atomIs(array('New', 'Clone'))
+             ->followParAs(FollowParAs::FOLLOW_PARAS_TERNARY)
+             ->atomIs(array('New', 'Clone'))
              ->back('first');
         $this->prepareQuery();
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -47,11 +47,6 @@ class GlobalDefinitions extends Analyzer {
             list($fullcode, $code) = array_values($row[0]);
             $result = $this->query('g.V().hasLabel("Virtualglobal").has("code", ' . $code . ').count()');
 
-            // This prevent duplicates of that node
-            if (!$result->isEmpty()) {
-                continue;
-            }
-
             $fullcode = str_replace('&', '', $fullcode);
             $fullcode = str_replace('$', '\\$', $fullcode);
 
@@ -65,7 +60,7 @@ class GlobalDefinitions extends Analyzer {
             $this->atomIs('Globaldefinition')
                  ->codeIs($code, self::NO_TRANSLATE, self::CASE_SENSITIVE)
                  ->addEFrom('DEFINITION', $result2->toInt());
-            $this->rawQuery();
+            $res = $this->rawQuery();
         }
     }
 

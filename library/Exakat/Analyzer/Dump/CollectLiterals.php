@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -48,9 +48,9 @@ SQL;
                  ->goToFile()
                  ->savePropertyAs('fullcode', 'file')
                  ->getVariable(array('name' => 'name',
-                 					 'file' => 'file',
-                 					 'line' => 'theLine',
-                 					 ));
+                                      'file' => 'file',
+                                      'line' => 'theLine',
+                                      ));
             $this->prepareQuery();
         }
 
@@ -66,11 +66,11 @@ SQL;
         // @todo 'Concatenation', 'Heredoc' too
         $this->atomIs('String')
              ->is('constant', true)
-        	 ->savePropertyAs('encoding', 'theEncoding')
-        	 ->savePropertyAs('block', 'theBlock')
+             ->savePropertyAs('encoding', 'theEncoding')
+             ->savePropertyAs('block', 'theBlock')
              ->getVariable(array('encoding' => 'theEncoding',
-                 				 'block' => 'theBlock',
-                 			))
+                                  'block' => 'theBlock',
+                             ))
               ->unique();
         $this->prepareQuery();
     }

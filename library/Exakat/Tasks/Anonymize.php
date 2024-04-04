@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,6 +26,8 @@ use Exakat\Exceptions\NoSuchDir;
 use Exakat\Exceptions\NoSuchFile;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\NoCodeInProject;
+use const STRICT_COMPARISON;
+use const MINIMAL_NUMBER_OF_TOKEN_PER_FILE;
 
 class Anonymize extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -116,7 +118,7 @@ class Anonymize extends Tasks {
     private function processFile(string $file, string $anonFile = null): bool {
         $php = file_get_contents($file);
         $tokens = token_get_all($php);
-        if (count($tokens) < 3) {
+        if (count($tokens) < MINIMAL_NUMBER_OF_TOKEN_PER_FILE) {
             display( "Ignoring $file, no PHP-code.\n");
             return false;
         }
@@ -173,7 +175,7 @@ class Anonymize extends Tasks {
                     break;
                 case T_CONSTANT_ENCAPSED_STRING:
                     ++$this->strings;
-                    if (in_array($this->strings, array('IF', 'AS', 'DO', 'OR'))) {
+                    if (in_array($this->strings, array('IF', 'AS', 'DO', 'OR'), STRICT_COMPARISON)) {
                         ++$this->strings;
                     }
                     if (isset($this->stringsNames[$t[1]])) {
@@ -191,7 +193,7 @@ class Anonymize extends Tasks {
                     // otherwise, fall through!
                 case T_ENCAPSED_AND_WHITESPACE :
                     ++$this->strings;
-                    if (in_array($this->strings, array('IF', 'AS', 'DO', 'OR'))) {
+                    if (in_array($this->strings, array('IF', 'AS', 'DO', 'OR'), STRICT_COMPARISON)) {
                         ++$this->strings;
                     }
                     if (isset($this->stringsNames[$t[1]])) {

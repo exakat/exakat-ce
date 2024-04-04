@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -39,6 +39,8 @@ CREATE TABLE constantOrder (  id INTEGER PRIMARY KEY AUTOINCREMENT,
 SQL;
 
     public function analyze(): void {
+        // const A = B + 1;
+        // const B = 3;
         $this ->atomIs('Constant', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->as('built')

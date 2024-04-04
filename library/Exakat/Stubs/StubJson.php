@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ use Stdclass;
 
 class StubJson extends Stubs implements StubsInterface {
     private string    $stubFile    = '';
-    private stdclass  $stub;
+    private Stdclass  $stub;
 
     public const STRICT = true;
     public const LOOSE  = false;

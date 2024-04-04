@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -58,6 +58,7 @@ class Sarif extends Reports {
         $precisionCache   = array();
         $severityCache    = array();
         $descriptionCache = array();
+        $titleCache       = array();
 
         $analysisResults = $this->dump->fetchAnalysers($analyzerList);
         foreach ($analysisResults->toArray() as $row) {

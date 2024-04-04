@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -144,7 +144,7 @@ class Status extends Tasks {
         $this->display($status, $this->config->json ? self::WITH_JSON : self::WITHOUT_JSON);
     }
 
-    private function display(array $status, int $json = self::WITH_JSON) : void {
+    private function display(array $status, int $json = self::WITH_JSON): void {
         // Json publication
         if ($json === self::WITH_JSON) {
             print json_encode($status);

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ class IsNot extends DSL {
 
             return new Command('filter{ if ( it.get().properties("' . $property . '").any()) { ' . $value . ' != it.get().value("' . $property . '")} else {' . $value . ' != false; }; }');
         } elseif ($value === true) {
-            return new Command("has(\"$property\", false)");
+            return new Command("not(has(\"$property\", true))");
         } elseif ($value === false) {
             return new Command("has(\"$property\", true)");
         } elseif (is_int($value)) {
@@ -47,6 +47,8 @@ class IsNot extends DSL {
         } elseif (is_string($value)) {
             if (empty($value)) {
                 return new Command("has(\"$property\").not(has(\"$property\", ''))");
+            } elseif ($this->isVariable($value)) {
+                return new Command('filter{ !(it.get().value("' . $property . '") in ' . $value . '); }');
             } else {
                 return new Command("has(\"$property\").not(has(\"$property\", ***))", array($value));
             }

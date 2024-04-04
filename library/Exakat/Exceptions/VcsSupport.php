@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,8 +24,9 @@
 namespace Exakat\Exceptions;
 
 use Exception;
+use RuntimeException;
 
-class VcsSupport extends \Exception {
+class VcsSupport extends RuntimeException {
     public function __construct(string $vcs, string $message = 'doesn\'t support this feature.', int $code = 0, ?Exception $previous = null) {
         parent::__construct("$vcs $message.\n", $code, $previous);
     }

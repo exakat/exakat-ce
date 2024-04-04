@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -79,7 +79,7 @@ class NoChoice extends Analyzer {
                       ->outIs('EXPRESSION')
                       ->atomIs($skipExpression)
              )
-             ->raw('sideEffect{ sthen = []; it.get().vertices(OUT, "EXPRESSION").sort{it.value("rank")}.each{ sthen.add(it.value("fullcode"));} }')
+             ->collectOut('sthen', 'EXPRESSION', 'fullcode')
              ->inIs('THEN')
              ->outIs('ELSE')
              ->atomIs('Sequence')
@@ -89,8 +89,8 @@ class NoChoice extends Analyzer {
                       ->outIs('EXPRESSION')
                       ->atomIs($skipExpression)
              )
-             ->raw('sideEffect{ selse = []; it.get().vertices(OUT, "EXPRESSION").sort{it.value("rank")}.each{ selse.add(it.value("fullcode"));} }')
-             ->raw('filter{ sthen.join(";") == selse.join(";") }')
+             ->collectOut('selse', 'EXPRESSION', 'fullcode')
+             ->isEqual('sthen', 'selse')
              ->back('first');
         $this->prepareQuery();
 

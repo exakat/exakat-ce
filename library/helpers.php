@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -50,6 +50,8 @@ const SQLITE_CHUNK_SIZE = 490;
 const SQLITE3_BUSY_TIMEOUT = 5000; // ms
 
 const PARALLEL_WAIT_MS      = 100000; 
+
+const MINIMAL_NUMBER_OF_TOKEN_PER_FILE = 3;
 
 
 function display(string $text): void {
@@ -373,19 +375,25 @@ function PHPSyntax(string $code): string {
     }
 
     $code = trim($code);
-    $php = highlight_string("<?php \n{$code}\n ?>", true);
-    $php = substr($php, 85, -40);
-    if (substr($php, 0, 7) === '</span>') {
-        $php = substr($php, 7, 20000);
+    if (preg_match('/^<\?php/m', $code)) {
+    	// Full PHP code
+    	$php = highlight_string($code, true);
     } else {
-        $php = '<span style="color: #0000BB">' . $php;
+    	// Partial PHP code
+    	$php = highlight_string("<?php /*A*/{$code}/*B*/ ?>", true);
+	
+		// PHP 8.3
+		// PHP 8.2 
+    	$php = preg_replace('!^<code>(.+)</code>!s', '\\1', $php);
+    	$php = preg_replace('!^<pre>(.+)</pre>!s', '\\1', $php);
+    	$php = preg_replace('!^<span style="color: #000000">(.+)</span>!', '\\1', $php);
+    	$php = preg_replace('!^.*/\*A\*/</span>!', '', $php);
+    	$php = preg_replace('!<span style="color: #FF8000">/\*B\*/.*?$!', '', $php);
+	
+    	$php = str_replace('&nbsp;', ' ', $php);
+    	$php = trim($php);
     }
-    if (substr($php, -17) === '<span style="colo') {
-        $php = substr($php, 0, -30);
-        $php .= '</span>';
-    } else {
-        $php .= '</span>';
-    }
+
     $cache[$code] = $php;
 
     return $cache[$code];
@@ -412,7 +420,7 @@ function makeFullNsPath(array|string $functions, bool $constant = \FNP_NOT_CONST
     if ($constant === \FNP_NOT_CONSTANT) {
         $cb = function (string $x): string {
             $r = mb_strtolower($x);
-            if (strpos($r, '\\\\') !== false) {
+            if (str_contains($r, '\\\\')) {
                 $r = stripslashes($r);
             }
             if (isset($r[0]) && $r[0] != '\\') {
@@ -425,12 +433,12 @@ function makeFullNsPath(array|string $functions, bool $constant = \FNP_NOT_CONST
         $cb = function (string $r): string {
             $r2 = str_replace('\\\\', '\\', $r);
 
-            if (strpos($r2, '::') === false) {
-                $d = explode('\\', $r2);
-                $glue = '\\';
-            } else {
+            if (str_contains($r2, '::')) {
                 $d = explode('::', $r2);
                 $glue = '::';
+            } else {
+                $d = explode('\\', $r2);
+                $glue = '\\';
             }
             $last = array_pop($d);
             $r = mb_strtolower(implode('\\', $d)) . $glue . $last;
@@ -457,8 +465,8 @@ function trimOnce(string $string, string $trim = '\'"'): string {
     }
 
     if ($string[0] === $string[$length -1] &&
-        strpos($trim, $string[0]) !== false &&
-        strpos($trim, $string[$length -1]) !== false
+        str_contains($trim, $string[0]) &&
+        str_contains($trim, $string[$length -1])
          ) {
         return substr($string, 1, -1);
     }
@@ -506,7 +514,7 @@ function rsttable2html(string $raw): string {
         } elseif ($table === true) {
             if (preg_match('/^[\+-]+$/', $line, $r)) {
                 $html[] = '<tr>' . str_repeat('<td></td>', substr_count($r[0], '+')) . "</tr>\n";
-            } elseif (strpos($line, '|') === false) {
+            } elseif (!str_contains($line, '|')) {
                 $table = false;
                 $html []= '</table>';
                 $html []= '';
@@ -602,7 +610,7 @@ function checkVersionRange(string $range, string $version): bool {
     }
 
     // version range 1.2.3-4.5.6
-    if (strpos($range, '-') !== false) {
+    if (str_contains($range, '-')) {
         list($lower, $upper) = explode('-', $range);
         return version_compare($version, $lower) >= 0 && version_compare($version, $upper) <= 0;
     }
@@ -655,7 +663,7 @@ function filter_analyzer(string $analyzer): int {
 
 function array_sub_sort(array &$list): void {
     foreach ($list as &$l) {
-        sort($l);
+        asort($l);
     }
     unset($l);
 }
@@ -666,6 +674,22 @@ function array_collect_by(array &$array, int|string $key, mixed $value): void {
     } else {
         $array[$key] = array($value);
     }
+}
+
+function array_add_by_keys(array $array): array {
+	$return = array();
+	
+	foreach($array as $a) {
+		foreach($a as $key => $value) {
+			if (isset($return[$key])) {
+				$return[$key] += $value;
+			} else {
+				$return[$key] = $value;
+			}
+		}
+	}
+	
+	return $return;
 }
 
 function readIniPercentage(string $value): float {
@@ -702,6 +726,14 @@ function flatten(array $array): string {
 }
 
 function implodeAnd(array $array, string $and = ' and '): string {
+	if (empty($array)) {
+		return '';
+	}
+
+	if (count($array) === 1) {
+		return $array[0];
+	}
+	
 	$last = array_pop($array);
     return implode(', ', $array).$and.$last;
 }
@@ -717,6 +749,11 @@ function array2tablerow(array $array) : string {
 	unset($a);
 
 	return implode(PHP_EOL, $array);
+}
+
+function fqn2class(string $fqn) : string {
+	$details = explode('\\', $fqn);
+	return end($details);
 }
 
 ?>

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,6 +28,11 @@ use Exakat\Analyzer\Analyzer;
 class ClassUsage extends Analyzer {
     protected array $classes = array();
 
+    public function dependsOn(): array {
+        return array('Complete/ReturnTypehint',
+                    );
+    }
+
     public function setClasses(array $classes): void {
         $this->classes = $classes;
     }
@@ -38,26 +43,27 @@ class ClassUsage extends Analyzer {
         // New X();
         $this->atomIs(self::NEW_CALLS)
              ->hasNoIn('NAME')
-             ->has('fullnspath')
              ->fullnspathIs($classes);
         $this->prepareQuery();
 
-        // @todo : shall skip traits and enums too ?
         $interfaces = $this->readStubs('getInterfaceList');
+        $traits = $this->readStubs('getTraitList');
+        $list = array_diff($classes, $interfaces, $traits);
 
-        // Typehint (return and argument), catch, instanceof, classes with extends
+        // Typehint (return and argument), catch, instanceof, ::class, classes with extends
         $this->atomIs(array('Identifier', 'Nsname'))
-             ->has('line') // what for?
              ->hasIn(array('TYPEHINT', 'RETURNTYPE', 'EXTENDS', 'CLASS')) // NOT IMPLEMENT
-             ->fullnspathIs($classes)
-             ->fullnspathIsNot($interfaces)
+             ->fullnspathIs($list)
+             ->isNot('extra', true)
              ->analyzerIsNot('self');
         $this->prepareQuery();
 
+        // class_alias('a', $b);
         $this->atomIs('Classalias')
              ->outWithRank('ARGUMENT', 0)
-             ->atomIs('String')
-             ->noDelimiterIs($classes);
+             ->atomIs('String', self::WITH_CONSTANTS)
+             ->analyzerIsNot('self')
+             ->noDelimiterIs($list);
         $this->prepareQuery();
     }
 }

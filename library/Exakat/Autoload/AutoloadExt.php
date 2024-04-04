@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ namespace Exakat\Autoload;
 
 
 class AutoloadExt implements Autoloader {
-    public const LOAD_ALL = null;
+    public const LOAD_ALL = 'all';
 
     private array $pharList   = array();
     private array $extensions = array();
@@ -57,7 +57,7 @@ class AutoloadExt implements Autoloader {
     }
 
     public function registerAutoload(): void {
-        spl_autoload_register(array($this, 'autoload'));
+        spl_autoload_register($this->autoload(...));
     }
 
     private function checkDependencies(): void {
@@ -105,6 +105,8 @@ class AutoloadExt implements Autoloader {
                 continue;
             }
             $ini = parse_ini_file($fullPath);
+
+            // @todo : throw here?
 
             $return[$name] = $ini[$theme] ?? array();
         }

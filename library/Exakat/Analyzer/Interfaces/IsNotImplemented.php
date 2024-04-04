@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@
 
 namespace Exakat\Analyzer\Interfaces;
 
+use Exakat\Data\Dictionary;
 use Exakat\Analyzer\Analyzer;
 use Exakat\Query\DSL\CollectMethods;
-use Exakat\Data\Dictionary;
 
 class IsNotImplemented extends Analyzer {
     public function analyze(): void {
@@ -48,7 +48,7 @@ class IsNotImplemented extends Analyzer {
         unset($l);
         $list = array_filter($list);
 
-        $this->atomIs('Class')
+        $this->atomIs(self::CLASSES_ALL)
              ->outIs('IMPLEMENTS')
              ->isAnyOf(array('isPhp', 'isStub', 'isExt'), true)
              ->fullnspathIs(array_keys($list))

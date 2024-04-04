@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -29,8 +29,7 @@ class CollectClassInterfaceCounts extends AnalyzerHashHashResults {
     public function analyze(): void {
         //class x implements i,j,k {}
         $this->atomIs(self::CLASSES_ALL)
-             ->raw('groupCount("m").by( __.out("IMPLEMENTS").count() ).cap("m")');
-
+             ->groupCount('__.out("IMPLEMENTS").count()');
         $this->prepareQuery();
     }
 }

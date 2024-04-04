@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,29 +26,18 @@ namespace Exakat\Query\DSL;
 
 class HasNoDefinition extends DSL {
     public function run(): Command {
-        return new Command(<<<'GREMLIN'
-not( 
-    where(                  // Not a use expression
-        __.out("DEFINITION").not( where(__.coalesce( __.in("NAME").in("USE"), __.in("USE"), __.in("USE")).hasLabel("Usenamespace") ) ) 
-                            // Not a recursive expression
-                            .where( 
-                                __.repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File", "Function")).where(neq("first"))
-                            )
-                            // Not a recursive level 2 expression
-                            /*
-                            .where(
-                                __.repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File", "Function")).where(neq("first")).as('second')
-                                  .out("DEFINITION").repeat( __.inE().not(hasLabel("DEFINITION")).outV()).until(hasLabel("File", "Function"))
-                            )
-                            */
-    )
-)
-GREMLIN
-        );
+        $this->assertArguments(1, func_num_args(), __METHOD__);
+        list($definitions) = func_get_args();
+
+        if (is_string($definitions)) {
+            $definitions = array($definitions);
+        }
+
+        $this->assertAtom($definitions);
+        $list = makeList($definitions);
+
+        return new Command('not( where(__.in("DEFINITION").hasLabel(' . $list . ') ) )');
     }
 }
-/*
-
-*/
 
 ?>

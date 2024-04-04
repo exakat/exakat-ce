@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,8 +30,8 @@ use Exakat\Config;
 use Exakat\Graph\Graph;
 use Exakat\Helpers\Timer;
 use Exakat\Data\Collector;
-use Exakat\Tasks\Helpers\Atom;
 use Exakat\Loader\Driver\Driver;
+use Exakat\Tasks\Helpers\LinksHolder;
 use Exakat\Tasks\Helpers\AtomInterface;
 
 // @todo : export process to a separate class, with a fall back on serial and inlined processing.
@@ -54,8 +54,6 @@ class SplitGraphsonId extends Loader {
     private Driver $driver;
 
     private string $path         = '';
-    private int    $pathPart     = 0;
-    private array  $processes    = array();
     private array  $links        = array();
 
     private int $total           = 0;
@@ -70,7 +68,7 @@ class SplitGraphsonId extends Loader {
 
     private array $properties = array();
 
-    public function __construct(Sqlite3 $sqlite, Atom $id0, bool $withWs = AtomInterface::WITHOUT_WS) {
+    public function __construct(Sqlite3 $sqlite, AtomInterface $id0, bool $withWs = AtomInterface::WITHOUT_WS) {
         $this->config         = exakat('config');
         $this->graphdb        = exakat('graphdb');
 
@@ -116,7 +114,7 @@ class SplitGraphsonId extends Loader {
 
         display("Fetch ID\n");
         $this->fetchIds();
-        display("Save last nodes\n");
+        display("Save last links\n");
         $this->saveNodeLinks();
         display("Save properties\n");
         $this->saveProperties();
@@ -250,7 +248,7 @@ SQL;
             $total += count($r);
 
             foreach ($r as $s) {
-                $links[] = array('DEFINITION', $row[0], $this->ids[$s]);
+                $links[] = new LinksHolder('DEFINITION', $row[0], $this->ids[$s]);
                 ++$chunk;
             }
 
@@ -341,13 +339,12 @@ SQL;
         }
 
         foreach ($links as $link) {
-            $this->tokenCounts[$link[0]] = ($this->tokenCounts[$link[0]] ?? 0) + 1;
+            $this->tokenCounts[$link->link] = ($this->tokenCounts[$link->link] ?? 0) + 1;
         }
 
         $total = 0; // local total
         $append = array();
         foreach ($json as $j) {
-//            assert(isset($j->properties['code']), print_r($j, true));
             if (isset($j->properties['code'])) {
                 $V = $j->properties['code'][0]->value;
                 $j->properties['code'][0]->value = $this->dictCode->get($V);
@@ -388,12 +385,10 @@ SQL;
     }
 
     private function fetchIds() {
-        $b = hrtime(true);
         $res = $this->graphdb->query('g.V().as("id").as("eId").select("id", "eId").by(id).by("eId")');
         $this->ids = $res->toHash('eId', 'id');
-        $e = hrtime(true);
-        
-        display("Loaded ".count($this->ids)." ids\n");
+
+        display('Loaded ' . count($this->ids) . " ids\n");
 
         assert($this->ids != array(), 'No ids were fetched from the server. This is not normal.');
     }
@@ -409,16 +404,16 @@ SQL;
 
         // break down property files into small chunks for processing inside 300s.
         $links = array_merge(...$this->links);
-        foreach ($links as &$link) {
-            $link[1] = $this->ids[$link[1]];
-            $link[2] = $this->ids[$link[2]];
+        foreach ($links as $link) {
+            $link->origin = $this->ids[$link->origin];
+            $link->destination = $this->ids[$link->destination];
         }
         unset($link);
 
         $this->driver->saveLinkGremlin($links);
     }
 
-    private function json_encode(Stdclass $object): string {
+    private function json_encode(stdClass $object): string {
         // in case the function name is full of non-encodable characters.
         if (isset($object->properties['fullnspath']) && !mb_check_encoding($object->properties['fullnspath'][0]->value, 'UTF-8')) {
             $object->properties['fullnspath'][0]->value = mb_convert_encoding($object->properties['fullnspath'][0]->value, 'UTF-8', 'ISO-8859-1');

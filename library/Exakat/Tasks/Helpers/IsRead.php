@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,11 +30,15 @@ class IsRead extends Plugin {
                                'Phpvariable', 'This',
                                'Array', 'Parameter', );
 
-    public function run(Atom $atom, array $extras): void {
+    public function run(AtomInterface $atom, array $extras): void {
         switch ($atom->atom) {
             case 'Assignation' :
                 if (in_array($extras['RIGHT']->atom, $this->variables, STRICT_COMPARISON)) {
                     $extras['RIGHT']->isRead = true;
+                }
+
+                if (in_array($atom->code, array('+=', '-=', '*=', '%=', '/=', '**=', '|=', '&=', '^=', '<<', '>>', '??='), STRICT_COMPARISON)) {
+                    $extras['LEFT']->isRead = true;
                 }
                 break;
 

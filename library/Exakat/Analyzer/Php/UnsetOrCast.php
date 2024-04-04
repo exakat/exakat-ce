@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ GREMLIN;
         $this->atomIs(array('Unset', 'Cast'))
              ->raw('or( hasLabel("Cast").has("token", "T_UNSET_CAST"), hasLabel("Unset"))')
              ->raw($mapping) // @todo : make this a step!
-             ->raw('groupCount("gf").cap("gf")');
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {

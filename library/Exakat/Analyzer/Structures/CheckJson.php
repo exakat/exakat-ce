@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ class CheckJson extends Analyzer {
         $this->atomFunctionIs(array('\\json_encode', '\\json_decode'))
              ->hasNoTryCatch()
              ->goToExpression()
-             ->hasNoNextSibling('EXPRESSION')
+             ->hasNoNextSibling()
              ->back('first');
         $this->prepareQuery();
 
@@ -39,7 +39,7 @@ class CheckJson extends Analyzer {
              ->analyzerIsNot('self')
              ->hasNoTryCatch()
              ->goToExpression()
-             ->nextSibling('EXPRESSION')
+             ->nextSibling()
              ->noFunctionInside(array('\\json_last_error', '\\json_last_error_msg'))
              ->back('first');
         $this->prepareQuery();

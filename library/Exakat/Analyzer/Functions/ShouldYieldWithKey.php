@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,11 +31,10 @@ class ShouldYieldWithKey extends Analyzer {
         $this->atomFunctionIs('\\iterator_to_array')
              ->outIs('ARGUMENT')
              ->inIs('DEFINITION')
-             ->atomInsideNoDefinition('Yieldfrom')
-             ->outIs('YIELD')
+             ->outIs('YIELDED')
+             ->atomIs(self::CALLS)
              ->inIs('DEFINITION')
-             ->atomInsideNoDefinition('Yield')
-             ->outIs('YIELD')
+             ->outIs('YIELDED')
              ->atomIsNot('Keyvalue')
              ->back('first');
         $this->prepareQuery();

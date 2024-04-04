@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ use Exakat\Exceptions\NoCodeInProject;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\ProjectNeeded;
 use Exakat\Fileset\{All, Filenames, FileExtensions, IgnoreDirs};
+use const STRICT_COMPARISON;
 
 class Files extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -247,7 +248,7 @@ class Files extends Tasks {
         $analyzingVersion = $this->config->phpversion[0] . $this->config->phpversion[2];
         $this->datastore->cleanTable("compilation$analyzingVersion");
         if ($this->is_subtask === self::IS_SUBTASK) {
-            $id = array_search($analyzingVersion, $versions);
+            $id = array_search($analyzingVersion, $versions, STRICT_COMPARISON);
             unset($versions[$id]);
         }
 

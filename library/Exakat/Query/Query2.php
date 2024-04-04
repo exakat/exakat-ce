@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ use Exakat\Analyzer\Analyzer;
 use Exakat\Query\DSL\DSLFactory;
 use Exakat\Query\DSL\Command;
 use Exakat\Project;
+use const STRICT_COMPARISON;
 
 class Query2 extends Query {
     private const SACK = '.withSack(["m":[], "processed":0, "total":0])';
@@ -73,7 +74,7 @@ class Query2 extends Query {
         assert(!empty($this->sides), 'No side was started! Missing $this->side() ? ');
         assert(!empty($commands), 'No command in side query');
 
-        if (in_array(self::STOP_QUERY, $commands) !== false) {
+        if (in_array(self::STOP_QUERY, $commands, STRICT_COMPARISON) !== false) {
             $this->commands = array_pop($this->sides);
             return new Command(self::STOP_QUERY);
         }

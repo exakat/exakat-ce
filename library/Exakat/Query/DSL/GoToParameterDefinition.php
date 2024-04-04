@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ namespace Exakat\Query\DSL;
 class GoToParameterDefinition extends DSL {
     public function run(): Command {
         return new Command(<<<'GREMLIN'
-has("rank")
+ has("rank")
 .choose(
     has("rankName"), 
 
@@ -38,10 +38,11 @@ has("rank")
         .where(__.out("NAME").filter{ it.get().value("fullcode") == ranked; }),
 
         // default behavior, rank + variadic
-        __.sideEffect{ranked = it.get().value("rank");}
+        __.has("rank").sideEffect{ranked = it.get().value("rank");}
                      .in('ARGUMENT').optional(__.in("METHOD")).hasLabel("Functioncall", "Newcall", "Methodcall", "Staticmethodcall")
                      .in("DEFINITION")
                      .out("ARGUMENT")
+                     .has("rank")
                      .filter{ (it.get().value("rank") == ranked) || ("variadic" in it.get().keys() && it.get().value("rank") <= ranked); }
 )
 

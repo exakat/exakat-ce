@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,6 +27,32 @@ use const STRICT_COMPARISON;
 
 class Atom extends AtomInterface {
     public const STRING_MAX_SIZE = 500;
+
+    private const PROPERTIES = array(
+                 'noscream',
+                 'reference',
+                 'variadic',
+                 'heredoc',
+                 'flexible',
+                 'constant',
+                 'enclosing',
+                 'final',
+                 'bracket',
+                 'close_tag',
+                 'trailing',
+                 'alternative',
+                 'absolute',
+                 'abstract',
+                 'readonly',
+                 'isRead',
+                 'isModified',
+                 'static',
+                 'isNull',
+                 'isPhp',
+                 'isExt',
+                 'isStub',
+                 'isConst',
+                );
 
     public function __construct(int $id, string $atom, int $line, string $ws = '') {
         parent::__construct($ws);
@@ -165,8 +191,7 @@ class Atom extends AtomInterface {
             foreach ($atomsValues as &$value) {
                 $value['ws'] = 0;
             }
-            unset($value);
-            unset($atomsValues['to_skip']['ws']);
+            unset($value, $atomsValues['to_skip']['ws']);
         } else {
             $atomsValues['to_skip']['ws'] = 0;
         }
@@ -231,31 +256,7 @@ class Atom extends AtomInterface {
 
     public function boolProperties(): array {
         $return = array();
-        foreach (array(
-                 'noscream',
-                 'reference',
-                 'variadic',
-                 'heredoc',
-                 'flexible',
-                 'constant',
-                 'enclosing',
-                 'final',
-                 'bracket',
-                 'close_tag',
-                 'trailing',
-                 'alternative',
-                 'absolute',
-                 'abstract',
-                 'readonly',
-                 'isRead',
-                 'isModified',
-                 'static',
-                 'isNull',
-                 'isPhp',
-                 'isExt',
-                 'isStub',
-                 'isConst',
-                               ) as $property) {
+        foreach (self::PROPERTIES as $property) {
             if ($this->$property === true) {
                 $return[] = $property;
             }

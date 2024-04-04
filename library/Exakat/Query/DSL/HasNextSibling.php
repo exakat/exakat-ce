@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ class HasNextSibling extends DSL {
         $hasIn = $this->dslfactory->factory('hasIn');
         $return = $hasIn->run($link);
 
-        return $return->add(new Command('where( __.sideEffect{sibling = it.get().value("rank");}.in("' . $link . '").out("' . $link . '").filter{sibling + 1 == it.get().value("rank")})'));
+        return $return->add(new Command('where( __.out("NEXT"))'));
     }
 }
 ?>

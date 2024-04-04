@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,20 +27,20 @@ use Exakat\Exceptions\QueryException;
 
 class GoToALineInCode extends DSL {
     public function run(): Command {
-    	switch(func_num_args()) {
-    		case 0:
-    			$limit = 1;
-    			break;
-    			
-    		case 1:
-    			$limit = (int) func_get_arg(0);
-    			break;
-    			
-    		default:
-    			throw new QueryException('Wrong number of arguments for ' . __METHOD__);
-    	}
+        switch(func_num_args()) {
+            case 0:
+                $limit = 1;
+                break;
 
-        return new Command('local(__.out("DEFINITION").limit('.$limit.'))');
+            case 1:
+                $limit = (int) func_get_arg(0);
+                break;
+
+            default:
+                throw new QueryException('Wrong number of arguments for ' . __METHOD__);
+        }
+
+        return new Command('local(__.out("DEFINITION").limit(' . $limit . '))');
     }
 }
 ?>

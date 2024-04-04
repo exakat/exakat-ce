@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -29,17 +29,13 @@ class CollectLocalVariableCounts extends AnalyzerHashHashResults {
     public function analyze(): void {
         // foo() {$t ; }
         $this->atomIs(self::FUNCTIONS_ALL)
-             ->raw(<<<'GREMLIN'
-groupCount("m").by(
-    __.out("DEFINITION")
+             ->groupCount('__.out("DEFINITION")
       .hasLabel("Variabledefinition")
       .not(
         __.out("DEFINITION")
           .in("GLOBAL")
       )
-      .count()).cap("m")
-GREMLIN
-             );
+      .count()');
 
         $this->prepareQuery();
     }

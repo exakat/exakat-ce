@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -153,7 +153,7 @@ class Analyze extends Tasks {
 
         $original = array_flip($analyzersClass);
         if ($this->config->verbose && !$this->config->quiet) {
-            $this->progressBar = new Progressbar(0, count($original), $this->config->screen_cols);
+            $this->progressBar = new ProgressBar(0, count($original), $this->config->screen_cols);
         }
 
         if ($this->config->noDependencies) {
@@ -178,9 +178,9 @@ class Analyze extends Tasks {
             ++$rounds;
 
             if ($rounds > 10) {
-                display('Stopping dependencies : ' . count($this->dependencies) . ' left : ' . join(', ', $this->dependencies));
-                $this->log->log('Stopping dependencies : ' . count($this->dependencies) . ' left : ' . join(', ', $this->dependencies));
-                $this->log->log(var_export($this->dependencies));
+                display('Stopping dependencies : ' . count($this->dependencies) . ' left');
+                $this->log->log('Stopping dependencies : ' . count($this->dependencies) . ' left');
+                $this->log->log(var_export($this->dependencies, true));
                 break 1;
             }
 
@@ -295,8 +295,7 @@ class Analyze extends Tasks {
 
                 if (empty($dependencies[$e])) {
                     yield $e;
-                    unset($d[$i]);
-                    unset($dependencies[$e]);
+                    unset($d[$i], $dependencies[$e]);
                     continue;
                 }
 
@@ -372,11 +371,9 @@ class Analyze extends Tasks {
             return false;
         }
 
-        $process = new Process(array('php',
-                                'exakat',
+        $processCommand = array('php',
+                                $_SERVER['PATH_TRANSLATED'], // exakat, but where it is called and how
                                 'analyze',
-                                '-p',
-                                $this->config->project,
                                 '-P',
                                 $analyzer->getShortAnalyzer(),
                                 '-v',
@@ -386,7 +383,14 @@ class Analyze extends Tasks {
                                 '1',
                                 '--logFile',
                                 $this->logname,
-                                ));
+                                );
+
+        if (!$this->config->inside_code) {
+            $processCommand [] = '-p';
+            $processCommand [] = $this->config->project;
+        }
+
+        $process = new Process($processCommand);
         $process->start();
         $this->processes[$analyzerClass] = $process;
 
@@ -501,7 +505,7 @@ GREMLIN;
         $res = $this->gremlin->query($query);
 
         foreach ($res as list('analyzer' => $analyzer, 'count' => $count)) {
-            if ($count != -1) {
+            if ($count != Analyzer::UNKNOWN_COMPATIBILITY) {
                 $this->analyzed[$analyzer] = $count;
             }
         }

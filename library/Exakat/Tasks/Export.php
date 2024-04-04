@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -65,7 +65,7 @@ class Export extends Tasks {
         }
 
         if (version_compare($gremlinVersion, '3.4.0') >= 0) {
-            $queryTemplate = 'g.E().not(has("extra")).as("e").outV().as("outV").select("e").inV().as("inV").select("e", "inV", "outV").by(__.valueMap(true).by(__.unfold())).by(__.id()).by(__.id())';
+            $queryTemplate = 'g.E().as("e").outV().as("outV").select("e").inV().as("inV").select("e", "inV", "outV").by(__.valueMap(true).by(__.unfold())).by(__.id()).by(__.id())';
         } else {
             $queryTemplate = 'g.E()';
         }

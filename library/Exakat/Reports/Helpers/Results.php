@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@ class Results {
     private array $options       = array();
     private ?SQLite3Result $res  = null;
 
-    public function __construct(?SQLite3Result $res = null, array $options = array()) {
-        if ($res === null) {
+    public function __construct(SQLite3Result|false $res = false, array $options = array()) {
+        if ($res === false) {
             $this->values = array();
         } else {
             $this->res = $res;
@@ -151,7 +151,7 @@ class Results {
         return $return;
     }
 
-    public function toList(string $col = null): array {
+    public function toList(?string $col = null): array {
         if ($this->values === null) {
             $this->load();
         }
@@ -222,7 +222,7 @@ class Results {
         }
 
         $this->values = array_slice($this->values, $begin, $end);
-        
+
         return $this;
     }
 

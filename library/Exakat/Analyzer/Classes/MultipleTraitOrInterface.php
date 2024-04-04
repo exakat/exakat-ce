@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ class MultipleTraitOrInterface extends Analyzer {
     public function analyze(): void {
         // interfaces
         // class x implements i, i, i {}
-        // @todo : review this, as it is not possible since PHP 5.0 
+        // @todo : review this, as it is not possible since PHP 5.0
         $this->atomIs(self::CLASSES_ALL)
              ->analyzerIsNot('self')
              ->raw(<<<'GREMLIN'
@@ -54,7 +54,7 @@ GREMLIN
         // class x { use t, t, t;}
         $this->atomIs(self::CLASSES_ALL)
              ->analyzerIsNot('self')
-             
+
              ->raw(<<<'GREMLIN'
 where( __.sideEffect{counts = [:]}
          .out("USE").hasLabel("Usetrait").out("USE")

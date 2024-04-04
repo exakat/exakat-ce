@@ -2,6 +2,7 @@
 
 namespace Exakat\Dump;
 
+use SQLite3Exception;
 use Exakat\Reports\Helpers\Results;
 use const STRICT_COMPARISON;
 
@@ -245,7 +246,11 @@ SQL;
 
     public function fetchAnalysersCounts(array $analysers): Results {
         $query = 'SELECT analyzer, count FROM resultsCounts WHERE analyzer IN (' . makeList($analysers) . ')';
-        $res = $this->sqlite->query($query);
+		try {
+	        $res = $this->sqlite->query($query);
+		} catch (SQLite3Exception $e) {
+			$res = false;
+		}
 
         return new Results($res);
     }
@@ -581,211 +586,6 @@ SQL
         );
 
         return new Results($res);
-    }
-
-    public function fetchTableCit(): Results {
-        $res = $this->sqlite->query(<<<'SQL'
-SELECT cit.*, 
-       cit.type AS type, 
-       namespace,
-
-       ( SELECT GROUP_CONCAT(CASE WHEN cit5.id IS NULL THEN traits.implements ELSE cit5.name END, ',') 
-       
-       FROM cit_implements AS traits
-LEFT JOIN cit cit5
-    ON traits.implements = cit5.id
-    WHERE traits.implementing = cit.id AND
-       traits.type = 'use') AS use,
-
-       (SELECT GROUP_CONCAT(CASE WHEN cit4.id IS NULL THEN implements.implements ELSE cit4.name END, ',') FROM cit_implements AS implements
-LEFT JOIN cit cit4
-    ON implements.implements = cit4.id
-    WHERE implements.implementing = cit.id AND
-       implements.type = 'implements') AS implements,
-
-        CASE WHEN cit2.extends IS NULL THEN cit.extends ELSE cit2.name END AS extends 
-        
-        FROM cit
-
-LEFT JOIN cit cit2 
-    ON cit.extends = cit2.id
-
-LEFT JOIN cit_implements AS interfaces
-    ON interfaces.implementing = cit.id AND
-       interfaces.type = 'implements'
-LEFT JOIN cit cit4
-    ON interfaces.implements = cit4.id
-LEFT JOIN namespaces
-    ON namespaces.id = cit.namespaceId
-
-
-GROUP BY cit.id
-SQL
-        );
-
-        return new Results($res);
-    }
-
-    public function fetchTablePhpcity(): Results {
-        $query = <<<'SQL'
-SELECT
-     cit.id,
-     files.file AS file,
-     namespaces.namespace AS namespace,
-     name,
-     extends,
-     (SELECT GROUP_CONCAT(implements) FROM cit_implements WHERE cit_implements.implementing = cit.id) AS implements,
-     end - begin + 1 AS no_lines,
-     (SELECT COUNT(*) FROM properties WHERE properties.citId = cit.id) AS no_attrs,
-     (SELECT COUNT(*) FROM methods WHERE methods.citId = cit.id) AS no_methods,
-     CASE type 
-           WHEN 'trait' 
-               THEN 1 
-           ELSE 0 END AS trait,
-     abstract,
-     final,
-     'class' AS type
-        
-     FROM cit
-     JOIN namespaces
-        ON namespaces.id = cit.namespaceId
-     JOIN files
-       ON cit.file = files.id
-SQL;
-        $res = $this->sqlite->query($query);
-
-        return new Results($res);
-    }
-
-    public function fetchTableUml(): Results {
-        $query = <<<'SQL'
-SELECT name, cit.id, extends, type, namespace, 
-       (SELECT GROUP_CONCAT(method,   "||")   FROM methods    WHERE citId = cit.id) AS methods,
-       (SELECT GROUP_CONCAT( case when value != '' then property || " = " || substr(value, 0, 40) else property end, "||") FROM properties WHERE citId = cit.id) AS properties
-    FROM cit
-    JOIN namespaces
-        ON namespaces.id = cit.namespaceId
-SQL;
-        $res = $this->sqlite->query($query);
-
-        return new Results($res);
-    }
-
-    public function getAnalyzedFiles(array $list): int {
-        $list = makeList($list);
-
-        $query = <<<SQL
-SELECT COUNT(DISTINCT results.file) 
-                            FROM results 
-                            JOIN files 
-                                ON files.file = results.file
-                            WHERE results.file != 'None'               AND 
-                                  results.file LIKE '/%'               AND 
-                                  analyzer IN ($list)
-SQL;
-        $result = $this->sqlite->querySingle($query) ?? '';
-
-        return $result;
-    }
-
-    public function getTotalAnalyzer(): array {
-        $query = <<<'SQL'
-SELECT COUNT(*) AS total, 
-       COUNT(CASE WHEN rc.count != 0 THEN 1 ELSE null END) AS yielding 
-    FROM resultsCounts AS rc
-    WHERE rc.count >= 0
-SQL;
-        $result = $this->sqlite->query($query);
-
-        return $result->fetchArray(\SQLITE3_ASSOC);
-    }
-
-    public function getSeverityBreakdown(array $list): Results {
-        $list = makeList($list);
-        $query = <<<SQL
-SELECT severity AS label, count(*) AS value
-    FROM results
-    WHERE analyzer IN ($list)
-    GROUP BY severity
-    ORDER BY value DESC
-SQL;
-        $result = $this->sqlite->query($query);
-
-        return new Results($result);
-    }
-
-    public function getFileBreakdown(array $list): Results {
-        $list = makeList($list);
-        $query = <<<SQL
-SELECT file, count(*) AS value
-    FROM results
-    WHERE analyzer IN ($list)
-    GROUP BY file
-    ORDER BY value DESC
-SQL;
-        $result = $this->sqlite->query($query);
-
-        return new Results($result);
-    }
-
-    public function getTopAnalyzers(array $list, int $limit): Results {
-        $listSQL = makeList($list);
-
-        $query = <<<SQL
-SELECT analyzer, count(*) AS number
-    FROM results
-    WHERE analyzer IN ($listSQL)
-    GROUP BY analyzer
-    ORDER BY number DESC
-    LIMIT $limit
-SQL;
-        $result = $this->sqlite->query($query);
-
-        return new Results($result);
-    }
-
-    public function getSeveritiesNumberBy(array $list, string $type): Results {
-        $listSQL = makeList($list);
-
-        $query = <<<SQL
-SELECT $type, severity, count(*) AS count
-    FROM results
-    WHERE analyzer IN ($listSQL)
-    GROUP BY $type, severity
-SQL;
-        $result = $this->sqlite->query($query);
-
-        return new Results($result);
-    }
-
-    public function getAnalyzersCount(array $list): Results {
-        $listSQL = makeList($list);
-
-        $query = <<<SQL
-SELECT analyzer, count(*) AS value
-    FROM results
-    WHERE analyzer in ($listSQL)
-    GROUP BY analyzer
-    ORDER BY value DESC
-SQL;
-        $result = $this->sqlite->query($query);
-
-        return new Results($result);
-    }
-
-    public function fetchPlantUml(): Results {
-        $query = <<<SQL
-SELECT name, cit.id, extends, type, namespace, 
-       COALESCE((SELECT GROUP_CONCAT(method,   "\n")   FROM methods    WHERE citId = cit.id), '') AS methods,
-       COALESCE((SELECT GROUP_CONCAT(visibility || ' ' || case when static != 0 then 'static ' else '' end ||  case when value != '' then property || " = " || substr(value, 0, 40) else property end, "\n") 
-            FROM properties WHERE citId = cit.id), '') AS properties
-    FROM cit
-    JOIN namespaces
-        ON namespaces.id = cit.namespaceId
-SQL;
-        $result = $this->sqlite->query($query);
-
-        return new Results($result);
     }
 
     public function getFilesResultsCounts(array $list): Results {

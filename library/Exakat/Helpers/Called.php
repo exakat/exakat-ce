@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,22 +28,22 @@ class Called {
     private Graph $graph;
 
     // @todo : turn to an helper class
-    private ?array $calledFunctions       = null;
-    private ?array $calledStaticMethods   = null;
-    private ?array $calledMethods         = null;
-    private ?array $calledClasses         = null;
-    private ?array $calledInterfaces      = null;
-    private ?array $calledTraits          = null;
-    private ?array $calledEnums           = null;
-    private ?array $calledNamespaces      = null;
-    private ?array $calledDirectives      = null;
+    private array $calledFunctions    ;
+    private array $calledStaticMethods;
+    private array $calledMethods      ;
+    private array $calledClasses      ;
+    private array $calledInterfaces   ;
+    private array $calledTraits       ;
+    private array $calledEnums        ;
+    private array $calledNamespaces   ;
+    private array $calledDirectives   ;
 
     public function __construct(Graph $graph) {
         $this->graph = $graph;
     }
 
     public function getCalledFunctions(): array {
-        if ($this->calledFunctions === null) {
+        if (!isset($this->calledFunctions)) {
             $calls = $this->graph
                           ->query('g.V().hasLabel("Functioncall").values("fullnspath").unique()')
                           ->toArray();
@@ -55,7 +55,7 @@ class Called {
     }
 
     public function getCalledStaticmethods(): array {
-        if ($this->calledStaticMethods === null) {
+        if (!isset($this->calledStaticMethods)) {
             $calls = $this->graph->query('g.V().hasLabel("Staticmethodcall").values("fullnspath").unique()')
                           ->toArray();
 
@@ -66,7 +66,7 @@ class Called {
     }
 
     public function getCalledmethods(): array {
-        if ($this->calledMethods === null) {
+        if (!isset($this->calledMethods)) {
             $calls = $this->graph->query('g.V().hasLabel("Methodcall").values("fullnspath").unique()')
                           ->toArray();
 
@@ -77,7 +77,7 @@ class Called {
     }
 
     public function getCalledClasses(): array {
-        if ($this->calledClasses === null) {
+        if (!isset($this->calledClasses)) {
             $news = $this->graph->query('g.V().hasLabel("New").out("NEW").values("fullnspath").unique()')
                          ->toArray();
             $staticcalls = $this->graph->query('g.V().hasLabel("Staticconstant", "Staticmethodcall", "Staticproperty", "Instanceof", "Catch").out("CLASS").values("fullnspath").unique()')
@@ -100,7 +100,7 @@ class Called {
     }
 
     public function getCalledInterfaces(): array {
-        if ($this->calledInterfaces === null) {
+        if (!isset($this->calledInterfaces)) {
             $this->calledInterfaces = $this->graph->query('g.V().hasLabel("Analysis").has("analyzer", "Interfaces/InterfaceUsage").out("ANALYZED").values("fullnspath")')
                                            ->toArray();
 
@@ -111,7 +111,7 @@ class Called {
     }
 
     public function getCalledEnums(): array {
-        if ($this->calledEnums === null) {
+        if (!isset($this->calledEnums)) {
             $this->calledEnums = $this->graph->query('g.V().hasLabel("Analysis").has("analyzer", "Php/EnumUsage").out("ANALYZED").values("fullnspath").unique()')
                                            ->toArray();
 
@@ -122,7 +122,7 @@ class Called {
     }
 
     public function getCalledTraits(): array {
-        if ($this->calledTraits === null) {
+        if (!isset($this->calledTraits)) {
             $query = <<<'GREMLIN'
 g.V().hasLabel("Analyzer")
      .has("analyzer", "Traits/TraitUsage")
@@ -139,7 +139,7 @@ GREMLIN;
     }
 
     public function getCalledNamespaces(): array {
-        if ($this->calledNamespaces === null) {
+        if (!isset($this->calledNamespaces)) {
             $query = <<<'GREMLIN'
 g.V().hasLabel("Namespace")
      .values("fullnspath")
@@ -153,7 +153,7 @@ GREMLIN;
     }
 
     public function getCalledDirectives(): array {
-        if ($this->calledDirectives === null) {
+        if (!isset($this->calledDirectives)) {
             $query = <<<'GREMLIN'
 g.V().hasLabel("Analysis")
      .has("analyzer", "Php/DirectivesUsage")

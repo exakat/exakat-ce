@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -46,9 +46,11 @@ class CollectVariables extends DSL {
 
         $containers = array('Variable', 'Variableobject', 'Variablearray', 'Phpvariable', 'Member', 'Staticproperty', 'Array', 'This', );
 
+        $LINKS_DOWN = self::$linksDown;
+
         return new Command(<<<GREMLIN
 sideEffect{ $variable = []; }.where(
-    __.repeat( __.outE().hasLabel(within(***)).inV() ).emit()
+    __.repeat( __.out($LINKS_DOWN) ).emit()
       .hasLabel(within(***))
       .sideEffect{ 
           $variable.add(it.get().value("$type")); 
@@ -57,8 +59,7 @@ sideEffect{ $variable = []; }.where(
 )
 
 GREMLIN
-            , array(self::$LINKS,
-                    $containers
+            , array($containers
                     )
         );
     }

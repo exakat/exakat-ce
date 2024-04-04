@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -52,8 +52,9 @@ class LogicalMistakes extends Analyzer {
         $this->prepareQuery();
 
         //if ( $a == 1 || $a != 2)
+        //if ( $a == 1 && $a != 2)
         $this->atomIs('Logical')
-             ->codeIs(array('||', 'or'))
+             ->codeIs(array('||', 'or', '&&', 'and'))
              ->outIs('LEFT')
              ->outIsIE('CODE')
              ->atomIs('Comparison')
@@ -110,31 +111,6 @@ class LogicalMistakes extends Analyzer {
              ->atomIs(self::CONTAINERS)
              ->samePropertyAs('fullcode', 'var')
 
-
-             ->back('first');
-        $this->prepareQuery();
-
-        //if ( $a == 1 && $a != 2)
-        $this->atomIs('Logical')
-             ->codeIs(array('&&', 'and'))
-             ->outIs('LEFT')
-             ->outIsIE('CODE')
-             ->atomIs('Comparison')
-             ->codeIs(array('==', '==='))
-             ->outIs(array('LEFT', 'RIGHT'))
-             ->atomIs(self::CONTAINERS)
-             ->savePropertyAs('fullcode', 'var')
-             ->inIs(array('LEFT', 'RIGHT'))
-             ->inIsIE('CODE')
-             ->inIs('LEFT')
-
-             ->outIs('RIGHT')
-             ->outIsIE('CODE')
-             ->atomIs('Comparison')
-             ->codeIs(array('!=', '!=='))
-             ->outIs(array('LEFT', 'RIGHT'))
-             ->atomIs(self::CONTAINERS)
-             ->samePropertyAs('fullcode', 'var')
              ->back('first');
         $this->prepareQuery();
 

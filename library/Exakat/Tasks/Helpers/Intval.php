@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ class Intval extends Plugin {
                                'Interface'      => 1,
                              );
 
-    public function run(Atom $atom, array $extras): void {
+    public function run(AtomInterface $atom, array $extras): void {
         if (isset($this->skipAtoms[$atom->atom])) {
             return;
         }

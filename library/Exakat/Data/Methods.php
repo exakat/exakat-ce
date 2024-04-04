@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ class Methods {
     private const ARGS_COL = array('arg0', 'arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6', 'arg7', 'arg8', 'arg9', 'arg10', 'arg11');
 
     private SQLite3 $sqlite;
-    private $phar_tmp = null;
+    private string $phar_tmp;
 
     public function __construct(Config $config) {
         if ($config->is_phar) {
@@ -46,11 +46,11 @@ class Methods {
         } else {
             $docPath = $config->dir_root . '/data/methods.sqlite';
         }
-        $this->sqlite = new \Sqlite3($docPath, \SQLITE3_OPEN_READONLY);
+        $this->sqlite = new SQLite3($docPath, \SQLITE3_OPEN_READONLY);
     }
 
     public function __destruct() {
-        if ($this->phar_tmp !== null && file_exists($this->phar_tmp)) {
+        if (isset($this->phar_tmp) && file_exists($this->phar_tmp)) {
             unlink($this->phar_tmp);
         }
     }

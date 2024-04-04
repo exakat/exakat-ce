@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -22,11 +22,12 @@
 
 namespace Exakat\Graph;
 
+use Exakat\Helpers\Timer;
 use Exakat\Graph\Helpers\GraphResults;
 use Exakat\Exceptions\GremlinException;
-use Exakat\Exceptions\UnknownGremlinVersion;
 use Brightzone\GremlinDriver\Connection;
-use Exakat\Helpers\Timer;
+use Exakat\Exceptions\UnknownGremlinVersion;
+use Brightzone\GremlinDriver\ServerException;
 
 class TinkergraphV3 extends Graph {
     private const SUPPORTED_VERSIONS = array('3.4', '3.5', '3.6', '3.7');

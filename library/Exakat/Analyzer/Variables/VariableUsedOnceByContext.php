@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -58,14 +58,16 @@ class VariableUsedOnceByContext extends Analyzer {
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('DEFINITION')
              ->atomIs('Variabledefinition')
+             // Not a self-transform variable
              ->filter(
                  $this->side()
                       ->outIs('DEFINITION')
                       ->atomIs(array('Variable', 'Variableobject', 'Variablearray', 'Parameter', 'String'))
                       ->analyzerIsNot('Variables/SelfTransform')
                       ->count()
-                      ->isEqual(1)
+                      ->raw('is(eq(1))')
              )
+             // Not a blind variable
              ->not(
                  $this->side()
                       ->outIs('DEFINITION')

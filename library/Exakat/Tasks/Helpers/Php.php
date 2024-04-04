@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -253,12 +253,26 @@ abstract class Php {
             throw new NoRecognizedTokens('<No token provided>');
         }
 
-        $versions = array('Php83', 'Php82', 'Php81', 'Php80', 'Php74', 'Php73', 'Php72', 'Php71', 'Php70', 'Php56', 'Php55', );
+        $versions = array('Php84',
+                          'Php83',
+                          'Php83a',
+                          'Php82',
+                          'Php81',
+                          'Php80',
+                          'Php74',
+                          'Php73',
+                          'Php72',
+                          'Php71',
+                          'Php70',
+                          'Php56',
+                          'Php55',
+                          );
 
         foreach ($versions as $version) {
+            $versionClass = __NAMESPACE__ . '\\' . $version . '::';
             $errors = array_filter($tokens,
-                function (string $v, string $k) use ($version): bool {
-                    return (string) constant(__NAMESPACE__ . '\\' . $version . '::' . $v) !== $k;
+                function (string $v, string $k) use ($versionClass): bool {
+                    return (string) constant($versionClass . $v) !== $k;
                 },
                 ARRAY_FILTER_USE_BOTH);
 

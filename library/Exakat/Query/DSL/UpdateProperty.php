@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ class UpdateProperty extends DSL {
             $code[] = "sideEffect{ it.get().property(\"$name\", it.get().property(\"$name\").value().toString().replaceAll(\"$value[0]\", \"$value[1]\"));}";
         }
 
-        $gremlin = implode(PHP_EOL.'.', $code);
+        $gremlin = implode(PHP_EOL . '.', $code);
 
         return new Command($gremlin, $arguments);
     }

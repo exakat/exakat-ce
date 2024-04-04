@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,9 +27,6 @@ use Exakat\Analyzer\Analyzer;
 
 class ConstDefinePreference extends Analyzer {
     public function analyze(): void {
-        $mapping = <<<'GREMLIN'
-x2 = it.get().label();
-GREMLIN;
         $storage = array('const'  => 'Const',
                          'define' => 'Defineconstant');
 

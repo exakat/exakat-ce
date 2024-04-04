@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -91,7 +91,7 @@ HTML;
     private function toStyle(array $array = array()): string {
         $return = array();
         foreach ($array as $name => $value) {
-        	assert(is_string($value), "Some value is not passed to toStyle in  Mermaid report");
+            assert(is_string($value), 'Some value is not passed to toStyle in  Mermaid report');
             $value = addslashes((string) $value);
             $return[] = "$name=\"$value\"";
         }

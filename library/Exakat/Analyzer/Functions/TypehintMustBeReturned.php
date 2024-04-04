@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -40,15 +40,10 @@ class TypehintMustBeReturned extends Analyzer {
                       ->atomIs('Void')
              )
              // Do not throw
+             ->hasNoOut('THROWN')
              ->not(
                  $this->side()
-                      ->outIs('BLOCK')
-                      ->atomInsideNoDefinition('Throw')
-             )
-             ->not(
-                 $this->side()
-                      ->outIs('BLOCK')
-                      ->atomInsideNoDefinition('Functioncall')
+                       ->outIs('CALLED')
                       ->fullnspathIs(array('\\assert', '\\trigger_error'))
              )
              ->outIs('RETURNED')
@@ -71,15 +66,10 @@ class TypehintMustBeReturned extends Analyzer {
                       ->atomIs('Void')
              )
              // Do not throw
+             ->hasNoOut('THROWN')
              ->not(
                  $this->side()
-                      ->outIs('BLOCK')
-                      ->atomInsideNoDefinition('Throw')
-             )
-             ->not(
-                 $this->side()
-                      ->outIs('BLOCK')
-                      ->atomInsideNoDefinition('Functioncall')
+                       ->outIs('CALLED')
                       ->fullnspathIs(array('\\assert', '\\trigger_error'))
              )
              ->hasNoOut('RETURNED')
@@ -98,11 +88,7 @@ class TypehintMustBeReturned extends Analyzer {
                       ->atomIs('Void')
              )
              // Do not throw nor yield
-             ->not(
-                 $this->side()
-                      ->outIs('BLOCK')
-                      ->atomInsideNoDefinition(array('Throw', 'Yield', 'Yieldfrom'))
-             )
+             ->hasNoOut(array('THROWN', 'YIELDED'))
              ->back('first');
         $this->prepareQuery();
     }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -48,7 +48,7 @@ class WrongOptionalParameter extends Analyzer {
                       ->hasNoIn('RIGHT')
              )
 
-             ->nextSibling('ARGUMENT')
+             ->nextSibling()
              ->outIsIE('PPP')
              ->isNot('variadic', true)
              ->outIs('DEFAULT')
@@ -82,7 +82,7 @@ class WrongOptionalParameter extends Analyzer {
                       ->hasNoIn('RIGHT')
              )
 
-             ->nextSibling('ARGUMENT')
+             ->nextSibling()
              // case of promoted properties
              ->outIsIE('PPP')
              ->outIs('DEFAULT')

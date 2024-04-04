@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -188,14 +188,9 @@ GREMLIN;
             }
 
             if ($this->config->format === 'CSV') {
-                $csvFile = fopen($name, 'w');
-                if (is_resource($csvFile)) {
-                    foreach ($text as $t) {
-                        fputcsv($csvFile, $t);
-                    }
-                    fclose($csvFile);
-                } else {
-                    die( "Couldn't open $name file for writing. Aborting\n");
+                $written = file_put_contents($name, implode('', $text));
+                if ($written === 0) {
+                    print "Couldn't open $name file for writing. Skipping.\n";
                 }
             } else {
                 file_put_contents($name, $text);

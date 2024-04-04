@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -43,9 +43,8 @@ class CollectOut extends DSL {
 where( 
     __.sideEffect{ $variable = []; }
       .out("$out")
-      .optional(
-	      __.order().by("rank")
-      )
+      .has("rank")
+      .order().by("rank")
       .has("$property")
       .sideEffect{ $variable.add(it.get().value("$property")) ; }
       .fold() 

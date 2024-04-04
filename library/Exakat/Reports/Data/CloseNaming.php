@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,11 +23,14 @@
 namespace Exakat\Reports\Data;
 
 class CloseNaming extends Data {
+    private const MIN_SIZE = 3;
+    private const MAX_SIZE = 200;
+
     public function prepare(): void {
         $res = $this->dump->fetchTable('variables');
         $variables = $res->getColumn('variable');
         $variables = array_filter($variables, function (string $x): bool {
-            return strlen($x) > 3 &&
+            return strlen($x) > self::MIN_SIZE &&
                                                                      $x[0] !== '{'  &&
                                                                      $x[1] !== '$';
         });
@@ -55,8 +58,9 @@ class CloseNaming extends Data {
             return $x > 1;
         }));
         foreach ($diff as $variable) {
+            $variable = mb_strtolower($variable);
             $r = array_filter( $variables, function (string $x) use ($variable) {
-                return mb_strtolower($x) === mb_strtolower($variable);
+                return mb_strtolower($x) === $variable;
             });
             if (count($r) > 1) {
                 $results[$variable]['case'] = array_diff($r, array($variable));
@@ -76,9 +80,9 @@ class CloseNaming extends Data {
         }
 
         // One char difference
-        $sizes = array_fill(4, 200, array());
+        $sizes = array_fill(4, self::MAX_SIZE, array());
         foreach ($variables as $variable) {
-            if (strlen($variable) > 200) {
+            if (strlen($variable) > self::MAX_SIZE) {
                 continue;
             }
             $sizes[strlen($variable)][] = $variable;

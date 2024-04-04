@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,7 +23,9 @@
 
 namespace Exakat\Exceptions;
 
-class NoStubDir extends \RuntimeException {
+use RuntimeException;
+
+class NoStubDir extends RuntimeException {
     public function __construct(string $dir) {
         parent::__construct( "No directory available for stubs : $dir.\n");
     }

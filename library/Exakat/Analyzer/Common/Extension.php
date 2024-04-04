@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ abstract class Extension extends Analyzer {
                      'Constants/ConstantUsage',
                      'Namespaces/NamespaceUsage',
                      'Php/DirectivesUsage',
-                     'Complete/PropagateCalls',
+                     'Php/EnumUsage',
                      );
     }
 
@@ -172,8 +172,7 @@ abstract class Extension extends Analyzer {
             return;
         }
 
-        $this->atomIs(self::STATIC_NAMES)
-             ->analyzerIs('Constants/ConstantUsage')
+        $this->analyzerIs('Constants/ConstantUsage')
              ->fullnspathIs($constants);
         $this->prepareQuery();
     }
@@ -188,21 +187,20 @@ abstract class Extension extends Analyzer {
     }
 
     private function processClasses(array $classes): void {
-        $usedClasses = array_values(array_intersect($this->called->getCalledClasses(), $classes));
-        if (empty($usedClasses)) {
+        if (empty($classes)) {
             return;
         }
 
         $this->atomIs('New')
              ->outIs('NEW')
              ->hasNoIn('DEFINITION')
-             ->fullnspathIs($usedClasses);
+             ->fullnspathIs($classes);
         $this->prepareQuery();
 
         $this->atomIs(array('Staticconstant', 'Staticmethodcall', 'Staticproperty'))
              ->outIs('CLASS')
              ->hasNoIn('DEFINITION')
-             ->fullnspathIs($usedClasses);
+             ->fullnspathIs($classes);
         $this->prepareQuery();
 
         $this->atomIs(self::FUNCTIONS_ALL)
@@ -210,82 +208,76 @@ abstract class Extension extends Analyzer {
              ->outIs('TYPEHINT')
              ->has('line')
              ->hasNoIn('DEFINITION')
-             ->fullnspathIs($usedClasses);
+             ->fullnspathIs($classes);
         $this->prepareQuery();
 
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->has('line')
-             ->fullnspathIs($usedClasses);
+             ->fullnspathIs($classes);
         $this->prepareQuery();
 
         $this->atomIs('Catch')
              ->outIs('CLASS')
              ->hasNoIn('DEFINITION')
-             ->fullnspathIs($usedClasses);
+             ->fullnspathIs($classes);
         $this->prepareQuery();
 
         $this->atomIs('Instanceof')
              ->outIs('CLASS')
              ->hasNoIn('DEFINITION')
-             ->fullnspathIs($usedClasses);
+             ->fullnspathIs($classes);
         $this->prepareQuery();
     }
 
     private function processInterfaces(array $interfaces): void {
-        $usedInterfaces = array_values(array_intersect($this->called->getCalledinterfaces(), $interfaces));
-        if (empty($usedInterfaces)) {
+        if (empty($interfaces)) {
             return;
         }
 
         $this->analyzerIs('Interfaces/InterfaceUsage')
-             ->fullnspathIs($usedInterfaces);
+             ->fullnspathIs($interfaces);
         $this->prepareQuery();
     }
 
     private function processEnums(array $enums): void {
-        $usedEnums = array_values(array_intersect($this->called->getCalledEnums(), $enums));
-        if (empty($usedEnums)) {
+        if (empty($enums)) {
             return;
         }
 
-        $this->analyzerIs('Enums/EnumUsage')
-             ->fullnspathIs($usedEnums);
+        $this->analyzerIs('Php/EnumUsage')
+             ->fullnspathIs($enums);
         $this->prepareQuery();
     }
 
     private function processTraits(array $traits): void {
-        $usedTraits = array_values(array_intersect($this->called->getCalledTraits(), $traits));
-        if (empty($usedTraits)) {
+        if (empty($traits)) {
             return;
         }
 
         $this->analyzerIs('Traits/TraitUsage')
-             ->fullnspathIs($usedTraits);
+             ->fullnspathIs($traits);
         $this->prepareQuery();
     }
 
     private function processNamespaces(array $namespaces): void {
-        $usedNamespaces = array_values(array_intersect($this->called->getCalledNamespaces(), $namespaces));
-        if (empty($usedNamespaces)) {
+        if (empty($namespaces)) {
             return;
         }
 
         $this->analyzerIs('Namespaces/NamespaceUsage')
-             ->fullnspathIs($usedNamespaces);
+             ->fullnspathIs($namespaces);
         $this->prepareQuery();
     }
 
     private function processDirectives(array $directives): void {
-        $usedDirectives = array_values(array_intersect($this->called->getCalledDirectives(), $directives));
-        if (empty($usedDirectives)) {
+        if (empty($directives)) {
             return;
         }
 
-
         $this->analyzerIs('Php/DirectivesUsage')
              ->outWithRank('ARGUMENT', 0)
-             ->noDelimiterIs($usedDirectives, self::CASE_SENSITIVE);
+             ->noDelimiterIs($directives, self::CASE_SENSITIVE);
         $this->prepareQuery();
     }
 

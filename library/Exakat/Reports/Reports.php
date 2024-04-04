@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -45,13 +45,13 @@ abstract class Reports {
                                           'Radwellcode', 'Grade', 'Scrutinizer', 'Codesniffer', 'Phpcsfixer',
                                           'Facetedjson', 'Json', 'Onepagejson', 'Marmelab', 'Simpletable', 'Exakatyaml',
                                           'Codeflower', 'Dependencywheel', 'Phpcity', 'Sarb',
-                                          'Exakatvendors', 'Topology',
+                                          'Exakatvendors', 'Topology', 'CallGraph',
                                           'Migration73', 'Migration74', 'Migration80', 'Migration81', 'Migration82', 'Migration83',
                                           'Meters', 'Perrule',
                                           'CompatibilityPHP56', 'CompatibilityPHP74', 'CompatibilityPHP80', 'CompatibilityPHP81', 'CompatibilityPHP82', 'CompatibilityPHP83',
                                           'Compatibility',
                                           'Unused', 'History',
-                                          'NoOneLiners',
+                                          'NoOneLiners', 'Test',
                                           //'DailyTodo',
                                           );
 

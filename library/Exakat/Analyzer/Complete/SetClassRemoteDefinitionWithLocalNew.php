@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,7 +36,8 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->outIs('METHOD')
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'name')
-              ->inIs('METHOD')
+              ->back('first')
+
               ->outIs('OBJECT')
               ->inIs('DEFINITION')  // No check on atoms :
               ->atomIs(array('Variabledefinition', 'Parametername', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)
@@ -47,9 +48,11 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs('METHOD')
-              ->outIs('NAME')
-              ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
-              ->inIs('NAME')
+              ->filter(
+                  $this->side()
+                     ->outIs('NAME')
+                     ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
+              )
               ->hasNoLinkYet('DEFINITION', 'first')
               ->addETo('DEFINITION', 'first');
         $this->prepareQuery();
@@ -61,7 +64,8 @@ class SetClassRemoteDefinitionWithLocalNew extends Complete {
               ->outIs('MEMBER')
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('code', 'name')
-              ->inIs('MEMBER')
+              ->back('first')
+
               ->outIs('OBJECT')
               ->inIs('DEFINITION')
               ->atomIs(array('Variabledefinition', 'Parametername', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'Virtualproperty'), self::WITHOUT_CONSTANTS)

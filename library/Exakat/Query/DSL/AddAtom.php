@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -32,11 +32,25 @@ class AddAtom extends DSL {
         $return = new Command('addV("' . $atom . '")');
 
         foreach ($properties as $name => $value) {
-            if (!$this->isVariable((string) $value)) {
-                $value = $this->protectValue($value);
+            if (is_string($value)) {
+                if ($this->isVariable($value)) {
+                    // Nothing
+                } elseif (substr($value, 0, 6) === 'select') {
+                    // Nothing
+                } elseif (substr($value, 0, 3) === '__.') {
+                    // Nothing
+                } else {
+                    $value = $this->protectValue($value);
+                }
+            } elseif (is_bool($value)) {
+                $value = json_encode($value);
+            } elseif (is_int($value)) {
+                $value = (string) $value;
+            } else {
+                assert(false, 'Wrong type for value : ' . gettype($value));
             }
 
-            $sideEffect = new Command('sideEffect{ it.get().property("' . $name . '", ' . $value . ');}');
+            $sideEffect = new Command('property("' . $name . '", ' . $value . ')');
 
             $return->add($sideEffect);
         }

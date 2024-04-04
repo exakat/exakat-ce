@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -59,8 +59,7 @@ class UndefinedInterfaces extends Analyzer {
              ->outIs('CLASS')
              ->atomIsNot(array('Self', 'Parent'))
              ->has('fullnspath')
-             ->noClassDefinition()
-             ->noInterfaceDefinition()
+             ->hasNoDefinition(array('Class', 'Interface'))
              ->isNotIgnored()
              ->isNot('isPhp', true)
              ->isNot('isExt', true)
@@ -73,8 +72,7 @@ class UndefinedInterfaces extends Analyzer {
              ->hasIn(self::TYPE_LINKS)
              ->atomIsNot(array('Self', 'Parent'))
              ->has('fullnspath')
-             ->noClassDefinition()
-             ->noInterfaceDefinition()
+             ->hasNoDefinition(array('Class', 'Interface'))
              ->noUseDefinition()
              ->has('line')
              ->isNotIgnored()

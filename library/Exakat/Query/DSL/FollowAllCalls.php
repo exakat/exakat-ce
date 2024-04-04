@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,9 +36,10 @@ class FollowAllCalls extends DSL {
                 break;
         }
 
+        $linksDown = self::$linksDown;
         return new Command(<<<GREMLIN
 emit().repeat(
-    __.out()
+    __.out($linksDown)
 ).times($loopings).hasLabel('Functioncall', 'Methodcall', 'Newcall', 'Staticmethodcall')
 .in('DEFINITION').hasLabel('Function', 'Closure', 'Arrowfunction', 'Method', 'Magicmethod')
 GREMLIN

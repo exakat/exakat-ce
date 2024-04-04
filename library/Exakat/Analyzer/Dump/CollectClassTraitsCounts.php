@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,11 +26,9 @@ class CollectClassTraitsCounts extends AnalyzerHashHashResults {
     protected string $analyzerName = 'ClassTraits';
 
     public function analyze(): void {
+        // trait t { use t1, t2, t3; }
         $this->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
-              ->raw(<<<'GREMLIN'
-groupCount("m").by( __.out("USE").out("USE").count() ).cap("m")
-GREMLIN
-              );
+             ->groupCount('__.out("USE").out("USE").count()');
         $this->prepareQuery();
     }
 }

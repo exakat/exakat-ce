@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,16 +25,11 @@ namespace Exakat\Query\DSL;
 
 class NextSiblings extends DSL {
     public function run(): Command {
-        if (func_num_args() === 1) {
-            list($link) = func_get_args();
-        } else {
-            $link = 'EXPRESSION';
+        if (func_num_args() !== 0) {
+            die('Wrong number of argument with ' . __METHOD__);
         }
 
-        $hasIn = $this->dslfactory->factory('hasIn');
-        $return = $hasIn->run($link);
-
-        return $return->add(new Command('has("rank").sideEffect{sibling = it.get().value("rank");}.in("' . $link . '").out("' . $link . '").has("rank").filter{sibling + 1 <= it.get().value("rank") }'));
+        return new Command('repeat( __.out("NEXT")).emit()');
     }
 }
 ?>

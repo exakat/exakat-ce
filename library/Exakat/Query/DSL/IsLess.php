@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
 namespace Exakat\Query\DSL;
 
-use Exakat\Exceptions\QueryException;
+use Exakat\Exceptions\WrongNumberOfArguments;
 
 class IsLess extends DSL {
     public function run(): Command {
@@ -43,7 +43,7 @@ class IsLess extends DSL {
                 return new Command("is(lt($g1))");
 
             default:
-                throw new QueryException('Wrong number of argument for ' . __METHOD__ . '. 2 or 1 are expected, ' . func_num_args() . ' provided');
+                throw new WrongNumberOfArguments('Wrong number of argument for ' . __METHOD__ . '. 2 or 1 are expected, ' . func_num_args() . ' provided');
         }
     }
 

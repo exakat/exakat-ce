@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ class OutWithRank extends DSL {
             return new Command('map( __.out("' . $link . '").order().by("rank").tail(2) )');
         } elseif (is_string($rank) && preg_match('/\D/', $rank)) {
             $this->assertVariable($rank, self::VARIABLE_READ);
-            return new Command('out("' . $link . '").filter{ it.get().value("rank") == ' . $rank . '; }');
+            return new Command('out("' . $link . '").has("rank").filter{ it.get().value("rank") == ' . $rank . '; }');
         } else { // abs((int) $rank) always works, and default to 0
             return new Command('out("' . $link . '").has("rank", eq(' . abs((int) $rank) . '))');
         }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,11 +24,20 @@
 namespace Exakat\Query\DSL;
 
 use Exakat\Query\Query;
+use Exakat\Exceptions\WrongNumberOfArguments;
 
 class HasNoParent extends DSL {
     public function run(): Command {
+        switch (func_num_args()) {
+            case 2:
+                list($parentClass, $ins) = func_get_args();
+                break;
+
+            default:
+                throw new WrongNumberOfArguments(__METHOD__, func_num_args(), 2);
+        }
+
         assert(func_num_args() === 2, 'Wrong number of argument for ' . __METHOD__ . '. 2 are expected, ' . func_num_args() . ' provided');
-        list($parentClass, $ins) = func_get_args();
 
         if (empty($ins)) {
             return new Command(Query::NO_QUERY);

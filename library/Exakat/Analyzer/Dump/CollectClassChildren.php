@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -29,8 +29,7 @@ class CollectClassChildren extends AnalyzerHashHashResults {
     public function analyze(): void {
         // class a {} class b extends a;
         $this->atomIs('Class')
-             ->raw('groupCount().by( __.out("DEFINITION").inE().hasLabel("EXTENDS").not(has("extra", true)).outV().hasLabel("Class").count() )');
-
+             ->groupCount('__.out("DEFINITION").inE().hasLabel("EXTENDS").not(has("extra", true)).outV().hasLabel("Class").count()');
         $this->prepareQuery();
     }
 }

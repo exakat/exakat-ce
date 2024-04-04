@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -101,7 +101,6 @@ class GSNeo4jV3 extends Graph {
         // 3.4/3.5/3.6
         preg_match('/gremlin-core-([0-9.]+)\.\d+.jar/', $gremlinVersion, $r);
         $gremlinVersion = $r[1] ?? 'unknown gremlin version';
-        $stats['gremlin version'] = $gremlinVersion;
         $this->gremlinVersion = $gremlinVersion;
 
         if (!in_array($this->gremlinVersion, self::GREMLIN_VERSIONS, STRICT_COMPARISON)) {
@@ -150,6 +149,7 @@ class GSNeo4jV3 extends Graph {
                 } else {
                     ++$attempts;
                 }
+                $result = array();
             }
         } while (!isset($result) && $attempts < 3);
 

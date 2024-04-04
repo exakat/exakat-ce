@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,7 +26,14 @@ namespace Exakat\Analyzer\Structures;
 use Exakat\Analyzer\Analyzer;
 
 class IndicesAreIntOrString extends Analyzer {
+    public function dependsOn(): array {
+        return array('Complete/VariableTypehint',
+                    );
+    }
+
     public function analyze(): void {
+        // @todo : add support for key => value
+
         // $x[1.2], $x[true], $x[null];
         $this->atomIs('Array')
              ->outIs('INDEX')
@@ -72,6 +79,28 @@ class IndicesAreIntOrString extends Analyzer {
              ->outWithRank('ARGUMENT', 1)
              ->atomIs(array('Boolean', 'Float', 'Null', 'Arrayliteral'))
              ->back('first');
+        $this->prepareQuery();
+
+        // $x[a] and define('a', 2.3)
+        $this->atomIs('Array')
+             ->analyzerIsNot('self')
+             ->outIs('INDEX')
+             // no test : works for variables, functions, properties...
+             ->goToTypehint()
+             ->fullnspathIsNot(array('\int', '\string'))
+             ->back('first');
+        $this->prepareQuery();
+
+        // $x[a] and define('a', 2.3)
+        $this->atomIs('Arrayliteral')
+             ->outIs('ARGUMENT')
+             ->as('result')
+             ->analyzerIsNot('self')
+             ->outIs('INDEX')
+             // no test : works for variables, functions, properties...
+             ->goToTypehint()
+             ->fullnspathIsNot(array('\int', '\string'))
+             ->back('result');
         $this->prepareQuery();
     }
 }

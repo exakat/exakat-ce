@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@ class NoChildWithRank extends DSL {
         } elseif ($this->isVariable($rank)) {
             assert($this->assertVariable($rank), "$rank is not a variable");
 
-            return new Command('not( where( __.out(' . $this->SorA($links) . ').filter{it.get().value("rank") == ' . $rank . '; } ) )');
+            return new Command('not( where( __.out(' . $this->SorA($links) . ').has("rank").filter{it.get().value("rank") == ' . $rank . '; } ) )');
         }
     }
 }

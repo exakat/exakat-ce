@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ class Context {
     public const CONTEXT_NEW          = 'New';
     public const CONTEXT_NOSEQUENCE   = 'NoSequence';
     public const CONTEXT_LIST         = 'List';
+    public const CONTEXT_CITE_BODY    = 'CITE';
     private $contexts = array(self::CONTEXT_CLASS        => array(0),
                               self::CONTEXT_INTERFACE    => array(0),
                               self::CONTEXT_TRAIT        => array(0),
@@ -37,6 +38,7 @@ class Context {
                               self::CONTEXT_NEW          => array(0),
                               self::CONTEXT_NOSEQUENCE   => array(0),
                               self::CONTEXT_LIST         => array(0),
+                              self::CONTEXT_CITE_BODY    => array(0),
                          );
 
     public function getCount(string $context = self::CONTEXT_NOSEQUENCE): bool {

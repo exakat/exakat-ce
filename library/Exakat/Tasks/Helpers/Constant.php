@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ class Constant extends Plugin {
         }, $deterministFunctions);
     }
 
-    public function run(Atom $atom, array $extras = array()): void {
+    public function run(AtomInterface $atom, array $extras = array()): void {
         if (isset($this->skipAtoms[$atom->atom])) {
             return;
         }
@@ -75,6 +75,7 @@ class Constant extends Plugin {
             case 'Static' :
             case 'Parent' :
             case 'Closure' :
+            case 'Magicconstant' :
                 $atom->constant = true;
                 break;
 

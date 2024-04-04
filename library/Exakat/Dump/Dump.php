@@ -18,10 +18,15 @@ abstract class Dump {
 
     protected array   $tablesList			= array();
 
-    public function __construct(string $path, int $init = self::READ, string $project = '', string $phpexecutable = '') {
+    public function __construct(string $path,
+                                int $init = self::READ,
+                                string $baseline = '',
+                                string $project = '',
+                                string $phpexecutable = '',
+                                ) {
         $this->sqliteFileFinal    = $path;
         $this->sqliteFile         = str_replace('/dump', '/.dump', $this->sqliteFileFinal);
-        $this->sqliteFilePrevious = str_replace('/dump', '/dump-1', $this->sqliteFileFinal);
+        $this->sqliteFilePrevious = $baseline;
 
         $this->project        = $project;
         $this->phpexcutable   = $phpexecutable;
@@ -46,6 +51,7 @@ abstract class Dump {
         copy($this->sqliteFileFinal, $this->sqliteFile);
         $this->sqlite = new Sqlite3($this->sqliteFile, \SQLITE3_OPEN_READWRITE);
         $this->sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
+        $this->sqlite->enableExceptions(true);
 
         $this->initTablesList();
     }
@@ -53,6 +59,7 @@ abstract class Dump {
     private function init(): void {
         $this->sqlite = new Sqlite3($this->sqliteFile, \SQLITE3_OPEN_READWRITE | \SQLITE3_OPEN_CREATE);
         $this->sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
+        $this->sqlite->enableExceptions(true);
 
         $this->initDump();
     }
@@ -65,6 +72,7 @@ abstract class Dump {
 
         $this->sqlite = new Sqlite3($this->sqliteFileFinal,  \SQLITE3_OPEN_READONLY);
         $this->sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
+        $this->sqlite->enableExceptions(true);
 
         $this->initTablesList();
     }
@@ -76,8 +84,8 @@ abstract class Dump {
         }
     }
 
-    public static function factory(string $path, int $init = self::READ): self {
-        return new Dump2($path, $init);
+    public static function factory(string $path, int $init = self::READ, string $baseline = ''): self {
+        return new Dump2($path, $init, $baseline);
     }
 
     protected function collectDatastore(): void {
@@ -96,6 +104,7 @@ abstract class Dump {
                         'compilation81',
                         'compilation82',
                         'compilation83',
+                        'compilation84',
                         'composer',
                         'configFiles',
                         'externallibraries',
@@ -129,7 +138,7 @@ abstract class Dump {
         foreach ($chunks as $chunk) {
             foreach ($chunk as &$c) {
                 assert(count($c) === 8, 'Wrong column count for results : ' . print_r($c, true));
-                $c = array_map(array($this->sqlite, 'escapeString'), $c);
+                $c = array_map($this->sqlite->escapeString(...), $c);
                 $c = '(NULL, \'' . implode('\', \'', $c) . '\')';
             }
             unset($c);
@@ -167,7 +176,7 @@ abstract class Dump {
     }
 
     public function getTableCount(string $table): int {
-        return $this->sqlite->querySingle('SELECT count(*) FROM ' . $table);
+        return (int) $this->sqlite->querySingle('SELECT count(*) FROM ' . $table);
     }
 
     public function collectTables(array $tables): void {
@@ -209,7 +218,7 @@ abstract class Dump {
         $total  = 0;
         foreach ($results as $change) {
             $first = array_shift($change);
-            $values[] = '(' . (empty($first) ? 'null' : $first) . ',' . makeList(array_map(array($this->sqlite, 'escapeString'), $change), "'" ) . ')';
+            $values[] = '(' . (empty($first) ? 'null' : $first) . ',' . makeList(array_map($this->sqlite->escapeString(...), $change), "'" ) . ')';
             // str_replace is an ugly hack for id, which should be null.
             ++$total;
         }

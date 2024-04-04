@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -87,15 +87,13 @@ class TypehintingStats extends AnalyzerArrayHashResults {
         $this->atomIs('Scalartypehint')
              ->has('fullnspath')
              ->fullnspathIsNot('\\null')
-             ->groupCount('fullnspath')
-             ->raw('cap("m")');
+             ->groupCount('fullnspath');
         $scalartypes1 = $this->rawQuery()->toArray();
 
         //typehinted 2
         $this->atomIs(array('Identifier', 'Nsname'))
              ->fullnspathIs(array('\\resource', '\\mixed', '\\numeric', '\\false', '\\never'))
-             ->groupCount('fullnspath')
-             ->raw('cap("m")');
+             ->groupCount('fullnspath');
         $scalartypes2 = $this->rawQuery()->toArray();
 
         $scalartypes = ($scalartypes1[0] ?? array()) + ($scalartypes2[0] ?? array());
@@ -104,16 +102,14 @@ class TypehintingStats extends AnalyzerArrayHashResults {
         $this->atomIs('Parameter')
              ->outIs('TYPEHINT')
              ->atomIs(array('Identifier', 'Nsname'))
-             ->groupCount('fullnspath')
-             ->raw('cap("m")');
+             ->groupCount('fullnspath');
         $objecttypes1 = $this->rawQuery()->toArray();
 
         //typehinted object2
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->atomIs(array('Identifier', 'Nsname'))
-             ->groupCount('fullnspath')
-             ->raw('cap("m")');
+             ->groupCount('fullnspath');
         $objecttypes2 = $this->rawQuery()->toArray();
 
         $objecttypes = ($objecttypes1[0] ?? array()) + ($objecttypes2[0] ?? array());
@@ -123,7 +119,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
              ->outIs('TYPEHINT')
              ->atomIs(array('Identifier', 'Nsname'))
              ->inIs('DEFINITION')
-             ->atomIs('Class')
+             ->atomIs(self::TYPES_DEFINITION)
              ->isNot('abstract', true)
              ->count();
         $classtypes1 = $this->rawQuery()->toInt();
@@ -133,7 +129,7 @@ class TypehintingStats extends AnalyzerArrayHashResults {
              ->outIs('RETURNTYPE')
              ->atomIs(array('Identifier', 'Nsname'))
              ->inIs('DEFINITION')
-             ->atomIs('Class')
+             ->atomIs(self::TYPES_DEFINITION)
              ->isNot('abstract', true)
              ->count();
         $classtypes2 = $this->rawQuery()->toInt();

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -132,6 +132,9 @@ class CouldBeInt extends CouldBeType {
         // foo(1); function foo($a) {}
         $this->checkCallingArgumentType(array('Integer'));
 
+        // class constant type
+        $this->checkConstantType(array('Integer'));
+
         // argument because used in a specific operation
         // $arg && ''
         $this->atomIs(self::FUNCTIONS_ALL)
@@ -144,9 +147,9 @@ class CouldBeInt extends CouldBeType {
              ->back('result');
         $this->prepareQuery();
 
-        // May also cover if( $arg).,
-        // May also cover coalesce, ternary.
-        // short assignations
+        // @todo May also cover if( $arg).,
+        // @todo May also cover coalesce, ternary.
+        // @todo short assignations
     }
 }
 

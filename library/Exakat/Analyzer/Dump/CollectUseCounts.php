@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,12 +27,12 @@ class CollectUseCounts extends AnalyzerHashHashResults {
     protected string $analyzerName = 'File Use Expression Counts';
 
     public function analyze(): void {
-        // foo() {$t ; }
+        // <?php use a, b;
         $this->atomIs('File')
              ->outIs('FILE')
              ->outIs('EXPRESSION')
              ->atomIs('Php')
-             ->raw('groupCount("m").by(__.out("CODE").out("EXPRESSION").hasLabel("Usenamespace").out("USE").count()).cap("m")');
+             ->groupCount('__.out("CODE").out("EXPRESSION").hasLabel("Usenamespace").out("USE").count()');
         $this->prepareQuery();
     }
 }

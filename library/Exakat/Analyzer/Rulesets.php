@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
 namespace Exakat\Analyzer;
 
-use Exakat\Autoload\Autoloader;
+use Exakat\Autoload\AutoloadDev;
 use Exakat\Analyzer\Common\None;
 
 class Rulesets implements RulesetsInterface {
@@ -34,7 +34,7 @@ class Rulesets implements RulesetsInterface {
 
     private static array $instanciated = array();
 
-    public function __construct(string $path, Autoloader $dev, array $extra_rulesets = array(), array $ignore_rulesets = array()) {
+    public function __construct(string $path, AutoloadDev $dev, array $extra_rulesets = array(), array $ignore_rulesets = array()) {
         $this->main   = new RulesetsMain($path);
         $this->extra  = new RulesetsExtra($extra_rulesets);
         $this->dev    = new RulesetsDev($dev);

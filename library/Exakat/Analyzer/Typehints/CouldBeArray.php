@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,13 +26,14 @@ class CouldBeArray extends CouldBeType {
     // dependsOn is in CouldBeType class
 
     public function analyze(): void {
+        $arrayAtoms = array('Arrayliteral');
         $arrayFnp = array('\\array');
 
         // property with default
-        $this->checkPropertyDefault(array('Arrayliteral'));
+        $this->checkPropertyDefault($arrayAtoms);
 
         // property relayed default
-        $this->checkPropertyRelayedDefault(array('Arrayliteral'));
+        $this->checkPropertyRelayedDefault($arrayAtoms);
 
         // property relayed typehint
         $this->checkPropertyRelayedTypehint(array('Scalartypehint'), $arrayFnp);
@@ -42,13 +43,13 @@ class CouldBeArray extends CouldBeType {
         $this->checkPropertyWithPHPCalls('array');
 
         // return type
-        $this->checkReturnedAtoms(array('Arrayliteral'));
+        $this->checkReturnedAtoms($arrayAtoms);
 
         $this->checkReturnedCalls(array('Scalartypehint'), $arrayFnp);
 
         $this->checkReturnedPHPTypes('array');
 
-        $this->checkReturnedDefault(array('Arrayliteral'));
+        $this->checkReturnedDefault($arrayAtoms);
 
         $this->checkReturnedTypehint(array('Scalartypehint'), $arrayFnp);
 
@@ -63,7 +64,7 @@ class CouldBeArray extends CouldBeType {
         $this->checkArgumentUsage(array('Variablearray'));
 
         // function ($a = array())
-        $this->checkArgumentDefaultValues(array('Arrayliteral'));
+        $this->checkArgumentDefaultValues($arrayAtoms);
 
         // function ($a) { bar($a);} function bar(array $b) {}
         $this->checkRelayedArgument(array('Scalartypehint'), $arrayFnp);
@@ -72,7 +73,7 @@ class CouldBeArray extends CouldBeType {
         $this->checkRelayedArgumentToPHP('array');
 
         // is_string
-        $this->checkArgumentValidation(array('\\is_array'), array('Arrayliteral'));
+        $this->checkArgumentValidation(array('\\is_array'), $arrayAtoms);
 
         // argument because used in a specific operation with ...
         $this->atomIs(array('Parameter', 'Ppp'))
@@ -104,6 +105,9 @@ class CouldBeArray extends CouldBeType {
              ->is('variadic', true)
              ->back('first');
         $this->prepareQuery();
+
+        // class constant type : only array, as const can't be an object
+        $this->checkConstantType($arrayAtoms);
     }
 }
 

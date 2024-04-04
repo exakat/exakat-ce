@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ namespace Exakat\Analyzer\Typehints;
 class CouldBeNull extends CouldBeType {
     public function analyze(): void {
         $nullAtoms = array('Null');
+        $nullFNP = array('\\null');
 
         // property : based on default value (created or not)
         $this->checkPropertyDefault($nullAtoms);
@@ -33,10 +34,10 @@ class CouldBeNull extends CouldBeType {
         $this->checkPropertyRelayedDefault($nullAtoms);
 
         // property relayed typehint
-        $this->checkPropertyRelayedTypehint(array('Scalartypehint'), array('\\null'));
+        $this->checkPropertyRelayedTypehint(array('Scalartypehint'), $nullFNP);
 
         // property relayed typehint
-        $this->checkPropertyWithCalls(array('Scalartypehint'), array('\\null'));
+        $this->checkPropertyWithCalls(array('Scalartypehint'), $nullFNP);
         $this->checkPropertyWithPHPCalls('null');
 
         // argument type : $x = $arg ?? 2;
@@ -61,20 +62,20 @@ class CouldBeNull extends CouldBeType {
         // return type
         $this->checkReturnedAtoms($nullAtoms);
 
-        $this->checkReturnedCalls(array('Scalartypehint'), array('\\null'));
+        $this->checkReturnedCalls(array('Scalartypehint'), $nullFNP);
 
         $this->checkReturnedPHPTypes('null');
 
         $this->checkReturnedDefault($nullAtoms);
 
-        $this->checkReturnedTypehint(array('Scalartypehint'), array('\\null'));
+        $this->checkReturnedTypehint(array('Scalartypehint'), $nullFNP);
 
         // arguments
         // function ($a = int)
         $this->checkArgumentDefaultValues($nullAtoms);
 
         // function ($a) { bar($a);} function bar(array $b) {}
-        $this->checkRelayedArgument(array('Scalartypehint'), array('\\null'));
+        $this->checkRelayedArgument(array('Scalartypehint'), $nullFNP);
 
         // function ($a) { pow($a, 2);}
         $this->checkRelayedArgumentToPHP('null');
@@ -115,6 +116,9 @@ class CouldBeNull extends CouldBeType {
              ->atomIs('Null')
              ->back('first');
         $this->prepareQuery();
+
+        // class constant type
+        $this->checkConstantType($nullAtoms);
 
         // May also cover if( $arg).,
         // May also cover coalesce, ternary.

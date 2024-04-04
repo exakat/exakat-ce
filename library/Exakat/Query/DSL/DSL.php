@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -205,9 +205,7 @@ abstract class DSL {
     protected function SorA(array|string $value): string {
         if (is_array($value)) {
             return makeList($value);
-        }
-
-        if (is_string($value)) {
+        } else {
             return '"' . $value . '"';
         }
     }
@@ -260,14 +258,13 @@ abstract class DSL {
                 throw new DSLException("Not a link : $link", self::LEVELS_TO_ANALYSE);
             }
             assert(in_array($link, self::$LINKS, STRICT_COMPARISON), "No such link as '$link'");
-        } elseif (is_array($link)) {
+        } else {
             foreach ($link as $l) {
                 $this->assertLink($l);
                 assert(in_array($l, self::$LINKS, STRICT_COMPARISON), "No such link as '$l'");
             }
-        } else {
-            assert(false, 'Unsupported type for link : ' . gettype($link));
         }
+
         return true;
     }
 
@@ -275,14 +272,13 @@ abstract class DSL {
         if (is_string($token)) {
             assert(substr($token, 0, 2) === 'T_', "Wrong prefix for TOKEN name : $token");
             assert($token === strtoupper($token), "Wrong format for TOKEN name : $token");
-        } elseif (is_array($token)) {
+        } else {
             foreach ($token as $t) {
                 assert(substr($t, 0, 2) === 'T_', "Wrong prefix for TOKEN name : $t");
                 assert($t === strtoupper($t), "Wrong format for TOKEN name : $t");
             }
-        } else {
-            assert(false, 'Unsupported type for token : ' . gettype($token));
         }
+
         return true;
     }
 
@@ -290,13 +286,11 @@ abstract class DSL {
         if (is_string($atom)) {
             assert($atom === ucfirst(strtolower($atom)), "Wrong format for Atom name : $atom");
             assert(in_array($atom, self::$ATOMS, STRICT_COMPARISON), "No such atom as '$atom'");
-        } elseif (is_array($atom)) {
+        } else {
             foreach ($atom as $a) {
                 assert($a === ucfirst(strtolower($a)), "Wrong format for Atom name : $a");
                 assert(in_array($a, self::$ATOMS, STRICT_COMPARISON), "No such atom as '$a'");
             }
-        } else {
-            assert(false, 'Unsupported type for atom : ' . gettype($atom));
         }
 
         return true;
@@ -306,13 +300,11 @@ abstract class DSL {
         if (is_string($analyzer)) {
             assert(preg_match('#^[A-Z]\w+/[A-Z]\w+$#', $analyzer) !== false, "Wrong format for Analyzer : $analyzer");
             assert(class_exists('\\Exakat\\Analyzer\\' . str_replace('/', '\\', $analyzer)), "No such analyzer as $analyzer");
-        } elseif (is_array($analyzer)) {
+        } else {
             foreach ($analyzer as $a) {
                 assert(preg_match('#^[A-Z]\W\w+/[A-Z]\W\w+$#', $a) !== false, "Wrong format for Analyzer : $a");
                 assert(class_exists('\\Exakat\\Analyzer\\' . str_replace('/', '\\', $a)), "No such analyzer as $a");
             }
-        } else {
-            assert(false, 'Unsupported type for analyzer : ' . gettype($analyzer));
         }
 
         return true;
@@ -339,7 +331,7 @@ abstract class DSL {
     }
 
     protected function cleanAnalyzerName(string $gremlin, array $dependencies = array()): string {
-        $fullNames = array_map(array($this, 'makeBaseName'), $dependencies);
+        $fullNames = array_map($this->makeBaseName(...), $dependencies);
 
         return str_replace($dependencies, $fullNames, $gremlin);
     }
@@ -397,20 +389,20 @@ abstract class DSL {
             } else {
                 return '"' . addcslashes($value, '$"\'\\') . '"';
             }
-        } 
-        
+        }
+
         if (is_int($value)) {
             return (string) $value;
-        } 
-        
+        }
+
         if ($value === null) {
             return 'null';
-        } 
-        
+        }
+
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
-        } 
-        
+        }
+
         assert(false, 'Could not process value type : ' . gettype($value));
     }
 }

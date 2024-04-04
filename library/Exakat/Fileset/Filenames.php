@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ class Filenames extends Fileset {
     private array $names   = array();
 
     public function __construct(string $dataDir) {
-        $names = @parse_ini_file($dataDir . '/data/ignore_files.ini') ?? array();
+        $names = @parse_ini_file($dataDir . '/data/ignore_files.ini') ?: array();
         $this->names = array_flip($names['files']);
     }
 

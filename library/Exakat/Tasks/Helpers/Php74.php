@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -162,5 +162,10 @@ class Php74 extends Php {
     public const T_ELLIPSIS                                         = 391;
     public const T_BAD_CHARACTER                                    = 395;
     public const T_DOUBLE_COLON                                     = 387;
+    public const T_READONLY                                         = 1000;
+    public const T_ENUM                                             = 1000;
+    public const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG              = 1000;
+    public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 1000;
+    public const T_CHARACTER                                        = 1000;
 }
 ?>

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ sideEffect{ line = it.get().value("line");
 .where( __.until( hasLabel("Project") ).repeat( 
     __.in({$linksDown})
       .sideEffect{ if (theFunction == "" && it.get().label() in ["Function", "Closure", "Arrowfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
-      .sideEffect{ if (theClass == ""    && it.get().label() in ["Class", "Trait", "Interface", "Classanonymous"]                ) { theClass = it.get().value("fullcode")   } }
+      .sideEffect{ if (theClass == ""    && it.get().label() in ["Class", "Trait", "Interface", "Classanonymous", "Enum"]               ) { theClass = it.get().value("fullcode")   } }
       .sideEffect{ if (it.get().label() == "File") { file = it.get().value("fullcode")} }
        ).fold()
 )

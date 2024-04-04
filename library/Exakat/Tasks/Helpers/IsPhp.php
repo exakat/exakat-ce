@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -70,7 +70,7 @@ class IsPhp extends Plugin {
         $this->phpStaticMethods         = $php->getClassStaticMethodList();
     }
 
-    public function run(Atom $atom, array $extras): void {
+    public function run(AtomInterface $atom, array $extras): void {
         $id = strrpos($atom->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
         $path = substr($atom->fullnspath ?? self::NOT_PROVIDED, $id);
 
@@ -288,7 +288,7 @@ class IsPhp extends Plugin {
                     }
                 } elseif ($atom->use === 'function') {
                     if (in_array($path, $this->phpFunctions, STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false                ) {
+                        !str_contains(substr($atom->fullcode, 1), '\\')                ) {
                         $atom->isPhp = true;
                     }
                 } elseif ($atom->use === 'class') {
@@ -303,7 +303,7 @@ class IsPhp extends Plugin {
                 } else {
                     // This is the default behavior
                     if (in_array($path, $this->phpConstants, STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false) { // No extra \\, besides the first one
+                        !str_contains(substr($atom->fullcode, 1), '\\')) { // No extra \\, besides the first one
                         $atom->isPhp = true;
                     }
                 }

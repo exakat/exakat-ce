@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ class Sequences {
     private array $ranksPile           = array();
     private array $elementsPile        = array();
 
-    public function start(Atom $sequence): void {
+    public function start(AtomInterface $sequence): void {
         ++$this->level;
 
         $this->sequences[$this->level]    = $sequence;
@@ -45,7 +45,7 @@ class Sequences {
         $this->elements                = array();
     }
 
-    public function add(Atom $element): void {
+    public function add(AtomInterface $element): void {
         ++$this->rank;
         $element->rank                        = $this->rank;
         $this->elements[]                     = $element;
@@ -56,7 +56,7 @@ class Sequences {
         return $this->elements;
     }
 
-    public function end(): Atom {
+    public function end(): AtomInterface {
         assert($this->level > 0, "Trying to pop a non-existing sequence ($this->level)\n");
 
         array_pop($this->sequences);

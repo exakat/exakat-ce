@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,10 +24,11 @@ declare(strict_types = 1);
 
 namespace Exakat\Query;
 
-use Exakat\Analyzer\Analyzer;
-use Exakat\Query\DSL\DSLFactory;
-use Exakat\Query\DSL\Command;
 use Exakat\Project;
+use Exakat\Analyzer\Analyzer;
+use Exakat\Query\DSL\Command;
+use Exakat\Query\DSL\DSLFactory;
+use const STRICT_COMPARISON;
 
 class Query {
     public const STOP_QUERY = 'filter{ false; }';
@@ -69,7 +70,7 @@ class Query {
             return $this;
         }
 
-        assert(!(empty($this->commands) && empty($this->sides)) || in_array(strtolower($name), array('atomis', 'atomisnot', 'analyzeris', 'atomfunctionis', 'addatom')), "First step in Query must be atomIs, atomFunctionIs, addAtom or analyzerIs ($name used)");
+        assert(!(empty($this->commands) && empty($this->sides)) || in_array(strtolower($name), array('atomis', 'atomisnot', 'analyzeris', 'atomfunctionis', 'addatom'), STRICT_COMPARISON), "First step in Query must be atomIs, atomFunctionIs, addAtom or analyzerIs ($name used)");
 
         $command = $this->queryFactory->factory($name);
         if (in_array($name, array('not', 'filter', 'optional', 'sideEffect'), STRICT_COMPARISON)) {
@@ -149,7 +150,7 @@ class Query {
         assert(!empty($this->sides), 'No side was started! Missing $this->side() ? ');
         assert(!empty($commands), 'No command in side query');
 
-        if (in_array(self::STOP_QUERY, $commands) !== false) {
+        if (in_array(self::STOP_QUERY, $commands, STRICT_COMPARISON) !== false) {
             $this->commands = array_pop($this->sides);
             return new Command(self::STOP_QUERY);
         }
@@ -189,7 +190,7 @@ class Query {
         $commands  = array_column($this->commands, 'gremlin');
         $arguments = array_column($this->commands, 'arguments');
 
-        if (in_array(self::STOP_QUERY, $commands) !== false) {
+        if (in_array(self::STOP_QUERY, $commands, STRICT_COMPARISON) !== false) {
             // any 'stop_query' is blocking
             $this->query = '';
             return false;
@@ -220,7 +221,7 @@ class Query {
         $commands = array_column($this->commands, 'gremlin');
         $arguments = array_column($this->commands, 'arguments');
 
-        if (in_array(self::STOP_QUERY, $commands) !== false) {
+        if (in_array(self::STOP_QUERY, $commands, STRICT_COMPARISON) !== false) {
             // any 'stop_query' is blocking
             $this->query = "// Query with STOP_QUERY\n";
             return ;

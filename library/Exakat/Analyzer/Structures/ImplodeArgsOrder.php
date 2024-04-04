@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ class ImplodeArgsOrder extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-        // Local variable, 
+        // Local variable,
         $this->atomFunctionIs($functions)
              ->is('count', 2)
              ->analyzerIsNot('self')
@@ -65,7 +65,7 @@ class ImplodeArgsOrder extends Analyzer {
              ->back('first');
         $this->prepareQuery();
 
-        // Local variable, 
+        // Local variable,
         $this->atomFunctionIs($functions)
              ->is('count', 2)
              ->analyzerIsNot('self')

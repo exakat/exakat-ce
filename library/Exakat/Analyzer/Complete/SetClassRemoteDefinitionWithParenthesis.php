@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -33,6 +33,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->atomIs('Methodcallname', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('lccode', 'name')
               ->back('first')
+
               ->outIs(array('OBJECT', 'CLASS'))
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
@@ -45,11 +46,13 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->outIs('NEW')
               ->inIs('DEFINITION')  // No check on atoms :
               ->atomIs('Class', self::WITHOUT_CONSTANTS)
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs(array('METHOD', 'MAGICMETHOD'))
-              ->outIs('NAME')
-              ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
-              ->inIs('NAME')
+              ->filter(
+                  $this->side()
+                     ->outIs('NAME')
+                     ->samePropertyAs('lccode', 'name', self::CASE_INSENSITIVE)
+              )
               ->hasNoLinkYet('DEFINITION', 'method')
               ->addETo('DEFINITION', 'method');
         $this->prepareQuery();
@@ -63,6 +66,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('code', 'name')
               ->back('first')
+
               ->outIs(array('OBJECT', 'CLASS'))
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
@@ -75,7 +79,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->outIs('NEW')
               ->inIs('DEFINITION')  // No check on atoms :
               ->atomIs('Class', self::WITHOUT_CONSTANTS)
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('propertyname', 'name', self::CASE_SENSITIVE)
@@ -90,6 +94,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->atomIs('Staticpropertyname', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('code', 'name')
               ->back('first')
+
               ->outIs('CLASS')
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
@@ -102,7 +107,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->outIs('NEW')
               ->inIs('DEFINITION')  // No check on atoms :
               ->atomIs('Class', self::WITHOUT_CONSTANTS)
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs('PPP')
               ->outIs('PPP')
               ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
@@ -118,6 +123,7 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->atomIs('Name', self::WITHOUT_CONSTANTS)
               ->savePropertyAs('code', 'name')
               ->back('first')
+
               ->outIs('CLASS')
               ->atomIs('Parenthesis', self::WITHOUT_CONSTANTS)
               ->outIs('CODE')
@@ -130,12 +136,14 @@ class SetClassRemoteDefinitionWithParenthesis extends Complete {
               ->outIs('NEW')
               ->inIs('DEFINITION')  // No check on atoms :
               ->atomIs('Class', self::WITHOUT_CONSTANTS)
-              ->goToAllParents(self::INCLUDE_SELF)
+              ->goToAllParentsTraits(self::INCLUDE_SELF)
               ->outIs('CONST')
               ->outIs('CONST')
-              ->outIs('NAME')
-              ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
-              ->inIs('NAME')
+              ->filter(
+                  $this->side()
+                     ->outIs('NAME')
+                     ->samePropertyAs('code', 'name', self::CASE_SENSITIVE)
+              )
               ->hasNoLinkYet('DEFINITION', 'constant')
               ->addETo('DEFINITION', 'constant');
         $this->prepareQuery();

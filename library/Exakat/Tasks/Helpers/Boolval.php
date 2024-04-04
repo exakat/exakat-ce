@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ class Boolval extends Plugin {
     public $name = 'boolean';
     public $type = 'boolean';
 
-    public function run(Atom $atom, array $extras): void {
+    public function run(AtomInterface $atom, array $extras): void {
         // Special case for Arraylist, so it won't be blocked by the filter behind.
         switch ($atom->atom) {
             case 'Arrayliteral' :

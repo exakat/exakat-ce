@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -33,6 +33,7 @@ abstract class CouldBeType extends Analyzer {
                      'Complete/CreateDefaultValues',
                      'Complete/OverwrittenMethods',
                      'Complete/OverwrittenProperties',
+                     'Complete/OverwrittenConstants',
                      'Complete/SetClassRemoteDefinitionWithTypehint',
                      'Functions/IsGenerator',
                     );
@@ -609,6 +610,29 @@ abstract class CouldBeType extends Analyzer {
                  ->back('result');
             $this->prepareQuery();
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //  Class Constant types
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // class x { protected $p = array(); }
+    // class x { private $p; function foo() {$this->p = array();  } }
+    protected function checkConstantType(array $atoms = array()): void {
+        $this->atomIs('Const')
+             ->hasIn('CONST')
+             ->hasNoOut('TYPEHINT')
+             ->outIs('CONST')
+             ->hasNoOut('OVERWRITE')
+             ->not(
+                 $this->side()
+                      ->inIs('OVERWRITE')
+                      ->outIs('VALUE')
+                      ->atomIsNot($atoms)
+             )
+             ->outIs('VALUE')
+             ->atomIs($atoms)
+             ->inIs('VALUE');
+        $this->prepareQuery();
     }
 }
 

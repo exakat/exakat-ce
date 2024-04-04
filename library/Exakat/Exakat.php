@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,8 +26,8 @@ use Exakat\Configsource\CommandLine;
 use DateTimeImmutable;
 
 class Exakat {
-	public const VERSION = '2.6.2';
-	public const BUILD = 1494;
+	public const VERSION = '2.6.7';
+	public const BUILD = 1504;
 	
 	private Config $config;
 

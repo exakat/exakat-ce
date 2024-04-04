@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -165,7 +165,8 @@ abstract class Analyzer {
     public const FUNCTIONS_ANONYMOUS = array('Closure', 'Arrowfunction');
     public const FUNCTIONS_METHOD = array('Method', 'Magicmethod');
 
-    public const CIT              = array('Class', 'Classanonymous', 'Interface', 'Trait', 'Enum');
+    public const CIT              = array('Class', 'Classanonymous', 'Interface', 'Trait');
+    public const CITE             = array('Class', 'Classanonymous', 'Interface', 'Trait', 'Enum');
     public const CLASSES_ALL      = array('Class', 'Classanonymous');
     public const CLASSES_TRAITS   = array('Class', 'Classanonymous', 'Trait');
     public const RELATIVE_CLASS   = array('Parent', 'Static', 'Self');
@@ -193,12 +194,14 @@ abstract class Analyzer {
     public const BREAKS           = array('Goto', 'Return', 'Break', 'Continue');
     public const ANONYMOUS        = array('Closure', 'Arrowfunction', 'Classanonymous');
 
-    public const TYPEHINTABLE     = array('Parameter', 'Ppp', 'Function', 'Closure', 'Method', 'Magicmethod', 'Arrowfunction');
+    public const TYPEHINTABLE     = array('Parameter', 'Ppp', 'Function', 'Closure', 'Method', 'Magicmethod', 'Arrowfunction', 'Const');
+    public const TYPES_DEFINITION = array('Class', 'Interface', 'Enum');
     public const TYPE_LINKS       = array('TYPEHINT', 'RETURNTYPE');
 
     public const SCALAR_TYPEHINTS = array('\\int', '\\\float', '\\object', '\\bool', '\\string', '\\array', '\\callable', '\\iterable', '\\void', '\\never');
 
     public const LEFT_RIGHT       = array('LEFT', 'RIGHT');
+    public const OBJECT_VARIABLE  = array('OBJECT', 'CLASS');
 
     public const INCLUDE_SELF     = false;
     public const EXCLUDE_SELF     = true;
@@ -272,7 +275,7 @@ abstract class Analyzer {
                         continue;
                     }
                     /*
-                } elseif (isset($this->config->{$this->analyzerQuoted}[$parameter['name']])) {
+                    } elseif (isset($this->config->{$this->analyzerQuoted}[$parameter['name']])) {
                     $value = $this->config->{$this->analyzerQuoted}[$parameter['name']];
 
                     if (!isset($parameter['default'])) {
@@ -327,7 +330,7 @@ abstract class Analyzer {
             }
         }
 
-        $this->linksDown = GraphElements::linksAsList();
+        $this->linksDown = GraphElements::linksDownAsList();
 
         $this->initNewQuery();
     }
@@ -445,6 +448,7 @@ GREMLIN;
              theClass=""; 
              theNamespace=""; 
              }
+
 .where( __.until( hasLabel("Project") ).repeat( 
     __.in($this->linksDown)
       .sideEffect{ if (theFunction == "" && it.get().label() in ["Function", "Closure", "Arrowfunction", "Magicmethod", "Method"]) { theFunction = it.get().value("fullcode")} }
@@ -460,6 +464,15 @@ GREMLIN;
        "function":theFunction,
        "analyzer":analyzer];
 }
+/*
+ map{ ["fullcode":fullcode, 
+       "file":file, 
+       "line":line, 
+       "namespace":theNamespace, 
+       "class":theClass, 
+       "function":theFunction,
+       "analyzer":analyzer];
+}*/
 GREMLIN
              );
 
@@ -541,7 +554,7 @@ GREMLIN
 
     abstract public function analyze(): void ;
 
-    public function printQuery() : void {
+    public function printQuery(): void {
         $this->query->printQuery();
     }
 
@@ -565,7 +578,7 @@ GREMLIN
         $this->initNewQuery();
     }
 
-    public function storeMissing() : void {
+    public function storeMissing(): void {
         foreach ($this->missingQueries as $m) {
             $query = <<<GREMLIN
 g.addV().{$m->toAddV()}
@@ -669,7 +682,7 @@ GREMLIN;
         return $this->rowCount;
     }
 
-    protected function loadIni(string $file, string $index = null): array|stdClass {
+    protected function loadIni(string $file, ?string $index = null): array|stdClass {
         assert(substr($file, -4) === '.ini', "Trying to loadIni on a non INI file : $file");
         $fullpath = "{$this->config->dir_root}/data/$file";
 
@@ -683,7 +696,7 @@ GREMLIN;
 
         if (file_exists($fullpath)) {
             $ini = (object) parse_ini_file($fullpath, \INI_PROCESS_SECTIONS);
-        } elseif (($iniString = $this->config->ext->loadData("data/$file")) != '') {
+        } elseif (($iniString = $this->config->ext->loadData("data/$file")) !== '') {
             $ini = (object) parse_ini_string($iniString, \INI_PROCESS_SECTIONS);
         } elseif (($this->config->extension_dev !== null) &&
                   file_exists("{$this->config->extension_dev}/data/$file")) {
@@ -704,7 +717,7 @@ GREMLIN;
         return self::$iniCache[$fullpath];
     }
 
-    protected function loadJson(string $file, string $property = null): array|stdClass {
+    protected function loadJson(string $file, ?string $property = null): array|stdClass {
         assert(substr($file, -5) === '.json', "Trying to loadIni on a non JSON file : $file");
         $fullpath = "{$this->config->dir_root}/data/$file";
 
@@ -765,7 +778,7 @@ GREMLIN;
         return self::$pdffCache[$fullpath];
     }
 
-    protected function load(string $file, string $property = null): array|stdClass {
+    protected function load(string $file, ?string $property = null): array|stdClass {
         $inifile = "{$this->config->dir_root}/data/$file.ini";
         if (file_exists($inifile)) {
             $ini = $this->loadIni("$file.ini", $property);

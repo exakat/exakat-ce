@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ class DotExakatConfig extends Config {
             return self::NOT_LOADED;
         }
 
-		$ini = parse_ini_file($this->dotExakat);
+        $ini = parse_ini_file($this->dotExakat);
         $ini['project'] = new Project($ini['project']);
         $ini['inside_code'] = $this->config['inside_code'];
         $this->config = $ini;

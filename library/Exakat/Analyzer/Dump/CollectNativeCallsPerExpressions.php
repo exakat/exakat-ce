@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,17 +28,38 @@ class CollectNativeCallsPerExpressions extends AnalyzerHashHashResults {
     public function analyze(): void {
         $MAX_LOOPING = self::MAX_LOOPING;
 
+        $avoided = array('Arrowfunction',
+                         'Case',
+                         'Catch',
+                         'Class',
+                         'Classanonymous',
+                         'Closure',
+                         'Default',
+                         'Dowhile',
+                         'Enum',
+                         'Finally',
+                         'For',
+                         'Foreach',
+                         'Function',
+                         'Ifthen',
+                         'Include',
+                         'Match',
+                         'Namespace',
+                         'Php',
+                         'Return',
+                         'Switch',
+                         'Trait',
+                         'Try',
+                         'While',
+                         );
+
         $this->atomIs('Sequence', self::WITHOUT_CONSTANTS)
               ->outIs('EXPRESSION')
-              ->atomIsNot(array('Arrowfunction', 'Case', 'Catch', 'Class', 'Classanonymous', 'Closure', 'Default', 'Dowhile', 'Enum', 'Finally', 'For', 'Foreach', 'Function', 'Ifthen', 'Include', 'Namespace', 'Php', 'Return', 'Switch', 'Trait', 'Try', 'While'), self::WITHOUT_CONSTANTS)
+              ->atomIsNot($avoided, self::WITHOUT_CONSTANTS)
               ->_as('results')
-              ->raw(<<<GREMLIN
-groupCount("m").by( __.emit( ).repeat( __.out({$this->linksDown}).not(hasLabel("Closure", "Arrowfunction", "Classanonymous")) ).times($MAX_LOOPING).hasLabel("Functioncall")
+              ->groupCount('__.emit( ).repeat( __.out(' . $this->linksDown . ').not(hasLabel("Closure", "Arrowfunction", "Classanonymous")) ).times(' . $MAX_LOOPING . ').hasLabel("Functioncall")
       .or( __.has("isPhp", true), __.has("isExt", true) )
-      .count()
-).cap("m")
-GREMLIN
-              );
+      .count()');
         $this->prepareQuery();
     }
 }

@@ -1,1 +1,1 @@
-{"versions":{"8.2.0-dev":{"\\":{"name":"\\","constants":[],"functions":[],"traits":[],"classes":[],"interfaces":[],"enums":[]}}}}
+{"versions":{"8.3.2":{"\\":{"name":"\\","constants":{"PDO_ODBC_TYPE":{"name":"PDO_ODBC_TYPE","phpdoc":[],"expression":false,"value":"unixODBC"}},"functions":[],"traits":[],"classes":[],"interfaces":[],"enums":[]}}}}

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,8 +24,9 @@
 namespace Exakat\Exceptions;
 
 use Exception;
+use RuntimeException;
 
-class NoRecognizedTokens extends \Exception {
+class NoRecognizedTokens extends RuntimeException {
     public function __construct(string $message = '', int $code = 0, ?Exception $previous = null) {
         parent::__construct('Tokens \'' . $message . '\' were not recognized. Please, check with @exakat on twitter.', $code, $previous);
     }

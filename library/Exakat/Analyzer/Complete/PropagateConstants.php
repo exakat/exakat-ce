@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -496,7 +496,7 @@ GREMLIN
                       ->outIs('NOT')
                       ->has('intval')
                       ->has('noDelimiter')
-                      ->savePropertyAs(savePropertyAs::ATOM, 'x')
+                      ->savePropertyAs(SavePropertyAs::ATOM, 'x')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 
@@ -572,19 +572,19 @@ GREMLIN
                  $this->side()
                       ->outIs('CONDITION')
                       ->has('intval')
-                      ->savePropertyAs(savePropertyAs::ATOM, 'condition')
+                      ->savePropertyAs(SavePropertyAs::ATOM, 'condition')
              )
              ->filter(
                  $this->side()
                       ->outIs('THEN')
                       ->has('intval')
-                      ->savePropertyAs(savePropertyAs::ATOM, '_then')
+                      ->savePropertyAs(SavePropertyAs::ATOM, '_then')
              )
              ->filter(
                  $this->side()
                       ->outIs('ELSE')
                       ->has('intval')
-                      ->savePropertyAs(savePropertyAs::ATOM, '_else')
+                      ->savePropertyAs(SavePropertyAs::ATOM, '_else')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 
@@ -623,13 +623,13 @@ GREMLIN
                  $this->side()
                       ->outIs('LEFT')
                       ->has('intval')
-                      ->savePropertyAs(savePropertyAs::ATOM, 'left')
+                      ->savePropertyAs(SavePropertyAs::ATOM, 'left')
              )
              ->filter(
                  $this->side()
                       ->outIs('RIGHT')
                       ->has('intval')
-                      ->savePropertyAs(savePropertyAs::ATOM, 'right')
+                      ->savePropertyAs(SavePropertyAs::ATOM, 'right')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 
@@ -664,13 +664,13 @@ GREMLIN
                  $this->side()
                       ->outIs('LEFT')
                       ->has('intval')
-                      ->savePropertyAs(savePropertyAs::ATOM, 'left')
+                      ->savePropertyAs(SavePropertyAs::ATOM, 'left')
              )
              ->filter(
                  $this->side()
                       ->outIs('RIGHT')
                       ->has('intval')
-                      ->savePropertyAs(savePropertyAs::ATOM, 'right')
+                      ->savePropertyAs(SavePropertyAs::ATOM, 'right')
              )
              ->raw(<<<'GREMLIN'
 sideEffect{ 

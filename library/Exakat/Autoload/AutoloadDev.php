@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,10 +30,10 @@ class AutoloadDev implements Autoloader {
     private string $path = '';
 
     public function __construct(string $path) {
-        if (class_exists('\\Phar') && phar::running()) {
+        if (class_exists('\\Phar') && Phar::running()) {
             // No autoloadDev with phar
             // Ignoring it all
-//            return;
+            return;
         }
 
         $this->path = $path;
@@ -52,7 +52,7 @@ class AutoloadDev implements Autoloader {
     }
 
     public function registerAutoload(): void {
-        spl_autoload_register(array($this, 'autoload'));
+        spl_autoload_register($this->autoload(...));
     }
 
     public function getAllAnalyzers(): array {

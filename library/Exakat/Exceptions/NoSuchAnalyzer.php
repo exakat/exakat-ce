@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,8 +24,11 @@
 namespace Exakat\Exceptions;
 
 use Exakat\Analyzer\Rulesets;
+use RuntimeException;
 
-class NoSuchAnalyzer extends \RuntimeException {
+class NoSuchAnalyzer extends RuntimeException {
+    private const MAX_SUGGESTIONS = 5;
+
     public function __construct(string $analyzer, Rulesets $themes) {
         $die = "Couldn't find '$analyzer'. Aborting\n";
 
@@ -36,9 +39,9 @@ class NoSuchAnalyzer extends \RuntimeException {
             if (empty($r)) {
                 $die .= "Couldn't find a suggestion. Check the documentation http://exakat.readthedocs.io/\n";
             } else {
-                $die .= 'Did you mean : ' . str_replace('\\', '/', implode(', ', array_slice($r, 0, 5)));
-                if (count($r) > 5) {
-                    $die .= ' (' . (count($r) - 5) . ' more possible)';
+                $die .= 'Did you mean : ' . str_replace('\\', '/', implode(', ', array_slice($r, 0, self::MAX_SUGGESTIONS)));
+                if (count($r) > self::MAX_SUGGESTIONS) {
+                    $die .= ' (' . (count($r) - self::MAX_SUGGESTIONS) . ' more possible)';
                 }
                 $die .= "\n";
             }

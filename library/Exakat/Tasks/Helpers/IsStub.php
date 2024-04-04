@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -73,7 +73,7 @@ class IsStub extends Plugin {
         $this->stubStaticMethods      = $stubs->getClassStaticMethodList();
     }
 
-    public function run(Atom $atom, array $extras): void {
+    public function run(AtomInterface $atom, array $extras): void {
         $id   = strrpos($atom->fullnspath ?? self::NOT_PROVIDED, '\\') ?: 0;
         $path = substr($atom->fullnspath  ?? self::NOT_PROVIDED, $id);
 
@@ -306,7 +306,7 @@ class IsStub extends Plugin {
                     }
                 } elseif ($atom->use === 'function') {
                     if (in_array($path, $this->stubFunctions, STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false                ) {
+                        !str_contains(substr($atom->fullcode, 1), '\\')                ) {
                         $atom->isStub = true;
                     }
                 } elseif ($atom->use === 'class') {
@@ -321,7 +321,7 @@ class IsStub extends Plugin {
                 } else {
                     // This is the default behavior
                     if (in_array($path, $this->stubConstants, STRICT_COMPARISON) &&
-                        strpos($atom->fullcode, '\\', 1) === false) { // No extra \\, besides the first one
+                        !str_contains(substr($atom->fullcode, 1), '\\')) { // No extra \\, besides the first one
                         $atom->isStub = true;
                     }
                 }

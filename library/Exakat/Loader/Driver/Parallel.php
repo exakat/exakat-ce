@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -79,12 +79,14 @@ class Parallel extends Driver {
         $timer = new Timer();
         // @todo check that this works with phar
         $process = new Process(array('php',
-        						'-r', 
-                                'include("'.$this->installationPath.'/server/load.php");',
+                                '-r',
+                                'include("' . $this->installationPath . '/server/load.php");',
                                 $this->filePath,
                                 $this->graphdb->getHost(),
                                 $this->graphdb->getPort(),
                                 $this->installationPath,
+                                // @todo replace dirname with the actual path
+                                dirname($this->tmpPath) . '/log/parallel.log',
                               ));
         $this->processes[] = $process;
         $process->start();
@@ -110,22 +112,25 @@ class Parallel extends Driver {
         $timer = new Timer();
 
         ++$this->fragment;
-        $path = "{$this->tmpPath}/graphdb." . $this->fragment . '.tmp';
+        $path = $this->tmpPath . '/graphdb.' . $this->fragment . '.tmp';
         foreach ($links as &$link) {
-            $link = join(',', $link);
+            $link = $link->toString();
         }
         unset($link);
         file_put_contents($path, join(PHP_EOL, $links));
 
         $this->monitorProcesses();
 
+        // @todo This should not be 'php' but the actual php binary from the config
         $process = new Process(array('php',
-        						'-r', 
-                                'include("'.$this->installationPath.'/server/loadLink.php");',
+                                '-r',
+                                'include("' . $this->installationPath . '/server/loadLink.php");',
                                 $path,
                                 $this->graphdb->getHost(),
                                 $this->graphdb->getPort(),
                                 $this->installationPath,
+                                // @todo replace dirname with the actual path
+                                dirname($this->tmpPath) . '/log/parallel.log',
                               ));
         $this->processes[] = $process;
         $process->start();
@@ -136,6 +141,7 @@ class Parallel extends Driver {
 
     public function savePropertiesGremlin(string $attribute, array $properties): void {
         $chunks = array_chunk($properties, self::LOAD_CHUNK_PROPERTY);
+
         foreach ($chunks as $chunk) {
             $this->savePropertiesGremlinByChunk($attribute, $chunk);
         }
@@ -151,13 +157,15 @@ class Parallel extends Driver {
         $this->monitorProcesses();
 
         $process = new Process(array('php',
-        						'-r', 
-                                'include("'.$this->installationPath.'/server/loadProperty.php");',
+                                '-r',
+                                'include("' . $this->installationPath . '/server/loadProperty.php");',
                                 $attribute,
                                 $path,
                                 $this->graphdb->getHost(),
                                 $this->graphdb->getPort(),
                                 $this->installationPath,
+                                // @todo replace dirname with the actual path
+                                dirname($this->tmpPath) . '/log/parallel.log',
                                 ));
         $this->processes[] = $process;
         $process->start();
@@ -171,7 +179,6 @@ class Parallel extends Driver {
         do {
             foreach ($this->processes as $id => $p) {
                 if (!$p->isRunning()) {
-                	print $this->processes[$id]->getOutput();
                     unset($this->processes[$id]);
                 }
             }
@@ -179,7 +186,7 @@ class Parallel extends Driver {
         } while (count($this->processes) >= $this->max);
     }
 
-    public function finish(bool $once = false): void {
+    public function finish(): void {
         display(count($this->processes) . " process to finish\n");
 
         $this->monitorProcesses();

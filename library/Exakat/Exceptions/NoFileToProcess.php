@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,9 +24,10 @@
 namespace Exakat\Exceptions;
 
 use Exception;
+use RuntimeException;
 
-class NoFileToProcess extends \RuntimeException {
-    public function __construct(string $filename = '', string $type = 'empty or doesn\'t compile', int $code = 0, Exception $previous = null) {
+class NoFileToProcess extends RuntimeException {
+    public function __construct(string $filename = '', string $type = 'empty or doesn\'t compile', int $code = 0, ?Exception $previous = null) {
         parent::__construct($filename . ' ' . $type, $code, $previous);
     }
 }

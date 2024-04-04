@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -34,6 +34,7 @@ use Exakat\Tasks\Helpers\ReportConfig;
 use Exakat\Helpers\Timer;
 use Exakat\Dump\Dump;
 use Exakat\Log;
+use const STRICT_COMPARISON;
 
 class Report extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -117,7 +118,7 @@ class Report extends Tasks {
         } else {
             // to files + extension
             $filename = basename($reportConfig->getFile());
-            if (in_array($filename, array('.', '..'))) {
+            if (in_array($filename, array('.', '..'), STRICT_COMPARISON)) {
                 $filename = $report::FILE_FILENAME;
             }
             display('Building report for project ' . $this->config->project . ' in "' . $reportConfig->getFile() . ($report::FILE_EXTENSION ? '.' . $report::FILE_EXTENSION : '') . "', with format " . $reportConfig->getFormat() . "\n");

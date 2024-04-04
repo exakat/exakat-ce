@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -62,8 +62,11 @@ class IsAnyOf extends DSL {
                 $command[] = 'has("' . $property . '", ' . $value . ')';
             }
         } elseif (is_string($value)) {
-            assert(false, 'Not done yet');
-            return new Command('has("' . $property . '", ***)', array($value));
+            if ($this->isVariable($value)) {
+                return new Command('filter{ it.get().value("' . $property . '") in ' . $value . '; }');
+            } else {
+                return new Command('has("' . $property . '", ***)', array($value));
+            }
         } elseif (is_array($value)) {
             assert(false, 'Not done yet');
             return new Command('has("' . $property . '", within(***))', array($value));

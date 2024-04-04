@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -49,8 +49,6 @@ SQL;
                      'Complete/OverwrittenMethods',
                      'Complete/SetParentDefinition',
                      'Complete/CreateMagicProperty',
-//                     'Complete/MakeClassMethodDefinition.php',
-//					 'Complete/SetParentDefinition.php',
                     );
     }
 
@@ -63,8 +61,8 @@ SQL;
         );
 
         $this ->atomIs($calls, self::WITHOUT_CONSTANTS)
-//              ->has('fullnspath')
-              ->goToInstruction(array('Function', 'Method', 'Magicmethod'))
+              ->inIs('CALLED')
+              ->atomIs(array('Function', 'Method', 'Magicmethod'))
               ->as('calling')
               ->as('callingName')
               ->back('first')

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -56,8 +56,7 @@ class Cobble extends Tasks {
             $cobblersClass = array($this->config->program);
         }
 
-        // @todo check for format now
-
+        // @todo check for cobbler name format now
         foreach ($cobblersClass as $cobbler) {
             if (!Cobbler::getClass($cobbler)) {
                 throw new NoSuchCobbler($cobbler);
@@ -78,8 +77,7 @@ class Cobble extends Tasks {
             return;
         }
 
-        // @todo : make this call getinstance
-        $vcs = new $vcs((string) $this->config->project, $this->config->code_dir);
+        $vcs = Vcs::getVcs($this->config);
         if (!empty($this->config->branch) && $vcs->hasBranch($this->config->branch)) {
             print 'Branch already exists : cannot overwrite an existing branch. Please, change branch name or remove branch first.';
 
@@ -170,6 +168,7 @@ class Cobble extends Tasks {
             $args[] = $this->config->branch;
         } elseif (!empty($cobbler->getTargetBranch())) {
             $args[] = '--branch';
+            // @todo : there might be several cobblers, and this is the last one only.
             $args[] = $cobbler->getTargetBranch();
         } else {
             die('Must config target destination. Aborting.');

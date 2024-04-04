@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -24,9 +24,10 @@
 namespace Exakat\Exceptions;
 
 use Exception;
+use RuntimeException;
 
-class InaptPHPBinary extends \Exception {
-    public function __construct(string $message = '', int $code = 0, Exception $previous = null) {
+class InaptPHPBinary extends RuntimeException {
+    public function __construct(string $message = '', int $code = 0, ?Exception $previous = null) {
         parent::__construct("The PHP version cannot be used to run Exakat : $message\n", $code, $previous);
     }
 }

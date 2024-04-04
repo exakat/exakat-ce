@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ class MakeFunctioncallWithReference extends Complete {
                      'Complete/SetClassRemoteDefinitionWithParenthesis',
                      'Complete/SetClassRemoteDefinitionWithReturnTypehint',
                      'Complete/SetClassRemoteDefinitionWithTypehint',
-                     'Complete/PropagateCalls',
+                     'Complete/FollowClosureDefinition',
                     );
     }
 
@@ -50,8 +50,6 @@ class MakeFunctioncallWithReference extends Complete {
                  ->setProperty('isModified', true);
             $this->prepareQuery();
         }
-
-        // @todo : extends to methods and static methods
 
         // Case of Custom native functions
         $this->atomIs(self::FUNCTIONS_ALL)

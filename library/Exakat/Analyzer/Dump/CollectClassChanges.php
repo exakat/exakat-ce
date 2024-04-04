@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -43,38 +43,37 @@ SQL;
     public function dependsOn(): array {
         return array('Complete/OverwrittenProperties',
                      'Complete/OverwrittenMethods',
+                     'Complete/OverwrittenConstants',
                     );
     }
 
 
     public function analyze(): void {
-        $total = 0;
-
         // Comparing Class constant : values, visibility
 
         // Class constants with different values
         $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
-              ->inIs('NAME')
+              ->back('first')
               ->outIs('VALUE')
               ->savePropertyAs('fullcode', 'default1')
-              ->inIs('VALUE')
+              ->back('first')
 
               ->inIs('CONST')
               ->inIs('CONST')
-              ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
-
+              ->atomIs('Class')
               ->savePropertyAs('fullcode', 'class1')
-              ->goToAllParents(self::EXCLUDE_SELF)
-              ->savePropertyAs('fullcode', 'class2') // another class
+              ->back('first')
 
-              ->outIs('CONST')
-              ->outIs('CONST')
+              ->outIs('OVERWRITE')
 
-              ->outIs('NAME')
-              ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
-              ->inIs('NAME')
+              ->as('class2')
+              ->inIs('CONST')
+              ->inIs('CONST')
+              ->atomIs('Class')
+              ->savePropertyAs('fullcode', 'class2')
+              ->back('class2')
 
               ->outIs('VALUE')
               ->notSamePropertyAs('fullcode', 'default1', self::CASE_SENSITIVE) // test
@@ -94,25 +93,25 @@ SQL;
         $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
-              ->inIs('NAME')
+              ->back('first')
 
               ->inIs('CONST')
               ->savePropertyAs('visibility', 'visibility1')
               ->inIs('CONST')
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
-
               ->savePropertyAs('fullcode', 'class1')
-              ->goToAllParents(self::EXCLUDE_SELF)
-              ->savePropertyAs('fullcode', 'class2') // another class
+              ->back('first')
 
-              ->outIs('CONST')
+              ->outIs('OVERWRITE')
+
+              ->as('class2')
+              ->inIs('CONST')
               ->notSamePropertyAs('visibility', 'visibility1', self::CASE_SENSITIVE) // test
               ->savePropertyAs('visibility', 'visibility2') // collect
-              ->outIs('CONST')
-
-              ->outIs('NAME')
-              ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
-              ->inIs('NAME')
+              ->inIs('CONST')
+              ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('fullcode', 'class2')
+              ->back('class2')
 
               ->selectMap(array(
                   'type' => '"Constant Visibility"',
@@ -122,30 +121,65 @@ SQL;
                   'class' => 'class1',
                   'classValue' => "visibility1 + ' ' + name",
               ));
-
         $this->prepareQuery();
 
-        // Comparing Methods : return type, visibility, argument's type, default, name
+        // Class constants with different types
+        $this->atomIs('Constant', self::WITHOUT_CONSTANTS)
+              ->outIs('NAME')
+              ->savePropertyAs('fullcode', 'name')
+              ->back('first')
+
+              ->inIs('CONST')
+              ->hasOut('TYPEHINT')
+              ->collectTypehints('types1')
+              ->inIs('CONST')
+              ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('fullcode', 'class1')
+              ->back('first')
+
+              ->outIs('OVERWRITE')
+
+              ->as('class2')
+              ->inIs('CONST')
+              ->collectTypehints('types2')
+              ->inIs('CONST')
+              ->atomIs('Class')
+              ->savePropertyAs('fullcode', 'class2')
+              ->back('class2')
+
+              ->isNotEqual('types1', 'types2') // test
+
+              ->outIs('NAME')
+              ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
+
+              ->selectMap(array(
+                  'type' => '"Constant Types"',
+                  'name' => 'name',
+                  'parent' => 'class2',
+                  'parentValue' => "types2.join('|') + ' ' + name",
+                  'class' => 'class1',
+                  'classValue' => "types1.join('|') + ' ' + name",
+              ));
+        $this->prepareQuery();
+
+        // Comparing Methods : return type, visibility, argument's type, argument's default, arguments's name
 
         // Methods with different signatures : argument's type, default, name
         // Upgrade this with separate queries for each element.
 
         $this->atomIs(array('Method', 'Magicmethod'), self::WITHOUT_CONSTANTS)
-              ->outIs('NAME')
-              ->savePropertyAs('fullcode', 'name')
-              ->inIs('NAME')
+              ->collectOutOne('name', 'NAME', 'fullcode')
               ->collectArguments('signature1')
 
-              ->inIs('METHOD')
+              ->inIs(array('METHOD', 'MAGICMETHOD'))
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'class1')
-
               ->back('first')
-              ->outIs('OVERWRITE')
 
-              ->outIs('NAME')
-              ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
-              ->inIs('NAME')
+              ->outIs('OVERWRITE')
+              ->atomIs(array('Method', 'Magicmethod')) // avoid virtual
+              ->as('method2')
+
               ->collectArguments('signature2')
               ->notSameVariableAs('signature1', 'signature2')
 
@@ -171,6 +205,7 @@ SQL;
               ->savePropertyAs('fullcode', 'name1')
               ->back('first')
               ->inIs('OVERWRITE')
+              ->atomIs(array('Method', 'Magicmethod')) // avoid virtual
               ->savePropertyAs('visibility', 'visibility2')
               ->notSameVariableAs('visibility1', 'visibility2')
               ->inIs('METHOD')
@@ -193,6 +228,8 @@ SQL;
               ->savePropertyAs('fullcode', 'name1')
               ->back('first')
               ->inIs('OVERWRITE')
+              ->atomIs(array('Method', 'Magicmethod')) // avoid virtual
+
               ->savePropertyAs('fullnspath', 'method2')
               ->collectTypehints('returntype2')
               ->notSameVariableAs('returntype1', 'returntype2')
@@ -215,30 +252,35 @@ SQL;
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
-              ->inIs('NAME')
+              ->back('first')
+
               ->outIs('DEFAULT')
               ->hasNoIn('RIGHT') // find an explicit default
               ->savePropertyAs('fullcode', 'default1')
-              ->inIs('DEFAULT')
+              ->back('first')
+
               ->inIs('PPP')
               ->inIs('PPP')
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'class1')
-
               ->back('first')
+
               ->outIs('OVERWRITE')
+              ->atomIs('Propertydefinition') // avoid virtual
+              ->as('property2')
 
               ->outIs('DEFAULT')
+              ->hasNoIn('RIGHT') // find an explicit default
               ->notSamePropertyAs('fullcode', 'default1', self::CASE_SENSITIVE)
               ->savePropertyAs('fullcode', 'default2')
-              ->inIs('DEFAULT')
+              ->back('property2')
 
               ->inIs('PPP')
               ->inIs('PPP')
               ->savePropertyAs('fullcode', 'class2')
 
               ->selectMap(array(
-                  'type' => '"Method Default"',
+                  'type' => '"Property Default"',
                   'name' => 'name',
                   'parent' => 'class2',
                   'parentValue' => "name + ' = ' + default2",
@@ -251,23 +293,28 @@ SQL;
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
-              ->inIs('NAME')
+              ->back('first')
+
               ->inIs('PPP')
               ->savePropertyAs('visibility', 'visibility1')
               ->inIs('PPP')
+
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'class1')
-              ->goToAllParents(self::EXCLUDE_SELF)
-              ->savePropertyAs('fullcode', 'class2')
 
-              ->outIs('PPP')
+              ->back('first')
+              ->inIs('OVERWRITE')
+              ->atomIs('Propertydefinition') // avoid virtual
+
+              ->inIs('PPP')
               ->notSamePropertyAs('visibility', 'visibility1', self::CASE_SENSITIVE)
               ->savePropertyAs('visibility', 'visibility2')
-              ->outIs('PPP')
-              ->samePropertyAs('fullcode', 'name', self::CASE_SENSITIVE)
+              ->inIs('PPP')
+              ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
+              ->savePropertyAs('fullcode', 'class2')
 
               ->selectMap(array(
-                  'type' => '"Method Visibility"',
+                  'type' => '"Property Visibility"',
                   'name' => 'name',
                   'parent' => 'class2',
                   'parentValue' => 'visibility2 + name',
@@ -280,15 +327,18 @@ SQL;
         $this->atomIs('Propertydefinition', self::WITHOUT_CONSTANTS)
               ->outIs('NAME')
               ->savePropertyAs('fullcode', 'name')
-              ->inIs('NAME')
+              ->back('first')
+
               ->inIs('PPP')
               ->collectTypehints('types1')
               ->inIs('PPP')
+
               ->atomIs(self::CLASSES_ALL, self::WITHOUT_CONSTANTS)
               ->savePropertyAs('fullcode', 'class1')
 
               ->back('first')
               ->inIs('OVERWRITE')
+              ->atomIs('Propertydefinition') // avoid virtual
 
               ->inIs('PPP')
               ->collectTypehints('types2')
@@ -297,7 +347,7 @@ SQL;
               ->savePropertyAs('fullcode', 'class2')
 
               ->selectMap(array(
-                  'type' => '"Method Type"',
+                  'type' => '"Property Type"',
                   'name' => 'name',
                   'parent' => 'class2',
                   'parentValue' => "types2.join('|') + ' ' + name",

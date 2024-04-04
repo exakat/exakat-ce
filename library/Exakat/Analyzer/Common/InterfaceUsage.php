@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ class InterfaceUsage extends Analyzer {
     public function analyze(): void {
         $interfaces =  makeFullNsPath($this->interfaces);
 
-        $this->atomIs('Class')
+        $this->atomIs(self::CLASSES_ALL)
              ->outIs('IMPLEMENTS')
              ->analyzerIsNot('self')
              ->atomIs(self::STATIC_NAMES)
@@ -62,7 +62,9 @@ class InterfaceUsage extends Analyzer {
              ->fullnspathIsNot($classes);
         $this->prepareQuery();
 
-        $this->atomIs('Parameter')
+        // function foo(I $i) {}
+        // class x { privatge I $p; }
+        $this->atomIs(array('Parameter', 'Ppp'))
              ->outIs('TYPEHINT')
              ->analyzerIsNot('self')
              ->has('line')
@@ -72,6 +74,7 @@ class InterfaceUsage extends Analyzer {
              ->fullnspathIsNot($classes);
         $this->prepareQuery();
 
+        // function foo() : I {}
         $this->atomIs(self::FUNCTIONS_ALL)
              ->outIs('RETURNTYPE')
              ->analyzerIsNot('self')

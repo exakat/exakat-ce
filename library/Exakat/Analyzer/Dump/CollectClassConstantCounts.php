@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,9 +28,8 @@ class CollectClassConstantCounts extends AnalyzerHashHashResults {
 
     public function analyze(): void {
         // foo() {const A=1, B=2; }
-        $this->atomIs(array('Class', 'Classanonymous', 'Interface'))
-             ->raw('groupCount("m").by(__.out("CONST").out("CONST").count()).cap("m")');
-
+        $this->atomIs(self::CITE)
+             ->groupCount('__.out("CONST").out("CONST").count()');
         $this->prepareQuery();
     }
 }

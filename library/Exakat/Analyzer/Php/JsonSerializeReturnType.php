@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -74,9 +74,10 @@ class JsonSerializeReturnType extends Analyzer {
 
         foreach ($list as $class => $methods) {
             foreach ($methods as $name => $type) {
-                $this->atomIs(self::STATIC_NAMES)
+                $this->atomIs('Class')
+                     ->outIs('IMPLEMENTS')
                      ->fullnspathIs($class)
-                     ->inIs('IMPLEMENTS')
+                     ->back('first')
                      ->goToAllChildren(self::INCLUDE_SELF)
 
                      ->goToMethod($name)
@@ -85,14 +86,12 @@ class JsonSerializeReturnType extends Analyzer {
                               ->outIs('ATTRIBUTE')
                               ->fullnspathIs('\\returntypewillchange')
                      )
-                     ->as('results')
                      ->not(
                          $this->side()
                               ->outIs('RETURNTYPE')
                               ->atomIs('Scalartypehint')
                               ->fullnspathIs($type)
-                     )
-                     ->back('results');
+                     );
                 $this->prepareQuery();
             }
         }

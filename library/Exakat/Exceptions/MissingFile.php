@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,11 +23,16 @@
 
 namespace Exakat\Exceptions;
 
-class MissingFile extends \Exception {
-    public function __construct(array $missing = array(), int $code = 0, \Exception $previous = null) {
+use Exception;
+use RuntimeException;
+
+class MissingFile extends RuntimeException {
+    private const MAX_MISSING_FILE_DISPLAYED = 3;
+
+    public function __construct(array $missing = array(), int $code = 0, ?Exception $previous = null) {
         $c = count($missing);
-        if ($c > 3) {
-            $display = array_slice($missing, 0, 3);
+        if ($c > self::MAX_MISSING_FILE_DISPLAYED) {
+            $display = array_slice($missing, 0, self::MAX_MISSING_FILE_DISPLAYED);
             $displayNames = implode(', ', $display) . '...';
         } else {
             $displayNames = implode(', ', $missing);

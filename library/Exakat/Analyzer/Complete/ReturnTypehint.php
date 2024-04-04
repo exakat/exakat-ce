@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -28,6 +28,8 @@ class ReturnTypehint extends Analyzer {
     protected int $storageType = self::QUERY_NO_ANALYZED;
 
     public function analyze(): void {
+        // @todo Add type based on PDFF
+
         // specific for self
         $this->atomIs('Method')
              ->filter(
@@ -48,23 +50,14 @@ class ReturnTypehint extends Analyzer {
 
              ->as('theClass')
              ->back('first')
-             ->raw(<<<'GREMLIN'
-sideEffect(
-        select("first").out("RETURNTYPE").fold().as("poubelle1").
-        sideEffect( select("poubelle1").unfold().bothE().drop() )
-    )
-.addV('Identifier')
-    .property("line",       -1 )
-    .property("extra",      true )
-    .property("fullnspath", select("theClass").properties("fullnspath").value() )
-    .property("fullcode",   select("theClass").out("NAME").properties("fullcode").value() )
-    .as("b")
-.sideEffect(
-    // Link Returntype to Function
-    select("first").addE("RETURNTYPE").to("b")
-)
-GREMLIN
-             );
+             ->removeLink('RETURNTYPE')
+             ->addAtom('Scalartypehint', array(
+                             'fullcode'   => 'select("theClass").out("NAME").properties("fullcode").value()',
+                             'fullnspath' => 'select("theClass").properties("fullnspath").value()',
+                             'line'       => -1,
+                             'extra'      => true,
+                          ))
+              ->addEFrom('RETURNTYPE', 'first');
         $this->prepareQuery();
 
         // specific for CIT
@@ -83,25 +76,17 @@ GREMLIN
              ->outIs('RETURNED')
              ->atomIs('New')
              ->outIs('NEW')
+             ->atomIsNot('Classanonymous')
              ->has('fullnspath')
              ->as('theClass')
-             ->raw(<<<'GREMLIN'
-sideEffect(
-        select("first").out("RETURNTYPE").fold().as("poubelle1").
-        sideEffect( select("poubelle1").unfold().bothE().drop() )
-    )
-.addV('Identifier')
-    .property("line",       -1 )
-    .property("extra",      true )
-    .property("fullnspath", select("theClass").properties("fullnspath").value() )
-    .property("fullcode",   select("theClass").optional(out("NAME")).properties("fullcode").value() )
-    .as("b")
-.sideEffect(
-    // Link Returntype to Function
-    select("first").addE("RETURNTYPE").to("b")
-)
-GREMLIN
-             );
+             ->removeLink('RETURNTYPE')
+             ->addAtom('Identifier', array(
+                             'fullcode'   => 'select("theClass").optional(out("NAME")).properties("fullcode").value()',
+                             'fullnspath' => 'select("theClass").properties("fullnspath").value()',
+                             'line'       => -1,
+                             'extra'      => true,
+                          ))
+              ->addEFrom('RETURNTYPE', 'first');
         $this->prepareQuery();
 
         $types = array(array(array('Integer'),
@@ -138,13 +123,9 @@ GREMLIN
                           ->atomIsNot(array_merge(...array_column($types, 0)))
                  )
                  ->back('first')
+                 ->removeLink('RETURNTYPE')
                  ->raw(<<<'GREMLIN'
-sideEffect(
-        select("first").out("RETURNTYPE").fold().as("poubelle1")
-        . sideEffect( select("poubelle1").unfold().bothE().drop() )
-
-    )
-.out('RETURNED')
+ out('RETURNED')
 .dedup().by(label)
 .as("r")
 .addV('Scalartypehint')
@@ -186,13 +167,9 @@ GREMLIN
                       ->atomIs('Cast')
              )
              ->back('first')
+             ->removeLink('RETURNTYPE')
              ->raw(<<<'GREMLIN'
-sideEffect(
-        select("first").out("RETURNTYPE").fold().as("poubelle1")
-        . sideEffect( select("poubelle1").unfold().bothE().drop() )
-
-    )
-.out('RETURNED').hasLabel('Cast')
+ out('RETURNED').hasLabel('Cast')
 .as("r")
 .addV('Scalartypehint')
          .as("b")
@@ -240,23 +217,16 @@ GREMLIN
                       ->outIs('RETURNED')
                       ->atomIsNot('Void')
              )
-             ->raw(<<<'GREMLIN'
-sideEffect(
-        select("first").out("RETURNTYPE").fold().as("poubelle1")
-        .sideEffect( select("poubelle1").unfold().bothE().drop() )
-    )
-.as("r")
-.addV('Scalartypehint')
-         .as("b")
-         .property("line", -1)
-         .property("extra", true)
-         .property("fullnspath", '\\void')
-         .property("fullcode", 'void')
-         .addE("RETURNTYPE").from("first")
-GREMLIN
-             )
-        ->back('first')
-        ->setProperty('typehint', '"one"');
+             ->removeLink('RETURNTYPE')
+             ->addAtom('Scalartypehint', array(
+                             'fullcode'   => 'void',
+                             'fullnspath' => '\\void',
+                             'line'       => -1,
+                             'extra'      => true,
+                          ))
+              ->addEFrom('RETURNTYPE', 'first')
+              ->back('first')
+              ->setProperty('typehint', '"one"');
         $this->prepareQuery();
     }
 }

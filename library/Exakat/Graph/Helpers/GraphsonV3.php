@@ -22,9 +22,6 @@ class GraphsonV3 implements SerializerInterface {
      */
     public static $name = 'GRAPHSON3';
 
-    /**
-     * @var int Value of this serializer. Will be deprecated in TP3
-     */
     public static $mimeType = 'application/json';
 
     /**

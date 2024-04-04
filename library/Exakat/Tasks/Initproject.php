@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ use Exakat\Project;
 use Exakat\Vcs\Vcs;
 use Exakat\Vcs\None;
 use DateTimeImmutable;
+use const STRICT_COMPARISON;
 
 class Initproject extends Tasks {
     public const CONCURENCE = self::ANYTIME;
@@ -109,9 +110,9 @@ class Initproject extends Tasks {
 
                 case 'svn' :
                     $projectName = basename($repositoryURL);
-                    if (in_array($projectName, array('trunk', 'code'))) {
+                    if (in_array($projectName, array('trunk', 'code'), STRICT_COMPARISON)) {
                         $projectName = basename(dirname($repositoryURL));
-                        if (in_array($projectName, array('trunk', 'code'))) {
+                        if (in_array($projectName, array('trunk', 'code'), STRICT_COMPARISON)) {
                             $projectName = basename(dirname($repositoryURL, 2));
                         }
                     }

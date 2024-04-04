@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -35,6 +35,12 @@ class Select extends DSL {
             } elseif ($v === 'id') {
                 $select[] = $k;
                 $by[]     = 'by(id())';
+            } elseif (empty($v)) {
+                $select[] = $k;
+                $by[]     = 'by()';
+            } elseif ($v === 'label') {
+                $select[] = $k;
+                $by[]     = 'by(label)';
             } elseif (in_array($v, self::PROPERTIES, \STRICT_COMPARISON)) {
                 assert(in_array($k, $this->availableLabels, \STRICT_COMPARISON), "No such step as '$k'");
                 // Use a local property

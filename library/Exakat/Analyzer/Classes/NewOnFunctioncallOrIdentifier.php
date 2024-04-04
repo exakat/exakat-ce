@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,22 +26,21 @@ namespace Exakat\Analyzer\Classes;
 use Exakat\Analyzer\Analyzer;
 
 class NewOnFunctioncallOrIdentifier extends Analyzer {
+    protected int $threshold = 10;
+
     public function analyze(): void {
         $mapping = <<<'GREMLIN'
-if ( (it.get().value("fullcode") =~ "\\(" ).getCount() != 0 ) {
-    x2 = 'Newcall';
-} else {
-    x2 = 'Identifier';
-}
+choose( __.out("NEW").hasLabel("Newcall"), 
+	constant("Newcall"),
+	constant("Identifier")
+)
 GREMLIN;
         $storage = array('className()' => 'Newcall',
                          'className'   => 'Identifier');
 
         $this->atomIs('New')
-             ->outIs('NEW')
-             ->atomIs(array('Newcall', 'Newcallname'))
-             ->raw('map{ ' . $mapping . ' }')
-             ->raw('groupCount("gf").cap("gf").sideEffect{ s = it.get().values().sum(); }');
+             ->raw($mapping)
+             ->groupCount();
         $types = $this->rawQuery()->toArray();
 
         if (empty($types)) {
@@ -63,16 +62,18 @@ GREMLIN;
             return;
         }
 
-        $types = array_filter($types, function (int $x) use ($total): bool {
-            return $x > 0 && $x / $total < 0.1;
+        if ($this->threshold > 0 and $this->threshold < 100) {
+            $threshold = $this->threshold / 100 * $total;
+        } else {
+            $threshold = intval($total / 10);
+        }
+        $types = array_filter($types, function (int $x) use ($threshold): bool {
+            return $x > 0 && $x < $threshold;
         });
-        $types = '[' . str_replace('\\', '\\\\', makeList(array_keys($types))) . ']';
 
         $this->atomIs('New')
-             ->outIs('NEW')
-             ->atomIs(array('Newcall', 'Newcallname'))
-             ->raw('sideEffect{ ' . $mapping . ' }')
-             ->raw('filter{ x2 in ' . $types . '}')
+             ->raw($mapping)
+             ->isEqual(array_keys($types))
              ->back('first');
         $this->prepareQuery();
     }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -25,6 +25,9 @@ namespace Exakat\Analyzer\Dump;
 use Exakat\Dump\Dump;
 
 abstract class AnalyzerTable extends AnalyzerDump {
+    // Dumps are made of 2 queries : create table and some inserts.
+    private const MIN_NUMBER_OF_QUERY = 2;
+
     protected int $storageType = self::QUERY_TABLE;
 
     protected array $dumpQueries = array();
@@ -96,7 +99,7 @@ abstract class AnalyzerTable extends AnalyzerDump {
         assert($this->analyzerTable !== 'no analyzer table name', 'No table name for ' . static::class);
         assert($this->analyzerSQLTable !== 'no analyzer sql creation', 'No table name for ' . static::class);
 
-        if (count($this->dumpQueries) >= 2) {
+        if (count($this->dumpQueries) >= self::MIN_NUMBER_OF_QUERY) {
             $this->prepareForDump($this->dumpQueries);
         }
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -303,8 +303,7 @@ class CommandLine extends Config {
                         $this->config[$config] = $args[$id + 1];
                 }
 
-                unset($args[$id]);
-                unset($args[$id + 1]);
+                unset($args[$id], $args[$id + 1]);
             }
         }
 
@@ -327,10 +326,13 @@ class CommandLine extends Config {
                 }
                 $this->config['subcommand'] = $subcommand;
 
+                // This collects the name of the baseline. It is necessary.
                 if (in_array($subcommand, array('remove'), STRICT_COMPARISON)) {
                     $this->config['baseline_id'] = array_shift($args);
+                    assert($this->config['baseline_id'] !== null, 'This commands needs a baseline name');
                 } elseif (in_array($subcommand, array('save'), STRICT_COMPARISON)) {
                     $this->config['baseline_set'] = array_shift($args);
+                    assert($this->config['baseline_set'] !== null, 'This commands needs a baseline name');
                 }
             }
         } else {

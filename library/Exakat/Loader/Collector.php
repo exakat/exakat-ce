@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@
 
 namespace Exakat\Loader;
 
-use Exakat\Tasks\Helpers\Atom;
 use Sqlite3;
 use Exakat\Datastore;
 use Exakat\Tasks\Helpers\AtomInterface;
@@ -35,7 +34,7 @@ class Collector extends Loader {
 
     private Datastore $datastore;
 
-    public function __construct(Sqlite3 $sqlite, Atom $id0, bool $withWs = AtomInterface::WITHOUT_WS) {
+    public function __construct(Sqlite3 $sqlite, AtomInterface $id0, bool $withWs = AtomInterface::WITHOUT_WS) {
         $this->datastore = exakat('datastore');
     }
 

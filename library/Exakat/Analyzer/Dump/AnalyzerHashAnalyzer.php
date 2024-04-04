@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -27,6 +27,9 @@ use Exakat\Dump\Dump;
 use Exakat\Reports\Helpers\Results;
 
 abstract class AnalyzerHashAnalyzer extends AnalyzerDump {
+    // Dumps are made of 3 queries
+    private const MIN_NUMBER_OF_QUERY = 3;
+
     protected int $storageType = self::QUERY_HASH_ANALYZER;
 
     protected array $dumpQueries = array();
@@ -41,7 +44,7 @@ abstract class AnalyzerHashAnalyzer extends AnalyzerDump {
         $chunk = 0;
         foreach ($this->analyzerValues as $values) {
             $values = array_map(array(Sqlite3::class, 'escapeString'), $values);
-            $valuesSQL[] = "(" . makeList($values, "'") . ")";
+            $valuesSQL[] = '(' . makeList($values, "'") . ')';
         }
 
         $chunks = array_chunk($valuesSQL, SQLITE_CHUNK_SIZE);
@@ -57,7 +60,7 @@ abstract class AnalyzerHashAnalyzer extends AnalyzerDump {
     public function execQuery(): int {
         array_unshift($this->dumpQueries, "DELETE FROM hashAnalyzer WHERE analyzer = '{$this->analyzerName}'");
 
-        if (count($this->dumpQueries) >= 3) {
+        if (count($this->dumpQueries) >= self::MIN_NUMBER_OF_QUERY) {
             $this->prepareForDump($this->dumpQueries);
         }
 

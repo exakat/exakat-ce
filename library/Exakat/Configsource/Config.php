@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -59,13 +59,12 @@ abstract class Config {
     }
 
     public function toIni(): string {
-        $ini = array();
-
-        $ini[] = ';Main PHP version for this code.';
-        $ini[] = "phpversion = {$this->options['phpversion']}";
-        $ini[] = '';
-
-        $ini[] = ';Ignored dirs and files, relative to code source root.';
+        $ini = array(
+            ';Main PHP version for this code.',
+            "phpversion = {$this->options['phpversion']}",
+            '',
+            ';Ignored dirs and files, relative to code source root.',
+        );
         foreach ($this->ignore_dirs as $ignore_dir) {
             $ini[] = "ignore_dirs[] = \"$ignore_dir\"";
         }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -121,9 +121,12 @@ class CouldBeFloat extends CouldBeType {
              ->back('result');
         $this->prepareQuery();
 
-        // May also cover if( $arg).,
-        // May also cover coalesce, ternary.
-        // short assignations
+        // class constant type
+        $this->checkConstantType($floatAtoms);
+
+        // @todo May also cover if( $arg).,
+        // @todo May also cover coalesce, ternary.
+        // @todo short assignations
     }
 }
 

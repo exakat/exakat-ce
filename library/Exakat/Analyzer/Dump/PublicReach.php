@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -38,10 +38,9 @@ SQL;
 
     public function analyze(): void {
         // class x
-        $this->atomIs('Methodcall')
-             ->outIs('OBJECT')
-             ->atomIs('This')
+        $this->atomIs('This')
              ->inIs('OBJECT')
+             ->atomIs('Methodcall')
              ->outIs('METHOD')
              ->outIs('NAME')
              ->as('called')
@@ -50,7 +49,9 @@ SQL;
              ->outIs('NAME')
              ->as('caller')
 
-             ->goToClass()
+             ->back('first')
+             ->inIs('DEFINITION')
+             ->atomIs('Class')
              ->as('context')
 
              ->select(array('called'  => 'fullcode',

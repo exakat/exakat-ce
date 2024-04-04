@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -22,12 +22,13 @@
 
 namespace Exakat;
 
-use Exakat\Configsource\{CommandLine, DefaultConfig, DotExakatConfig, DotExakatYamlConfig, EmptyConfig, EnvConfig, ExakatConfig, ProjectConfig, RulesetConfig, Config as Configsource };
-use Exakat\Exceptions\InaptPHPBinary;
-use Exakat\Autoload\AutoloadDev;
-use Exakat\Autoload\AutoloadExt;
 use Phar;
 use Exakat\Helpers\Directive;
+use Exakat\Autoload\AutoloadDev;
+use Exakat\Autoload\AutoloadExt;
+use Exakat\Exceptions\InaptPHPBinary;
+use Exakat\Configsource\{CommandLine, DefaultConfig, DotExakatConfig, DotExakatYamlConfig, EmptyConfig, EnvConfig, ExakatConfig, ProjectConfig, RulesetConfig, Config as Configsource, Webconfig };
+use const STRICT_COMPARISON;
 
 class Config extends Configsource {
     public const PHP_VERSIONS = Phpexec::VERSIONS_COMPACT;
@@ -84,8 +85,7 @@ class Config extends Configsource {
             }
             $this->ext_root      = "{$this->dir_root}/ext";
 
-            assert_options(ASSERT_ACTIVE, 1);
-            assert_options(ASSERT_BAIL, 1);
+			ini_set('assert.active', 1);
 
             error_reporting(E_ALL);
             ini_set('display_errors', '1');
@@ -111,9 +111,19 @@ class Config extends Configsource {
         }
 
         // then read the config from the commandline (if any)
-        $this->commandLineConfig = new CommandLine();
-        $this->commandLineConfig->setArgs($this->argv);
-        $this->commandLineConfig->loadConfig($project);
+        // @todo change that name commandLineConfig
+        if (empty($_GET)) {
+	        $this->commandLineConfig = new CommandLine();
+    	    $this->commandLineConfig->setArgs($this->argv);
+        	$this->commandLineConfig->loadConfig($project);
+        } else {
+	        $this->commandLineConfig = new Webconfig();
+    	    $this->commandLineConfig->setArgs(['command' => 'project', 
+	        										  'p' => 'xxx',
+	        										  'v' => 1,
+	        										  ]);
+        	$this->commandLineConfig->loadConfig($project);
+        }
 
         // Environment values, the one in the server config.
         $this->envConfig = new EnvConfig();
@@ -170,7 +180,7 @@ class Config extends Configsource {
                                      $this->projectConfig      ->toArray(),
                                      $this->dotExakatConfig    ->toArray(), // yaml then ini
                                      $this->envConfig          ->toArray(),
-                                     $this->commandLineConfig  ->toArray()
+                                     $this->commandLineConfig  ->toArray()  // webconfig or commandline
                                      );
 
         // @todo : consider 'onefile' as a separate config, as the others.
@@ -188,8 +198,7 @@ class Config extends Configsource {
 
         if ($this->options['debug'] === true) {
             display("Debug mode\n");
-            assert_options(ASSERT_ACTIVE, 1);
-            assert_options(ASSERT_BAIL, 1);
+			ini_set('assert.active', 1);
 
             error_reporting(E_ALL);
             ini_set('display_errors', '1');
@@ -241,7 +250,7 @@ class Config extends Configsource {
         $exts = glob($this->dir_root . '/library/Exakat/Analyzer/Extensions/Ext*');
         $exts = array_map(function (string $path): string { return strtolower(substr(basename($path, '.php'), 3));}, $exts);
 
-        if (in_array('all', $this->options['php_extensions'])) {
+        if (in_array('all', $this->options['php_extensions'], STRICT_COMPARISON)) {
             $this->options['php_extensions'] = $exts;
         } elseif (in_array('none', $this->options['php_extensions'])) {
             $this->options['php_extensions'] = array();
@@ -336,8 +345,8 @@ TEXT;
     }
 
     private function checkSelf(): void {
-        if (version_compare(PHP_VERSION, '7.4.0') < 0) {
-            throw new InaptPHPBinary('PHP needs to be version 7.4.0 or more to run exakat.(' . PHP_VERSION . ' provided)');
+        if (version_compare(PHP_VERSION, '8.0.0') < 0) {
+            throw new InaptPHPBinary('PHP needs to be version 8.0.0 or more to run exakat.(' . PHP_VERSION . ' provided)');
         }
         $extensions = array('curl', 'mbstring', 'sqlite3', 'hash', 'json');
 
@@ -357,9 +366,7 @@ TEXT;
         $return = $this->argv;
 
         $id = array_search('-remote', $return);
-        unset($return[$id]);
-        unset($return[$id + 1]);
-        unset($return[0]);
+        unset($return[$id], $return[$id + 1], $return[0]);
         return json_encode(array_values($return));
     }
 

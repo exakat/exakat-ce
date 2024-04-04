@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@ class NoParenthesisForLanguageConstruct extends Analyzer {
         // throw
         // return
         // print, echo
-        $this->atomIs(array('Echo', 'Print', 'Include', 'Throw', 'Return'))
-             ->outIs(array('ARGUMENT', 'THROW', 'RETURN'))
+        $this->atomIs(array('Echo', 'Print', 'Include', 'Throw', 'Return', 'Yield', 'Yieldfrom'))
+             ->outIs(array('ARGUMENT', 'THROW', 'RETURN', 'YIELD'))
              ->atomIs('Parenthesis')
              ->back('first');
         $this->prepareQuery();

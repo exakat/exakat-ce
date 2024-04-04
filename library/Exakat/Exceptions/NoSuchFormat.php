@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,8 +23,11 @@
 
 namespace Exakat\Exceptions;
 
-class NoSuchFormat extends \RuntimeException {
-    public function __construct(string $requested, array $formats, int $code = 0, \Exception $previous = null) {
+use Exception;
+use RuntimeException;
+
+class NoSuchFormat extends RuntimeException {
+    public function __construct(string $requested, array $formats, int $code = 0, ?Exception $previous = null) {
         parent::__construct("Format '" . $requested . "' doesn't exist. Choose among : " . implode(', ', $formats), $code, $previous);
     }
 }

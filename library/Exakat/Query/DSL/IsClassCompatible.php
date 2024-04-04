@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,15 +23,22 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Exceptions\WrongNumberOfArguments;
+
 class IsClassCompatible extends DSL {
     public function run(): Command {
-        if (func_num_args() === 2) {
-            list($fnp, $typehint) = func_get_args();
-        } elseif (func_num_args() === 1) {
-            list($fnp) = func_get_args();
-            $typehint = '"one"';
-        } else {
-            assert(false, 'Wrong number of argument for ' . __METHOD__ . '. 2 is expected, ' . func_num_args() . ' provided');
+        switch (func_num_args()) {
+            case 2:
+                list($fnp, $typehint) = func_get_args();
+                break;
+
+            case 1:
+                list($fnp) = func_get_args();
+                $typehint = 'one';
+                break;
+
+            default:
+                throw new WrongNumberOfArguments(__METHOD__, func_num_args(), 1, 2);
         }
 
         // ONE and OR : one is sufficient

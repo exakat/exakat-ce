@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ abstract class Driver {
     public const DRIVERS = array('Serial', 'Parallel');
 
     protected const LOAD_CHUNK          = 100000;
-    protected const LOAD_CHUNK_LINK     = 200000;
+    protected const LOAD_CHUNK_LINK     = 100000;
     protected const LOAD_CHUNK_PROPERTY = 100000;
 
     protected array $info = array();
@@ -60,7 +60,7 @@ abstract class Driver {
             display('Loading with Serial (Fallback)');
             return new Serial($tmpPath, $installationPath, $graphdb, $log);
         } elseif (class_exists($class)) {
-            display('Loading with '.$class);
+            display('Loading with ' . $class);
             return new $class($tmpPath, $installationPath, $graphdb, $log, $max_parallel);
         } else {
             display('Loading with Serial (Default)');

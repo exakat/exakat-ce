@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy Ð Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy - Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -50,23 +50,24 @@ use Exakat\Tasks\Helpers\IsStub;
 use Exakat\Tasks\Helpers\IsExt;
 use Exakat\Tasks\Helpers\IsRead;
 use Exakat\Tasks\Helpers\IsModified;
+use Exakat\Tasks\Helpers\Links;
 use Exakat\Tasks\Helpers\Php;
 use Exakat\Tasks\Helpers\FunctionContext;
 use Exakat\Tasks\Helpers\Sequences;
+use Exakat\Tasks\Helpers\Token;
 use Exakat\Tasks\Helpers\NestedCollector;
 use Exakat\Tasks\Helpers\ContextVariables;
+use Exakat\Tasks\Helpers\VariablesUsageContext;
 use Exakat\Tasks\Helpers\ContextMethods;
 use Exakat\Tasks\Helpers\ContextProperties;
 use Exakat\Tasks\Helpers\ClassTraitContext;
 use Exakat\Tasks\Helpers\AnonymousNames;
 use ProgressBar\Manager as ProgressBar;
-use Exakat\Loader\Collector;
 use Exakat\Log\Timing as TimingLog;
 use Exakat\Fileset\{All, Filenames, FileExtensions, IgnoreDirs};
 use Exakat\Analyzer\Analyzer;
 use Sqlite3;
 use Exakat\Log;
-use Exakat\Tasks\Helpers\Atom;
 use Exakat\Loader\Loader;
 use Exakat\Phpexec;
 
@@ -78,7 +79,8 @@ class Load extends Tasks {
 
     // @todo : Move this outside the code, to handle PHP versions
     // @todo hanlde PHP version of introduction for true, false, etc...
-    private $SCALAR_TYPE = array('int',
+    // @todo : rename this, from SCALAR_TYPE to something better
+    private array $SCALAR_TYPE = array('int',
                                  'bool',
                                  'void',
                                  'float',
@@ -94,7 +96,7 @@ class Load extends Tasks {
                                  'never',
                                  );
 
-    private $PHP_SUPERGLOBALS = array('$GLOBALS',
+    private array $PHP_SUPERGLOBALS = array('$GLOBALS',
                                       '$_SERVER',
                                       '$_GET',
                                       '$_POST',
@@ -116,7 +118,7 @@ class Load extends Tasks {
     private array $phpKeywords  = array();
 
     private Phpexec $php;
-    private ?Loader $loader;
+    private Loader $loader;
 
     private bool $debug = false;
 
@@ -131,19 +133,23 @@ class Load extends Tasks {
     private Fullnspaths $uses;
     private string $filename;
 
-    private array $links   = array();
+    private Links $links;
     private array $relicat = array();
-    private int    $minId  = \PHP_INT_MAX;
+    private int   $minId   = \PHP_INT_MAX;
 
-    private Sequences $sequences;
-    private Atom      $sequence;
+    private Sequences         $sequences;
+    private AtomInterface     $sequence;
+    private ?AtomInterface    $previous = null;
+    private array             $previousStack = array();
 
     private FunctionContext   $currentFunction;
     private ContextVariables  $currentVariables;
+    private VariablesUsageContext  $variableUsages;
     private ClassTraitContext $currentClassTrait;
     private ContextProperties $currentProperties;
     private NestedCollector   $cases;
     private ContextMethods    $currentMethods;
+    private bool              $currentReadonly = false;
 
     private bool $withWs = AtomInterface::WITHOUT_WS;
 
@@ -234,11 +240,13 @@ class Load extends Tasks {
 
     private array $expressions         = array();
     private array $atoms               = array();
-    private array $argumentsId         = array();
+    private array $labels              = array();
 
     private array $processing = array();
 
     private array $plugins = array();
+
+    private array $scalarTypes = array();
 
     private array $stats = array(   'loc'			=> 0,
                                     'totalLoc'  	=> 0,
@@ -260,6 +268,8 @@ class Load extends Tasks {
         );
 
         $this->atomGroup = new AtomGroup();
+
+        $this->links     = new Links();
 
         $this->contexts  = new Context();
         $this->currentFunction = new FunctionContext();
@@ -303,6 +313,7 @@ class Load extends Tasks {
         $this->sequences = new Sequences();
 
         $this->currentVariables = new ContextVariables();
+        $this->variableUsages = new VariablesUsageContext($this->links);
 
         $this->precedence = Precedence::getInstance($this->phptokens::class);
 
@@ -582,7 +593,7 @@ $this->phptokens::T_YIELD,
     }
 
     public function __destruct() {
-        $this->loader        = null;
+        unset($this->loader);
 
         if (file_exists("{$this->config->projects_root}/projects/.exakat/calls.sqlite")) {
             unlink("{$this->config->projects_root}/projects/.exakat/calls.sqlite");
@@ -661,7 +672,7 @@ $this->phptokens::T_YIELD,
         } elseif ($dirName = $this->config->dirname) {
             // Use this to make it phar compatible
             $dirName = realpath($dirName);
-            if (!is_dir($dirName)) {
+            if ($dirName === false || !is_dir($dirName)) {
                 throw new MustBeADir($dirName);
             }
             $this->processDir($dirName);
@@ -697,8 +708,6 @@ $this->phptokens::T_YIELD,
             throw new NoFileToProcess((string) $project, "No file to load.\n");
         }
 
-        $stubs = $this->config->stubs;
-
         $this->gremlin = Graph::getConnexion($this->config, $this->config->gremlin);
 
         $nbTokens = $this->runProjectCore($files);
@@ -710,10 +719,8 @@ $this->phptokens::T_YIELD,
     private function runProjectCore(array $files): int {
         $this->callsDatabase = new Sqlite3($this->sqliteLocation);
 
-        $loader = Loader::getInstance($this->config->loader, $this->callsDatabase, $this->id0, $this->withWs);
         display('Loading with ' . $this->config->loader . "\n");
-
-        $this->loader = $loader;
+        $this->loader = Loader::getInstance($this->config->loader, $this->callsDatabase, $this->id0, $this->withWs);
         $this->calls = new Calls($this->callsDatabase);
 
         $version = $this->php->getVersion();
@@ -721,7 +728,7 @@ $this->phptokens::T_YIELD,
 
         $nbTokens = 0;
         if ($this->config->verbose && !$this->config->quiet) {
-            $progressBar = new Progressbar(0, count($files), $this->config->screen_cols);
+            $progressBar = new ProgressBar(0, count($files), $this->config->screen_cols);
         }
 
         foreach ($files as $file) {
@@ -762,9 +769,8 @@ $this->phptokens::T_YIELD,
         $files = $set->getFiles();
         $ignoredFiles = $set->getIgnored();
 
-        $clientClass = Loader::getInstance($this->config->loader, $this->callsDatabase, $this->id0, $this->withWs);
         $this->calls = new Calls($this->callsDatabase);
-        $this->loader = new $clientClass($this->callsDatabase, $this->id0);
+        $this->loader = Loader::getInstance($this->config->loader, $this->callsDatabase, $this->id0, $this->withWs);
 
         $nbTokens = 0;
         foreach ($files as $file) {
@@ -778,7 +784,7 @@ $this->phptokens::T_YIELD,
         }
         $this->loader->finalize($this->relicat);
 
-        $this->loader = new Collector($this->callsDatabase, $this->id0);
+        $this->loader = Loader::getInstance('Collector', $this->callsDatabase, $this->id0, $this->withWs);
         $stats = $this->stats;
         foreach ($ignoredFiles as $file) {
             try {
@@ -796,16 +802,18 @@ $this->phptokens::T_YIELD,
 
     private function reset(): void {
         $this->atoms   = array();
-        $this->links   = array();
+        $this->links   = new Links();
         $this->minId  = \PHP_INT_MAX;
 
         $this->contexts    = new Context();
         $this->expressions = array();
+        $this->labels      = array();
         $this->uses        = new Fullnspaths();
 
         $this->currentFunction         = new FunctionContext();
         $this->currentClassTrait       = new ClassTraitContext();
         $this->currentVariables        = new ContextVariables();
+        $this->variableUsages 		   = new VariablesUsageContext($this->links);
 
         $this->tokens                  = array();
         $this->phpDocs                 = array();
@@ -827,7 +835,7 @@ $this->phptokens::T_YIELD,
         $this->atoms          = array();
         $this->minId         = \PHP_INT_MAX;
 
-        $this->loader = new $clientClass($this->callsDatabase, $this->id0);
+        $this->loader = Loader::getInstance($this->config->loader, $this->callsDatabase, $this->id0, $this->withWs);
     }
 
     public function finishDiff(): void {
@@ -884,7 +892,7 @@ $this->phptokens::T_YIELD,
         $tokens = $this->php->getTokenFromFile($fullpath);
         $log['token_initial'] = count($tokens);
 
-        if (count($tokens) < 3) {
+        if (count($tokens) < MINIMAL_NUMBER_OF_TOKEN_PER_FILE) {
             throw new NoFileToProcess($filename, 'Only ' . count($tokens) . ' tokens');
         }
 
@@ -898,14 +906,14 @@ $this->phptokens::T_YIELD,
                 switch ($t[0]) {
                     case $this->phptokens::T_WHITESPACE:
                         $line += substr_count($t[1], "\n");
-                        $ws   .= $t[1];
+                        $ws->addWs($t[1]);
                         break;
 
                     case $this->phptokens::T_COMMENT :
                         $c        = substr_count($t[1], "\n");
                         $line     += $c;
                         $comments += $c;
-                        $ws       .= $t[1];
+                        $ws->addWs($t[1]);
                         break;
 
                     case $this->phptokens::T_BAD_CHARACTER :
@@ -915,16 +923,18 @@ $this->phptokens::T_YIELD,
                     case $this->phptokens::T_DOC_COMMENT:
                         $t[] = $position;
                         $t[] = '';
-                        $ws  = &$t[4];
+                        $t   = new Token(...$t);
+                        $ws  = $t;
                         $this->tokens[] = $t;
                         $comments += substr_count($t[1], "\n") + 1;
                         break;
 
                     default :
-                        $t[] = $position;
-                        $t[] = '';
-                        $ws  = &$t[4];
+                        $t[]  = $position;
+                        $t[]  = '';
                         $line = $t[2];
+                        $t    = new Token(...$t);
+                        $ws   = $t;
                         $this->tokens[] = $t;
                         ++$total;
                 }
@@ -935,7 +945,8 @@ $this->phptokens::T_YIELD,
                                $position,
                                '',
                                );
-                $ws             = &$token[4];
+                $token = new Token(...$token);
+                $ws    = $token;
                 $this->tokens[] = $token;
                 ++$total;
             } else {
@@ -945,11 +956,11 @@ $this->phptokens::T_YIELD,
         $this->stats['loc'] -= $comments;
 
         // Final token
-        $this->tokens[] = array(0 => $this->phptokens::T_END,
+        $this->tokens[] = new Token(...array(0 => $this->phptokens::T_END,
                                 1 => '/* END */',
                                 2 => $line,
                                 3 => 0,
-                                4 => '');
+                                4 => ''));
         $this->stats['tokens'] += count($tokens);
         unset($tokens);
 
@@ -978,20 +989,24 @@ $this->phptokens::T_YIELD,
             $sequence = $this->sequence;
             $sequence->ws->separators[] = '';
 
-            $this->addLink($id1, $sequence, 'FILE');
+            $this->links->addLink($id1, $sequence, 'FILE');
         } catch (LoadError $e) {
             if ($compileCheck === self::COMPILE_CHECK) {
-                $this->log->log('Can\'t process file \'' . $this->filename . '\' during load (\'' . $this->tokens[$this->id][0] . '\', line \'' . $this->tokens[$this->id][2] . '\'). Ignoring' . PHP_EOL . $e->getMessage() . PHP_EOL);
+                $this->log->log('Can\'t process file \'' . $this->filename . '\' during load (\'' . $this->tokens[$this->id]->token . '\', line \'' . $this->tokens[$this->id]->line . '\'). Ignoring' . PHP_EOL . $e->getMessage() . PHP_EOL);
             }
             $this->reset();
             $this->calls->reset();
             throw new NoFileToProcess($filename, 'empty (1)', 0, $e);
+        } catch (\Throwable $e) {
+            if ($this->debug) {
+                print_r($e->getMessage());
+            }
         } finally {
             try {
                 $this->checkTokens($filename);
                 $this->calls->save();
             } catch (LoadError $e) {
-                $this->log->log('Can\'t process file \'' . $this->filename . '\' during load (finally) (\'' . $this->tokens[$this->id][0] . '\', line \'' . $this->tokens[$this->id][2] . '\'). Ignoring' . PHP_EOL . $e->getMessage() . PHP_EOL);
+                $this->log->log('Can\'t process file \'' . $this->filename . '\' during load (finally) (\'' . $this->tokens[$this->id]->token . '\', line \'' . $this->tokens[$this->id]->line . '\'). Ignoring' . PHP_EOL . $e->getMessage() . PHP_EOL);
                 $this->reset();
                 $this->calls->reset();
                 throw new NoFileToProcess($filename, 'empty (2) : ' . $e->getMessage(), 0, $e);
@@ -1000,12 +1015,14 @@ $this->phptokens::T_YIELD,
             $this->stats['totalLoc'] += $line;
             $this->stats['loc'] += $line;
         }
+        
+        $this->variableUsages->finishCycle();
 
         $timer->end();
         $load = $timer->duration(Timer::MS);
 
         $atoms = count($this->atoms);
-        $links = count($this->links);
+        $links = $this->links->count();
 
         $timer = new Timer();
         $this->saveFiles();
@@ -1022,12 +1039,12 @@ $this->phptokens::T_YIELD,
 
         if ($this->nextIs(array($this->phptokens::T_END), 0)          ||
             !isset($this->processing[ $this->tokens[$this->id][0] ])) {
-            display("Can't process file '$this->filename' during load ('{$this->tokens[$this->id][0]}', line {$this->tokens[$this->id][2]}), token {$this->tokens[$this->id][0]}) : {$this->tokens[$this->id][1]}). Ignoring\n");
-            $this->log->log("Can't process file '$this->filename' during load ('{$this->tokens[$this->id][0]}', line {$this->tokens[$this->id][2]}). Ignoring\n");
+            display("Can't process file '$this->filename' during load ('{$this->tokens[$this->id]->token}', line {$this->tokens[$this->id]->line}), token {$this->tokens[$this->id]->token}) : {$this->tokens[$this->id]->code}). Ignoring\n");
+            $this->log->log("Can't process file '$this->filename' during load ('{$this->tokens[$this->id]->token}', line {$this->tokens[$this->id]->line}). Ignoring\n");
 
             throw new LoadError('Processing error (processNext end)');
         }
-        $method = $this->processing[ $this->tokens[$this->id][0] ];
+        $method = $this->processing[ $this->tokens[$this->id]->token ];
 
         if ($this->debug === true) {
             print "  $method in" . PHP_EOL;
@@ -1054,14 +1071,21 @@ $this->phptokens::T_YIELD,
 
     private function processColon(): AtomInterface {
         $current = $this->id;
-        --$this->id;
-        $tag = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
+
+        if (isset($this->labels[$this->tokens[$this->id - 1]->code])) {
+            $tag = $this->labels[$this->tokens[$this->id - 1]->code];
+        } else {
+            --$this->id;
+            $tag = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
+            $this->labels[$this->tokens[$this->id]->code] = $tag;
+        }
+
         $this->moveToNext();
 
         $label = $this->addAtom('Gotolabel', $this->id);
-        $this->addLink($label, $tag, 'GOTOLABEL');
+        $this->links->addLink($label, $tag, 'GOTOLABEL');
         $label->fullcode = $tag->fullcode . ' :';
-        $label->ws->opening = $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
+        $label->ws->opening = $this->tokens[$current + 1]->toWs();
 
         if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
             $class = '\global';
@@ -1070,8 +1094,6 @@ $this->phptokens::T_YIELD,
         }
 
         $method = $this->currentFunction->currentFullnspath();
-
-        $this->calls->addDefinition(Calls::GOTO, $class . '::' . $method . '..' . $tag->fullcode, $label);
 
         $this->addToSequence($label);
         $this->sequence->ws->separators[] = '';
@@ -1088,27 +1110,27 @@ $this->phptokens::T_YIELD,
         $rank = -1;
         $elements = array();
 
-        if ($this->tokens[$current][0] === $this->phptokens::T_QUOTE) {
+        if ($this->tokens[$current]->token === $this->phptokens::T_QUOTE) {
             $string = $this->addAtom('String', $current);
             $finalToken = $this->phptokens::T_QUOTE;
             $closeQuote = '"';
             $type = $this->phptokens::T_QUOTE;
 
-            $openQuote = $this->tokens[$this->id][1];
-            if (mb_strtolower($this->tokens[$current][1][0]) === 'b') {
-                $string->binaryString = $openQuote[0];
-                $openQuote = '"';
+            $openQuote = $this->tokens[$this->id]->code[0];
+            if (mb_strtolower($openQuote) === 'b') {
+                $string->binaryString = $openQuote;
+                $openQuote = $this->tokens[$this->id]->code[1];
             }
-        } elseif ($this->tokens[$current][0] === $this->phptokens::T_BACKTICK) {
+        } elseif ($this->tokens[$current]->token === $this->phptokens::T_BACKTICK) {
             $string = $this->addAtom('Shell', $current);
             $finalToken = $this->phptokens::T_BACKTICK;
             $openQuote = '`';
             $closeQuote = '`';
             $type = $this->phptokens::T_BACKTICK;
-        } elseif ($this->tokens[$current][0] === $this->phptokens::T_START_HEREDOC) {
+        } elseif ($this->tokens[$current]->token === $this->phptokens::T_START_HEREDOC) {
             $string = $this->addAtom('Heredoc', $current);
             $finalToken = $this->phptokens::T_END_HEREDOC;
-            $openQuote = $this->tokens[$this->id][1];
+            $openQuote = $this->tokens[$this->id]->code;
             if (strtolower($openQuote[0]) === 'b') {
                 $string->binaryString = $openQuote[0];
                 $openQuote = substr($openQuote, 1);
@@ -1118,14 +1140,15 @@ $this->phptokens::T_YIELD,
 
             $type = $this->phptokens::T_START_HEREDOC;
         } else {
-            throw new LoadError(__METHOD__ . ' : unsupported type of open quote : ' . $this->tokens[$current][0]);
+            throw new LoadError(__METHOD__ . ' : unsupported type of open quote : ' . $this->tokens[$current]->token);
         }
 
         // Set default, in case the whole loop is skipped
         $string->noDelimiter = '';
         $string->delimiter   = '';
+        $previous = null;
 
-        while ($this->tokens[$this->id + 1][0] !== $finalToken) {
+        while ($this->tokens[$this->id + 1]->token !== $finalToken) {
             $currentVariable = $this->id + 1;
             if ($this->nextIs(array($this->phptokens::T_CURLY_OPEN))) {
                 $open = $this->id + 1;
@@ -1138,8 +1161,8 @@ $this->phptokens::T_YIELD,
                 $this->popExpression();
 
                 $part->enclosing = self::ENCLOSING;
-                $part->fullcode  = $this->tokens[$open][1] . $part->fullcode . '}';
-                $part->token     = $this->getToken($this->tokens[$currentVariable][0]);
+                $part->fullcode  = $this->tokens[$open]->code . $part->fullcode . '}';
+                $part->token     = $this->getToken($this->tokens[$currentVariable]->token);
                 $part->bracket   = self::BRACKET;
 
                 $this->pushExpression($part);
@@ -1149,14 +1172,14 @@ $this->phptokens::T_YIELD,
                 $part = $this->processDollarCurly();
 
                 $part->enclosing = self::ENCLOSING;
-                $part->token     = $this->getToken($this->tokens[$currentVariable][0]);
+                $part->token     = $this->getToken($this->tokens[$currentVariable]->token);
                 $this->pushExpression($part);
 
                 $elements[] = $part;
             } elseif ($this->nextIs(array($this->phptokens::T_VARIABLE))) {
-                if ($this->tokens[$this->id + 1][1] === '$this') {
+                if ($this->tokens[$this->id + 1]->code === '$this') {
                     $atom = 'This';
-                } elseif (in_array($this->tokens[$this->id + 1][1], $this->PHP_SUPERGLOBALS, STRICT_COMPARISON)) {
+                } elseif (in_array($this->tokens[$this->id + 1]->code, $this->PHP_SUPERGLOBALS, STRICT_COMPARISON)) {
                     $atom = 'Phpvariable';
                 } elseif ($this->nextIs(array($this->phptokens::T_OBJECT_OPERATOR,
                                               $this->phptokens::T_NULLSAFE_OBJECT_OPERATOR), 2)) {
@@ -1168,7 +1191,8 @@ $this->phptokens::T_YIELD,
                 }
                 $this->moveToNext();
                 $variable = $this->processSingle($atom);
-                $variable->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $this->variableUsages->followup($variable);
+                $variable->ws->opening = $this->tokens[$this->id]->toWs();
 
                 if ($atom === 'This' && ($class = $this->currentClassTrait->getCurrentForThis())) {
                     $variable->fullnspath = $class->fullnspath;
@@ -1180,22 +1204,22 @@ $this->phptokens::T_YIELD,
                                         ))) {
                     $this->moveToNext();
                     $property = $this->addAtom('Member', $this->id);
-                    $property->ws->operator = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $property->ws->operator = $this->tokens[$this->id]->toWs();
 
-                    $propertyName = $this->processNextAsIdentifier();
+                    $propertyName = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
 
-                    $property->fullcode  = "{$variable->fullcode}->{$propertyName->fullcode}";
+                    $property->fullcode  = $variable->fullcode . $property->ws->operator . $propertyName->fullcode;
                     $property->enclosing = self::NO_ENCLOSING;
 
-                    $this->addLink($property, $variable, 'OBJECT');
-                    $this->addLink($property, $propertyName, 'MEMBER');
+                    $this->links->addLink($property, $variable, 'OBJECT');
+                    $this->links->addLink($property, $propertyName, 'MEMBER');
                     $this->runPlugins($property, array('OBJECT' => $variable,
                                                        'MEMBER' => $propertyName,
                                                        ));
 
                     if ($variable->atom === 'This' &&
                         $propertyName->token   === 'T_STRING') {
-                        $this->calls->addCall(Calls::PROPERTY, "{$variable->fullnspath}::{$propertyName->code}", $property);
+                        $this->calls->addCall(Calls::PROPERTY, $variable->fullnspath . '::' . $propertyName->code, $property);
                         $this->currentProperties->addCall($propertyName->code, $property);
                     }
 
@@ -1205,7 +1229,7 @@ $this->phptokens::T_YIELD,
                 } elseif ($this->nextIs(array($this->phptokens::T_OPEN_BRACKET))) {
                     $this->moveToNext(); // Skip $a
                     $array = $this->addAtom('Array', $this->id);
-                    $array->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $array->ws->opening = $this->tokens[$this->id]->toWs();
                     $this->moveToNext(); // Skip [
 
                     if ($this->nextIs(array($this->phptokens::T_NUM_STRING), 0)) {
@@ -1213,10 +1237,10 @@ $this->phptokens::T_YIELD,
                         $this->runPlugins($index);
                     } elseif ($this->nextIs(array($this->phptokens::T_MINUS), 0)) {
                         $this->moveToNext();
-                        if ($this->tokens[$this->id][1][0] === '0') {
+                        if ($this->tokens[$this->id]->code[0] === '0') {
                             $index            = $this->processSingle('String');
-                            $index->code      = "-{$index->code}";
-                            $index->fullcode  = "-{$index->fullcode}";
+                            $index->code      = '-' . $index->code;
+                            $index->fullcode  = '-' . $index->fullcode;
                         } else {
                             $index            = $this->processSingle('Integer');
                             $index->code      = (string) (-1 * $index->code);
@@ -1230,16 +1254,16 @@ $this->phptokens::T_YIELD,
                         $index = $this->processVariable();
                         $this->popExpression();
                     } else {
-                        throw new UnknownCase('Couldn\'t read that token inside quotes : ' . $this->tokens[$this->id][0]);
+                        throw new UnknownCase('Couldn\'t read that token inside quotes : ' . $this->tokens[$this->id]->token);
                     }
                     $this->moveToNext(); // Skip ]
-                    $array->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $array->ws->closing = $this->tokens[$this->id]->toWs();
 
-                    $array->fullcode  = "{$variable->fullcode}[{$index->fullcode}]";
+                    $array->fullcode  = $variable->fullcode . '[' . $index->fullcode . ']';
                     $array->enclosing = self::NO_ENCLOSING;
 
-                    $this->addLink($array, $variable, 'VARIABLE');
-                    $this->addLink($array, $index, 'INDEX');
+                    $this->links->addLink($array, $variable, 'VARIABLE');
+                    $this->links->addLink($array, $index, 'INDEX');
                     $this->runPlugins($array, array('VARIABLE' => $variable,
                                                     'INDEX'    => $index,
                                                      ));
@@ -1266,12 +1290,14 @@ $this->phptokens::T_YIELD,
             $fullcode[] = $part->fullcode;
             $elements[] = $part;
 
-            $this->addLink($string, $part, 'CONCAT');
+            $this->links->addLink($string, $part, 'CONCAT');
+            $this->addNextLink($previous, $part);
+            $previous = $part;
         }
 
         if ($type === $this->phptokens::T_START_HEREDOC) {
             /*
-            This might be a PHP 7 artefact. Keep it here until checked.
+            @todo This might be a PHP 7 artefact. Keep it here until checked.
             if (!empty($elements)) {
                 // This is the last part
                 $part = array_pop($elements);
@@ -1281,7 +1307,7 @@ $this->phptokens::T_YIELD,
                 $elements[]        = $part;
             }*/
             // Get the closing quote for flexibility
-            $closeQuote = $this->tokens[$this->id + 1][1];
+            $closeQuote = $this->tokens[$this->id + 1]->code;
             if (trim($closeQuote) !== $closeQuote) {
                 $string->flexible = self::FLEXIBLE;
             }
@@ -1294,7 +1320,7 @@ $this->phptokens::T_YIELD,
         $string->count       = $rank + 1;
 
         $string->ws->opening = $openQuote;
-        $string->ws->closing = $closeQuote . $this->tokens[$this->id][4];
+        $string->ws->closing = $closeQuote . $this->tokens[$this->id]->ws;
 
         if ($type === $this->phptokens::T_START_HEREDOC) {
             $string->delimiter = trim($closeQuote);
@@ -1325,12 +1351,12 @@ $this->phptokens::T_YIELD,
         $this->moveToNext(); // Skip }
 
         $this->popExpression();
-        $this->addLink($variable, $name, 'NAME');
+        $this->links->addLink($variable, $name, 'NAME');
 
         $variable->fullcode  = '${' . $name->fullcode . '}';
         $variable->enclosing = self::ENCLOSING;
-        $variable->ws->opening = $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
-        $variable->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $variable->ws->opening = $this->tokens[$current + 1]->toWs();
+        $variable->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->runPlugins($variable, array('NAME' => $name));
 
@@ -1342,12 +1368,12 @@ $this->phptokens::T_YIELD,
     private function processTry(): AtomInterface {
         $current = $this->id;
         $try = $this->addAtom('Try', $current);
-        $try->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $try->ws->opening = $this->tokens[$this->id]->toWs();
 
         $block = $this->processFollowingBlock(array($this->phptokens::T_CLOSE_CURLY));
         $try->ws->closing = '';
 
-        $this->addLink($try, $block, 'BLOCK');
+        $this->links->addLink($try, $block, 'BLOCK');
         $extras = array('BLOCK' => $block);
 
         $rank = 0;
@@ -1362,23 +1388,25 @@ $this->phptokens::T_YIELD,
             $catchFullcode = array();
             $extrasCatch = array();
             $rankCatch = -1;
-            $catch->ws->opening = $this->tokens[$this->id - 1][1] . $this->tokens[$this->id - 1][4] .
-                                  $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $catch->ws->opening = $this->tokens[$this->id - 1]->toWs() .
+                                  $this->tokens[$this->id]->toWs();
 
             // processing the typehint (including multiple types)
             $rankClass = -1;
             while (!$this->nextIs(array($this->phptokens::T_VARIABLE,
                                         $this->phptokens::T_CLOSE_PARENTHESIS))) {
                 $class = $this->processOneNsname();
-                $this->addLink($catch, $class, 'CLASS');
+                $this->links->addLink($catch, $class, 'CLASS');
                 $class->rank = ++$rankClass;
 
                 $this->calls->addCall(Calls::A_CLASS, $class->fullnspath, $class);
                 $catchFullcode[] = $class->fullcode;
                 $extrasCatch['CLASS' . $rankCatch] = $class;
 
+                $this->links->addLink($this->currentFunction->current(), $class, 'CAUGHT');
+
                 if ($this->nextIs(array($this->phptokens::T_OR))) {
-                    $catch->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                    $catch->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
                     $this->moveToNext(); // Skip |
                 } else {
                     $catch->ws->separators[] = '';
@@ -1393,7 +1421,7 @@ $this->phptokens::T_YIELD,
                 $variable = $this->processNext();
 
                 $this->popExpression();
-                $this->addLink($catch, $variable, 'VARIABLE');
+                $this->links->addLink($catch, $variable, 'VARIABLE');
                 $extrasCatch['VARIABLE'] = $variable;
 
                 $variableFullcode = $variable->fullcode;
@@ -1403,19 +1431,19 @@ $this->phptokens::T_YIELD,
 
             // Skip )
             $this->moveToNext();
-            $catch->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $catch->ws->toblock = $this->tokens[$this->id]->toWs();
 
             // Skip }
             $blockCatch = $this->processFollowingBlock(array($this->phptokens::T_CLOSE_CURLY));
             $catch->ws->closing = '';
 
-            $this->addLink($catch, $blockCatch, 'BLOCK');
+            $this->links->addLink($catch, $blockCatch, 'BLOCK');
             $extrasCatch['BLOCK'] = $blockCatch;
 
-            $catch->fullcode = $this->tokens[$catchId][1] . ' (' . $catchFullcode . ' ' . $variableFullcode . ')' . static::FULLCODE_BLOCK;
+            $catch->fullcode = $this->tokens[$catchId]->code . ' (' . $catchFullcode . ' ' . $variableFullcode . ')' . static::FULLCODE_BLOCK;
             $catch->rank     = ++$rank;
 
-            $this->addLink($try, $catch, 'CATCH');
+            $this->links->addLink($try, $catch, 'CATCH');
             $fullcode[] = $catch->fullcode;
 
             $extras['CATCH' . $rank] = $catch;
@@ -1427,10 +1455,10 @@ $this->phptokens::T_YIELD,
         if ($this->nextIs(array($this->phptokens::T_FINALLY))) {
             $finally = $this->processFinally();
 
-            $this->addLink($try, $finally, 'FINALLY');
+            $this->links->addLink($try, $finally, 'FINALLY');
         }
 
-        $try->fullcode = $this->tokens[$current][1] . static::FULLCODE_BLOCK . implode('', $fullcode) . ( isset($finally) ? $finally->fullcode : '');
+        $try->fullcode = $this->tokens[$current]->code . static::FULLCODE_BLOCK . implode('', $fullcode) . ( isset($finally) ? $finally->fullcode : '');
         $try->count    = $rank;
 
         $this->addToSequence($try);
@@ -1443,14 +1471,14 @@ $this->phptokens::T_YIELD,
     private function processFinally(): AtomInterface {
         $finallyId = $this->id + 1;
         $finally = $this->addAtom('Finally', $finallyId);
-        $finally->ws->opening = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $finally->ws->opening = $this->tokens[$this->id + 1]->toWs();
 
         $this->moveToNext();
         $finallyBlock = $this->processFollowingBlock(array($this->phptokens::T_CLOSE_CURLY));
-        $this->addLink($finally, $finallyBlock, 'BLOCK');
+        $this->links->addLink($finally, $finallyBlock, 'BLOCK');
 
         $finally->ws->closing = '';
-        $finally->fullcode = $this->tokens[$finallyId][1] . static::FULLCODE_BLOCK;
+        $finally->fullcode = $this->tokens[$finallyId]->code . static::FULLCODE_BLOCK;
 
         $this->runPlugins($finally, array('BLOCK' => $finallyBlock));
 
@@ -1459,6 +1487,11 @@ $this->phptokens::T_YIELD,
 
     private function processFn(): AtomInterface {
         $current = $this->id;
+
+        $this->variableUsages->nest();
+        if ($this->currentClassTrait->getCurrent() !== null) {
+               $this->variableUsages->importFromPrevious('$this');
+        }
 
         if ($this->nextIs(array($this->phptokens::T_AND,
                                 $this->phptokens::T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG))) {
@@ -1476,41 +1509,42 @@ $this->phptokens::T_YIELD,
 
         $fn              = $this->processParameters($atom);
         $fn->reference   = $reference;
-        $fn->code        = $this->tokens[$current][1];
-        $fn->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4] .
-                           $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
+        $fn->code        = $this->tokens[$current]->code;
+        $fn->ws->opening = $this->tokens[$current]->toWs() .
+                           $this->tokens[$current + 1]->toWs();
 
         // Process return type
-        $fn->ws->endargs = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $fn->ws->endargs = $this->tokens[$this->id]->toWs();
         $returnTypeFullcode = $this->processTypehint($fn);
 
-        $fn->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $fn->ws->toblock = $this->tokens[$this->id + 1]->toWs();
         $this->moveToNext($this->phptokens::T_DOUBLE_ARROW); // skip =>
 
         $this->contexts->nestContext(Context::CONTEXT_FUNCTION);
         $this->contexts->toggleContext(Context::CONTEXT_FUNCTION);
 
         // arrowfunction may be static
-        if ($this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
+        if ($this->tokens[$current - 1]->token === $this->phptokens::T_STATIC) {
             $this->currentClassTrait->toggleThisContext();
         }
 
+		$this->variableUsages->addRoots($this->currentVariables->list());
         $block = $this->processExpression($this->END_OF_EXPRESSION);
         $this->currentFunction->remove();
 
         // arrowfunction may be static
-        if ($this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
+        if ($this->tokens[$current - 1]->token === $this->phptokens::T_STATIC) {
             $this->currentClassTrait->toggleThisContext();
         }
 
         $this->contexts->exitContext(Context::CONTEXT_FUNCTION);
 
-        $this->addLink($fn, $block, 'BLOCK');
-        $this->addLink($fn, $block, 'RETURNED');
-        $this->addLink($fn, $block, 'RETURN');
+        $this->links->addLink($fn, $block, 'BLOCK');
+        $this->links->addLink($fn, $block, 'RETURNED');
+        $this->links->addLink($fn, $block, 'RETURN');
 
-        $fn->token    = $this->getToken($this->tokens[$current][0]);
-        $fn->fullcode = $this->tokens[$current][1] . ' ' .
+        $fn->token    = $this->getToken($this->tokens[$current]->token);
+        $fn->fullcode = $this->tokens[$current]->code . ' ' .
                         ($fn->reference ? '&' : '') .
                         '(' . $fn->fullcode . ')' .
                         $returnTypeFullcode .
@@ -1522,15 +1556,23 @@ $this->phptokens::T_YIELD,
         $this->pushExpression($fn);
         $this->checkExpression();
 
+        $this->variableUsages->finishCycle();
+        $this->variableUsages->unnest();
+
         return $fn;
     }
 
     private function processFunction(): AtomInterface {
         $current = $this->id;
+        
 
-        if ( $this->contexts->isContext(Context::CONTEXT_CLASS) &&
-             !$this->contexts->isContext(Context::CONTEXT_FUNCTION)) {
-            if (in_array(mb_strtolower($this->tokens[$this->id + 1][1]),
+        $this->variableUsages->nest();
+        if ($this->currentClassTrait->getCurrent() !== null) {
+               $this->variableUsages->importFromPrevious('$this');
+        }
+
+        if ( $this->contexts->isContext(Context::CONTEXT_CLASS)) {
+            if (in_array(mb_strtolower($this->tokens[$this->id + 1]->code),
                 array('__construct',
                       '__destruct',
                       '__call',
@@ -1576,7 +1618,7 @@ $this->phptokens::T_YIELD,
                                 $this->phptokens::T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG,
                                 ))) {
             $this->moveToNext();
-            $referenceWS = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $referenceWS = $this->tokens[$this->id]->toWs();
             $reference = self::REFERENCE;
         } else {
             $referenceWS = '';
@@ -1587,27 +1629,27 @@ $this->phptokens::T_YIELD,
             $name = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
         }
         $this->moveToNext();
-        $toargsWS = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $toargsWS = $this->tokens[$this->id]->toWs();
 
         // Process arguments
         $function              = $this->processParameters($atom);
-        $function->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4] .
-                                 $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
+        $function->ws->opening = $this->tokens[$current]->toWs() .
+                                 $this->tokens[$current + 1]->toWs();
         $function->ws->toargs  = $toargsWS;
 
         $function->code = $function->atom === 'Closure' ? 'function' : $name->fullcode;
-        $function->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $function->ws->opening = $this->tokens[$current]->toWs();
 
         if ($function->atom === 'Function') {
             $this->getFullnspath($name, 'function', $function);
             $this->calls->addDefinition(Calls::FUNCTION, $function->fullnspath, $function);
 
-            $this->addLink($function, $name, 'NAME');
+            $this->links->addLink($function, $name, 'NAME');
         } elseif ($function->atom === 'Closure') {
             $function->fullnspath = $this->anonymousNames->getName(AnonymousNames::A_FUNCTION);
 
             // closure may be static
-            if ($this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
+            if ($this->tokens[$current - 1]->token === $this->phptokens::T_STATIC) {
                 $this->currentClassTrait->toggleThisContext();
             }
         } elseif ($function->isA(array('Method', 'Magicmethod'))) {
@@ -1617,24 +1659,24 @@ $this->phptokens::T_YIELD,
                 $function->visibility = 'none';
             }
 
-            $this->addLink($function, $name, 'NAME');
+            $this->links->addLink($function, $name, 'NAME');
         } else {
             throw new LoadError(__METHOD__ . ' : wrong type of function ' . $function->atom);
         }
 
-        $function->token   = $this->getToken($this->tokens[$current][0]);
+        $function->token   = $this->getToken($this->tokens[$current]->token);
 
         $argumentsFullcode = $function->fullcode;
         $function->reference = $reference;
 
         $function->ws->reference = $referenceWS;
-        $function->ws->endargs = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $function->ws->endargs = $this->tokens[$this->id]->toWs();
 
         // Process use
         $useFullcode = array();
         if ($this->nextIs(array($this->phptokens::T_USE))) {
-            $function->ws->touse = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4] .
-                                   $this->tokens[$this->id + 2][1] . $this->tokens[$this->id + 2][4];
+            $function->ws->touse = $this->tokens[$this->id + 1]->toWs() .
+                                   $this->tokens[$this->id + 2]->toWs();
             $this->moveToNext(); // Skip use
             $this->moveToNext(); // Skip (
 
@@ -1656,12 +1698,18 @@ $this->phptokens::T_YIELD,
                                         ), 0)) {
                     $this->moveToNext();
                     $arg = $this->processSingle('Parameter');
-                    $arg->ws->reference = $this->tokens[$this->id - 1][1] . $this->tokens[$this->id - 1][4];
+                    $arg->ws->reference = $this->tokens[$this->id - 1]->toWs();
                     $arg->reference = self::REFERENCE;
-                    $arg->fullcode = "&$arg->fullcode";
+                    $arg->fullcode = '&' . $arg->fullcode;
                 } else {
                     $arg = $this->processSingle('Parameter');
                 }
+
+				if (!$this->currentVariables->exists($arg->fullcode)) {
+					$this->variableUsages->addRoot($arg);
+				}
+                $this->variableUsages->importFromPrevious($arg->code);
+
                 $arg->typehint = 'one'; // in fact, none
                 $this->moveToNext();
                 $uses[] = $arg;
@@ -1669,17 +1717,17 @@ $this->phptokens::T_YIELD,
                 $useFullcode[] = $arg->fullcode;
                 $arg->rank = ++$rank;
 
-                $this->addLink($function, $arg, 'USE');
+                $this->links->addLink($function, $arg, 'USE');
                 $this->currentVariables->set($arg->code, $arg);
                 if ($previousContextVariables->exists($arg->code)) {
-                    $this->addLink($previousContextVariables->get($arg->code), $arg, 'DEFINITION');
+                    $this->links->addLink($previousContextVariables->get($arg->code), $arg, 'DEFINITION');
                 }
 
                 if ($this->nextIs(array($this->phptokens::T_COMMA), 0)) {
-                    $function->ws->touseseparators[] = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $function->ws->touseseparators[] = $this->tokens[$this->id]->toWs();
                 } else {
-                    $function->ws->touseseparators[] = $this->tokens[$this->id - 1][4] .
-                                                       $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $function->ws->touseseparators[] = $this->tokens[$this->id - 1]->ws .
+                                                       $this->tokens[$this->id]->toWs();
                 }
             } while ($this->nextIs(array($this->phptokens::T_COMMA), 0));
             $this->runPlugins($function, array('USE' => $uses));
@@ -1687,30 +1735,33 @@ $this->phptokens::T_YIELD,
 
         // Process return type
         $returnTypes = $this->processTypehint($function);
-        $function->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $function->ws->toblock = $this->tokens[$this->id + 1]->toWs();
 
         // Process block
         if ($this->nextIs(array($this->phptokens::T_SEMICOLON))) {
             $block = $this->addAtomVoid();
-            $block->ws->opening = ';' . $this->tokens[$this->id + 1][4];
-            $this->addLink($function, $block, 'BLOCK');
+            $block->ws->opening = ';' . $this->tokens[$this->id + 1]->ws;
+            $this->links->addLink($function, $block, 'BLOCK');
             $this->moveToNext(); // skip the next ;
             $blockFullcode = ' ;';
             $this->runPlugins($block);
         } else {
+            $this->contexts->toggleContext(Context::CONTEXT_CITE_BODY);
             $block = $this->processFollowingBlock(array($this->phptokens::T_CLOSE_CURLY));
-            $this->addLink($function, $block, 'BLOCK');
+            $this->contexts->toggleContext(Context::CONTEXT_CITE_BODY);
+
+            $this->links->addLink($function, $block, 'BLOCK');
             $blockFullcode = self::FULLCODE_BLOCK;
         }
 
-        $function->fullcode   = $this->tokens[$current][1] . ' ' . ($function->reference ? '&' : '') .
+        $function->fullcode   = $this->tokens[$current]->code . ' ' . ($function->reference ? '&' : '') .
                                 ($function->atom === 'Closure' ? '' : $name->fullcode) . '(' . $argumentsFullcode . ')' .
                                 (empty($useFullcode) ? '' : ' use (' . implode(', ', $useFullcode) . ')') . // No space before use
                                 $returnTypes .
                                 $blockFullcode;
 
         if ($function->atom === 'Closure' &&
-           $this->tokens[$current - 1][0] === $this->phptokens::T_STATIC) {
+           $this->tokens[$current - 1]->token === $this->phptokens::T_STATIC) {
             $this->currentClassTrait->toggleThisContext();
         }
 
@@ -1726,7 +1777,7 @@ $this->phptokens::T_YIELD,
         if ($function->atom === 'Function') {
             $this->processSemicolon();
         } elseif ($function->atom === 'Closure' &&
-                  $this->tokens[$current  - 1][0] !== $this->phptokens::T_EQUAL          &&
+                  $this->tokens[$current  - 1]->token !== $this->phptokens::T_EQUAL   &&
                   $this->nextIs(array($this->phptokens::T_CLOSE_TAG))) {
             $this->processSemicolon();
         } elseif ($function->atom === 'Method' && !empty(preg_match('/^static$/i', $function->fullcode))) {
@@ -1740,9 +1791,9 @@ $this->phptokens::T_YIELD,
             // double call for internal reference
             $this->calls->addDefinition(Calls::STATICMETHOD, $function->fullnspath, $function);
         } elseif ($function->atom === 'Magicmethod') {
-            if (mb_strtolower($this->tokens[$current + 1][1]) === '__construct' &&
+            if (mb_strtolower($this->tokens[$current + 1]->code) === '__construct' &&
                 $this->currentClassTrait->getCurrent()->atom === 'Classanonymous') {
-                $this->addLink($function, $this->currentClassTrait->getCurrent(), 'DEFINITION');
+                $this->links->addLink($function, $this->currentClassTrait->getCurrent(), 'DEFINITION');
             }
 
             $this->calls->addDefinition(Calls::METHOD, $function->fullnspath, $function);
@@ -1750,7 +1801,9 @@ $this->phptokens::T_YIELD,
             $this->currentMethods->addMethod(mb_strtolower($function->code), $function);
         }
 
-        $function->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $function->ws->closing = $this->tokens[$this->id]->toWs();
+		$this->variableUsages->finishCycle();
+        $this->variableUsages->unnest();
 
         return $function;
     }
@@ -1773,24 +1826,24 @@ $this->phptokens::T_YIELD,
         $this->currentClassTrait->pushContext($trait);
         $this->makeAttributes($trait);
         $this->makePhpdoc($trait);
-        $trait->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $trait->ws->opening = $this->tokens[$current]->toWs();
 
         $this->contexts->nestContext(Context::CONTEXT_CLASS);
         $this->contexts->toggleContext(Context::CONTEXT_CLASS);
 
         $name = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
-        $this->addLink($trait, $name, 'NAME');
+        $this->links->addLink($trait, $name, 'NAME');
 
         $this->getFullnspath($name, 'class', $trait);
         $this->calls->addDefinition(Calls::A_CLASS, $trait->fullnspath, $trait);
-        $trait->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $trait->ws->toblock = $this->tokens[$this->id + 1]->toWs();
 
         // Process block
         $this->makeCitBody($trait);
         $this->runPlugins($trait, array());
 
-        $trait->fullcode   = $this->tokens[$current][1] . ' ' . $name->fullcode . static::FULLCODE_BLOCK;
-        $trait->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $trait->fullcode   = $this->tokens[$current]->code . ' ' . $name->fullcode . static::FULLCODE_BLOCK;
+        $trait->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->addToSequence($trait);
         $this->sequence->ws->separators[] = '';
@@ -1810,13 +1863,13 @@ $this->phptokens::T_YIELD,
         $this->makePhpdoc($interface);
         $extras = array('EXTENDS'   => array(),
                         );
-        $interface->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $interface->ws->opening = $this->tokens[$current]->toWs();
 
         $this->contexts->nestContext(Context::CONTEXT_CLASS);
         $this->contexts->toggleContext(Context::CONTEXT_CLASS);
 
         $name = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
-        $this->addLink($interface, $name, 'NAME');
+        $this->links->addLink($interface, $name, 'NAME');
 
         $this->getFullnspath($name, 'class', $interface);
 
@@ -1829,35 +1882,35 @@ $this->phptokens::T_YIELD,
         $fullcode= array();
         $extendsKeyword = '';
         if ($this->nextIs(array($this->phptokens::T_EXTENDS))) {
-            $extendsKeyword = $this->tokens[$this->id + 1][1];
-            $interface->ws->toextends =  $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $extendsKeyword = $this->tokens[$this->id + 1]->code;
+            $interface->ws->toextends =  $this->tokens[$this->id + 1]->toWs();
             do {
                 $this->moveToNext(); // Skip extends or ,
                 $this->checkPhpdoc();
                 $extends = $this->processOneNsname(self::WITH_FULLNSPATH);
                 $extends->rank = $rank;
 
-                $this->addLink($interface, $extends, 'EXTENDS');
+                $this->links->addLink($interface, $extends, 'EXTENDS');
                 $this->calls->addCall(Calls::A_CLASS, $extends->fullnspath, $extends);
 
                 $fullcode[] = $extends->fullcode;
                 $extras['EXTENDS'][] = $extends;
-                $interface->ws->toextendsseparator[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $interface->ws->toextendsseparator[] = $this->tokens[$this->id + 1]->toWs();
             } while ($this->nextIs(array($this->phptokens::T_COMMA)));
             array_pop($interface->ws->toextendsseparator);
             $interface->ws->toextendsseparator[] = '';
         }
 
         $this->checkPhpdoc();
-        $interface->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $interface->ws->toblock = $this->tokens[$this->id + 1]->toWs();
 
         // Process block
         $this->makeCitBody($interface);
 
         $this->runPlugins($interface, $extras);
 
-        $interface->fullcode   = $this->tokens[$current][1] . ' ' . $name->fullcode . (empty($extendsKeyword) ? '' : ' ' . $extendsKeyword . ' ' . implode(', ', $fullcode)) . static::FULLCODE_BLOCK;
-        $interface->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $interface->fullcode   = $this->tokens[$current]->code . ' ' . $name->fullcode . (empty($extendsKeyword) ? '' : ' ' . $extendsKeyword . ' ' . implode(', ', $fullcode)) . static::FULLCODE_BLOCK;
+        $interface->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->addToSequence($interface);
         $this->sequence->ws->separators[] = '';
@@ -1874,6 +1927,7 @@ $this->phptokens::T_YIELD,
 
         $this->currentProperties      = new ContextProperties();
         $this->currentMethods         = new ContextMethods();
+        $this->contexts->toggleContext(Context::CONTEXT_CITE_BODY);
 
         $this->checkPhpdoc();
         while (!$this->nextIs(array($this->phptokens::T_CLOSE_CURLY))) {
@@ -1883,7 +1937,7 @@ $this->phptokens::T_YIELD,
                 $cpm = $this->processStaticDefinition();
             } elseif ($this->nextIs(array($this->phptokens::T_READONLY))) {
                 $this->moveToNext();
-                $cpm = $this->processReadonly(self::PROMOTED, true);
+                $cpm = $this->processReadonly(self::PROMOTED);
             } else {
                 $cpm = $this->processNext();
             }
@@ -1910,16 +1964,18 @@ $this->phptokens::T_YIELD,
                 $cpm->abstract = self::ABSTRACT;
             }
 
-            $this->addLink($class, $cpm, $link);
+            $this->links->addLink($class, $cpm, $link);
             $last = count($class->ws->bodyseparator) - 1;
             if ($this->nextIs(array($this->phptokens::T_SEMICOLON))) {
                 $this->moveToNext();
-                $class->ws->bodyseparator[$last] .= ';' . $this->tokens[$this->id][4];
+                $class->ws->bodyseparator[$last] .= ';' . $this->tokens[$this->id]->ws;
             } else {
                 $class->ws->bodyseparator[$last] = '';
             }
             $this->checkPhpdoc();
         }
+
+        $this->contexts->toggleContext(Context::CONTEXT_CITE_BODY);
 
         $currentClass = $this->currentClassTrait->getCurrent();
 
@@ -1931,18 +1987,18 @@ $this->phptokens::T_YIELD,
             $ppp->code         = $missing;
             $ppp->count        = 1;
             $ppp->line         = -1;
-            $this->addLink($currentClass, $ppp, 'PPP');
+            $this->links->addLink($currentClass, $ppp, 'PPP');
 
             $virtual = $this->addAtom('Virtualproperty');
             $virtual->code	       = '$' . $missing;
             $virtual->fullcode     = $virtual->code;
             $virtual->propertyname = $missing;
             $virtual->line         = -1;
-            $this->addLink($ppp, $virtual, 'PPP');
-            $this->addLink($virtual, $this->addAtomVoid(), 'DEFAULT');
+            $this->links->addLink($ppp, $virtual, 'PPP');
+            $this->links->addLink($virtual, $this->addAtomVoid(), 'DEFAULT');
 
             foreach ($this->currentProperties->getCurrentPropertyCalls($missing) as $member) {
-                $this->addLink($virtual, $member, 'DEFINITION');
+                $this->links->addLink($virtual, $member, 'DEFINITION');
             }
 
             $this->currentProperties->setCurrentPropertyCalls($missing, $virtual);
@@ -1956,11 +2012,10 @@ $this->phptokens::T_YIELD,
             $virtual->visibility   = 'none';
             $virtual->code         = mb_strtolower($missing);
             $virtual->line         = -1;
-            $this->addLink($currentClass, $virtual, 'METHOD');
-            // @todo : may be MAGICMETHOD ?
+            $this->links->addLink($currentClass, $virtual, 'METHOD');
 
             foreach ($this->currentMethods->getCurrentMethodsCalls($missing) as $member) {
-                $this->addLink($virtual, $member, 'DEFINITION');
+                $this->links->addLink($virtual, $member, 'DEFINITION');
             }
 
             $this->currentMethods->setCurrentMethodsCalls($missing, $virtual);
@@ -1978,17 +2033,17 @@ $this->phptokens::T_YIELD,
         $this->makeAttributes($case);
         $this->makePhpdoc($case);
 
-        $case->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $case->ws->opening = $this->tokens[$this->id]->toWs();
 
         $name = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
         $case->fullcode = 'case ' . $name->fullcode;
-        $this->addLink($case, $name, 'NAME');
+        $this->links->addLink($case, $name, 'NAME');
         $this->moveToNext();
 
         $this->calls->addDefinition(Calls::STATICCONSTANT,   $this->currentClassTrait->getCurrent()->fullnspath . '::' . $name->fullcode, $case);
 
         if ($this->nextIs(array($this->phptokens::T_EQUAL), 0)) {
-            $case->ws->operator = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $case->ws->operator = $this->tokens[$this->id]->toWs();
 
             $default = $this->processExpression(array($this->phptokens::T_SEMICOLON,
                                                       $this->phptokens::T_COMMA,
@@ -1996,11 +2051,11 @@ $this->phptokens::T_YIELD,
                                                       $this->phptokens::T_CLOSE_TAG,
                                                     ));
 
-            $this->addLink($case, $default, 'VALUE');
+            $this->links->addLink($case, $default, 'VALUE');
             $case->fullcode .= ' = ' . $default->fullcode;
             $case->ws->closing = '';
         } else {
-            $case->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $case->ws->closing = $this->tokens[$this->id]->toWs();
         }
 
         return $case;
@@ -2013,18 +2068,18 @@ $this->phptokens::T_YIELD,
             return '';
         }
 
-        $class->ws->toimplements =  $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $class->ws->toimplements =  $this->tokens[$this->id + 1]->toWs();
 
-        $implementsKeyword = $this->tokens[$this->id + 1][1];
+        $implementsKeyword = $this->tokens[$this->id + 1]->code;
         $fullcodeImplements = array();
         $extras = array('IMPLEMENTS' => array());
         do {
             $this->moveToNext(); // Skip implements
             $this->checkPhpdoc();
             $implements = $this->processOneNsname(self::WITHOUT_FULLNSPATH);
-            $class->ws->toimplementsseparator[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $class->ws->toimplementsseparator[] = $this->tokens[$this->id + 1]->toWs();
 
-            $this->addLink($class, $implements, 'IMPLEMENTS');
+            $this->links->addLink($class, $implements, 'IMPLEMENTS');
             $fullcodeImplements[] = $implements->fullcode;
             $extras['IMPLEMENTS'][] = $implements;
 
@@ -2052,7 +2107,7 @@ $this->phptokens::T_YIELD,
         $this->getFullnspath($name, 'class', $enum);
 
         $this->calls->addDefinition(Calls::A_CLASS, $enum->fullnspath, $enum);
-        $this->addLink($enum, $name, 'NAME');
+        $this->links->addLink($enum, $name, 'NAME');
 
         if ($this->nextIs(array($this->phptokens::T_COLON))) {
             $this->moveToNext();
@@ -2068,7 +2123,7 @@ $this->phptokens::T_YIELD,
 
         $this->makePhpdoc($enum);
 
-        $enum->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $enum->ws->opening = $this->tokens[$current]->toWs();
 
         $this->contexts->nestContext(Context::CONTEXT_CLASS);
         $this->contexts->toggleContext(Context::CONTEXT_CLASS);
@@ -2080,12 +2135,12 @@ $this->phptokens::T_YIELD,
 
         $extras = array();
 
-        $enum->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $enum->ws->toblock = $this->tokens[$this->id + 1]->toWs();
 
         // Process block
         $this->makeCitBody($enum);
 
-        $enum->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $enum->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->contexts->exitContext(Context::CONTEXT_CLASS);
         $this->contexts->exitContext(Context::CONTEXT_NEW);
@@ -2097,7 +2152,7 @@ $this->phptokens::T_YIELD,
 
         $this->runPlugins($enum, $extras);
 
-        $enum->fullcode   = $this->tokens[$current][1] . ' ' . $name->fullcode
+        $enum->fullcode   = $this->tokens[$current]->code . ' ' . $name->fullcode
                             . $returnTypes
                             . $implements
                             . static::FULLCODE_BLOCK;
@@ -2119,29 +2174,34 @@ $this->phptokens::T_YIELD,
             $this->getFullnspath($name, 'class', $class);
 
             $this->calls->addDefinition(Calls::A_CLASS, $class->fullnspath, $class);
-            $this->addLink($class, $name, 'NAME');
+            $this->links->addLink($class, $name, 'NAME');
         } else {
             if ($this->nextIs(array($this->phptokens::T_OPEN_PARENTHESIS))) {
                 // Process arguments
                 $this->moveToNext(); // Skip (
                 $argsId = $this->id;
                 $class = $this->processArguments('Classanonymous', array());
-                $class->ws->toargs = $this->tokens[$argsId][1] . $this->tokens[$argsId][4];
-                $class->ws->endargs = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $class->ws->toargs = $this->tokens[$argsId]->toWs();
+                $class->ws->endargs = $this->tokens[$this->id]->toWs();
                 $argumentsFullcode = $class->fullcode;
             } else {
                 $class = $this->addAtom('Classanonymous', $current);
+                $class->count = 0;
+                $class->args_max = 0;
+                $class->args_min = 0;
             }
 
             $class->fullnspath = $this->anonymousNames->getName(AnonymousNames::A_CLASS);
             $this->calls->addDefinition(Calls::A_CLASS, $class->fullnspath, $class);
         }
+
+        $this->variableUsages->addRoot($class, '$this');
         $this->makePhpdoc($class);
         if ($class->atom === 'Class') {
             $this->makeAttributes($class);
         }
 
-        $class->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $class->ws->opening = $this->tokens[$current]->toWs();
 
         $this->currentClassTrait->pushContext($class);
 
@@ -2156,15 +2216,15 @@ $this->phptokens::T_YIELD,
         $extras = array();
         // Process extends
         if ($this->nextIs(array($this->phptokens::T_EXTENDS))) {
-            $extendsKeyword = $this->tokens[$this->id + 1][1];
+            $extendsKeyword = $this->tokens[$this->id + 1]->code;
             $this->moveToNext(); // Skip extends
-            $class->ws->toextends =  $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $class->ws->toextends =  $this->tokens[$this->id]->toWs();
 
             $this->checkPhpdoc();
             $extends = $this->processOneNsname(self::WITHOUT_FULLNSPATH);
             $class->ws->toextendsseparator[] = '';
 
-            $this->addLink($class, $extends, 'EXTENDS');
+            $this->links->addLink($class, $extends, 'EXTENDS');
             $this->getFullnspath($extends, 'class', $extends);
             $extras['EXTENDS'] = $extends;
 
@@ -2177,23 +2237,23 @@ $this->phptokens::T_YIELD,
 
         $implements = $this->processImplements($class);
 
-        $class->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $class->ws->toblock = $this->tokens[$this->id + 1]->toWs();
 
         // Process block
         $this->makeCitBody($class);
 
-        $class->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $class->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->runPlugins($class, $extras);
 
-        $class->fullcode   = $this->tokens[$current][1] . ($class->atom === 'Classanonymous' ? '' : ' ' . $name->fullcode)
+        $class->fullcode   = $this->tokens[$current]->code . ($class->atom === 'Classanonymous' ? '' : ' ' . $name->fullcode)
                              . (isset($argumentsFullcode) ? ' (' . $argumentsFullcode . ')' : '')
                              . (empty($extends) ? '' : ' ' . $extendsKeyword . ' ' . $extends->fullcode)
                              . $implements
                              . static::FULLCODE_BLOCK;
 
         // Case of anonymous classes
-        if ($this->tokens[$current - 1][0] === $this->phptokens::T_NEW) {
+        if ($class->atom === 'Classanonymous') {
             $this->pushExpression($class);
         } else {
             $this->addToSequence($class);
@@ -2213,7 +2273,7 @@ $this->phptokens::T_YIELD,
     private function processOpenTag(): AtomInterface {
         $current = $this->id;
         $phpcode = $this->addAtom('Php', $current);
-        $phpcode->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $phpcode->ws->opening = $this->tokens[$current]->toWs();
 
         $this->startSequence();
 
@@ -2225,21 +2285,21 @@ $this->phptokens::T_YIELD,
             $void->ws->closing = '';
             $this->addToSequence($void);
 
-            $this->addLink($phpcode, $this->sequence, 'CODE');
+            $this->links->addLink($phpcode, $this->sequence, 'CODE');
             $this->sequence->ws->opening = '';
             $this->sequence->ws->separators[] = '';
             $this->endSequence();
             $closing = '';
 
             $phpcode->ws->closing = '';
-            $phpcode->code        = $this->tokens[$current][1];
+            $phpcode->code        = $this->tokens[$current]->code;
             $phpcode->close_tag   = self::NO_CLOSING_TAG;
 
             return $phpcode;
         }
 
         $n = count($this->tokens) - 2;
-        if ($this->tokens[$n][0] === $this->phptokens::T_INLINE_HTML) {
+        if ($this->tokens[$n]->token === $this->phptokens::T_INLINE_HTML) {
             --$n;
         }
 
@@ -2264,7 +2324,7 @@ $this->phptokens::T_YIELD,
 
         if ($this->nextIs(array($this->phptokens::T_CLOSE_TAG), 0)) {
             $closeTag = self::CLOSING_TAG;
-            $closing = $this->tokens[$this->id][1]; // This includes final new lines
+            $closing = $this->tokens[$this->id]->code; // This includes final new lines
         } elseif ($this->nextIs(array($this->phptokens::T_HALT_COMPILER), 0)) {
             $closeTag = self::NO_CLOSING_TAG;
             $this->moveToNext(); // Go to HaltCompiler
@@ -2286,24 +2346,27 @@ $this->phptokens::T_YIELD,
         }
 
         $this->sequence->ws->opening = '';
-        $this->addLink($phpcode, $this->sequence, 'CODE');
+        $this->links->addLink($phpcode, $this->sequence, 'CODE');
         $this->endSequence();
 
-        $phpcode->code         = $this->tokens[$current][1];
+        $phpcode->code         = $this->tokens[$current]->code;
         $phpcode->fullcode     = '<?php ' . self::FULLCODE_SEQUENCE . ' ' . $closing;
-        $phpcode->token        = $this->getToken($this->tokens[$current][0]);
+        $phpcode->token        = $this->getToken($this->tokens[$current]->token);
         $phpcode->close_tag    = $closeTag;
 
         return $phpcode;
     }
 
-    private function processSemicolon(): AtomInterface {
-        $atom = $this->popExpression();
+    private function processSemicolon(?AtomInterface $atom = null): AtomInterface {
+    	if ($atom === null) {
+	        $atom = $this->popExpression();
+    	}
+    	
         if ($atom->atom === 'Void') {
             $atom->ws->closing = '';
         }
-        if ($this->tokens[$this->id][1] === ';') {
-            $this->sequence->ws->separators[] = ';' . $this->tokens[$this->id][4];
+        if ($this->tokens[$this->id]->code === ';') {
+            $this->sequence->ws->separators[] = ';' . $this->tokens[$this->id]->ws;
         } else {
             $this->sequence->ws->separators[] = '';
         }
@@ -2323,7 +2386,7 @@ $this->phptokens::T_YIELD,
                 assert($this->nextIs(array($this->phptokens::T_INLINE_HTML), 0), 'Not an inline HTML : ' . print_r($this->tokens[$this->id], true));
                 $return = $this->processInlinehtml();
                 $this->addToSequence($return);
-                $return->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $return->ws->closing = $this->tokens[$this->id + 1]->toWs();
             } while ( $this->nextIs(array($this->phptokens::T_INLINE_HTML)));
 
             if ($this->nextIs(array($this->phptokens::T_OPEN_TAG_WITH_ECHO))) {
@@ -2333,7 +2396,7 @@ $this->phptokens::T_YIELD,
                     $this->addToSequence($return);
 
                     // for ; ending the <?= 'c';
-                    $this->sequence->ws->separators[] = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $this->sequence->ws->separators[] = $this->tokens[$this->id]->toWs();
                 } elseif (!$this->nextIs(array($this->phptokens::T_SEMICOLON))) {
                     $this->addToSequence($return);
                 }
@@ -2397,16 +2460,16 @@ $this->phptokens::T_YIELD,
         $functioncall->token       = 'T_OPEN_TAG_WITH_ECHO';
         $functioncall->fullnspath  = '\echo';
         $functioncall->ws->opening = '';
-        $functioncall->ws->closing = $this->tokens[$this->id + 1][4];
+        $functioncall->ws->closing = $this->tokens[$this->id + 1]->ws;
 
-        $this->addLink($functioncall, $echo, 'NAME');
+        $this->links->addLink($functioncall, $echo, 'NAME');
 
         return $functioncall;
     }
 
     private function makeNsname(): AtomInterface {
         if ($this->nextIs(array($this->phptokens::T_NAME_QUALIFIED), 0)) {
-            $fullcode = array($this->tokens[$this->id][1]);
+            $fullcode = array($this->tokens[$this->id]->code);
             $token = 'T_NAME_QUALIFIED';
             $absolute = self::NOT_ABSOLUTE;
 
@@ -2416,7 +2479,7 @@ $this->phptokens::T_YIELD,
                 $atom = 'Nsname';
             }
         } elseif ($this->nextIs($this->phpKeywords, 0)) {
-            $fullcode = array($this->tokens[$this->id][1]);
+            $fullcode = array($this->tokens[$this->id]->code);
             $token = 'T_NAME_QUALIFIED';
             $absolute = self::NOT_ABSOLUTE;
 
@@ -2426,21 +2489,21 @@ $this->phptokens::T_YIELD,
                 $atom = 'Nsname';
             }
         } elseif ($this->nextIs(array($this->phptokens::T_NAME_FULLY_QUALIFIED), 0)) {
-            $fullcode = array($this->tokens[$this->id][1]);
+            $fullcode = array($this->tokens[$this->id]->code);
             $token = 'T_NAME_FULLY_QUALIFIED';
             $absolute = self::ABSOLUTE;
 
             if ($this->contexts->isContext(Context::CONTEXT_NEW)) {
                 $atom = 'Newcallname';
-            } elseif (in_array(mb_strtolower($this->tokens[$this->id][1]), array('\\true', '\\false'), STRICT_COMPARISON)) {
+            } elseif (in_array(mb_strtolower($this->tokens[$this->id]->code), array('\\true', '\\false'), STRICT_COMPARISON)) {
                 $atom = 'Boolean';
-            } elseif (in_array(mb_strtolower($this->tokens[$this->id][1]), array('\\null'), STRICT_COMPARISON)) {
+            } elseif (in_array(mb_strtolower($this->tokens[$this->id]->code), array('\\null'), STRICT_COMPARISON)) {
                 $atom = 'Null';
             } else {
                 $atom = 'Nsname';
             }
         } elseif ($this->nextIs(array($this->phptokens::T_NAME_RELATIVE), 0)) {
-            $fullcode = array($this->tokens[$this->id][1]);
+            $fullcode = array($this->tokens[$this->id]->code);
             $token = 'T_NAME_RELATIVE';
             $absolute = self::NOT_ABSOLUTE;
 
@@ -2455,22 +2518,22 @@ $this->phptokens::T_YIELD,
 
             if ($this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 0)             &&
                 $this->nextIs(array($this->phptokens::T_STRING))                            &&
-                in_array(mb_strtolower($this->tokens[$this->id + 1][1]), array('true', 'false'), STRICT_COMPARISON) &&
+                in_array(mb_strtolower($this->tokens[$this->id + 1]->code), array('true', 'false'), STRICT_COMPARISON) &&
                 !$this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 2)
             ) {
                 $atom = 'Boolean';
             } elseif ($this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 0) &&
                       $this->nextIs(array($this->phptokens::T_STRING))                     &&
-                      mb_strtolower($this->tokens[$this->id + 1][1]) === 'null'            &&
+                      mb_strtolower($this->tokens[$this->id + 1]->code) === 'null'            &&
                       !$this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 2)           ) {
                 $atom = 'Null';
-            } elseif (mb_strtolower($this->tokens[$this->id][1]) === 'parent') {
+            } elseif (mb_strtolower($this->tokens[$this->id]->code) === 'parent') {
                 $atom = 'Parent';
-            } elseif (mb_strtolower($this->tokens[$this->id][1]) === 'self') {
+            } elseif (mb_strtolower($this->tokens[$this->id]->code) === 'self') {
                 $atom = 'Self';
             } elseif ($this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 0) &&
                       $this->nextIs(array($this->phptokens::T_STRING))                     &&
-                      mb_strtolower($this->tokens[$this->id + 1][1]) === 'self'            &&
+                      mb_strtolower($this->tokens[$this->id + 1]->code) === 'self'            &&
                       !$this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 2)           ) {
                 $atom = 'Self';
             } elseif ($this->contexts->isContext(Context::CONTEXT_NEW)) {
@@ -2488,12 +2551,12 @@ $this->phptokens::T_YIELD,
                                     $this->phptokens::T_CALLABLE,
                                     // @todo the list should be longer and may be moved to a constant
                                      ), 0)) {
-                $fullcode[] = $this->tokens[$this->id][1];
+                $fullcode[] = $this->tokens[$this->id]->code;
                 $this->moveToNext();
 
                 $absolute = self::NOT_ABSOLUTE;
             } elseif ($this->nextIs(array($this->phptokens::T_NAMESPACE), -1)) {
-                $fullcode[] = $this->tokens[$this->id - 1][1];
+                $fullcode[] = $this->tokens[$this->id - 1]->code;
 
                 $absolute = self::NOT_ABSOLUTE;
             } elseif ($this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 0)) {
@@ -2501,7 +2564,7 @@ $this->phptokens::T_YIELD,
 
                 $absolute = self::ABSOLUTE;
             } else {
-                $fullcode[] = $this->tokens[$this->id][1];
+                $fullcode[] = $this->tokens[$this->id]->code;
                 $this->moveToNext();
 
                 $absolute = self::NOT_ABSOLUTE;
@@ -2511,7 +2574,7 @@ $this->phptokens::T_YIELD,
                    !$this->nextIs(array($this->phptokens::T_OPEN_CURLY))
             ) {
                 $this->moveToNext(); // skip \
-                $fullcode[] = $this->tokens[$this->id][1];
+                $fullcode[] = $this->tokens[$this->id]->code;
 
                 // Go to next
                 $this->moveToNext(); // skip \
@@ -2608,7 +2671,7 @@ $this->phptokens::T_YIELD,
             $holder->ws->totype = '';
         } elseif ($holder->isA(array('Method', 'Magicmethod', 'Function', 'Closure', 'Arrowfunction'))) {
             $link = 'RETURNTYPE';
-            $holder->ws->totype = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $holder->ws->totype = $this->tokens[$this->id + 1]->toWs();
 
             // Skip : if it is here (it might not)
             if ($this->nextIs(array($this->phptokens::T_COLON))) {
@@ -2630,7 +2693,7 @@ $this->phptokens::T_YIELD,
                 $typehint->rank = 0;
             }
 
-            $this->addLink($holder, $typehint, $link);
+            $this->links->addLink($holder, $typehint, $link);
             $holder->ws->totype = '';
 
             return '';
@@ -2646,7 +2709,7 @@ $this->phptokens::T_YIELD,
             $null->noDelimiter = '';
             $null->delimiter   = '';
             $null->fullnspath  = '\\null';
-            $null->ws->closing = $this->tokens[$this->id + 1][4];
+            $null->ws->closing = $this->tokens[$this->id + 1]->ws;
 
             $return[] = $null;
             $this->moveToNext();
@@ -2655,27 +2718,25 @@ $this->phptokens::T_YIELD,
         }
 
         --$this->id;
-        $dnf = 0;
         do {
             $this->moveToNext();
 
-            if (in_array(mb_strtolower($this->tokens[$this->id + 1][1]), $this->SCALAR_TYPE, STRICT_COMPARISON) &&
+            if (in_array(mb_strtolower($this->tokens[$this->id + 1]->code), $this->SCALAR_TYPE, STRICT_COMPARISON) &&
                  !$this->nextIs(array($this->phptokens::T_NS_SEPARATOR), 2)) {
                 $this->moveToNext();
-                $nsname = $this->processSingle('Scalartypehint');
-                $nsname->fullnspath = '\\' . mb_strtolower($nsname->code);
+                $nsname = $this->addAtomScalartype(mb_strtolower($this->tokens[$this->id]->code));
             } elseif ($this->nextIs(array($this->phptokens::T_STATIC))) {
                 $this->moveToNext();
 
                 $nsname = $this->addAtom('Static');
-                $nsname->code        = $this->tokens[$this->id][1];
-                $nsname->fullcode    = $this->tokens[$this->id][1];
+                $nsname->code        = $this->tokens[$this->id]->code;
+                $nsname->fullcode    = $this->tokens[$this->id]->code;
                 $nsname->token       = 'T_STATIC';
                 $nsname->noDelimiter = '';
                 $nsname->delimiter   = '';
                 $nsname->fullnspath  = '\\static';
-                $nsname->ws->closing = $this->tokens[$this->id + 1][4];
-            } elseif (mb_strtolower($this->tokens[$this->id + 1][1]) === 'null') {
+                $nsname->ws->closing = $this->tokens[$this->id + 1]->ws;
+            } elseif (mb_strtolower($this->tokens[$this->id + 1]->code) === 'null') {
                 $this->moveToNext();
                 $nsname = $this->processSingle('Null');
                 $nsname->fullnspath = '\\null';
@@ -2690,7 +2751,7 @@ $this->phptokens::T_YIELD,
                 $this->moveToNext();
 
                 $holder->typehint = 'dnf';
-                $nsname->ws->closing .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $nsname->ws->closing .= $this->tokens[$this->id + 1]->toWs();
             } else {
                 $nsname = $this->processOneNsname(self::WITHOUT_FULLNSPATH);
                 $this->getFullnspath($nsname, 'class', $nsname);
@@ -2700,15 +2761,13 @@ $this->phptokens::T_YIELD,
             }
 
             if ($this->nextIs(array($this->phptokens::T_OR))) {
-                // @todo no fallback to and from dnf
                 $holder->typehint = 'or';
-                $nsname->ws->closing .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $nsname->ws->closing .= $this->tokens[$this->id + 1]->toWs();
             }
 
             if ($this->nextIs(array($this->phptokens::T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG))) {
-                // @todo no fallback to and from dnf
                 $holder->typehint = 'and';
-                $nsname->ws->closing .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $nsname->ws->closing .= $this->tokens[$this->id + 1]->toWs();
             }
 
             $return[] = $nsname;
@@ -2719,13 +2778,13 @@ $this->phptokens::T_YIELD,
                  !$this->nextIs(array($this->phptokens::T_VARIABLE), 2)
         );
 
-        if ($this->tokens[$this->id + 1][1] === ',') {
+        if ($this->tokens[$this->id + 1]->code === ',') {
             $this->moveToNext();
         }
 
         if ($return[0]->code === '?') {
-            $this->addLink($holder, $return[0], $link);
-            $this->addLink($holder, $return[1], $link);
+            $this->links->addLink($holder, $return[0], $link);
+            $this->links->addLink($holder, $return[1], $link);
 
             $return[0]->rank = 0;
             $return[1]->rank = 1;
@@ -2735,7 +2794,7 @@ $this->phptokens::T_YIELD,
             $fullcode = array();
             $rank = -1;
             foreach ($return as $returnType) {
-                $this->addLink($holder, $returnType, $link);
+                $this->links->addLink($holder, $returnType, $link);
                 $returnType->rank = ++$rank;
 
                 if ($returnType->isA(array('Void'))) {
@@ -2786,17 +2845,18 @@ $this->phptokens::T_YIELD,
         $this->currentFunction->add($arguments);
 
         $argumentsList  = array();
+        $previous = null;
 
         $this->checkAttribute();
         if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS))) {
             $void = $this->addAtomVoid();
             $void->rank = 0;
-            $this->addLink($arguments, $void, 'ARGUMENT');
+            $this->links->addLink($arguments, $void, 'ARGUMENT');
             $void->ws->closing = '';
 
-            $arguments->code     = $this->tokens[$current][1];
+            $arguments->code     = $this->tokens[$current]->code;
             $arguments->fullcode = self::FULLCODE_VOID;
-            $arguments->token    = $this->getToken($this->tokens[$current][0]);
+            $arguments->token    = $this->getToken($this->tokens[$current]->token);
             $arguments->args_max = 0;
             $arguments->args_min = 0;
             $arguments->count    = 0;
@@ -2816,6 +2876,7 @@ $this->phptokens::T_YIELD,
         $rank      = -1;
         $default   = 0;
         $variadic  = self::NOT_ELLIPSIS;
+        $previous  = null;
 
         do {
             do {
@@ -2833,20 +2894,23 @@ $this->phptokens::T_YIELD,
 
                 if ($this->nextIs(array($this->phptokens::T_READONLY))) {
                     $this->moveToNext();
-                    $index = $this->processReadonly(self::PROMOTED, true);
+                    $index = $this->processReadonly(self::PROMOTED);
 
-                    $this->addLink($this->currentClassTrait->getCurrent(), $index, 'PPP');
+                    $this->links->addLink($this->currentClassTrait->getCurrent(), $index, 'PPP');
 
                     $index->rank = ++$rank;
                     $this->popExpression();
                     $fullcode[] = $index->fullcode;
-                    $this->addLink($arguments, $index, 'ARGUMENT');
+                    $this->links->addLink($arguments, $index, 'ARGUMENT');
+                    $this->addNextLink($previous, $index);
+                    $previous = $index;
                     $argumentsList[] = $index;
                     $this->moveToNext();
 
                     continue;
                 }
 
+                // Promoted properties
                 if ($this->nextIs(array($this->phptokens::T_PUBLIC,
                                         $this->phptokens::T_PRIVATE,
                                         $this->phptokens::T_PROTECTED,
@@ -2857,15 +2921,18 @@ $this->phptokens::T_YIELD,
 
                     $this->moveToNext();
 
-                    $this->addLink($this->currentClassTrait->getCurrent(), $index, 'PPP');
-                    // Nothing better to do?
-                    preg_match('/\$([^ ]+?)/', $index->fullcode, $r);
+                    $this->links->addLink($this->currentClassTrait->getCurrent(), $index, 'PPP');
+                    // there is nothing better to do than regex on fullcode, because it is buried in ProcessPPP
+                    preg_match('/\$([^ ]+)/', $index->fullcode, $r);
                     $this->currentVariables->set($r[0], $index);
+	                $this->variableUsages->addRoot($index, $r[0]);
 
                     $index->rank = ++$rank;
                     $this->popExpression();
                     $fullcode[] = $index->fullcode;
-                    $this->addLink($arguments, $index, 'ARGUMENT');
+                    $this->links->addLink($arguments, $index, 'ARGUMENT');
+                    $this->addNextLink($previous, $index);
+                    $previous = $index;
                     $argumentsList[] = $index;
 
                     continue;
@@ -2880,7 +2947,7 @@ $this->phptokens::T_YIELD,
                 if ($this->nextIs(array($this->phptokens::T_AND,
                                         $this->phptokens::T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG), 0)) {
                     $reference = self::REFERENCE;
-                    $referenceWS = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $referenceWS = $this->tokens[$this->id]->toWs();
                     $this->moveToNext();
                 } else {
                     $reference   = self::NOT_REFERENCE;
@@ -2889,26 +2956,28 @@ $this->phptokens::T_YIELD,
 
                 if ($this->nextIs(array($this->phptokens::T_ELLIPSIS), 0)) {
                     $variadic = self::ELLIPSIS;
-                    $ellipsisWS = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $ellipsisWS = $this->tokens[$this->id]->toWs();
                     $this->moveToNext();
                 }
 
-                assert($this->nextIs(array($this->phptokens::T_VARIABLE), 0), 'No variable in parameter list (' . $this->tokens[$this->id][1] . ') in file ' . $this->filename . ' on line ' . $this->tokens[$this->id][2]);
+                assert($this->nextIs(array($this->phptokens::T_VARIABLE), 0), 'No variable in parameter list (' . $this->tokens[$this->id]->code . ') in file ' . $this->filename . ' on line ' . $this->tokens[$this->id]->line);
 
                 $variable   = $this->addAtom('Parametername');
                 $this->makeAttributes($index);
                 $this->makePhpdoc($index);
+                $index->line = $variable->line; // Parameter is build too early for the line to be correct
 
-                $variable->code     = $this->tokens[$this->id][1];
-                $variable->fullcode = $this->tokens[$this->id][1];
-                $variable->token    = $this->getToken($this->tokens[$this->id][0]);
-                $variable->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $variable->code     = $this->tokens[$this->id]->code;
+                $variable->fullcode = $this->tokens[$this->id]->code;
+                $variable->token    = $this->getToken($this->tokens[$this->id]->token);
+                $variable->ws->opening = $this->tokens[$this->id]->toWs();
                 $variable->ws->closing = '';
                 $this->runPlugins($variable);
 
                 $index->code     = $variable->fullcode;
                 $index->fullcode = $variable->fullcode;
                 $index->token    = 'T_VARIABLE';
+                $this->variableUsages->addRoot($index);
 
                 if ($variadic === self::ELLIPSIS) {
                     $index->fullcode     = '...' . $index->fullcode;
@@ -2922,7 +2991,7 @@ $this->phptokens::T_YIELD,
                     $index->ws->reference = $referenceWS;
                 }
 
-                $this->addLink($index, $variable, 'NAME');
+                $this->links->addLink($index, $variable, 'NAME');
                 $variable->fullnspath = $index->fullnspath;
                 $variable->isPhp      = $index->isPhp;
                 $variable->isExt      = $index->isExt;
@@ -2932,7 +3001,7 @@ $this->phptokens::T_YIELD,
                 $this->checkPhpdoc();
                 if ($this->nextIs(array($this->phptokens::T_EQUAL))) {
                     $this->moveToNext(); // Skip =
-                    $index->ws->operator = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $index->ws->operator = $this->tokens[$this->id]->toWs();
                     $finals      = array($this->phptokens::T_COMMA,
                                          $this->phptokens::T_CLOSE_PARENTHESIS
                                          );
@@ -2945,16 +3014,17 @@ $this->phptokens::T_YIELD,
                     }
                     $default = $this->addAtomVoid();
                 }
-                $this->addLink($index, $default, 'DEFAULT');
+                $this->links->addLink($index, $default, 'DEFAULT');
                 if ($default->atom !== 'Void') {
                     $index->fullcode .= ' = ' . $default->fullcode;
 
                     // When Null is default, then typehint is also nullable
-                    if ($default->atom === 'Null' &&
+                    if ($default->atom === 'Null'        &&
                         !str_contains($typehints, '?')   &&
+                        !empty($typehints)               &&
                         preg_match('/\bnull\b/i', $typehints) === 0
                     ) {
-                        $this->addLink($index, $default, 'TYPEHINT');
+                        $this->links->addLink($index, $default, 'TYPEHINT');
                     }
                 }
 
@@ -2962,12 +3032,15 @@ $this->phptokens::T_YIELD,
 
                 $index->fullcode = $typehints . $index->fullcode;
                 $fullcode[] = $index->fullcode;
-                $this->addLink($arguments, $index, 'ARGUMENT');
+                $this->links->addLink($arguments, $index, 'ARGUMENT');
+                $this->addNextLink($previous, $index);
+                $previous = $index;
+
                 $this->runPlugins($index);
                 $argumentsList[] = $index;
 
                 $this->moveToNext();
-                $arguments->ws->separators[] = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $arguments->ws->separators[] = $this->tokens[$this->id]->toWs();
             } while ($this->nextIs(array($this->phptokens::T_COMMA), 0));
 
             --$this->id;
@@ -3008,12 +3081,12 @@ $this->phptokens::T_YIELD,
             $void = $this->addAtomVoid();
             $void->rank = 0;
             $void->ws->closing = '';
-            $this->addLink($arguments, $void, 'ARGUMENT');
+            $this->links->addLink($arguments, $void, 'ARGUMENT');
             $arguments->ws->separators[] = '';
 
-            $arguments->code     = $this->tokens[$current][1];
+            $arguments->code     = $this->tokens[$current]->code;
             $arguments->fullcode = self::FULLCODE_VOID;
-            $arguments->token    = $this->getToken($this->tokens[$current][0]);
+            $arguments->token    = $this->getToken($this->tokens[$current]->token);
             $arguments->args_max = 0;
             $arguments->args_min = 0;
             $arguments->count    = 0;
@@ -3041,12 +3114,12 @@ $this->phptokens::T_YIELD,
             $void->fullcode = '...';
             $void->variadic = self::VARIADIC;
             $void->token    = 'T_ELLIPSIS';
-            $this->addLink($arguments, $void, 'ARGUMENT');
+            $this->links->addLink($arguments, $void, 'ARGUMENT');
             $arguments->ws->separators[] = '';
 
-            $arguments->code     = $this->tokens[$current][1];
-            $arguments->fullcode = $this->tokens[$current + 1][1]; // the ...
-            $arguments->token    = $this->getToken($this->tokens[$current][0]);
+            $arguments->code     = $this->tokens[$current]->code;
+            $arguments->fullcode = $this->tokens[$current + 1]->code; // the ...
+            $arguments->token    = $this->getToken($this->tokens[$current]->token);
             $arguments->args_max = 0;
             $arguments->args_min = 0;
             $arguments->count    = 0;
@@ -3072,6 +3145,7 @@ $this->phptokens::T_YIELD,
         $rank       = -1;
         $rankName  = '';
         $argumentsList  = array();
+        $previous = null;
 
         while (!$this->nextIs($finals)) {
             $initialId = $this->id;
@@ -3081,10 +3155,10 @@ $this->phptokens::T_YIELD,
             // based only on id + 2 == T_COLON
             if ($this->nextIs(array($this->phptokens::T_COLON ), 2)) {
                 $this->moveToNext();
-                $rankName = $this->tokens[$this->id][1];
-                $rankNameOpening = $this->tokens[$this->id][1].$this->tokens[$this->id][4]; 
+                $rankName = $this->tokens[$this->id]->code;
+                $rankNameOpening = $this->tokens[$this->id]->toWs();
                 $this->moveToNext(); // skip :
-                $rankNameOpening .= ':' . $this->tokens[$this->id][4]; 
+                $rankNameOpening .= ':' . $this->tokens[$this->id]->ws;
             }
 
             while (!$this->nextIs(array($this->phptokens::T_COMMA,
@@ -3101,8 +3175,8 @@ $this->phptokens::T_YIELD,
             $this->popExpression();
             if (!empty($rankName)) {
                 $index->rankName = '$' . $rankName;
-				$index->ws->opening = $rankNameOpening;
-			}
+                $index->ws->opening = $rankNameOpening;
+            }
 
             $this->checkPhpdoc();
             while ($this->nextIs(array($this->phptokens::T_COMMA))) {
@@ -3115,7 +3189,18 @@ $this->phptokens::T_YIELD,
 
                 $index->rank = ++$rank;
 
-                $this->addLink($arguments, $index, 'ARGUMENT');
+                $this->links->addLink($arguments, $index, 'ARGUMENT');
+                if ($atom === 'Unset') {
+	            	if ($index->atom === 'Variable') {
+			            $this->variableUsages->unsetVariable($index->code, $index);
+        	    	}
+                } else {
+		            $this->variableUsages->followup($index);
+                }
+
+                $this->addNextLink($previous, $index);
+                $previous = $index;
+
                 $argumentsId[] = $index;
                 // array($this, 'b'); for Callback syntax.
                 if ($index->atom === 'Variable' &&
@@ -3125,7 +3210,7 @@ $this->phptokens::T_YIELD,
                 }
 
                 $fullcode[] = (empty($index->rankName) ? '' : trim($index->rankName, '$') . ' : ' ) . $index->fullcode;
-                $separator = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $separator = $this->tokens[$this->id + 1]->toWs();
                 $arguments->ws->separators[] = $separator;
                 $argumentsList[] = $index;
 
@@ -3135,7 +3220,7 @@ $this->phptokens::T_YIELD,
             }
 
             if ($initialId === $this->id) {
-                throw new NoFileToProcess($this->filename, ' not processable with the current code, on line ' . $this->tokens[$this->id][2]);
+                throw new NoFileToProcess($this->filename, ' not processable with the current code, on line ' . $this->tokens[$this->id]->line);
             }
         }
 
@@ -3147,14 +3232,22 @@ $this->phptokens::T_YIELD,
 
                 $index->rank = ++$rank;
                 $argumentsId[] = $index;
-                $this->argumentsId = $argumentsId; // This avoid overwriting when nesting functioncall
-                if ($this->tokens[$this->id + 1][1] === ')') {
+                if ($this->tokens[$this->id + 1]->code === ')') {
                     $arguments->ws->separators[] = '';
                 } else {
-                    $arguments->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                    $arguments->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
                 }
 
-                $this->addLink($arguments, $index, 'ARGUMENT');
+                $this->links->addLink($arguments, $index, 'ARGUMENT');
+                if ($atom === 'Unset') {
+	            	if ($index->atom === 'Variable') {
+			            $this->variableUsages->unsetVariable($index->code, $index);
+        	    	}
+                } else {
+		            $this->variableUsages->followup($index);
+                }
+                $this->addNextLink($previous, $index);
+                $previous = $index;
 
                 $fullcode[] = (empty($index->rankName) ? '' : trim($index->rankName, '$') . ' : ' ) . $index->fullcode;
                 $argumentsList[] = $index;
@@ -3164,12 +3257,20 @@ $this->phptokens::T_YIELD,
         } else {
             $index->rank = ++$rank;
             $argumentsId[] = $index;
-            $this->argumentsId = $argumentsId; // This avoid overwriting when nesting functioncall
             $arguments->ws->separators[] = '';
 
             $this->makePhpdoc($index);
 
-            $this->addLink($arguments, $index, 'ARGUMENT');
+            $this->links->addLink($arguments, $index, 'ARGUMENT');
+            if ($atom === 'Unset') {
+            	if ($index->atom === 'Variable') {
+		            $this->variableUsages->unsetVariable($index->code, $index);
+            	}
+            } else {
+		        $this->variableUsages->followup($index);
+            }
+            $this->addNextLink($previous, $index);
+            $previous = $index;
 
             $fullcode[] = (empty($index->rankName) ? '' : trim($index->rankName, '$') . ' : ' ) . $index->fullcode;
             $argumentsList[] = $index;
@@ -3195,7 +3296,7 @@ $this->phptokens::T_YIELD,
         $this->moveToNext();
 
         $identifier = $this->addAtom($getFullnspath === self::WITH_FULLNSPATH ? 'Identifier' : 'Name', $this->id);
-        $identifier->fullcode    = $this->tokens[$this->id][1];
+        $identifier->fullcode    = $this->tokens[$this->id]->code;
         $identifier->ws->opening = '';
 
         if ($getFullnspath === self::WITH_FULLNSPATH) {
@@ -3206,7 +3307,7 @@ $this->phptokens::T_YIELD,
         return $identifier;
     }
 
-    private function guessType(AtomInterface $atom): ?Atominterface {
+    private function guessType(AtomInterface $atom): ?AtomInterface {
         switch ($atom->atom) {
             case 'Integer' :
             case 'Addition' :
@@ -3216,51 +3317,33 @@ $this->phptokens::T_YIELD,
             case 'Bitoperation':
             case 'Sign':
             case 'Spaceship':
-                $type = $this->addAtom('Scalartypehint');
-                $type->fullnspath = '\\int';
-                $type->fullcode   = 'int';
-                $type->code       = 'int';
+                $type = $this->addAtomScalartype('int');
                 break;
 
             case 'Float' :
-                $type = $this->addAtom('Scalartypehint');
-                $type->fullnspath = '\\float';
-                $type->fullcode = 'float';
-                $type->code     = 'float';
+                $type = $this->addAtomScalartype('float');
                 break;
 
             case 'String' :
             case 'Concatenation' :
             case 'Heredoc' :
             case 'Magicconstant' :
-                $type = $this->addAtom('Scalartypehint');
-                $type->fullnspath = '\\string';
-                $type->fullcode = 'string';
-                $type->code     = 'string';
+                $type = $this->addAtomScalartype('string');
                 break;
 
             case 'Null' :
-                $type = $this->addAtom('Scalartypehint');
-                $type->fullnspath = '\\null';
-                $type->fullcode = 'null';
-                $type->code     = 'null';
+                $type = $this->addAtomScalartype('null');
                 break;
 
             case 'Boolean' :
             case 'Logical' :
             case 'Comparison' :
             case 'Not' :
-                $type = $this->addAtom('Scalartypehint');
-                $type->fullnspath = '\\bool';
-                $type->fullcode = 'bool';
-                $type->code 	= 'bool';
+                $type = $this->addAtomScalartype('bool');
                 break;
 
             case 'Arrayliteral' :
-                $type = $this->addAtom('Scalartypehint');
-                $type->fullnspath = '\\array';
-                $type->fullcode = 'array';
-                $type->code 	= 'array';
+                $type = $this->addAtomScalartype('array');
                 break;
 
             case 'New' :
@@ -3294,7 +3377,7 @@ $this->phptokens::T_YIELD,
     private function processConst(): AtomInterface {
         $current = $this->id;
         $const = $this->addAtom('Const', $current);
-        $const->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $const->ws->opening = $this->tokens[$this->id]->toWs();
         $this->makePhpdoc($const);
         $this->makeAttributes($const);
 
@@ -3323,19 +3406,23 @@ $this->phptokens::T_YIELD,
 
             $this->moveToNext(); // Skip =
             $def = $this->addAtom('Constant', $this->id);
-            $def->ws->operator = '=' . $this->tokens[$this->id][4];
+            $def->ws->operator = '=' . $this->tokens[$this->id]->ws;
+
+            $this->contexts->nestContext(Context::CONTEXT_NOSEQUENCE);
+            $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
             $value = $this->processExpression(array($this->phptokens::T_SEMICOLON,
                                                     $this->phptokens::T_COMMA,
                                                     $this->phptokens::T_DOC_COMMENT,
                                                     $this->phptokens::T_CLOSE_TAG,
                                                     ));
+            $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
 
-            $this->addLink($def, $name, 'NAME');
-            $this->addLink($def, $value, 'VALUE');
+            $this->links->addLink($def, $name, 'NAME');
+            $this->links->addLink($def, $value, 'VALUE');
 
             $type = $this->guessType($value);
             if (!empty($type)) {
-                $this->addLink($def, $type, 'TYPEHINT');
+                $this->links->addLink($def, $type, 'TYPEHINT');
                 $def->typehint = 'one';
             }
 
@@ -3349,7 +3436,7 @@ $this->phptokens::T_YIELD,
 
             $this->getFullnspath($name, 'const', $name);
 
-            $this->addLink($const, $def, 'CONST');
+            $this->links->addLink($const, $def, 'CONST');
 
             if ($this->contexts->isContext(Context::CONTEXT_CLASS)) {
                 $this->calls->addDefinition(Calls::STATICCONSTANT,   $this->currentClassTrait->getCurrent()->fullnspath . '::' . $name->fullcode, $def);
@@ -3360,14 +3447,14 @@ $this->phptokens::T_YIELD,
             $this->checkPhpdoc();
 
             if ($this->nextIs(array($this->phptokens::T_COMMA))) {
-                $const->ws->separators[] = ',' . $this->tokens[$this->id + 1][4];
+                $const->ws->separators[] = ',' . $this->tokens[$this->id + 1]->ws;
             }
         } while (!$this->nextIs(array($this->phptokens::T_SEMICOLON,
                                       $this->phptokens::T_CLOSE_TAG,
                                       )));
         $const->ws->separators[] = '';
 
-        $const->fullcode = $this->tokens[$current][1] . ' ' .
+        $const->fullcode = $this->tokens[$current]->code . ' ' .
                            ($returnTypes === '' ? '' : $returnTypes) .
                            implode(', ', $fullcode);
         $const->count    = $rank + 1;
@@ -3382,7 +3469,7 @@ $this->phptokens::T_YIELD,
 
     private function processAbstract(): AtomInterface {
         $current = $this->id;
-        $abstract = $this->tokens[$this->id][1];
+        $abstract = $this->tokens[$this->id]->code;
 
         if ($this->nextIs(array($this->phptokens::T_STATIC))) {
             $next = $this->processStaticDefinition();
@@ -3391,16 +3478,21 @@ $this->phptokens::T_YIELD,
         }
 
         $next->abstract = self::ABSTRACT;
-        $next->ws->abstract = $this->tokens[$current][1] . $this->tokens[$current][4];
-        $next->fullcode = "$abstract $next->fullcode";
+        $next->ws->abstract = $this->tokens[$current]->toWs();
+        $next->fullcode = $abstract . ' ' . $next->fullcode;
         $this->makePhpdoc($next);
 
         return $next;
     }
 
-    private function processReadonly(bool $promoted = self::PROMOTED_NOT, bool $citBody = false): AtomInterface {
+    private function processReadonly(bool $promoted = self::PROMOTED_NOT): AtomInterface {
         $current = $this->id;
-        $readonly = $this->tokens[$this->id][1];
+        $readonly = $this->tokens[$this->id]->code;
+
+        if ($this->nextIs(array($this->phptokens::T_OPEN_PARENTHESIS)) &&
+            !$this->contexts->isContext(Context::CONTEXT_CITE_BODY)) {
+            return $this->processFunctioncall();
+        }
 
         if ($this->nextIs(array($this->phptokens::T_PRIVATE,
                                 $this->phptokens::T_PROTECTED,
@@ -3409,28 +3501,24 @@ $this->phptokens::T_YIELD,
             $this->moveToNext();
             $next = $this->processPpp($promoted);
             $this->makePhpdoc($next);
-            $next->fullcode = "$readonly $next->fullcode";
-            $next->ws->readonly = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $next->fullcode = $readonly . ' ' . $next->fullcode;
+            $next->ws->readonly = $this->tokens[$current]->toWs();
         } elseif ($this->nextIs(array($this->phptokens::T_FINAL,
                                       $this->phptokens::T_ABSTRACT,
                                       ))) {
             $next = $this->processNext();
             $this->makePhpdoc($next);
-            $next->fullcode = "$readonly $next->fullcode";
-            $next->ws->readonly = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $next->fullcode = $readonly . ' ' . $next->fullcode;
+            $next->ws->readonly = $this->tokens[$current]->toWs();
         } elseif ($this->nextIs(array($this->phptokens::T_CLASS))) {
+            $this->currentReadonly = true;
             $next = $this->processNext();
             $this->makePhpdoc($next);
-            $next->fullcode = "$readonly $next->fullcode";
-            $next->ws->readonly = $this->tokens[$current][1] . $this->tokens[$current][4];
-        } elseif ($this->nextIs(array($this->phptokens::T_OPEN_PARENTHESIS)) &&
-                  $citBody === false) {
-            --$this->id;
-            $next = $this->processNextAsIdentifier();
-            $this->pushExpression($next);
-            return $this->processFCOA($next);
+            $next->fullcode = $readonly . ' ' . $next->fullcode;
+            $next->ws->readonly = $this->tokens[$current]->toWs();
+            $this->currentReadonly = false;
         } else {
-            // next is variables or typehints
+            // next is variable or typehints
             $next = $this->addAtom('Ppp', $current);
             $this->makePhpdoc($next);
             $returnTypes = $this->processTypehint($next);
@@ -3439,8 +3527,8 @@ $this->phptokens::T_YIELD,
             $this->makeAttributes($variable);
             $next->ws->opening = '';
 
-            $next->ws->readonly = $this->tokens[$current][1] . $this->tokens[$current][4];
-            $next->fullcode = "$readonly $returnTypes $next->fullcode";
+            $next->ws->readonly = $this->tokens[$current]->toWs();
+            $next->fullcode = $readonly . ' ' . $returnTypes . ' ' . $next->fullcode;
             $this->makePhpdoc($next);
         }
         $next->visibility = 'none';
@@ -3452,7 +3540,7 @@ $this->phptokens::T_YIELD,
 
     private function processFinal(): AtomInterface {
         $current = $this->id;
-        $final = $this->tokens[$this->id][1];
+        $final = $this->tokens[$this->id]->code;
         $this->checkPhpdoc();
 
         if ($this->nextIs(array($this->phptokens::T_STATIC))) {
@@ -3462,8 +3550,8 @@ $this->phptokens::T_YIELD,
         }
 
         $next->final     = self::FINAL;
-        $next->ws->final = $this->tokens[$current][1] . $this->tokens[$current][4];
-        $next->fullcode  = "$final $next->fullcode";
+        $next->ws->final = $this->tokens[$current]->toWs();
+        $next->fullcode  = $final . ' ' . $next->fullcode;
         $this->makePhpdoc($next);
 
         return $next;
@@ -3471,14 +3559,14 @@ $this->phptokens::T_YIELD,
 
     private function processVar(): AtomInterface {
         $current = $this->id;
-        $visibility = $this->tokens[$this->id][1];
+        $visibility = $this->tokens[$this->id]->code;
         $ppp = $this->addAtom('Ppp', $current);
         $returnTypes = $this->processTypehint($ppp);
 
         $this->processSGVariable($ppp);
 
         $ppp->visibility = 'none';
-        $ppp->fullcode   = "$visibility {$returnTypes}$ppp->fullcode";
+        $ppp->fullcode   = $visibility . ' ' . $returnTypes . $ppp->fullcode;
         $this->makePhpdoc($ppp);
 
         return $ppp;
@@ -3486,7 +3574,7 @@ $this->phptokens::T_YIELD,
 
     private function processPPP(bool $promoted = self::PROMOTED_NOT): AtomInterface {
         $current = $this->id;
-        $visibility = $this->tokens[$this->id][1];
+        $visibility = $this->tokens[$this->id]->code;
         $this->checkPhpdoc();
 
         if ($this->nextIs(array($this->phptokens::T_FINAL,
@@ -3505,7 +3593,7 @@ $this->phptokens::T_YIELD,
             $returnTypes = '';
         } elseif ( $this->nextIs(array($this->phptokens::T_READONLY) )) {
             $this->moveToNext();
-            $ppp = $this->processReadonly($promoted, true);
+            $ppp = $this->processReadonly($promoted);
 
             $this->makeAttributes($ppp);
             $this->makePhpdoc($ppp);
@@ -3525,9 +3613,12 @@ $this->phptokens::T_YIELD,
             $ppp->ws->opening = '';
         }
 
+        if ($this->currentReadonly === true) {
+            $ppp->readonly = true;
+        }
         $ppp->visibility = strtolower($visibility);
-        $ppp->ws->visibility = $visibility . $this->tokens[$current][4];
-        $ppp->fullcode   = "$visibility {$returnTypes}$ppp->fullcode";
+        $ppp->ws->visibility = $visibility . $this->tokens[$current]->ws;
+        $ppp->fullcode   = $visibility . ' ' . $returnTypes . $ppp->fullcode;
 
         return $ppp;
     }
@@ -3535,8 +3626,8 @@ $this->phptokens::T_YIELD,
     private function processDefineConstant(AtomInterface $namecall): AtomInterface {
         $namecall->atom = 'Defineconstant';
         $namecall->fullnspath = '\\define';
-        $namecall->ws->opening = $this->tokens[$this->id - 1][1] . $this->tokens[$this->id - 1][4] .
-                                 $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $namecall->ws->opening = $this->tokens[$this->id - 1]->toWs() .
+                                 $this->tokens[$this->id]->toWs();
         $this->makePhpdoc($namecall);
 
         // Empty call
@@ -3546,7 +3637,7 @@ $this->phptokens::T_YIELD,
 
             $this->runPlugins($namecall, array());
             $this->moveToNext(); // Skip )
-            $namecall->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $namecall->ws->closing = $this->tokens[$this->id]->toWs();
 
             $this->checkExpression();
             return $namecall;
@@ -3558,18 +3649,11 @@ $this->phptokens::T_YIELD,
             $this->nextIs(array($this->phptokens::T_COMMA))
         ) {
             $name = $this->processSingle('Identifier');
-            $name->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
-            $namecall->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $name->ws->opening = $this->tokens[$this->id]->toWs();
+            $namecall->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
 
             $this->runPlugins($name);
-            $name->delimiter   = $name->code[0];
-            if (strtolower($name->delimiter) === 'b') {
-                $name->binaryString = $name->delimiter;
-                $name->delimiter    = $name->code[1];
-                $name->noDelimiter  = substr($name->code, 2, -1);
-            } else {
-                $name->noDelimiter = substr($name->code, 1, -1);
-            }
+            $this->makeString($name);
             $this->getFullnspath($name, 'const', $name);
 
             $this->calls->addDefinition(Calls::CONST, $name->fullnspath, $namecall);
@@ -3584,17 +3668,25 @@ $this->phptokens::T_YIELD,
             $name = $this->processExpression(array($this->phptokens::T_COMMA,
                                                    $this->phptokens::T_CLOSE_PARENTHESIS // In case of missing arguments...
                                                    ));
-            $namecall->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $namecall->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
         }
-        $this->addLink($namecall, $name, 'NAME');
+        // $name is often a string, but should be processed as an identifier.
+        // This is fixed here.
+        if (!empty($name->delimiter)) {
+            $name->noDelimiter = trim($name->noDelimiter, $name->delimiter);
+            $name->fullnspath = ltrim($name->fullnspath, '\\bB');
+            $name->fullnspath = trim($name->fullnspath, $name->delimiter);
+            $name->fullnspath = '\\' . $name->fullnspath;
+        }
+        $this->links->addLink($namecall, $name, 'NAME');
 
         if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS))) {
-            $namecall->fullcode   = "{$namecall->code}({$name->code})";
+            $namecall->fullcode   = $namecall->code . '(' . $name->code . ')';
             $this->pushExpression($namecall);
 
             $this->runPlugins($namecall, array('NAME'  => $name, ));
             $this->moveToNext(); // Skip )
-            $namecall->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $namecall->ws->closing = $this->tokens[$this->id]->toWs();
 
             $this->checkExpression();
             return $namecall;
@@ -3605,35 +3697,52 @@ $this->phptokens::T_YIELD,
         $value = $this->processExpression(array($this->phptokens::T_COMMA,
                                                 $this->phptokens::T_CLOSE_PARENTHESIS // In case of missing arguments...
                                                ));
-        $this->addLink($namecall, $value, 'VALUE');
+        $this->links->addLink($namecall, $value, 'VALUE');
 
         // Most common point of exit
         if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS))) {
-            $namecall->fullcode   = "{$namecall->code}({$name->fullcode}, {$value->fullcode})";
+            $namecall->fullcode   = $namecall->code . '(' . $name->fullcode . ', ' . $value->fullcode . ')';
             $this->pushExpression($namecall);
 
             $this->runPlugins($namecall, array('NAME'  => $name,
                                                'VALUE' => $value,
                                                ));
             $this->moveToNext(); // Skip )
-            $namecall->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $namecall->ws->closing = $this->tokens[$this->id]->toWs();
 
-            $this->processDefineAsConstants($namecall, $name, self::CASE_INSENSITIVE);
+            $this->processDefineAsConstants($namecall, $name, self::CASE_SENSITIVE);
 
             $this->checkExpression();
 
             return $namecall;
         }
 
-        // Third argument : case sensitive
+        // Third argument : case sensitivity
         $this->moveToNext(); // Skip ,
-        $namecall->ws->separators[] = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS))) {
+            $namecall->fullcode   = $namecall->code . '(' . $name->fullcode . ', ' . $value->fullcode . ')';
+            $this->pushExpression($namecall);
+
+            $this->runPlugins($namecall, array('NAME'  => $name,
+                                               'VALUE' => $value,
+                                               ));
+            $this->moveToNext(); // Skip )
+            $namecall->ws->closing = $this->tokens[$this->id]->toWs();
+
+            $this->processDefineAsConstants($namecall, $name, self::CASE_SENSITIVE);
+
+            $this->checkExpression();
+
+            return $namecall;
+        }
+
+        $namecall->ws->separators[] = $this->tokens[$this->id]->toWs();
         $case = $this->processExpression(array($this->phptokens::T_COMMA,
                                                $this->phptokens::T_CLOSE_PARENTHESIS // In case of missing arguments...
                                               ));
-        $this->addLink($namecall, $case, 'CASE');
+        $this->links->addLink($namecall, $case, 'CASE');
 
-        $this->processDefineAsConstants($namecall, $name, (bool) $case->boolean);
+        $this->processDefineAsConstants($namecall, $name, (bool) $case->boolean ? self::CASE_INSENSITIVE : self::CASE_SENSITIVE);
 
         $namecall->fullcode   = $namecall->code . '(' . $name->fullcode . ', ' . $value->fullcode . ', ' . $case->fullcode . ')';
         $this->pushExpression($namecall);
@@ -3645,7 +3754,7 @@ $this->phptokens::T_YIELD,
 
         if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS))) {
             $this->moveToNext(); // Skip )
-            $namecall->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $namecall->ws->closing = $this->tokens[$this->id]->toWs();
 
             $this->checkExpression();
             return $namecall;
@@ -3663,7 +3772,7 @@ $this->phptokens::T_YIELD,
             }
         }
 
-        $namecall->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $namecall->ws->closing = $this->tokens[$this->id]->toWs();
         $this->checkExpression();
         return $namecall;
     }
@@ -3712,11 +3821,11 @@ $this->phptokens::T_YIELD,
         $this->makePhpdoc($functioncall);
         $argumentsFullcode           = $functioncall->fullcode;
         $functioncall->ws->opening  = '';
-        $functioncall->ws->toargs   = '(' . $this->tokens[$current][4];
-        $functioncall->ws->closing  = ')' . $this->tokens[$this->id][4];
+        $functioncall->ws->toargs   = '(' . $this->tokens[$current]->ws;
+        $functioncall->ws->closing  = ')' . $this->tokens[$this->id]->ws;
 
         $functioncall->code      = $name->code;
-        $functioncall->fullcode  = "{$name->fullcode}({$argumentsFullcode})";
+        $functioncall->fullcode  = $name->fullcode . '(' . $argumentsFullcode . ')';
         $functioncall->token     = $name->token;
 
         if ($atom === 'Newcall') {
@@ -3734,7 +3843,7 @@ $this->phptokens::T_YIELD,
                 !empty($argumentsList[0]->noDelimiter)) {
                 $fullnspath = makeFullNsPath($argumentsList[0]->noDelimiter, FNP_CONSTANT);
                 if ($argumentsList[0]->noDelimiter[0] === '\\') {
-                    $fullnspath = "\\$fullnspath";
+                    $fullnspath = '\\' . $fullnspath;
                 }
                 $argumentsList[0]->fullnspath = $fullnspath;
                 $this->calls->addCall(!str_contains($fullnspath, '::') ? 'const' : 'staticconstant', $fullnspath, $argumentsList[0]);
@@ -3755,7 +3864,10 @@ $this->phptokens::T_YIELD,
             throw new LoadError("Unprocessed atom in functioncall definition (its name) : $atom : $this->filename : " . __LINE__);
         }
 
-        $this->addLink($functioncall, $name, 'NAME');
+        $this->links->addLink($functioncall, $name, 'NAME');
+        if ($name->isA(array('This', 'Variable'))) {
+	        $this->variableUsages->followup($name);
+        }
         if ($name->atom === 'Name') {
             $this->runPlugins($name);
         }
@@ -3777,6 +3889,8 @@ $this->phptokens::T_YIELD,
             $this->runPlugins($functioncall, $argumentsList);
             $functioncall = $this->processFCOA($functioncall);
         }
+
+        $this->links->addLink($this->currentFunction->current(), $functioncall, 'CALLED');
 
         return $functioncall;
     }
@@ -3802,11 +3916,11 @@ $this->phptokens::T_YIELD,
                                       ), -1) &&
                    $this->nextIs(array($this->phptokens::T_COLON       ))) {
             return $this->processColon();
-        } elseif (mb_strtolower($this->tokens[$this->id][1]) === 'self') {
+        } elseif (mb_strtolower($this->tokens[$this->id]->code) === 'self') {
             $string = $this->addAtom('Self', $this->id);
-        } elseif (mb_strtolower($this->tokens[$this->id][1]) === 'parent') {
+        } elseif (mb_strtolower($this->tokens[$this->id]->code) === 'parent') {
             $string = $this->addAtom('Parent', $this->id);
-        } elseif (mb_strtolower($this->tokens[$this->id][1]) === 'list') {
+        } elseif (mb_strtolower($this->tokens[$this->id]->code) === 'list') {
             $string = $this->addAtom('Name', $this->id);
             $string->fullnspath = '\\list';
         } elseif ($this->contexts->isContext(Context::CONTEXT_NEW)) {
@@ -3815,21 +3929,21 @@ $this->phptokens::T_YIELD,
             $this->runPlugins($string);
         } elseif ($this->nextIs(array($this->phptokens::T_OPEN_PARENTHESIS ))) {
             $string = $this->addAtom('Name', $this->id);
-        } elseif (in_array(mb_strtolower($this->tokens[$this->id][1]), array('true', 'false'), STRICT_COMPARISON)) {
+        } elseif (in_array(mb_strtolower($this->tokens[$this->id]->code), array('true', 'false'), STRICT_COMPARISON)) {
             $string = $this->addAtom('Boolean', $this->id);
 
             $string->noDelimiter = mb_strtolower($string->code) === 'true' ? '1' : '';
             $string->fullnspath = '\\' . mb_strtolower($string->code);
-        } elseif (mb_strtolower($this->tokens[$this->id][1]) === 'null') {
+        } elseif (mb_strtolower($this->tokens[$this->id]->code) === 'null') {
             $string = $this->addAtom('Null', $this->id);
             $string->fullnspath = '\\null';
         } else {
             $string = $this->addAtom('Identifier', $this->id);
             $string->ws->opening = '';
-            $string->ws->closing = $this->tokens[$this->id][4];
+            $string->ws->closing = $this->tokens[$this->id]->ws;
         }
 
-        $string->fullcode   = $this->tokens[$this->id][1];
+        $string->fullcode   = $this->tokens[$this->id]->code;
         $string->absolute   = self::NOT_ABSOLUTE;
 
         $this->pushExpression($string);
@@ -3879,10 +3993,11 @@ $this->phptokens::T_YIELD,
         $this->popExpression();
         $plusplus = $this->addAtom('Postplusplus', $this->id);
 
-        $this->addLink($plusplus, $previous, 'POSTPLUSPLUS');
+        $this->links->addLink($plusplus, $previous, 'POSTPLUSPLUS');
+        $this->variableUsages->followup($previous);
 
-        $plusplus->fullcode = $previous->fullcode . $this->tokens[$this->id][1];
-        $plusplus->ws->closing = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $plusplus->fullcode = $previous->fullcode . $this->tokens[$this->id]->code;
+        $plusplus->ws->closing = $this->tokens[$current]->toWs();
 
         $this->pushExpression($plusplus);
         $this->runPlugins($plusplus, array('POSTPLUSPLUS' => $previous));
@@ -3896,9 +4011,9 @@ $this->phptokens::T_YIELD,
         $current = $this->id;
 
         $operator = $this->addAtom('Preplusplus', $this->id);
-        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id][0]), 'PREPLUSPLUS');
-        $operator = $this->popExpression();
-        $operator->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id]->token), 'PREPLUSPLUS');
+        $this->popExpression();
+        $operator->ws->opening = $this->tokens[$current]->toWs();
         $this->pushExpression($operator);
 
         $this->checkExpression();
@@ -3922,9 +4037,9 @@ $this->phptokens::T_YIELD,
             $next->ws->opening = '';
 
             $next->static      = self::STATIC;
-            $next->ws->static  = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $next->ws->static  = $this->tokens[$current]->toWs();
             $next->ws->opening = '';
-            $next->code	      = $this->tokens[$current][1] . " $next->fullcode";
+            $next->code	      = $this->tokens[$current]->code . ' ' . $next->fullcode;
             $next->fullcode    = $next->code;
 
             return $next;
@@ -3943,7 +4058,7 @@ $this->phptokens::T_YIELD,
                                 $this->phptokens::T_OPEN_PARENTHESIS,
                                 ))) {
             $current = $this->id;
-            $option = $this->tokens[$this->id][1];
+            $option = $this->tokens[$this->id]->code;
 
             $ppp = $this->addAtom('Ppp', $current);
             $returnTypes = $this->processTypehint($ppp);
@@ -3952,9 +4067,9 @@ $this->phptokens::T_YIELD,
             $ppp->ws->opening = '';
 
             $ppp->static = self::STATIC;
-            $ppp->ws->static = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $ppp->ws->static = $this->tokens[$current]->toWs();
             $ppp->visibility = 'none';
-            $ppp->code		 = "$option {$returnTypes}$ppp->fullcode";
+            $ppp->code		 = $option . ' ' . $returnTypes . $ppp->fullcode;
             $ppp->fullcode   = $ppp->code;
             $this->makePhpdoc($ppp);
 
@@ -3967,10 +4082,10 @@ $this->phptokens::T_YIELD,
 
                 $void = $this->addAtomVoid();
                 $void->rank = 0;
-                $this->addLink($ppp, $void, 'TYPEHINT');
+                $this->links->addLink($ppp, $void, 'TYPEHINT');
             } else {
                 // something like public static
-                $option = $this->tokens[$this->id][1];
+                $option = $this->tokens[$this->id]->code;
 
                 $ppp = $this->addAtom('Ppp', $current);
                 $ppp->typehint = 'one';
@@ -3978,7 +4093,7 @@ $this->phptokens::T_YIELD,
                 $ppp->ws->opening = '';
 
                 $void = $this->addAtomVoid();
-                $this->addLink($ppp, $void, 'TYPEHINT');
+                $this->links->addLink($ppp, $void, 'TYPEHINT');
                 $void->rank = 0;
 
                 if (empty($ppp->visibility)) {
@@ -3987,9 +4102,9 @@ $this->phptokens::T_YIELD,
                 $this->popExpression();
 
                 $ppp->static = self::STATIC;
-                $ppp->ws->static = $this->tokens[$current][1] . $this->tokens[$current][4];
+                $ppp->ws->static = $this->tokens[$current]->toWs();
                 $ppp->ws->opening = '';
-                $ppp->code	   = "$option $ppp->fullcode";
+                $ppp->code	   = $option . ' ' . $ppp->fullcode;
                 $ppp->fullcode = $ppp->code;
             }
             return $ppp;
@@ -3998,22 +4113,23 @@ $this->phptokens::T_YIELD,
         // static methods only
         if ($this->nextIs(array($this->phptokens::T_FUNCTION,
                                 ))) {
-            $static = $this->tokens[$this->id][1];
+            $static = $this->tokens[$this->id]->code;
 
             $this->currentClassTrait->toggleThisContext();
             $ppp = $this->processNext();
             $this->currentClassTrait->toggleThisContext();
 
             $ppp->static   = self::STATIC;
-            $ppp->ws->static = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $ppp->ws->static = $this->tokens[$current]->toWs();
 
-            $ppp->code     = "$static $ppp->fullcode";
+            $ppp->code     = $static . ' ' . $ppp->fullcode;
             $ppp->fullcode = $ppp->code;
             $this->makePhpdoc($ppp);
+
             return $ppp;
         }
 
-        assert(false, "Could not process static Definition in $this->filename");
+        throw new LoadError("Could not process static Definition in $this->filename");
     }
 
     private function processStatic(): AtomInterface {
@@ -4023,7 +4139,7 @@ $this->phptokens::T_YIELD,
         if ($this->nextIs(array($this->phptokens::T_DOUBLE_COLON))   ||
             $this->nextIs(array($this->phptokens::T_INSTANCEOF), -1) ) {
             $identifier = $this->processSingle('Static');
-            $identifier->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $identifier->ws->opening = $this->tokens[$current]->toWs();
             $this->pushExpression($identifier);
             $this->getFullnspath($identifier, 'class', $identifier);
             $this->calls->addCall(Calls::A_CLASS, $identifier->fullnspath, $identifier);
@@ -4039,10 +4155,10 @@ $this->phptokens::T_YIELD,
             $this->END_OF_EXPRESSION))
         ) {
             $name = $this->addAtom('Static', $this->id);
-            $name->fullcode   = $this->tokens[$this->id][1];
+            $name->fullcode   = $this->tokens[$this->id]->code;
 
             $this->getFullnspath($name, 'class', $name);
-            $name->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $name->ws->opening = $this->tokens[$current]->toWs();
 
             if ($this->contexts->isContext(Context::CONTEXT_NEW)) {
                 $this->getFullnspath($name, 'class', $name);
@@ -4061,13 +4177,13 @@ $this->phptokens::T_YIELD,
 
                 $void = $this->addAtomVoid();
                 $void->rank = 0;
-                $this->addLink($ppp, $void, 'TYPEHINT');
+                $this->links->addLink($ppp, $void, 'TYPEHINT');
 
                 return $ppp;
             }
 
             // something like public static
-            $option = $this->tokens[$this->id][1];
+            $option = $this->tokens[$this->id]->code;
 
             $ppp = $this->addAtom('Ppp', $current);
             $ppp->typehint = 'one';
@@ -4075,7 +4191,7 @@ $this->phptokens::T_YIELD,
             $ppp->ws->opening = '';
 
             $void = $this->addAtomVoid();
-            $this->addLink($ppp, $void, 'TYPEHINT');
+            $this->links->addLink($ppp, $void, 'TYPEHINT');
             $void->rank = 0;
 
             if (empty($ppp->visibility)) {
@@ -4084,9 +4200,9 @@ $this->phptokens::T_YIELD,
             $this->popExpression();
 
             $ppp->static = self::STATIC;
-            $ppp->ws->static = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $ppp->ws->static = $this->tokens[$current]->toWs();
             $ppp->ws->opening = '';
-            $ppp->code	   = "$option $ppp->fullcode";
+            $ppp->code	   = $option . ' ' . $ppp->fullcode;
             $ppp->fullcode = $ppp->code;
 
             return $ppp;
@@ -4096,23 +4212,23 @@ $this->phptokens::T_YIELD,
         if ($this->nextIs(array($this->phptokens::T_FUNCTION,
                                 $this->phptokens::T_FN,
                                 ))) {
-            $static = $this->tokens[$this->id][1];
+            $static = $this->tokens[$this->id]->code;
 
             $this->currentClassTrait->toggleThisContext();
             $ppp = $this->processNext();
             $this->currentClassTrait->toggleThisContext();
 
             $ppp->static   = self::STATIC;
-            $ppp->ws->static = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $ppp->ws->static = $this->tokens[$current]->toWs();
 
-            $ppp->code     = "$static $ppp->fullcode";
+            $ppp->code     = $static . ' ' . $ppp->fullcode;
             $ppp->fullcode = $ppp->code;
             $this->makePhpdoc($ppp);
 
             return $ppp;
         }
 
-        assert(false, "Could not process static in $this->filename");
+        throw new LoadError("Could not process static in $this->filename");
     }
 
     private function processSGVariable(AtomInterface $static, bool $promoted = self::PROMOTED_NOT): AtomInterface {
@@ -4121,7 +4237,7 @@ $this->phptokens::T_YIELD,
 
         $this->makePhpdoc($static);
         if ($static->isA(array('Global', 'Static'))) {
-            $fullcodePrefix = $this->tokens[$this->id][1];
+            $fullcodePrefix = $this->tokens[$this->id]->code;
             $link = strtoupper($static->atom);
             $atom = $static->atom . 'definition';
         } else {
@@ -4134,11 +4250,11 @@ $this->phptokens::T_YIELD,
             }
             $fullcodePrefix = implode(' ', $fullcodePrefix);
         }
-        $static->code = $this->tokens[$this->id][1];
-        $static->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $static->code = $this->tokens[$this->id]->code;
+        $static->ws->opening = $this->tokens[$this->id]->toWs();
 
         if (!isset($fullcodePrefix)) {
-            $fullcodePrefix = $this->tokens[$current][1];
+            $fullcodePrefix = $this->tokens[$current]->code;
         }
 
         $finals = array($this->phptokens::T_SEMICOLON,
@@ -4159,7 +4275,7 @@ $this->phptokens::T_YIELD,
             $this->checkPhpdoc();
 
             if ($this->nextIs(array($this->phptokens::T_AND,
-                                   $this->phptokens::T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG))) {
+                                    $this->phptokens::T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG))) {
                 $reference = self::REFERENCE;
                 $this->moveToNext();
             } else {
@@ -4170,38 +4286,45 @@ $this->phptokens::T_YIELD,
                 $this->moveToNext();
 
                 $name = $this->addAtom('Name');
-                $name->code     = $this->tokens[$this->id][1];
+                $name->code     = $this->tokens[$this->id]->code;
                 $name->fullcode = $name->code;
                 $name->token = 'T_VARIABLE';
 
                 $element = $this->processSingle($atom);
-                $this->addLink($element, $name, 'NAME');
+                $this->links->addLink($element, $name, 'NAME');
                 $this->makePhpdoc($element);
 
                 if ($element->isA(array('Globaldefinition', 'Staticdefinition', 'Variabledefinition'))) {
                     if ($this->currentVariables->exists($element->code)) {
-                        $definition = $this->currentVariables->get($this->tokens[$this->id][1]);
+                        $definition = $this->currentVariables->get($this->tokens[$this->id]->code);
                     } else {
                         $definition = $this->addAtom('Variabledefinition');
-                        $definition->code 	  = $this->tokens[$this->id][1];
+                        $definition->code 	  = $this->tokens[$this->id]->code;
                         $definition->fullcode = $definition->code;
-                        $this->addLink($this->currentFunction->current(), $definition, 'DEFINITION');
+                        $this->links->addLink($this->currentFunction->current(), $definition, 'DEFINITION');
                         $this->currentVariables->set($definition->code, $definition);
+			            $this->variableUsages->addRoot($definition);
+				        $this->variableUsages->followup($element);
                     }
 
-                    $this->addLink($definition, $element, 'DEFINITION');
+                    $this->links->addLink($definition, $element, 'DEFINITION');
                 }
 
                 if ($this->nextIs(array($this->phptokens::T_EQUAL))) {
                     $this->moveToNext();
-                    $element->ws->operator = '=' . $this->tokens[$this->id][4];
+                    $element->ws->operator = '=' . $this->tokens[$this->id]->ws;
+
+                    $this->contexts->nestContext(Context::CONTEXT_NOSEQUENCE);
+                    $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
                     $default = $this->processExpression(array($this->phptokens::T_SEMICOLON,
                                                               $this->phptokens::T_CLOSE_TAG,
                                                               $this->phptokens::T_COMMA,
                                                               $this->phptokens::T_CLOSE_PARENTHESIS,
                                                               $this->phptokens::T_DOC_COMMENT,
                                                               ));
-                    $element->ws->closing = $this->tokens[$this->id][4];
+                    $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
+
+                    $element->ws->closing = $this->tokens[$this->id]->ws;
                 } else {
                     $element->ws->operator = '';
                     $default = $this->addAtomVoid();
@@ -4225,7 +4348,7 @@ $this->phptokens::T_YIELD,
             }
 
             $element->rank = ++$rank;
-            $this->addLink($static, $element, $link);
+            $this->links->addLink($static, $element, $link);
 
             if ($atom === 'Propertydefinition') {
                 $this->makeAttributes($element);
@@ -4240,18 +4363,18 @@ $this->phptokens::T_YIELD,
                 }
             }
 
-            $this->addLink($element, $default, 'DEFAULT');
+            $this->links->addLink($element, $default, 'DEFAULT');
             if ($default->atom === 'Void') {
                 $this->runPlugins($element);
             } else {
-                $element->fullcode .= " = {$default->fullcode}";
+                $element->fullcode .= ' = ' . $default->fullcode;
                 $this->runPlugins($element, array('DEFAULT' => $default));
             }
             $fullcode[] = $element->fullcode;
             $extras[] = $element;
             $this->checkPhpdoc();
-            if ($this->tokens[$this->id + 1][1] === ',') {
-                $static->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            if ($this->tokens[$this->id + 1]->code === ',') {
+                $static->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
             }
         } while (!$this->nextIs($finals));
         $static->ws->separators[] = '';
@@ -4286,16 +4409,17 @@ $this->phptokens::T_YIELD,
         $bracket = $this->addAtom('Array', $current + 1);
 
         $variable = $this->popExpression();
-        $this->addLink($bracket, $variable, 'VARIABLE');
+        $this->links->addLink($bracket, $variable, 'VARIABLE');
+        $this->variableUsages->followup($variable);
 
         // Skip opening bracket
-        $opening = $this->tokens[$this->id + 1][0];
+        $opening = $this->tokens[$this->id + 1]->token;
         if ($opening === '{') {
             $closing = '}';
         } else {
             $closing = ']';
         }
-        $bracket->ws->opening = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $bracket->ws->opening = $this->tokens[$this->id + 1]->toWs();
 
         $this->moveToNext();
         $resetContext = false;
@@ -4306,6 +4430,7 @@ $this->phptokens::T_YIELD,
         $index = $this->processExpression(array($this->phptokens::T_CLOSE_BRACKET,
                                                 $this->phptokens::T_CLOSE_CURLY,
                                                 ));
+		$this->variableUsages->followup($index);
 
         if ($resetContext === true) {
             $this->contexts->toggleContext(Context::CONTEXT_NEW);
@@ -4313,7 +4438,7 @@ $this->phptokens::T_YIELD,
 
         // Skip closing bracket
         $this->moveToNext();
-        $this->addLink($bracket, $index, 'INDEX');
+        $this->links->addLink($bracket, $index, 'INDEX');
 
         if ($variable->code === '$GLOBALS' && !empty($index->noDelimiter)) {
             // Build the name of the global, dropping the fi
@@ -4322,7 +4447,7 @@ $this->phptokens::T_YIELD,
 
         $bracket->fullcode  = $variable->fullcode . $opening . $index->fullcode . $closing ;
         $bracket->enclosing = self::NO_ENCLOSING;
-        $bracket->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $bracket->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->pushExpression($bracket);
         $this->runPlugins($bracket, array('VARIABLE' => $variable,
@@ -4360,10 +4485,10 @@ $this->phptokens::T_YIELD,
 
         $block->code     = '{}';
         $block->fullcode = static::FULLCODE_BLOCK;
-        $block->token    = $this->getToken($this->tokens[$this->id][0]);
+        $block->token    = $this->getToken($this->tokens[$this->id]->token);
         $block->bracket  = self::BRACKET;
-        $block->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
-        $block->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $block->ws->opening = $this->tokens[$current]->toWs();
+        $block->ws->closing = $this->tokens[$this->id + 1]->toWs();
 
         $this->moveToNext(); // skip }
 
@@ -4390,7 +4515,7 @@ $this->phptokens::T_YIELD,
                 if ($this->nextIs(array($this->phptokens::T_COMMA))) {
                     $element = $this->popExpression();
                     $this->addToSequence($element);
-                    $this->sequence->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                    $this->sequence->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
 
                     $this->moveToNext();
                 }
@@ -4405,7 +4530,7 @@ $this->phptokens::T_YIELD,
         $this->endSequence();
         $block->code        = $sequence->code;
         $block->fullcode    = self::FULLCODE_SEQUENCE;
-        $block->token       = $this->getToken($this->tokens[$this->id][0]);
+        $block->token       = $this->getToken($this->tokens[$this->id]->token);
         $block->ws->closing = '';
         $block->ws->opening = '';
 
@@ -4420,39 +4545,39 @@ $this->phptokens::T_YIELD,
         $current = $this->id;
         $for = $this->addAtom('For', $current);
         $this->makePhpdoc($for);
-        $for->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                            $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $for->ws->opening = $this->tokens[$this->id]->toWs() .
+                            $this->tokens[$this->id + 1]->toWs();
         $this->moveToNext(); // Skip for
 
         $init = $this->processForblock(array($this->phptokens::T_SEMICOLON));
-        $this->addLink($for, $init, 'INIT');
-        $for->ws->init = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $this->links->addLink($for, $init, 'INIT');
+        $for->ws->init = $this->tokens[$this->id]->toWs();
 
         $final = $this->processForblock(array($this->phptokens::T_SEMICOLON));
-        $this->addLink($for, $final, 'FINAL');
-        $for->ws->final = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $this->links->addLink($for, $final, 'FINAL');
+        $for->ws->final = $this->tokens[$this->id]->toWs();
 
         $increment = $this->processForblock(array($this->phptokens::T_CLOSE_PARENTHESIS));
-        $this->addLink($for, $increment, 'INCREMENT');
-        $for->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $this->links->addLink($for, $increment, 'INCREMENT');
+        $for->ws->toblock = $this->tokens[$this->id]->toWs();
         $isColon = $this->whichSyntax($current, $this->id + 1);
 
         if ($isColon === self::ALTERNATIVE_SYNTAX) {
-            $for->ws->toblock .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $for->ws->toblock .= $this->tokens[$this->id + 1]->toWs();
         }
 
         $block = $this->processFollowingBlock($isColon === self::ALTERNATIVE_SYNTAX ? array($this->phptokens::T_ENDFOR) : array());
-        $this->addLink($for, $block, 'BLOCK');
+        $this->links->addLink($for, $block, 'BLOCK');
 
         if ($isColon === self::ALTERNATIVE_SYNTAX) {
-            $fullcode = $this->tokens[$current][1] . '(' . $init->fullcode . ' ; ' . $final->fullcode . ' ; ' . $increment->fullcode . ') : ' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id + 1][1];
+            $fullcode = $this->tokens[$current]->code . '(' . $init->fullcode . ' ; ' . $final->fullcode . ' ; ' . $increment->fullcode . ') : ' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id + 1]->code;
             // include endoforeach and the final ;
-            $for->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
-            if ($this->tokens[$this->id + 2][1] === ';') {
-                $for->ws->closing .= $this->tokens[$this->id + 2][1] . $this->tokens[$this->id + 2][4];
+            $for->ws->closing = $this->tokens[$this->id + 1]->toWs();
+            if ($this->tokens[$this->id + 2]->code === ';') {
+                $for->ws->closing .= $this->tokens[$this->id + 2]->toWs();
             }
         } else {
-            $fullcode = $this->tokens[$current][1] . '(' . $init->fullcode . ' ; ' . $final->fullcode . ' ; ' . $increment->fullcode . ')' . ($block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE);
+            $fullcode = $this->tokens[$current]->code . '(' . $init->fullcode . ' ; ' . $final->fullcode . ' ; ' . $increment->fullcode . ')' . ($block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE);
             $for->ws->closing = '';
         }
 
@@ -4474,42 +4599,45 @@ $this->phptokens::T_YIELD,
         $current = $this->id;
         $foreach = $this->addAtom('Foreach', $current);
         $this->makePhpdoc($foreach);
-        $foreach->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                                $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $foreach->ws->opening = $this->tokens[$this->id]->toWs() .
+                                $this->tokens[$this->id + 1]->toWs();
         $this->moveToNext(); // Skip foreach
 
         do {
             $source = $this->processNext();
         } while (!$this->nextIs(array($this->phptokens::T_AS)));
+        $this->variableUsages->followup($source);
 
         $this->popExpression();
-        $this->addLink($foreach, $source, 'SOURCE');
+        $this->links->addLink($foreach, $source, 'SOURCE');
 
-        $as = $this->tokens[$this->id + 1][1];
+        $as = $this->tokens[$this->id + 1]->code;
         $this->moveToNext(); // Skip as
-        $foreach->ws->as = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $foreach->ws->as = $this->tokens[$this->id]->toWs();
         $variablesStart = max(array_keys($this->atoms));
 
         do {
             $value = $this->processNext();
         } while (!$this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS,
-                                    $this->phptokens::T_DOUBLE_ARROW)));
+                                      $this->phptokens::T_DOUBLE_ARROW)));
         $this->popExpression();
         $valueFullcode = $value->fullcode;
+        $this->variableUsages->followup($value);
 
         if ($this->nextIs(array($this->phptokens::T_DOUBLE_ARROW))) {
-            $this->addLink($foreach, $value, 'INDEX');
+            $this->links->addLink($foreach, $value, 'INDEX');
             $variablesStart = max(array_keys($this->atoms));
             $index = $value;
             $this->moveToNext();
-            $index->ws->operator ??= $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $index->ws->operator ??= $this->tokens[$this->id]->toWs();
             do {
                 $value = $this->processNext();
             } while (!$this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS)));
             $this->popExpression();
-            $valueFullcode .= " => {$value->fullcode}";
+            $valueFullcode .= ' => ' . $value->fullcode;
+	        $this->variableUsages->followup($value);
         }
-        $this->addLink($foreach, $value, 'VALUE');
+        $this->links->addLink($foreach, $value, 'VALUE');
 
         // Warning : this is also connecting variables used for reading : foreach($a as [$b => $c]) { }
         $max = max(array_keys($this->atoms));
@@ -4517,30 +4645,30 @@ $this->phptokens::T_YIELD,
         for ($i = $variablesStart + 1; $i < $max; ++$i) {
             if ($this->atoms[$i]->atom === 'Variable' && !isset($double[$this->atoms[$i]->code])) {
                 $double[$this->atoms[$i]->code] = 1;
-                $this->addLink($foreach, $this->atoms[$i], 'VALUE');
+                $this->links->addLink($foreach, $this->atoms[$i], 'VALUE');
             }
         }
         unset($double);
 
         $this->moveToNext(); // Skip )
-        $foreach->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $foreach->ws->toblock = $this->tokens[$this->id]->toWs();
         $isColon = $this->whichSyntax($current, $this->id + 1);
         if ($isColon === self::ALTERNATIVE_SYNTAX) {
-            $foreach->ws->toblock .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $foreach->ws->toblock .= $this->tokens[$this->id + 1]->toWs();
         }
 
         $block = $this->processFollowingBlock($isColon === self::ALTERNATIVE_SYNTAX ? array($this->phptokens::T_ENDFOREACH) : array());
-        $this->addLink($foreach, $block, 'BLOCK');
+        $this->links->addLink($foreach, $block, 'BLOCK');
 
         if ($isColon === self::ALTERNATIVE_SYNTAX) {
-            $fullcode = $this->tokens[$current][1] . '(' . $source->fullcode . ' ' . $as . ' ' . $valueFullcode . ') : ' . self::FULLCODE_SEQUENCE . ' endforeach';
+            $fullcode = $this->tokens[$current]->code . '(' . $source->fullcode . ' ' . $as . ' ' . $valueFullcode . ') : ' . self::FULLCODE_SEQUENCE . ' endforeach';
             // include endoforeach and the final ;
-            $foreach->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
-            if ($this->tokens[$this->id + 2][1] === ';') {
-                $foreach->ws->closing .= $this->tokens[$this->id + 2][1] . $this->tokens[$this->id + 2][4];
+            $foreach->ws->closing = $this->tokens[$this->id + 1]->toWs();
+            if ($this->tokens[$this->id + 2]->code === ';') {
+                $foreach->ws->closing .= $this->tokens[$this->id + 2]->toWs();
             }
         } else {
-            $fullcode = $this->tokens[$current][1] . '(' . $source->fullcode . ' ' . $as . ' ' . $valueFullcode . ')' . ($block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE);
+            $fullcode = $this->tokens[$current]->code . '(' . $source->fullcode . ' ' . $as . ' ' . $valueFullcode . ')' . ($block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE);
             $foreach->ws->closing = '';
         }
 
@@ -4558,7 +4686,6 @@ $this->phptokens::T_YIELD,
         $this->pushExpression($foreach);
         $this->finishWithAlternative($isColon);
 
-
         return $foreach;
     }
 
@@ -4568,11 +4695,11 @@ $this->phptokens::T_YIELD,
             $this->moveToNext();
             $current = $this->id;
             $block = $this->processBlock(self::RELATED_BLOCK);
-            $block->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $block->ws->opening = $this->tokens[$current]->toWs();
             $block->ws->separators[] = '';
             $block->bracket = self::BRACKET;
             $this->popExpression(); // drop it
-            $block->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $block->ws->closing = $this->tokens[$this->id]->toWs();
             // Finish on the last token of the block
         } elseif ($this->nextIs(array($this->phptokens::T_COLON))) {
             $this->startSequence();
@@ -4593,7 +4720,7 @@ $this->phptokens::T_YIELD,
             $block = $this->sequence;
             $block->ws->opening = '';
             $block->ws->separators[] = '';
-            $block->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $block->ws->closing = $this->tokens[$this->id + 1]->toWs();
 
             $void = $this->addAtomVoid();
             $this->addToSequence($void);
@@ -4614,7 +4741,6 @@ $this->phptokens::T_YIELD,
             // One expression only
             $this->startSequence();
             $block = $this->sequence;
-            $current = $this->id;
 
             // This may include WHILE in the list of finals for do....while
             $finals = array_merge(array($this->phptokens::T_SEMICOLON,
@@ -4646,7 +4772,7 @@ $this->phptokens::T_YIELD,
                 $this->runPlugins($block, array($expression));
             }
 
-            $this->sequence->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $this->sequence->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
             $this->sequence->ws->opening = '';
             $this->sequence->ws->closing = '';
 
@@ -4662,15 +4788,15 @@ $this->phptokens::T_YIELD,
     private function processDo(): AtomInterface {
         $current = $this->id;
         $dowhile = $this->addAtom('Dowhile', $this->id);
-        $dowhile->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $dowhile->ws->opening = $this->tokens[$this->id]->toWs();
 
         $block = $this->processFollowingBlock(array($this->phptokens::T_WHILE));
-        $this->addLink($dowhile, $block, 'BLOCK');
+        $this->links->addLink($dowhile, $block, 'BLOCK');
 
-        $while = $this->tokens[$this->id + 1][1];
+        $while = $this->tokens[$this->id + 1]->code;
         $this->moveToNext(); // Skip while
-        $dowhile->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                                $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $dowhile->ws->toblock = $this->tokens[$this->id]->toWs() .
+                                $this->tokens[$this->id + 1]->toWs();
         $this->moveToNext(); // Skip (
 
         do {
@@ -4678,10 +4804,10 @@ $this->phptokens::T_YIELD,
         } while (!$this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS)));
         $this->moveToNext(); // skip )
         $this->popExpression();
-        $this->addLink($dowhile, $condition, 'CONDITION');
+        $this->links->addLink($dowhile, $condition, 'CONDITION');
 
-        $dowhile->fullcode = $this->tokens[$current][1] . ( $block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE) . $while . '(' . $condition->fullcode . ')';
-        $dowhile->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $dowhile->fullcode = $this->tokens[$current]->code . ( $block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE) . $while . '(' . $condition->fullcode . ')';
+        $dowhile->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->runPlugins($dowhile, array('CONDITION' => $condition,
                                           'BLOCK'     => $block));
@@ -4695,8 +4821,8 @@ $this->phptokens::T_YIELD,
     private function processWhile(): AtomInterface {
         $current = $this->id;
         $while = $this->addAtom('While', $current);
-        $while->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                              $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $while->ws->opening = $this->tokens[$this->id]->toWs() .
+                              $this->tokens[$this->id + 1]->toWs();
 
         $this->moveToNext(); // Skip while
 
@@ -4704,24 +4830,24 @@ $this->phptokens::T_YIELD,
             $condition = $this->processNext();
         } while (!$this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS)));
         $this->popExpression();
-        $this->addLink($while, $condition, 'CONDITION');
+        $this->links->addLink($while, $condition, 'CONDITION');
 
         $this->moveToNext(); // Skip )
-        $while->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
-        if ($this->tokens[$this->id + 1][1] === ':') {
-            $while->ws->toblock .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $while->ws->toblock = $this->tokens[$this->id]->toWs();
+        if ($this->tokens[$this->id + 1]->code === ':') {
+            $while->ws->toblock .= $this->tokens[$this->id + 1]->toWs();
         }
 
         $isColon = $this->whichSyntax($current, $this->id + 1);
         $block = $this->processFollowingBlock($isColon === self::ALTERNATIVE_SYNTAX ? array($this->phptokens::T_ENDWHILE) : array());
-        $this->addLink($while, $block, 'BLOCK');
+        $this->links->addLink($while, $block, 'BLOCK');
 
         if ($isColon === self::ALTERNATIVE_SYNTAX) {
-            $fullcode = $this->tokens[$current][1] . ' (' . $condition->fullcode . ') : ' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id + 1][1];
-            $while->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4] .
-                                  $this->tokens[$this->id + 2][1] . $this->tokens[$this->id + 2][4];
+            $fullcode = $this->tokens[$current]->code . ' (' . $condition->fullcode . ') : ' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id + 1]->code;
+            $while->ws->closing = $this->tokens[$this->id + 1]->toWs() .
+                                  $this->tokens[$this->id + 2]->toWs();
         } else {
-            $fullcode = $this->tokens[$current][1] . ' (' . $condition->fullcode . ')' . ($block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE);
+            $fullcode = $this->tokens[$current]->code . ' (' . $condition->fullcode . ')' . ($block->bracket === self::BRACKET ? self::FULLCODE_BLOCK : self::FULLCODE_SEQUENCE);
             $while->ws->closing = '';
         }
 
@@ -4741,7 +4867,7 @@ $this->phptokens::T_YIELD,
         $current = $this->id;
         $declare = $this->addAtom('Declare', $current);
         $fullcode = array();
-        $declare->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] . $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $declare->ws->opening = $this->tokens[$this->id]->toWs() . $this->tokens[$this->id + 1]->toWs();
 
         $this->moveToNext(); // Skip declare
         $strictTypes = false;
@@ -4750,18 +4876,18 @@ $this->phptokens::T_YIELD,
             $name = $this->processSingle('Name');
 
             $declaredefinition = $this->addAtom('Declaredefinition');
-            $declaredefinition->ws->operator = '=' . $this->tokens[$this->id][4];
+            $declaredefinition->ws->operator = '=' . $this->tokens[$this->id]->ws;
             $this->moveToNext(); // Skip =
             $config = $this->processNext();
             $this->popExpression();
             $declaredefinition->code = $name->code . ' = ' . $config->code;
 
-            $this->addLink($declaredefinition, $name, 'NAME');
-            $this->addLink($declaredefinition, $config, 'VALUE');
+            $this->links->addLink($declaredefinition, $name, 'NAME');
+            $this->links->addLink($declaredefinition, $config, 'VALUE');
 
             $strictTypes = $strictTypes || strtolower($name->code) === 'strict_types';
 
-            $this->addLink($declare, $declaredefinition, 'DECLARE');
+            $this->links->addLink($declare, $declaredefinition, 'DECLARE');
             $declaredefinition->fullcode = $name->fullcode . ' = ' . $config->fullcode;
             $fullcode[] = $declaredefinition->fullcode;
 
@@ -4769,27 +4895,27 @@ $this->phptokens::T_YIELD,
         } while ($this->nextIs(array($this->phptokens::T_COMMA), 0));
 
         if ($strictTypes === true) {
-            $fullcode = $this->tokens[$current][1] . ' (' . implode(', ', $fullcode) . ') ';
-            $declare->ws->endargs = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $fullcode = $this->tokens[$current]->code . ' (' . implode(', ', $fullcode) . ') ';
+            $declare->ws->endargs = $this->tokens[$this->id]->toWs();
             $this->moveToNext(); // skip ;
 
             $isColon = false;
         } else {
             $isColon = $this->whichSyntax($current, $this->id + 1);
-            $declare->ws->endargs = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $declare->ws->endargs = $this->tokens[$this->id]->toWs();
             if ($this->nextIs(array($this->phptokens::T_SEMICOLON))) {
-                $fullcode = $this->tokens[$current][1] . ' (' . implode(', ', $fullcode) . ') ;';
-                $declare->ws->endargs = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                                        $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $fullcode = $this->tokens[$current]->code . ' (' . implode(', ', $fullcode) . ') ;';
+                $declare->ws->endargs = $this->tokens[$this->id]->toWs() .
+                                        $this->tokens[$this->id + 1]->toWs();
                 $this->moveToNext(); // skip ;
             } else {
                 $block = $this->processFollowingBlock($isColon === self::ALTERNATIVE_SYNTAX ? array($this->phptokens::T_ENDDECLARE) : array());
-                $this->addLink($declare, $block, 'BLOCK');
+                $this->links->addLink($declare, $block, 'BLOCK');
 
                 if ($isColon === self::ALTERNATIVE_SYNTAX) {
-                    $fullcode = $this->tokens[$current][1] . ' (' . implode(', ', $fullcode) . ') : ' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id + 1][1];
+                    $fullcode = $this->tokens[$current]->code . ' (' . implode(', ', $fullcode) . ') : ' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id + 1]->code;
                 } else {
-                    $fullcode = $this->tokens[$current][1] . ' (' . implode(', ', $fullcode) . ') ' . self::FULLCODE_BLOCK;
+                    $fullcode = $this->tokens[$current]->code . ' (' . implode(', ', $fullcode) . ') ' . self::FULLCODE_BLOCK;
                 }
             }
         }
@@ -4803,7 +4929,7 @@ $this->phptokens::T_YIELD,
             if ($this->nextIs(array($this->phptokens::T_CLOSE_TAG), 0)) {
                 --$this->id;
             }
-            $declare->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $declare->ws->closing = $this->tokens[$this->id]->toWs();
             $this->pushExpression($declare);
             $this->processSemicolon();
         } else {
@@ -4821,15 +4947,19 @@ $this->phptokens::T_YIELD,
     private function processSwitchDefault(): AtomInterface {
         $current = $this->id;
         $default = $this->addAtom('Default', $current);
-        $default->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                                $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $default->ws->opening = $this->tokens[$this->id]->toWs() .
+                                $this->tokens[$this->id + 1]->toWs();
 
+        $this->contexts->nestContext(Context::CONTEXT_NOSEQUENCE);
+        $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
         if ($this->nextIs(array($this->phptokens::T_COLON,
-                                 $this->phptokens::T_SEMICOLON))) {
+                                $this->phptokens::T_SEMICOLON,
+                                ))) {
             $this->moveToNext(); // Skip :
         }
+        $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
 
-        $default->fullcode = $this->tokens[$current][1] . ' : ' . self::FULLCODE_SEQUENCE;
+        $default->fullcode = $this->tokens[$current]->code . ' : ' . self::FULLCODE_SEQUENCE;
 
         if ($this->nextIs(array($this->phptokens::T_CASE,
                                 $this->phptokens::T_DEFAULT,
@@ -4862,7 +4992,7 @@ $this->phptokens::T_YIELD,
         $code->ws->opening = '';
 
         foreach ($this->cases->getAll() as $aCase) {
-            $this->addLink($aCase[0], $code, 'CODE');
+            $this->links->addLink($aCase[0], $code, 'CODE');
 
             if ($aCase[0]->atom === 'Default') {
                 $this->runPlugins($aCase[0], array('CODE' => $code));
@@ -4872,7 +5002,7 @@ $this->phptokens::T_YIELD,
             }
         }
 
-        $this->addLink($default, $code, 'CODE');
+        $this->links->addLink($default, $code, 'CODE');
         $this->runPlugins($default, array('CODE' => $code));
 
         return $default;
@@ -4888,12 +5018,12 @@ $this->phptokens::T_YIELD,
 
         if ($this->nextIs(array($this->phptokens::T_DEFAULT))) {
             $case = $this->addAtom('Default', $current);
-            $case->fullcode = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $case->fullcode = $this->tokens[$this->id + 1]->toWs();
 
             $item = null;
             $this->moveToNext();
-            $case->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                                 $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $case->ws->opening = $this->tokens[$this->id]->toWs() .
+                                 $this->tokens[$this->id + 1]->toWs();
         } else {
             $case = $this->addAtom('Case', $current);
 
@@ -4905,11 +5035,12 @@ $this->phptokens::T_YIELD,
             $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
 
             $this->popExpression();
-            $this->addLink($case, $item, 'CASE');
+            $this->links->addLink($case, $item, 'CASE');
             $case->fullcode = $item->fullcode;
 
             $case->ws->opening = '';
-            $case->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $case->ws->toblock = $this->tokens[$this->id + 1]->toWs();
+			$this->variableUsages->split();
         }
         $this->cases->add(array($case, $item));
         $case->ws->final = $this->nextIs(array($this->phptokens::T_CLOSE_CURLY));
@@ -4937,10 +5068,10 @@ $this->phptokens::T_YIELD,
         $this->endSequence();
 
         foreach ($this->cases->getAll() as $aCase) {
-            $this->addLink($aCase[0], $code, 'CODE');
+            $this->links->addLink($aCase[0], $code, 'CODE');
 
             if ($aCase[0]->atom === 'Default') {
-                $this->runPlugins($aCase[0], array( 'CODE' => $code));
+                $this->runPlugins($aCase[0], array('CODE' => $code));
             } else {
                 $this->runPlugins($aCase[0], array('CASE' => $aCase[1],
                                                    'CODE' => $code));
@@ -4959,9 +5090,10 @@ $this->phptokens::T_YIELD,
     private function processSwitchCase(): AtomInterface {
         $current = $this->id;
         $case = $this->addAtom('Case', $current);
-        $case->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $case->ws->opening = $this->tokens[$this->id]->toWs();
 
         $this->contexts->nestContext(Context::CONTEXT_NOSEQUENCE);
+        $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
         do {
             $item = $this->processNext();
         } while (!$this->nextIs(array($this->phptokens::T_COLON,
@@ -4969,17 +5101,17 @@ $this->phptokens::T_YIELD,
                                       $this->phptokens::T_CLOSE_TAG,
                                       )));
         $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
-        $case->ws->toblock = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $case->ws->toblock = $this->tokens[$this->id + 1]->toWs();
 
         $this->popExpression();
-        $this->addLink($case, $item, 'CASE');
+        $this->links->addLink($case, $item, 'CASE');
 
         if ($this->nextIs(array($this->phptokens::T_COLON,
                                  $this->phptokens::T_SEMICOLON))) {
             $this->moveToNext(); // Skip :
         }
 
-        $case->fullcode = $this->tokens[$current][1] . ' ' . $item->fullcode . ' : ' . self::FULLCODE_SEQUENCE . ' ';
+        $case->fullcode = $this->tokens[$current]->code . ' ' . $item->fullcode . ' : ' . self::FULLCODE_SEQUENCE . ' ';
 
         if ($this->nextIs(array($this->phptokens::T_CASE,
                                 $this->phptokens::T_DEFAULT,
@@ -5015,7 +5147,7 @@ $this->phptokens::T_YIELD,
 
         foreach ($this->cases->getAll() as $aCase) {
             $code->ws->opening = '';
-            $this->addLink($aCase[0], $code, 'CODE');
+            $this->links->addLink($aCase[0], $code, 'CODE');
 
             if ($aCase[0]->atom === 'Default') {
                 $this->runPlugins($aCase[0], array('CODE' => $code));
@@ -5025,7 +5157,7 @@ $this->phptokens::T_YIELD,
             }
         }
 
-        $this->addLink($case, $code, 'CODE');
+        $this->links->addLink($case, $code, 'CODE');
 
         $this->runPlugins($case, array( 'CASE' => $item,
                                         'CODE' => $code));
@@ -5039,9 +5171,11 @@ $this->phptokens::T_YIELD,
         // skip { or :
         $this->moveToNext();
 
-        switch ($this->tokens[$this->id][0]) {
+        switch ($this->tokens[$this->id]->token) {
             case $this->phptokens::T_CASE:
                 $case = $this->processSwitchCase();
+                // @todo This doesn't take into account breaks/returns that break the flow of exit.
+				$this->variableUsages->split();
                 break;
 
             case $this->phptokens::T_DEFAULT:
@@ -5062,32 +5196,36 @@ $this->phptokens::T_YIELD,
     private function processSwitch(): AtomInterface {
         $current = $this->id;
         $switch = $this->addAtom('Switch', $current);
-        $switch->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] . $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $switch->ws->opening = $this->tokens[$this->id]->toWs() . $this->tokens[$this->id + 1]->toWs();
         $this->moveToNext(); // Skip (
         $this->cases->push();
 
         do {
             $name = $this->processNext();
         } while (!$this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS)));
+        // @todo : may be a not a variable only
+		$this->variableUsages->followup($name);
         $this->popExpression();
-        $this->addLink($switch, $name, 'CONDITION');
+        $this->links->addLink($switch, $name, 'CONDITION');
         $this->moveToNext(); // skip )
-        $switch->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] . $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $switch->ws->toblock = $this->tokens[$this->id]->toWs() . $this->tokens[$this->id + 1]->toWs();
 
         $isColon = $this->whichSyntax($current, $this->id + 1);
+
+		$this->variableUsages->split(VariablesUsageContext::NEST);
 
         $cases = $this->addAtom('Sequence', $current);
         $cases->code         = self::FULLCODE_SEQUENCE;
         $cases->fullcode     = $cases->code;
         $cases->bracket      = $isColon === true ? self::NOT_BRACKET : self::BRACKET;
 
-        $this->addLink($switch, $cases, 'CASES');
+        $this->links->addLink($switch, $cases, 'CASES');
         $extraCases = array();
 
         $rank = -1;
         if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS))) {
             $void = $this->addAtomVoid();
-            $this->addLink($cases, $void, 'EXPRESSION');
+            $this->links->addLink($cases, $void, 'EXPRESSION');
             $void->rank = $rank;
             $extraCases[] = $void;
 
@@ -5104,11 +5242,10 @@ $this->phptokens::T_YIELD,
                 // process case or default.
                 $case = $this->processSwitchCaseDefault();
 
-                $this->popExpression();
-                $this->addLink($cases, $case, 'EXPRESSION');
+                $this->links->addLink($cases, $case, 'EXPRESSION');
                 $case->rank = ++$rank;
                 $extraCases[] = $case;
-                $cases->ws->separators[] = ''; //$this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $cases->ws->separators[] = '';
             }
         }
         $this->moveToNext();
@@ -5117,11 +5254,11 @@ $this->phptokens::T_YIELD,
         $cases->ws->closing = '';
 
         if ($isColon === self::ALTERNATIVE_SYNTAX) {
-            $fullcode = $this->tokens[$current][1] . ' (' . $name->fullcode . ') :' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id][1];
-            $switch->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $fullcode = $this->tokens[$current]->code . ' (' . $name->fullcode . ') :' . self::FULLCODE_SEQUENCE . ' ' . $this->tokens[$this->id]->code;
+            $switch->ws->closing = $this->tokens[$this->id]->toWs();
         } else {
-            $fullcode = $this->tokens[$current][1] . ' (' . $name->fullcode . ')' . self::FULLCODE_BLOCK;
-            $switch->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $fullcode = $this->tokens[$current]->code . ' (' . $name->fullcode . ')' . self::FULLCODE_BLOCK;
+            $switch->ws->closing = $this->tokens[$this->id]->toWs();
         }
 
         $switch->fullcode    = $fullcode;
@@ -5130,6 +5267,8 @@ $this->phptokens::T_YIELD,
 
         $this->runPlugins($switch, array('CONDITION' => $name,
                                          'CASES'     => $cases, ));
+
+		$this->variableUsages->merge(VariablesUsageContext::NEST);
 
         $this->pushExpression($switch);
         $this->finishWithAlternative($isColon);
@@ -5142,8 +5281,8 @@ $this->phptokens::T_YIELD,
     private function processMatch(): AtomInterface {
         $current = $this->id;
         $match = $this->addAtom('Match', $current);
-        $match->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                              $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $match->ws->opening = $this->tokens[$this->id]->toWs() .
+                              $this->tokens[$this->id + 1]->toWs();
 
         $this->moveToNext(); // Skip (
         $this->cases->push();
@@ -5151,58 +5290,58 @@ $this->phptokens::T_YIELD,
         do {
             $name = $this->processNext();
         } while (!$this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS)));
+        $this->variableUsages->followup($name);
         $this->popExpression();
-        $this->addLink($match, $name, 'CONDITION');
+        $this->links->addLink($match, $name, 'CONDITION');
+
+		// @todo : handle default case correctly
+		$this->variableUsages->split(VariablesUsageContext::NEST);
 
         $cases = $this->addAtom('Sequence', $current);
         $cases->code     = self::FULLCODE_SEQUENCE;
         $cases->fullcode = $cases->code;
         $cases->bracket  = self::BRACKET;
 
-        $this->addLink($match, $cases, 'CASES');
+        $this->links->addLink($match, $cases, 'CASES');
         $extraCases = array();
         $this->moveToNext();
-        $match->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                              $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $match->ws->toblock = $this->tokens[$this->id]->toWs() .
+                              $this->tokens[$this->id + 1]->toWs();
 
         $rank = -1;
-        if ($this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS))) {
+        $this->moveToNext(); // {
+        if ($this->nextIs(array($this->phptokens::T_CLOSE_CURLY))) {
             // case of an empty Match
             $void = $this->addAtomVoid();
-            $this->addLink($cases, $void, 'EXPRESSION');
+            $this->links->addLink($cases, $void, 'EXPRESSION');
             $void->rank = $rank;
             $extraCases[] = $void;
-
-            $this->moveToNext();
+            $this->moveToNext(); // }
         } else {
-            if ($this->nextIs(array($this->phptokens::T_OPEN_CURLY))) {
-                $this->moveToNext();
-                $finals = array($this->phptokens::T_CLOSE_CURLY);
-            } else {
-                $this->moveToNext(); // skip :
-                $finals = array($this->phptokens::T_ENDSWITCH);
-            }
+            $finals = array($this->phptokens::T_CLOSE_CURLY);
+
             do {
                 $this->checkPhpdoc();
                 $case = $this->processMatchCase();
 
                 $this->popExpression();
-                $this->addLink($cases, $case, 'EXPRESSION');
+                $this->links->addLink($cases, $case, 'EXPRESSION');
                 $case->rank = ++$rank;
                 $extraCases[] = $case;
                 if ($this->nextIs(array(','), 0)) {
-                    $cases->ws->separators[] = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                    $cases->ws->separators[] = $this->tokens[$this->id]->toWs();
                 } else {
                     $cases->ws->separators[] = '';
                 }
             } while (!$this->nextIs($finals));
+            $this->moveToNext(); // }
         }
-        $this->moveToNext();
         $cases->count = $rank + 1;
         $cases->ws->opening = '';
+		$this->variableUsages->merge(VariablesUsageContext::NEST);
 
-        $fullcode = $this->tokens[$current][1] . ' (' . $name->fullcode . ')' . self::FULLCODE_BLOCK;
-        $match->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $fullcode = $this->tokens[$current]->code . ' (' . $name->fullcode . ')' . self::FULLCODE_BLOCK;
+        $match->ws->closing = $this->tokens[$this->id]->toWs();
 
         $match->fullcode    = $fullcode;
 
@@ -5213,6 +5352,7 @@ $this->phptokens::T_YIELD,
         $this->pushExpression($match);
 
         $this->cases->pop();
+        $this->checkExpression();
 
         return $match;
     }
@@ -5222,33 +5362,36 @@ $this->phptokens::T_YIELD,
         $current = $this->id;
         $ifthen = $this->addAtom('Ifthen', $current);
         $this->makePhpdoc($ifthen);
-        $ifthen->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4] .
-                               $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
+        $ifthen->ws->opening = $this->tokens[$current]->toWs() .
+                               $this->tokens[$current + 1]->toWs();
         $this->moveToNext(); // Skip (
 
         do {
             $condition = $this->processNext();
         } while (!$this->nextIs(array($this->phptokens::T_CLOSE_PARENTHESIS)));
+		$this->variableUsages->followup($condition);
 
         $this->popExpression();
-        $this->addLink($ifthen, $condition, 'CONDITION');
+        $this->links->addLink($ifthen, $condition, 'CONDITION');
         $extras = array('CONDITION' => $condition);
 
         $this->moveToNext(); // Skip )
-        $ifthen->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
-        if ($this->tokens[$this->id + 1][1] === ':') {
-            $ifthen->ws->toblock .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $ifthen->ws->toblock = $this->tokens[$this->id]->toWs();
+        if ($this->tokens[$this->id + 1]->code === ':') {
+            $ifthen->ws->toblock .= $this->tokens[$this->id + 1]->toWs();
         }
 
-        $isInitialIf = $this->tokens[$current][0] === $this->phptokens::T_IF;
+        $isInitialIf = $this->tokens[$current]->token === $this->phptokens::T_IF;
         $isColon = $this->whichSyntax($current, $this->id + 1);
 
+		$this->variableUsages->split(VariablesUsageContext::NEST);
         $then = $this->processFollowingBlock(array($this->phptokens::T_ENDIF,
                                                    $this->phptokens::T_ELSE,
                                                    $this->phptokens::T_ELSEIF,
                                                    ));
-        $this->addLink($ifthen, $then, 'THEN');
+        $this->links->addLink($ifthen, $then, 'THEN');
         $extras['THEN'] = $then;
+		$this->variableUsages->split();
 
         $this->checkPhpdoc();
         // Managing else case
@@ -5259,26 +5402,33 @@ $this->phptokens::T_YIELD,
             --$this->id;
             // Back up one unit to allow later processing for sequence
         } elseif ($this->nextIs(array($this->phptokens::T_ELSEIF))) {
+			$this->variableUsages->split(VariablesUsageContext::NEST);
+
             $this->moveToNext();
             $this->checkPhpdoc();
 
             $elseif = $this->processIfthen();
-            $this->addLink($ifthen, $elseif, 'ELSE');
+            $this->links->addLink($ifthen, $elseif, 'ELSE');
             $extras['ELSE'] = $elseif;
             $ifthen->ws->else = '';
 
             $elseFullcode = $elseif->fullcode;
+
+			$this->variableUsages->merge(VariablesUsageContext::NEST);
+
+			$this->variableUsages->split();
         } elseif ($this->nextIs(array($this->phptokens::T_ELSE))) {
+
             $this->moveToNext(); // Skip else
-            $elseFullcode = $this->tokens[$this->id][1];
-            $ifthen->ws->else = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
-            if ($this->tokens[$this->id + 1][1] === ':') {
-                $ifthen->ws->else .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $elseFullcode = $this->tokens[$this->id]->code;
+            $ifthen->ws->else = $this->tokens[$this->id]->toWs();
+            if ($this->tokens[$this->id + 1]->code === ':') {
+                $ifthen->ws->else .= $this->tokens[$this->id + 1]->toWs();
             }
 
             $else = $this->processFollowingBlock(array($this->phptokens::T_ENDIF));
 
-            $this->addLink($ifthen, $else, 'ELSE');
+            $this->links->addLink($ifthen, $else, 'ELSE');
             $extras['ELSE'] = $else;
 
             if ($isColon === self::ALTERNATIVE_SYNTAX) {
@@ -5288,6 +5438,7 @@ $this->phptokens::T_YIELD,
         } else {
             $elseFullcode = '';
         }
+		$this->variableUsages->merge(VariablesUsageContext::NEST);
 
         if ($isInitialIf === true && $isColon === self::ALTERNATIVE_SYNTAX) {
             if ($this->nextIs(array($this->phptokens::T_SEMICOLON))) {
@@ -5297,10 +5448,10 @@ $this->phptokens::T_YIELD,
         }
 
         if ($isColon === self::ALTERNATIVE_SYNTAX) {
-            $fullcode = $this->tokens[$current][1] . '(' . $condition->fullcode . ') : ' . $then->fullcode . $elseFullcode . ($isInitialIf === true ? ' endif' : '');
-            $ifthen->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $fullcode = $this->tokens[$current]->code . '(' . $condition->fullcode . ') : ' . $then->fullcode . $elseFullcode . ($isInitialIf === true ? ' endif' : '');
+            $ifthen->ws->closing = $this->tokens[$this->id]->toWs();
         } else {
-            $fullcode = $this->tokens[$current][1] . '(' . $condition->fullcode . ')' . $then->fullcode . $elseFullcode;
+            $fullcode = $this->tokens[$current]->code . '(' . $condition->fullcode . ')' . $then->fullcode . $elseFullcode;
             $ifthen->ws->closing = '';
         }
 
@@ -5309,10 +5460,11 @@ $this->phptokens::T_YIELD,
 
         $this->runPlugins($ifthen, $extras);
 
-        if ($this->tokens[$current][0] === $this->phptokens::T_IF) {
+        if ($this->tokens[$current]->token === $this->phptokens::T_IF) {
             $this->pushExpression($ifthen);
             $this->finishWithAlternative($isColon);
         }
+        
 
         return $ifthen;
     }
@@ -5356,12 +5508,12 @@ $this->phptokens::T_YIELD,
         }
 
         $code = $this->popExpression();
-        $this->addLink($parenthese, $code, 'CODE');
+        $this->links->addLink($parenthese, $code, 'CODE');
 
         $parenthese->fullcode    = '(' . $code->fullcode . ')';
         $parenthese->noDelimiter = $code->noDelimiter;
-        $parenthese->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
-        $parenthese->ws->closing = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+        $parenthese->ws->opening = $this->tokens[$current]->toWs();
+        $parenthese->ws->closing = $this->tokens[$this->id + 1]->toWs();
         $this->runPlugins($parenthese, array('CODE' => $code));
 
         $this->pushExpression($parenthese);
@@ -5392,11 +5544,11 @@ $this->phptokens::T_YIELD,
             $argumentsFullcode = $functioncall->fullcode;
             $argumentsFullcode = "($argumentsFullcode)";
 
-            $functioncall->code        = $this->tokens[$current][1];
-            $functioncall->fullcode    = $this->tokens[$current][1] . $argumentsFullcode;
-            $functioncall->fullnspath  = '\\' . mb_strtolower($this->tokens[$current][1]);
-            $functioncall->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4] . $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
-            $functioncall->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $functioncall->code        = $this->tokens[$current]->code;
+            $functioncall->fullcode    = $this->tokens[$current]->code . $argumentsFullcode;
+            $functioncall->fullnspath  = '\\' . mb_strtolower($this->tokens[$current]->code);
+            $functioncall->ws->opening = $this->tokens[$current]->toWs() . $this->tokens[$current + 1]->toWs();
+            $functioncall->ws->closing = $this->tokens[$this->id]->toWs();
 
             $this->pushExpression($functioncall);
             $this->runPlugins($functioncall);
@@ -5407,16 +5559,16 @@ $this->phptokens::T_YIELD,
         } else {
             $functioncall = $this->addAtom('Exit', $this->id);
 
-            $functioncall->fullcode    = $this->tokens[$this->id][1] . ' ';
+            $functioncall->fullcode    = $this->tokens[$this->id]->code . ' ';
             $functioncall->count       = 0;
             $functioncall->fullnspath  = '\\' . mb_strtolower($functioncall->code);
-            $functioncall->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $functioncall->ws->opening = $this->tokens[$current]->toWs();
             $functioncall->ws->closing = '';
 
             $void = $this->addAtomVoid();
             $void->rank = 0;
 
-            $this->addLink($functioncall, $void, 'ARGUMENT');
+            $this->links->addLink($functioncall, $void, 'ARGUMENT');
 
             if ( !$this->contexts->isContext(Context::CONTEXT_NOSEQUENCE) &&
                  $this->nextIs(array($this->phptokens::T_CLOSE_TAG,
@@ -5435,33 +5587,33 @@ $this->phptokens::T_YIELD,
         $current = $this->id;
 
         $argumentsList = array();
-        if ($this->tokens[$current][0] === $this->phptokens::T_ARRAY) {
+        if ($this->tokens[$current]->token === $this->phptokens::T_ARRAY) {
             $this->moveToNext(); // Skipping the name, set on (
             $array = $this->processArguments('Arrayliteral', array(), $argumentsList);
             $argumentsFullcode = $array->fullcode;
             $array->token    = 'T_ARRAY';
-            $array->fullcode = $this->tokens[$current][1] . '(' . $argumentsFullcode . ')';
-            $array->ws->opening   = $this->tokens[$current][1] . $this->tokens[$current][4] .
-                                    $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
-            $array->ws->closing   = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $array->fullcode = $this->tokens[$current]->code . '(' . $argumentsFullcode . ')';
+            $array->ws->opening   = $this->tokens[$current]->toWs() .
+                                    $this->tokens[$current + 1]->toWs();
+            $array->ws->closing   = $this->tokens[$this->id]->toWs();
         } else {
             $bracket = 1;
             $id = $this->id;
             while ($bracket > 0) {
                 ++$id;
                 if (!isset($this->tokens[$id])) {
-                    throw new LoadError('File is finished in Arraylist :' . $this->filename . ':' . $this->tokens[$current][2]);
+                    throw new LoadError('File is finished in Arraylist :' . $this->filename . ':' . $this->tokens[$current]->line);
                 }
 
-                if ($this->tokens[$id][0] === $this->phptokens::T_CLOSE_BRACKET) {
+                if ($this->tokens[$id]->token === $this->phptokens::T_CLOSE_BRACKET) {
                     --$bracket;
-                } elseif ($this->tokens[$id][0] === $this->phptokens::T_OPEN_BRACKET) {
+                } elseif ($this->tokens[$id]->token === $this->phptokens::T_OPEN_BRACKET) {
                     ++$bracket;
                 }
             }
 
-            if ($this->tokens[$id + 1][0] === $this->phptokens::T_EQUAL ||
-                $this->tokens[$current - 1][0] === $this->phptokens::T_AS ||
+            if ($this->tokens[$id + 1]->token === $this->phptokens::T_EQUAL ||
+                $this->tokens[$current - 1]->token === $this->phptokens::T_AS ||
                 $this->contexts->isContext(Context::CONTEXT_LIST)
             ) {
                 $this->contexts->nestContext(Context::CONTEXT_LIST);
@@ -5475,8 +5627,8 @@ $this->phptokens::T_YIELD,
                 $array->token      = 'T_OPEN_BRACKET';
                 $array->fullnspath = '\list';
                 $array->fullcode   = "[$argumentsFullcode]";
-                $array->ws->opening   = $this->tokens[$current][1] . $this->tokens[$current][4];
-                $array->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $array->ws->opening   = $this->tokens[$current]->toWs();
+                $array->ws->closing = $this->tokens[$this->id]->toWs();
                 $array->ws->toargs    = '';
             } else {
                 $array = $this->processArguments('Arrayliteral', array($this->phptokens::T_CLOSE_BRACKET), $argumentsList);
@@ -5484,12 +5636,12 @@ $this->phptokens::T_YIELD,
 
                 $array->token         = 'T_OPEN_BRACKET';
                 $array->fullcode      = "[$argumentsFullcode]";
-                $array->ws->opening   = $this->tokens[$current][1] . $this->tokens[$current][4];
-                $array->ws->closing   = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $array->ws->opening   = $this->tokens[$current]->toWs();
+                $array->ws->closing   = $this->tokens[$this->id]->toWs();
             }
         }
 
-        $array->code      = $this->tokens[$current][1];
+        $array->code      = $this->tokens[$current]->code;
         $this->runPlugins($array, $argumentsList);
 
         $this->pushExpression($array);
@@ -5506,22 +5658,25 @@ $this->phptokens::T_YIELD,
     private function processTernary(): AtomInterface {
         $current = $this->id;
         $condition = $this->popExpression();
+        $this->variableUsages->followup($condition);
+        
         $ternary = $this->addAtom('Ternary', $current);
-        $ternary->ws->operator = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $ternary->ws->operator = $this->tokens[$this->id]->toWs();
 
         $names = array($this->phptokens::T_STRING,
                        $this->phptokens::T_NAME_FULLY_QUALIFIED,
                        $this->phptokens::T_NAME_RELATIVE,
                        $this->phptokens::T_NAME_QUALIFIED,
         );
+		$this->variableUsages->split(VariablesUsageContext::NEST);
 
         if ($this->nextIs($names) &&
             $this->nextIs(array($this->phptokens::T_COLON), 2)) {
-            if (in_array(mb_strtolower($this->tokens[$this->id + 1][1]), array('true', 'false', '\true', '\false'), STRICT_COMPARISON)) {
+            if (in_array(mb_strtolower($this->tokens[$this->id + 1]->code), array('true', 'false', '\true', '\false'), STRICT_COMPARISON)) {
                 $this->moveToNext();
                 $then = $this->processSingle('Boolean');
                 $this->runPlugins($then);
-            } elseif (mb_strtolower($this->tokens[$this->id + 1][1]) === 'null') {
+            } elseif (mb_strtolower($this->tokens[$this->id + 1]->code) === 'null') {
                 $this->moveToNext();
                 $then = $this->processSingle('Null');
                 $this->runPlugins($then);
@@ -5544,18 +5699,20 @@ $this->phptokens::T_YIELD,
             $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
             $this->popExpression();
         }
+        $this->variableUsages->followup($then);
+		$this->variableUsages->split();
 
         $this->moveToNext(); // Skip colon
-        $ternary->ws->else = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $ternary->ws->else = $this->tokens[$this->id]->toWs();
 
         // special cases for T_STRING
         if ($this->nextIs($names) &&
             $this->nextIs(array($this->phptokens::T_COLON), 2)) {
-            if (in_array(mb_strtolower($this->tokens[$this->id + 1][1]), array('true', 'false'), STRICT_COMPARISON)) {
+            if (in_array(mb_strtolower($this->tokens[$this->id + 1]->code), array('true', 'false'), STRICT_COMPARISON)) {
                 $this->moveToNext();
                 $else = $this->processSingle('Boolean');
                 $this->runPlugins($else);
-            } elseif (mb_strtolower($this->tokens[$this->id + 1][1]) === 'null') { // should also check on T_STRING
+            } elseif (mb_strtolower($this->tokens[$this->id + 1]->code) === 'null') { // should also check on T_STRING
                 $this->moveToNext();
                 $else = $this->processSingle('Null');
                 $this->runPlugins($else);
@@ -5563,7 +5720,7 @@ $this->phptokens::T_YIELD,
                 $else = $this->processNextAsIdentifier();
             }
         } else {
-            $finals = $this->precedence->get($this->tokens[$this->id][0]);
+            $finals = $this->precedence->get($this->tokens[$this->id]->token);
             $finals[] = $this->phptokens::T_COLON; // Added from nested Ternary
             $finals[] = $this->phptokens::T_CLOSE_TAG;
 
@@ -5576,13 +5733,15 @@ $this->phptokens::T_YIELD,
 
             $this->popExpression();
         }
+        $this->variableUsages->followup($else);
+		$this->variableUsages->merge(VariablesUsageContext::NEST);
 
         if ($then->isA(array('Identifier', 'Nsname'))) {
             $this->calls->addCall(Calls::CONST, $then->fullnspath, $then);
         }
-        $this->addLink($ternary, $condition, 'CONDITION');
-        $this->addLink($ternary, $then, 'THEN');
-        $this->addLink($ternary, $else, 'ELSE');
+        $this->links->addLink($ternary, $condition, 'CONDITION');
+        $this->links->addLink($ternary, $then, 'THEN');
+        $this->links->addLink($ternary, $else, 'ELSE');
 
         $ternary->fullcode = $condition->fullcode . ' ?' . ($then->atom === 'Void' ? '' : ' ' . $then->fullcode . ' ' ) . ': ' . $else->fullcode;
         $this->runPlugins($ternary, array('CONDITION' => $condition,
@@ -5602,22 +5761,23 @@ $this->phptokens::T_YIELD,
     //////////////////////////////////////////////////////
     private function processSingle(string $atomName): AtomInterface {
         $atom = $this->addAtom($atomName, $this->id);
-        $atom->fullcode = $this->tokens[$this->id][1];
+        $atom->fullcode = $this->tokens[$this->id]->code;
 
         if ($atomName === 'Phpvariable' && in_array($atom->code, array('$GLOBALS', '$_SERVER', '$_REQUEST', '$_POST', '$_GET', '$_FILES', '$_ENV', '$_COOKIE', '$_SESSION'), STRICT_COMPARISON)) {
             // do nothing
         } elseif (!in_array($atomName, array('Parametername', 'Parameter', 'Staticpropertyname', 'Propertydefinition', 'Globaldefinition', 'Staticdefinition', 'This'), STRICT_COMPARISON) &&
             $this->nextIs(array($this->phptokens::T_VARIABLE), 0)) {
             if ($this->currentVariables->exists($atom->code)) {
-                $this->addLink($this->currentVariables->get($atom->code), $atom, 'DEFINITION');
+                $this->links->addLink($this->currentVariables->get($atom->code), $atom, 'DEFINITION');
             } else {
                 $definition = $this->addAtom('Variabledefinition');
                 $definition->code = $atom->code;
                 $definition->fullcode = $atom->fullcode;
-                $this->addLink($this->currentFunction->current(), $definition, 'DEFINITION');
+                $this->links->addLink($this->currentFunction->current(), $definition, 'DEFINITION');
                 $this->currentVariables->set($atom->code, $definition);
+                $this->variableUsages->addRoot($definition);
 
-                $this->addLink($definition, $atom, 'DEFINITION');
+                $this->links->addLink($definition, $atom, 'DEFINITION');
             }
         }
 
@@ -5628,7 +5788,7 @@ $this->phptokens::T_YIELD,
         $inlineHtml = $this->processSingle('Inlinehtml');
 
         if ($this->id > 0 && $this->nextIs(array($this->phptokens::T_CLOSE_TAG), -1)) {
-            $inlineHtml->ws->opening = $this->tokens[$this->id - 1][1];
+            $inlineHtml->ws->opening = $this->tokens[$this->id - 1]->code;
         } else {
             $inlineHtml->ws->opening = '';
         }
@@ -5659,7 +5819,7 @@ $this->phptokens::T_YIELD,
 
         $block->code     = ' ';
         $block->fullcode = ' ' . self::FULLCODE_SEQUENCE . ' ';
-        $block->token    = $this->getToken($this->tokens[$this->id][0]);
+        $block->token    = $this->getToken($this->tokens[$this->id]->token);
 
         return $block;
     }
@@ -5680,13 +5840,13 @@ $this->phptokens::T_YIELD,
             $name->ws->closing = '';
         } else {
             $this->moveToNext();
-            $name = $this->makeNsName();
+            $name = $this->makeNsname();
             $name->fullnspath = ($name->fullcode[0] === '\\' ? '' : '\\') . mb_strtolower($name->fullcode);
         }
 
         $namespace = $this->addAtom('Namespace', $current);
         $this->makePhpdoc($namespace);
-        $this->addLink($namespace, $name, 'NAME');
+        $this->links->addLink($namespace, $name, 'NAME');
         $this->setNamespace($name->fullcode === ' ' ? self::NO_NAMESPACE : $name->fullcode);
 
         // Here, we make sure namespace is encompassing the next elements.
@@ -5704,20 +5864,21 @@ $this->phptokens::T_YIELD,
                 $block->ws->opening      = ';';
                 $block->ws->closing      = '';
 
-                $this->addLink($block, $void, 'EXPRESSION');
+                $this->links->addLink($block, $void, 'EXPRESSION');
             } else {
-                $namespace->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $namespace->ws->toblock = $this->tokens[$this->id]->toWs();
                 $block = $this->processNamespaceBlock();
                 $block->ws->opening      = '';
             }
-            $this->addLink($namespace, $block, 'BLOCK');
+
+            $this->links->addLink($namespace, $block, 'BLOCK');
             $this->addToSequence($namespace);
             $block = ';';
             $namespace->ws->closing = '';
         } else {
             // Process block
             $block = $this->processFollowingBlock(array($this->phptokens::T_CLOSE_CURLY));
-            $this->addLink($namespace, $block, 'BLOCK');
+            $this->links->addLink($namespace, $block, 'BLOCK');
 
             $this->addToSequence($namespace);
 
@@ -5727,86 +5888,82 @@ $this->phptokens::T_YIELD,
         }
         $this->setNamespace(self::NO_NAMESPACE);
 
-        $namespace->fullcode   = $this->tokens[$current][1] . ' ' . $name->fullcode . $block;
+        $namespace->fullcode   = $this->tokens[$current]->code . ' ' . $name->fullcode . $block;
         $namespace->fullnspath = $name->atom === 'Void' ? '\\' : $name->fullnspath;
-        $namespace->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $namespace->ws->opening = $this->tokens[$current]->toWs();
 
         $this->sequence->ws->separators[] = '';
+        
         return $namespace;
     }
 
     private function processAlias(string $useType): AtomInterface {
         $current = $this->id;
         $as = $this->addAtom('As', $current);
-        $as->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $as->ws->opening = $this->tokens[$this->id]->toWs();
 
         $left = $this->popExpression();
         assert($left->atom !== 'Void', 'Poping a void expression!');
-        $this->addLink($as, $left, 'NAME');
+        $this->links->addLink($as, $left, 'NAME');
 
         $right = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
         $right->fullnspath = '\\' . mb_strtolower($right->code);
-        $this->addLink($as, $right, 'AS');
+        $this->links->addLink($as, $right, 'AS');
 
-        $as->fullcode = $left->fullcode . ' ' . $this->tokens[$this->id - 1][1] . ' ' . $right->fullcode;
+        $as->fullcode = $left->fullcode . ' ' . $this->tokens[$this->id - 1]->code . ' ' . $right->fullcode;
 
         $this->addNamespaceUse($left, $as, $useType, $as);
 
         return $as;
     }
 
-    private function processAsTrait(): AtomInterface {
+    private function processAsTrait(AtomInterface $useTrait): AtomInterface {
         $current = $this->id;
         $as = $this->addAtom('As', $current);
 
         // special case for use t, t2 { as as yes; }
-        if ($this->nextIs(array($this->phptokens::T_AS))) {
-            $left = $this->processNextAsIdentifier();
-        } else {
-            $left = $this->popExpression();
-            assert($left->atom !== 'Void', 'Poping a void expression!');
-        }
+        $left = $useTrait;
 
-        $as->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $as->ws->opening = $this->tokens[$this->id]->toWs();
 
         $this->calls->addCall(Calls::STATICMETHOD, $left->fullnspath, $left);
 
-        $this->addLink($as, $left, 'NAME');
-        $fullcode = array($left->fullcode, $this->tokens[$current][1]);
+        $this->links->addLink($as, $left, 'NAME');
+        $fullcode = array($left->fullcode, $this->tokens[$current]->code);
 
         if ($this->nextIs(array($this->phptokens::T_PRIVATE,
                                 $this->phptokens::T_PUBLIC,
                                 $this->phptokens::T_PROTECTED,
                                 ))) {
-            $fullcode[] = $this->tokens[$this->id + 1][1];
-            $as->visibility = strtolower($this->tokens[$this->id + 1][1]);
-            $as->ws->visibility = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $fullcode[] = $this->tokens[$this->id + 1]->code;
+            $as->visibility = strtolower($this->tokens[$this->id + 1]->code);
+            $as->ws->visibility = $this->tokens[$this->id + 1]->toWs();
             $this->moveToNext();
         }
 
         if (!$this->nextIs(array($this->phptokens::T_SEMICOLON))) {
             $alias = $this->processNextAsIdentifier();
-            $this->addLink($as, $alias, 'AS');
+            $this->links->addLink($as, $alias, 'AS');
             $fullcode[] = $alias->fullcode;
         }
 
         $as->fullcode = implode(' ', $fullcode);
 
-        $this->pushExpression($as);
-
         return $as;
     }
 
-    private function processInsteadof(): AtomInterface {
-        $insteadof = $this->processOperator('Insteadof', $this->precedence->get($this->tokens[$this->id][0]), array('NAME', 'INSTEADOF'));
+    private function processInsteadof(AtomInterface $useTrait): AtomInterface {
+    	$this->pushExpression($useTrait);
+        $insteadof = $this->processOperator('Insteadof', $this->precedence->get($this->tokens[$this->id]->token), array('NAME', 'INSTEADOF'));
         while ($this->nextIs(array($this->phptokens::T_COMMA))) {
             $this->moveToNext();
             $nsname = $this->processOneNsname();
 
-            $this->addLink($insteadof, $nsname, 'INSTEADOF');
+            $this->links->addLink($insteadof, $nsname, 'INSTEADOF');
         }
         $insteadof->ws->closing = '';
-
+    	$this->popExpression();
+        
         return $insteadof;
     }
 
@@ -5822,7 +5979,7 @@ $this->phptokens::T_YIELD,
         $current = $this->id;
         $use = $this->addAtom('Usenamespace', $current);
         $use->use = 'class';
-        $use->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $use->ws->opening = $this->tokens[$this->id]->toWs();
         $this->makePhpdoc($use);
 
         $fullcode = array();
@@ -5830,7 +5987,7 @@ $this->phptokens::T_YIELD,
         $use->ws->operator = '';
         // use const
         if ($this->nextIs(array($this->phptokens::T_CONST))) {
-            $use->ws->operator = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $use->ws->operator = $this->tokens[$this->id + 1]->toWs();
             $this->moveToNext();
 
             $use->use = 'const';
@@ -5838,7 +5995,7 @@ $this->phptokens::T_YIELD,
 
         // use function
         if ($this->nextIs(array($this->phptokens::T_FUNCTION))) {
-            $use->ws->operator = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $use->ws->operator = $this->tokens[$this->id + 1]->toWs();
             $this->moveToNext();
 
             $use->use = 'function';
@@ -5886,7 +6043,7 @@ $this->phptokens::T_YIELD,
 
                 $alias = $this->addNamespaceUse($origin, $as, $useType, $as);
 
-                $this->addLink($use, $as, 'USE');
+                $this->links->addLink($use, $as, 'USE');
 
                 $namespace             = $as;
                 $namespace->fullnspath = $fullnspath;
@@ -5895,13 +6052,13 @@ $this->phptokens::T_YIELD,
                 $this->runPlugins($namespace, array());
             } elseif ($this->nextIs(array($this->phptokens::T_NS_SEPARATOR))) {
                 //use A\B\ {}
-                $this->addLink($use, $namespace, 'GROUPUSE');
+                $this->links->addLink($use, $namespace, 'GROUPUSE');
                 $prefix = makeFullNsPath($namespace->fullcode);
                 if ($prefix[0] !== '\\') {
                     $prefix = "\\$prefix";
                 }
                 $prefix .= '\\';
-                $use->ws->toblock = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                $use->ws->toblock = $this->tokens[$this->id]->toWs();
 
                 $this->moveToNext(); // Skip \
 
@@ -5912,7 +6069,7 @@ $this->phptokens::T_YIELD,
                     if ($this->nextIs(array($this->phptokens::T_CLOSE_CURLY))) {
                         $use->trailing = self::TRAILING;
                         $last = count($use->ws->touseseparators) - 1;
-                        $use->ws->touseseparators[$last] .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                        $use->ws->touseseparators[$last] .= $this->tokens[$this->id + 1]->toWs();
 
                         continue;
                     }
@@ -5924,7 +6081,7 @@ $this->phptokens::T_YIELD,
                         $this->moveToNext();
 
                         $useType = 'const';
-                        $totype = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                        $totype = $this->tokens[$this->id]->toWs();
                     }
 
                     if ($this->nextIs(array($this->phptokens::T_FUNCTION))) {
@@ -5932,7 +6089,7 @@ $this->phptokens::T_YIELD,
                         $this->moveToNext();
 
                         $useType = 'function';
-                        $totype = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+                        $totype = $this->tokens[$this->id]->toWs();
                     }
 
                     $nsname = $this->processOneNsname();
@@ -5960,10 +6117,10 @@ $this->phptokens::T_YIELD,
 
                         $aliasName = $this->addNamespaceUse($nsname, $alias, $useType, $alias);
                         $alias->alias = $aliasName;
-                        $this->addLink($use, $alias, 'USE');
+                        $this->links->addLink($use, $alias, 'USE');
                         $usesDefinitions[] = $alias;
                     } else {
-                        $this->addLink($use, $nsname, 'USE');
+                        $this->links->addLink($use, $nsname, 'USE');
                         if ($useType === 'const') {
                             $nsname->fullnspath = $prefix . $nsname->fullcode;
                             $nsname->origin     = $nsname->fullnspath;
@@ -5980,14 +6137,14 @@ $this->phptokens::T_YIELD,
 
                     $nsname->use = $useType;
                     $nsname->ws->totype = $totype;
-                    $use->ws->touseseparators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                    $use->ws->touseseparators[] = $this->tokens[$this->id + 1]->toWs();
                 } while ( $this->nextIs(array($this->phptokens::T_COMMA)));
 
                 $fullcode[] = $namespace->fullcode . self::FULLCODE_BLOCK;
 
                 $this->moveToNext(); // Skip }
             } else {
-                $this->addLink($use, $namespace, 'USE');
+                $this->links->addLink($use, $namespace, 'USE');
                 $namespace->rank = $rank;
                 $usesDefinitions[] = $namespace;
                 $namespace->use    = $useType;
@@ -5998,7 +6155,7 @@ $this->phptokens::T_YIELD,
                 $namespace->origin     = $fullnspath;
 
                 if (($use2 = $this->uses->get('class', $prefix)) instanceof AtomInterface) {
-                    $this->addLink($namespace, $use2, 'DEFINITION');
+                    $this->links->addLink($namespace, $use2, 'DEFINITION');
                 }
 
                 $namespace->fullnspath = $fullnspath;
@@ -6013,7 +6170,7 @@ $this->phptokens::T_YIELD,
             }
 
             if ($this->nextIs(array($this->phptokens::T_COMMA))) {
-                $use->ws->touseseparators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+                $use->ws->touseseparators[] = $this->tokens[$this->id + 1]->toWs();
             } else {
                 $use->ws->touseseparators[] = '';
             }
@@ -6021,7 +6178,7 @@ $this->phptokens::T_YIELD,
         $this->runPlugins($use, $usesDefinitions);
         $use->count = $rank + 1; // final rank is the count total
 
-        $use->fullcode = $this->tokens[$current][1] . ($useType !== 'class' ? ' ' . $useType : '') . ' ' . implode(', ', $fullcode);
+        $use->fullcode = $this->tokens[$current]->code . ($useType !== 'class' ? ' ' . $useType : '') . ' ' . implode(', ', $fullcode);
 
         $this->pushExpression($use);
 
@@ -6033,7 +6190,7 @@ $this->phptokens::T_YIELD,
     private function processUseTrait(): AtomInterface {
         $current = $this->id;
         $use = $this->addAtom('Usetrait', $current);
-        $use->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $use->ws->opening = $this->tokens[$this->id]->toWs();
 
         $fullcode = array();
 
@@ -6050,10 +6207,10 @@ $this->phptokens::T_YIELD,
 
             $this->calls->addCall(Calls::A_CLASS, $namespace->fullnspath, $namespace);
 
-            $this->addLink($use, $namespace, 'USE');
+            $this->links->addLink($use, $namespace, 'USE');
             $extras[] = $namespace;
             $this->checkPhpdoc();
-            $use->ws->separators[] = $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $use->ws->separators[] = $this->tokens[$this->id + 1]->toWs();
         } while ($this->nextIs(array($this->phptokens::T_COMMA)));
         array_pop($use->ws->separators);
         $use->ws->separators[] = '';
@@ -6065,17 +6222,17 @@ $this->phptokens::T_YIELD,
             //use A\B{} // Group
             $currentBlock = $this->id + 1;
             $block = $this->processUseBlock();
-            $block->ws->opening = $this->tokens[$currentBlock][1] . $this->tokens[$currentBlock][4];
-            $block->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $block->ws->opening = $this->tokens[$currentBlock]->toWs();
+            $block->ws->closing = $this->tokens[$this->id]->toWs();
 
-            $this->addLink($use, $block, 'BLOCK');
+            $this->links->addLink($use, $block, 'BLOCK');
             $fullcode .= ' ' . $block->fullcode;
 
             // Several namespaces ? This has to be recalculated inside the block!!
             $namespace->fullnspath = makeFullNsPath($namespace->fullcode);
         }
 
-        $use->fullcode = $this->tokens[$current][1] . ' ' . $fullcode;
+        $use->fullcode = $this->tokens[$current]->code . ' ' . $fullcode;
         $this->pushExpression($use);
 
         return $use;
@@ -6105,27 +6262,26 @@ $this->phptokens::T_YIELD,
                     $this->calls->addCall(Calls::A_CLASS, $class->fullnspath, $class);
 
                     $staticmethod = $this->addAtom('Staticmethod');
-                    $this->addLink($staticmethod, $origin, 'CLASS');
-                    $this->addLink($staticmethod, $method, 'METHOD');
+                    $this->links->addLink($staticmethod, $origin, 'CLASS');
+                    $this->links->addLink($staticmethod, $method, 'METHOD');
                     $origin = $staticmethod;
 
                     $origin->fullcode = "{$class->fullcode}::{$method->fullcode}";
                 }
-                $this->pushExpression($origin);
 
                 $this->checkPhpdoc();
                 $this->moveToNext();
 
                 if ($this->nextIs(array($this->phptokens::T_AS), 0)) {
-                    $this->processAsTrait();
+                    $origin = $this->processAsTrait($origin);
                 } elseif ($this->nextIs(array($this->phptokens::T_INSTEADOF), 0)) {
-                    $this->processInsteadof();
+                    $origin = $this->processInsteadof($origin);
                 } else {
-                    throw new UnknownCase('Usetrait without as or insteadof : ' . $this->tokens[$this->id + 1][1]);
+                    throw new UnknownCase('Usetrait without as or insteadof : ' . $this->tokens[$this->id + 1]->code);
                 }
 
                 $this->moveToNext();
-                $this->processSemicolon(); // ;
+                $this->addToSequence($origin);
                 $this->checkPhpdoc();
             } while (!$this->nextIs(array($this->phptokens::T_CLOSE_CURLY)));
             $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
@@ -6145,9 +6301,9 @@ $this->phptokens::T_YIELD,
     }
 
     private function processVariable(): AtomInterface {
-        if ($this->tokens[$this->id][1] === '$this') {
+        if ($this->tokens[$this->id]->code === '$this') {
             $atom = 'This';
-        } elseif (in_array($this->tokens[$this->id][1], $this->PHP_SUPERGLOBALS, STRICT_COMPARISON)) {
+        } elseif (in_array($this->tokens[$this->id]->code, $this->PHP_SUPERGLOBALS, STRICT_COMPARISON)) {
             $atom = 'Phpvariable';
         } elseif ($this->nextIs(array($this->phptokens::T_OBJECT_OPERATOR,
                                       $this->phptokens::T_NULLSAFE_OBJECT_OPERATOR,
@@ -6166,9 +6322,9 @@ $this->phptokens::T_YIELD,
             $this->calls->addCall(Calls::A_CLASS, $class->fullnspath, $variable);
         }
         $this->runPlugins($variable);
-        $variable->ws->opening = $this->tokens[$this->id][1];
+        $variable->ws->opening = $this->tokens[$this->id]->code;
 
-        if ( !$this->contexts->isContext(Context::CONTEXT_NOSEQUENCE) && $this->nextIs(array($this->phptokens::T_CLOSE_TAG))) {
+        if (!$this->contexts->isContext(Context::CONTEXT_NOSEQUENCE) && $this->nextIs(array($this->phptokens::T_CLOSE_TAG))) {
             $this->processSemicolon();
         } else {
             $variable = $this->processFCOA($variable);
@@ -6246,10 +6402,11 @@ $this->phptokens::T_YIELD,
 
         $left = $this->popExpression();
         assert($left->atom !== 'Void', 'Poping a void expression!');
-        $this->addLink($append, $left, 'APPEND');
+        $this->links->addLink($append, $left, 'APPEND');
+        $this->variableUsages->followup($left);
 
         $append->fullcode = $left->fullcode . '[]';
-        $append->ws->closing = '[' . $this->tokens[$current + 1][4] . ']' . $this->tokens[$current + 2][4];
+        $append->ws->closing = '[' . $this->tokens[$current + 1]->ws . ']' . $this->tokens[$current + 2]->ws;
 
         $this->pushExpression($append);
         $this->runPlugins($append, array('APPEND' => $left));
@@ -6270,8 +6427,8 @@ $this->phptokens::T_YIELD,
     private function processInteger(): AtomInterface {
         $integer = $this->addAtom('Integer', $this->id);
 
-        $integer->code     = $this->tokens[$this->id][1];
-        $integer->fullcode = $this->tokens[$this->id][1];
+        $integer->code     = $this->tokens[$this->id]->code;
+        $integer->fullcode = $this->tokens[$this->id]->code;
 
         $this->pushExpression($integer);
         $this->runPlugins($integer);
@@ -6283,16 +6440,25 @@ $this->phptokens::T_YIELD,
     private function processFloat(): AtomInterface {
         $float = $this->addAtom('Float', $this->id);
 
-        $float->code     = $this->tokens[$this->id][1];
+        $float->code     = $this->tokens[$this->id]->code;
         $float->fullcode = $float->code;
 
         $this->pushExpression($float);
-        // (int) is for loading into the database
         $this->runPlugins($float);
-
         $this->checkExpression();
 
         return $float;
+    }
+
+    private function makeString(AtomInterface $atom): void {
+        $atom->delimiter   = $atom->code[0];
+        if (in_array($atom->delimiter, array('b', 'B'), STRICT_COMPARISON)) {
+            $atom->binaryString = $atom->delimiter;
+            $atom->delimiter    = $atom->code[1];
+            $atom->noDelimiter  = substr($atom->code, 2, -1);
+        } else {
+            $atom->noDelimiter = substr($atom->code, 1, -1);
+        }
     }
 
     private function processLiteral(): AtomInterface {
@@ -6300,14 +6466,7 @@ $this->phptokens::T_YIELD,
         $this->pushExpression($literal);
 
         if ($this->nextIs(array($this->phptokens::T_CONSTANT_ENCAPSED_STRING), 0)) {
-            $literal->delimiter   = $literal->code[0];
-            if (in_array($literal->delimiter, array('b', 'B'), STRICT_COMPARISON)) {
-                $literal->binaryString = $literal->delimiter;
-                $literal->delimiter    = $literal->code[1];
-                $literal->noDelimiter  = substr($literal->code, 2, -1);
-            } else {
-                $literal->noDelimiter = substr($literal->code, 1, -1);
-            }
+            $this->makeString($literal);
 
             if (in_array(mb_strtolower($literal->noDelimiter),  array('parent', 'self', 'static'), STRICT_COMPARISON)) {
                 $this->getFullnspath($literal, 'class', $literal);
@@ -6369,7 +6528,7 @@ $this->phptokens::T_YIELD,
                 $constant->noDelimiter = '';
             }
         } elseif (mb_strtolower($constant->fullcode) === '__line__') {
-            $constant->noDelimiter = (string) $this->tokens[$this->id][2];
+            $constant->noDelimiter = (string) $this->tokens[$this->id]->line;
         } elseif (mb_strtolower($constant->fullcode) === '__method__') {
             if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
                 if ($this->currentFunction->currentFullnspath() === 'global') {
@@ -6414,9 +6573,12 @@ $this->phptokens::T_YIELD,
         $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
 
         $this->popExpression();
-        $this->addLink($operator, $operand, $link);
+        $this->links->addLink($operator, $operand, $link);
+        if ($operand->isA(array('Variable', 'Variableobject', 'Variablearray'))) {
+	        $this->variableUsages->followup($operand);
+        }
 
-        $operator->fullcode = $this->tokens[$current][1] . $separator . $operand->fullcode;
+        $operator->fullcode = $this->tokens[$current]->code . $separator . $operand->fullcode;
 
         $this->runPlugins($operator, array($link => $operand));
         $this->pushExpression($operator);
@@ -6428,12 +6590,12 @@ $this->phptokens::T_YIELD,
 
     private function processCast(): AtomInterface {
         $operator = $this->addAtom('Cast', $this->id);
-        $operator->ws->opening  = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] ;
+        $operator->ws->opening  = $this->tokens[$this->id]->toWs() ;
 
-        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id][0]), 'CAST', ' ');
+        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id]->token), 'CAST', ' ');
         $this->popExpression();
-        if (strtolower($operator->code) === '(binary)') {
-            $operator->binaryString = $operator->code[1];
+        if (strtolower(str_replace(array(' ', "\t"), '', $operator->code)) === '(binary)') {
+            $operator->binaryString = $operator->code;
         }
         $this->pushExpression($operator);
 
@@ -6457,15 +6619,15 @@ $this->phptokens::T_YIELD,
         // Case of return ;
         $return = $this->addAtom('Return', $current);
         $this->makePhpdoc($return);
-        $return->ws->opening  = $this->tokens[$current][1] . $this->tokens[$current][4] ;
+        $return->ws->opening  = $this->tokens[$current]->toWs() ;
 
         if ($this->nextIs(array($this->phptokens::T_CLOSE_TAG,
                                 $this->phptokens::T_SEMICOLON))) {
             $returnArg = $this->addAtomVoid();
             $returnArg->ws->closing = '';
-            $this->addLink($return, $returnArg, 'RETURN');
+            $this->links->addLink($return, $returnArg, 'RETURN');
 
-            $return->fullcode = $this->tokens[$current][1] . ' ;';
+            $return->fullcode = $this->tokens[$current]->code . ' ;';
 
             $this->runPlugins($return, array('RETURN' => $returnArg) );
 
@@ -6475,15 +6637,17 @@ $this->phptokens::T_YIELD,
             }
 
             if ($this->currentFunction->currentFullnspath() !== 'global') {
-                $this->addLink($this->currentFunction->current(), $returnArg, 'RETURNED');
+                $this->links->addLink($this->currentFunction->current(), $returnArg, 'RETURNED');
             }
+
+			$this->variableUsages->closeCycle();
 
             return $return;
         }
 
         $this->contexts->nestContext(Context::CONTEXT_NOSEQUENCE);
         $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
-        $finals =  $this->precedence->get($this->tokens[$this->id][0]);
+        $finals =  $this->precedence->get($this->tokens[$this->id]->token);
         do {
             $returned = $this->processNext();
         } while (!$this->nextIs($finals));
@@ -6491,26 +6655,31 @@ $this->phptokens::T_YIELD,
 
         $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
 
-        $this->addLink($return, $returned, 'RETURN');
+        $this->links->addLink($return, $returned, 'RETURN');
+        $this->variableUsages->followup($returned);
 
-        $return->fullcode     = $this->tokens[$current][1] . ' ' . $returned->fullcode;
+        $return->fullcode     = $this->tokens[$current]->code . ' ' . $returned->fullcode;
 
-        $this->addLink($this->currentFunction->current(), $returned, 'RETURNED');
+        $this->links->addLink($this->currentFunction->current(), $returned, 'RETURNED');
 
         $this->runPlugins($return, array('RETURN' => $returned) );
 
         $this->pushExpression($return);
         $this->checkExpression();
 
+		$this->variableUsages->closeCycle();
+
         return $return;
     }
 
     private function processThrow(): AtomInterface {
         $operator = $this->addAtom('Throw', $this->id);
-        $operator->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
-        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id][0]), 'THROW', ' ');
+        $operator->ws->opening = $this->tokens[$this->id]->toWs();
+        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id]->token), 'THROW', ' ');
         $operator = $this->popExpression();
         $this->pushExpression($operator);
+
+        $this->links->addLink($this->currentFunction->current(), $operator, 'THROWN');
 
         $this->checkExpression();
 
@@ -6521,7 +6690,7 @@ $this->phptokens::T_YIELD,
         assert(in_array($node->atom, Analyzer::ATTRIBUTE_ATOMS, STRICT_COMPARISON), "Wrong type for assigning Attribute ($node->atom), $this->filename\n");
 
         foreach ($this->attributes as $attribute) {
-            $this->addLink($node, $attribute, 'ATTRIBUTE');
+            $this->links->addLink($node, $attribute, 'ATTRIBUTE');
         }
 
         $this->attributes = array();
@@ -6535,10 +6704,10 @@ $this->phptokens::T_YIELD,
             $yieldArg = $this->addAtomVoid();
             $yield = $this->addAtom('Yield', $current);
 
-            $this->addLink($yield, $yieldArg, 'YIELD');
+            $this->links->addLink($yield, $yieldArg, 'YIELD');
 
-            $yield->fullcode = $this->tokens[$current][1] . ' ;';
-            $yield->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $yield->fullcode = $this->tokens[$current]->code . ' ;';
+            $yield->ws->opening = $this->tokens[$this->id]->toWs();
 
             $this->pushExpression($yield);
             $this->runPlugins($yield, array('YIELD' => $yieldArg) );
@@ -6547,22 +6716,24 @@ $this->phptokens::T_YIELD,
                 $this->processSemicolon();
             }
 
+            $this->links->addLink($this->currentFunction->current(), $yield, 'YIELDED');
+
             return $yield;
         }
 
         // => is actually a lower priority
-        $finals = $this->precedence->get($this->tokens[$this->id][0]);
+        $finals = $this->precedence->get($this->tokens[$this->id]->token);
         $id = array_search($this->phptokens::T_DOUBLE_ARROW, $finals);
         unset($finals[$id]);
 
-        $operator = $this->addAtom('Yield', $this->id);
-        $operator->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $yield = $this->addAtom('Yield', $this->id);
+        $yield->ws->opening = $this->tokens[$this->id]->toWs();
 
         if ($this->nextIs(array($this->phptokens::T_YIELD,
                                 ))) {
             $yieldArg = $this->addAtomVoid();
-            $this->addLink($operator, $yieldArg, 'YIELD');
-            $this->processSingleOperator($operator, $finals, 'YIELD', ' ');
+            $this->links->addLink($yield, $yieldArg, 'YIELD');
+            $operator = $this->processSingleOperator($yield, $finals, 'YIELD', ' ');
         } elseif ($this->nextIs(array($this->phptokens::T_IS_SMALLER_OR_EQUAL,
                                       $this->phptokens::T_IS_GREATER_OR_EQUAL,
                                       $this->phptokens::T_GREATER			,
@@ -6582,37 +6753,41 @@ $this->phptokens::T_YIELD,
                                       $this->phptokens::T_POW		  ,
 
                                  ))) {
-            $yieldArg = $this->addAtomVoid();
-            $this->addLink($operator, $yieldArg, 'YIELD');
-            $operator->fullcode = $this->tokens[$this->id][1];
-            $this->pushExpression($operator);
+            $operator = $this->addAtomVoid();
+            $this->links->addLink($yield, $operator, 'YIELD');
+            $yield->fullcode = $this->tokens[$this->id]->code;
+            $this->pushExpression($yield);
             $this->moveToNext();
-            $operator = $this->processComparison();
+            $yield = $this->processComparison();
         } else {
-            $this->processSingleOperator($operator, $finals, 'YIELD', ' ');
+            $operator = $this->processSingleOperator($yield, $finals, 'YIELD', ' ');
         }
 
-        return $operator;
+        $this->links->addLink($this->currentFunction->current(), $operator, 'YIELDED');
+
+        return $yield;
     }
 
     private function processYieldfrom(): AtomInterface {
-        $operator = $this->addAtom('Yieldfrom', $this->id);
-        $operator->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $yieldfrom = $this->addAtom('Yieldfrom', $this->id);
+        $yieldfrom->ws->opening = $this->tokens[$this->id]->toWs();
 
-        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id][0]), 'YIELD', ' ');
+        $operator = $this->processSingleOperator($yieldfrom, $this->precedence->get($this->tokens[$this->id]->token), 'YIELD', ' ');
 
         $this->checkExpression();
 
-        return $operator;
+        $this->links->addLink($this->currentFunction->current(), $operator, 'YIELDED');
+
+        return $yieldfrom;
     }
 
     private function processNot(): AtomInterface {
         $current = $this->id;
-        $finals = array_diff($this->precedence->get($this->tokens[$this->id][0]),
+        $finals = array_diff($this->precedence->get($this->tokens[$this->id]->token),
             $this->assignations
         );
         $operator = $this->addAtom('Not', $this->id);
-        $operator->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $operator->ws->opening = $this->tokens[$current]->toWs();
         $this->processSingleOperator($operator, $finals, 'NOT');
 
         $this->checkExpression();
@@ -6631,14 +6806,14 @@ $this->phptokens::T_YIELD,
         $block = $this->addAtom('Block', $this->id);
         $block->code     = '{}';
         $block->fullcode = '{' . $code->fullcode . '}';
-        $block->ws->opening = $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
+        $block->ws->opening = $this->tokens[$current + 1]->toWs();
 
-        $this->addLink($block, $code, 'CODE');
+        $this->links->addLink($block, $code, 'CODE');
 
         $this->runPlugins($block, array('CODE' => $code));
 
         $this->moveToNext(); // Skip }
-        $block->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $block->ws->closing = $this->tokens[$this->id]->toWs();
 
         return $block;
     }
@@ -6663,19 +6838,20 @@ $this->phptokens::T_YIELD,
             $this->moveToNext();
 
             $expression = $this->popExpression();
-            $this->addLink($variable, $expression, 'NAME');
+            $this->variableUsages->followup($expression);
+            $this->links->addLink($variable, $expression, 'NAME');
 
-            $variable->fullcode = $this->tokens[$current][1] . '{' . $expression->fullcode . '}';
+            $variable->fullcode = $this->tokens[$current]->code . '{' . $expression->fullcode . '}';
             $this->runPlugins($variable, array('NAME' => $expression));
             $this->pushExpression($variable);
 
-            $variable->ws->opening  = $this->tokens[$current][1] . $this->tokens[$current][4] .
-                                      $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
-            $variable->ws->closing  = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $variable->ws->opening  = $this->tokens[$current]->toWs() .
+                                      $this->tokens[$current + 1]->toWs();
+            $variable->ws->closing  = $this->tokens[$this->id]->toWs();
 
             if ( !$this->contexts->isContext(Context::CONTEXT_NOSEQUENCE) && $this->nextIs(array($this->phptokens::T_CLOSE_TAG))) {
                 $this->processSemicolon();
-            } elseif (!in_array($this->tokens[$current - 1][0], array($this->phptokens::T_OBJECT_OPERATOR,
+            } elseif (!in_array($this->tokens[$current - 1]->token, array($this->phptokens::T_OBJECT_OPERATOR,
                                                                       $this->phptokens::T_NULLSAFE_OBJECT_OPERATOR,
                                                                       $this->phptokens::T_DOUBLE_COLON,
                                                                       ),
@@ -6684,9 +6860,9 @@ $this->phptokens::T_YIELD,
             }
         } else {
             $operator = $this->addAtom('Variable', $this->id);
-            $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id][0]), 'NAME');
+            $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id]->token), 'NAME');
             $variable = $this->popExpression();
-            $variable->ws->opening  = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $variable->ws->opening  = $this->tokens[$current]->toWs();
             $variable->ws->closing  = '';
 
             $this->pushExpression($variable);
@@ -6700,8 +6876,8 @@ $this->phptokens::T_YIELD,
 
     private function processClone(): AtomInterface {
         $operator = $this->addAtom('Clone', $this->id);
-        $operator->ws->opening  = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] ;
-        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id][0]), 'CLONE', ' ' );
+        $operator->ws->opening  = $this->tokens[$this->id]->toWs() ;
+        $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$this->id]->token), 'CLONE', ' ' );
         $operatorId = $this->popExpression();
         $this->pushExpression($operatorId);
 
@@ -6711,24 +6887,23 @@ $this->phptokens::T_YIELD,
     private function processGoto(): AtomInterface {
         $current = $this->id;
 
-        $label = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
+        if (isset($this->labels[$this->tokens[$this->id + 1]->code])) {
+            $label = $this->labels[$this->tokens[$this->id + 1]->code];
+            $this->moveToNext();
+        } else {
+            $label = $this->processNextAsIdentifier(self::WITHOUT_FULLNSPATH);
+            $this->labels[$this->tokens[$this->id + 1]->code] = $label;
+        }
 
         $goto = $this->addAtom('Goto', $current);
-        $goto->fullcode  = $this->tokens[$current][1] . ' ' . $label->fullcode;
-        $goto->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $goto->fullcode  = $this->tokens[$current]->code . ' ' . $label->fullcode;
+        $goto->ws->opening = $this->tokens[$current]->toWs();
 
-        $this->addLink($goto, $label, 'GOTO');
-
-        if ($this->currentClassTrait->getCurrent() === ClassTraitContext::NO_CLASS_TRAIT_CONTEXT) {
-            $class = '\global';
-        } else {
-            $class = $this->currentClassTrait->getCurrent()->fullnspath;
-        }
+        $this->links->addLink($goto, $label, 'GOTO');
 
         $method = $this->currentFunction->currentFullnspath();
 
         $this->runPlugins($goto, array('GOTO' => $label));
-        $this->calls->addCall(Calls::GOTO, $class . '::' . $method . '..' . $this->tokens[$this->id][1], $goto);
         $this->pushExpression($goto);
 
         return $goto;
@@ -6736,10 +6911,10 @@ $this->phptokens::T_YIELD,
 
     private function processNoscream(): AtomInterface {
         $current = $this->id;
-        $atom = $this->processExpression($this->precedence->get($this->tokens[$this->id][0]));
+        $atom = $this->processExpression($this->precedence->get($this->tokens[$this->id]->token));
         $atom->noscream = self::NOSCREAM;
-        $atom->ws->noscream = $this->tokens[$current][1] . $this->tokens[$current][4];
-        $atom->fullcode = "@{$atom->fullcode}";
+        $atom->ws->noscream = $this->tokens[$current]->toWs();
+        $atom->fullcode = '@' . $atom->fullcode;
         $this->pushExpression($atom);
 
         $this->checkExpression();
@@ -6759,9 +6934,9 @@ $this->phptokens::T_YIELD,
         }
 
         $operator = $this->addAtom('New', $current);
-        $operator->fullcode = $this->tokens[$current][1];
-        $operator->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
-        $newcall = $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$current][0]), 'NEW', ' ');
+        $operator->fullcode = $this->tokens[$current]->code;
+        $operator->ws->opening = $this->tokens[$current]->toWs();
+        $newcall = $this->processSingleOperator($operator, $this->precedence->get($this->tokens[$current]->token), 'NEW', ' ');
         $this->runPlugins($newcall, array());
 
         if ($this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT &&
@@ -6774,6 +6949,8 @@ $this->phptokens::T_YIELD,
         if ($noSequence === false) {
             $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
         }
+
+        $this->links->addLink($this->currentFunction->current(), $operator, 'CALLED');
 
         $operator = $this->popExpression();
         $this->pushExpression($operator);
@@ -6788,13 +6965,13 @@ $this->phptokens::T_YIELD,
     //////////////////////////////////////////////////////
     private function processSign(): AtomInterface {
         $current = $this->id;
-        $signExpression = $this->tokens[$this->id][1];
-        $whitespaces    = array($this->tokens[$this->id][1] . $this->tokens[$this->id][4]);
+        $signExpression = $this->tokens[$this->id]->code;
+        $whitespaces    = array($this->tokens[$this->id]->toWs());
         while ($this->nextIs(array($this->phptokens::T_PLUS,
                                    $this->phptokens::T_MINUS))) {
             $this->moveToNext();
-            $signExpression = $this->tokens[$this->id][1] . $signExpression;
-            $whitespaces[] = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            $signExpression = $this->tokens[$this->id]->code . $signExpression;
+            $whitespaces[] = $this->tokens[$this->id]->toWs();
         }
 
         if (($this->nextIs(array($this->phptokens::T_LNUMBER)) ||
@@ -6804,13 +6981,13 @@ $this->phptokens::T_YIELD,
 
             $operand->code     = $signExpression . $operand->code;
             $operand->fullcode = $signExpression . $operand->fullcode;
-            $operand->token    = $this->getToken($this->tokens[$this->id][0]);
+            $operand->token    = $this->getToken($this->tokens[$this->id]->token);
             $this->runPlugins($operand);
 
             return $operand;
         }
 
-        $finals = $this->precedence->get($this->tokens[$this->id][0]);
+        $finals = $this->precedence->get($this->tokens[$this->id]->token);
         $finals[] = '-';
         $finals[] = '+';
 
@@ -6829,7 +7006,7 @@ $this->phptokens::T_YIELD,
 
         for ($i = strlen($signExpression) - 1; $i >= 0; --$i) {
             $sign = $this->addAtom('Sign', $current);
-            $this->addLink($sign, $signed, 'SIGN');
+            $this->links->addLink($sign, $signed, 'SIGN');
 
             $sign->code     = $signExpression[$i];
             $sign->fullcode = $signExpression[$i] . $signed->fullcode;
@@ -6847,12 +7024,12 @@ $this->phptokens::T_YIELD,
 
     private function processAddition(): AtomInterface {
         if (!$this->hasExpression() ||
-            $this->tokens[$this->id - 1][0] === $this->phptokens::T_DOT
+            $this->tokens[$this->id - 1]->token === $this->phptokens::T_DOT
         ) {
             return $this->processSign();
         }
 
-        $finals = $this->precedence->get($this->tokens[$this->id][0], Precedence::WITH_SELF);
+        $finals = $this->precedence->get($this->tokens[$this->id]->token, Precedence::WITH_SELF);
         $finals = array_diff($finals, $this->assignations);
         $finals = array_unique($finals);
 
@@ -6891,10 +7068,10 @@ $this->phptokens::T_YIELD,
             $breakLevel = $this->popExpression();
         }
 
-        $link = $this->tokens[$current][0] === $this->phptokens::T_BREAK ? 'BREAK' : 'CONTINUE';
-        $this->addLink($break, $breakLevel, $link);
-        $break->fullcode = $this->tokens[$current][1] . ( $breakLevel->atom !== 'Void' ? ' ' . $breakLevel->fullcode : '');
-        $break->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $link = $this->tokens[$current]->token === $this->phptokens::T_BREAK ? 'BREAK' : 'CONTINUE';
+        $this->links->addLink($break, $breakLevel, $link);
+        $break->fullcode = $this->tokens[$current]->code . ( $breakLevel->atom !== 'Void' ? ' ' . $breakLevel->fullcode : '');
+        $break->ws->opening = $this->tokens[$current]->toWs();
 
         $this->runPlugins($break, array($link => $breakLevel));
         $this->pushExpression($break);
@@ -6909,6 +7086,9 @@ $this->phptokens::T_YIELD,
 
         $left = $this->popExpression();
         assert($left->atom !== 'Void', 'Poping a void expression!');
+        if ($left->isA(array('Variable'))) {
+	        $this->variableUsages->followup($left);
+        }
 
         $this->checkPhpdoc();
 
@@ -6926,7 +7106,9 @@ $this->phptokens::T_YIELD,
                 $this->moveToNext();
                 $right = $this->processSingle('Name');
             } else {
-                $right = $this->tokens[$this->id + 1][1];
+                $right = $this->addAtom('Staticclass', $current);
+                $right->fullcode = $left->fullcode . '::' . $this->tokens[$this->id + 1]->code;
+
                 $this->moveToNext(); // Skip ::
             }
         } elseif ($this->nextIs(array($this->phptokens::T_VARIABLE))) {
@@ -6945,11 +7127,12 @@ $this->phptokens::T_YIELD,
         $this->contexts->exitContext(Context::CONTEXT_NEW);
         $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
 
-        // @todo : remove $right is a string (cf L 6568, to make $right always an object)
-        if (is_string($right) && mb_strtolower($right) === 'class') {
-            $static = $this->addAtom('Staticclass', $current);
-            $fullcode = "$left->fullcode::$right";
-            $static->ws->closing = $this->tokens[$current][1] . $this->tokens[$current][4] . $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
+        if ($right->isA(array('Staticclass'))) {
+            $fullcode = $right->fullcode;
+            $static = $right;
+
+            $static->ws->closing = $this->tokens[$current]->toWs() . $this->tokens[$current + 1]->toWs();
+            $static->fullnspath = $left->fullnspath;
 
             if (!$left->isA(array('Functioncall', 'Methodcall', 'Staticmethodcall'))) {
                 $this->calls->addCall(Calls::A_CLASS, $left->fullnspath, $left);
@@ -6969,7 +7152,7 @@ $this->phptokens::T_YIELD,
             }
         } elseif ($right->isA(array('Name'))) {
             $static = $this->addAtom('Staticconstant', $current);
-            $this->addLink($static, $right, 'CONSTANT');
+            $this->links->addLink($static, $right, 'CONSTANT');
             $fullcode = "{$left->fullcode}::{$right->fullcode}";
 
             if ($left->isA(array('Identifier', 'Nsname', 'Parent', 'Static', 'Self'))) {
@@ -6996,7 +7179,7 @@ $this->phptokens::T_YIELD,
 
                 $static->fullnspath = "{$left->fullnspath}::{$right->fullcode}";
             }
-            $this->addLink($static, $right, 'MEMBER');
+            $this->links->addLink($static, $right, 'MEMBER');
             $fullcode = "{$left->fullcode}::{$right->fullcode}";
 
             $this->runPlugins($static, array('CLASS'  => $left,
@@ -7004,7 +7187,7 @@ $this->phptokens::T_YIELD,
         } elseif ($right->isA(array('Block', ))) {
             $static = $this->addAtom('Staticconstant', $current);
 
-            $this->addLink($static, $right, 'CONSTANT');
+            $this->links->addLink($static, $right, 'CONSTANT');
             $fullcode = "{$left->fullcode}::{$right->fullcode}";
 
             $this->runPlugins($static, array('CLASS'  => $left,
@@ -7015,7 +7198,7 @@ $this->phptokens::T_YIELD,
             } else {
                 $static = $this->addAtom('Staticmethodcall', $current);
             }
-            $this->addLink($static, $right, 'METHOD');
+            $this->links->addLink($static, $right, 'METHOD');
 
             if ($left->isA(array('Identifier', 'Nsname', 'Parent', 'Static', 'Self'))) {
                 $this->calls->addCall(Calls::A_CLASS, $left->fullnspath, $left);
@@ -7025,12 +7208,14 @@ $this->phptokens::T_YIELD,
             $fullcode = "{$left->fullcode}::{$right->fullcode}";
             $this->runPlugins($static, array('CLASS'  => $left,
                                              'METHOD' => $right));
+
+            $this->links->addLink($this->currentFunction->current(), $static, 'CALLED');
         } else {
             throw new LoadError('Unprocessed atom in static call (right) : ' . $right->atom . ':' . $this->filename . ':' . __LINE__);
         }
         $this->makePhpdoc($static);
 
-        $this->addLink($static, $left, 'CLASS');
+        $this->links->addLink($static, $left, 'CLASS');
         if ($static->atom  === 'Staticproperty'                                                  &&
             in_array($left->token, array('T_STRING', 'T_STATIC'), STRICT_COMPARISON)             &&
             $this->currentClassTrait->getCurrent() !== ClassTraitContext::NO_CLASS_TRAIT_CONTEXT &&
@@ -7052,7 +7237,7 @@ $this->phptokens::T_YIELD,
 
         $static->fullcode = $fullcode;
         $static->ws->opening  = '';
-        $static->ws->operator = '::' . $this->tokens[$current][4];
+        $static->ws->operator = '::' . $this->tokens[$current]->ws;
 
         if (!empty($left->fullnspath)) {
             if ($static->isA(array('Staticmethodcall', 'Staticmethod'))) {
@@ -7090,8 +7275,12 @@ $this->phptokens::T_YIELD,
         $this->makePhpdoc($operator);
 
         $left = $this->popExpression();
-        assert($left->atom !== 'Void', "Poping a void expression on $this->filename: " . $this->tokens[$this->id][2]);
-        $this->addLink($operator, $left, $links[0]);
+        assert($left->atom !== 'Void', "Poping a void expression on $this->filename: " . $this->tokens[$this->id]->line);
+        $this->links->addLink($operator, $left, $links[0]);
+		if ($atom === 'Coalesce') {
+    	    $this->variableUsages->followup($left);
+			$this->variableUsages->split(VariablesUsageContext::NEST);
+		}
 
         $this->contexts->nestContext(Context::CONTEXT_NOSEQUENCE);
         $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
@@ -7104,20 +7293,29 @@ $this->phptokens::T_YIELD,
             $this->checkPhpdoc();
         } while (!$this->nextIs($finals) );
 
+		if ($atom === 'Coalesce') {
+    	    $this->variableUsages->followup($right);
+			$this->variableUsages->split();
+			$this->variableUsages->merge(VariablesUsageContext::NEST);
+		} else {
+	        $this->variableUsages->followup($left);
+    	    $this->variableUsages->followup($right);
+		}
+
         $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
         $this->popExpression();
 
-        $this->addLink($operator, $right, $links[1]);
+        $this->links->addLink($operator, $right, $links[1]);
 
         // This adds DEFAULT to local variables.
         if ($operator->code === '='        &&
             $left->atom     === 'Variable' &&
             $this->currentVariables->exists($left->code)) {
-            $this->addLink($this->currentVariables->get($left->code), $right, 'DEFAULT');
+            $this->links->addLink($this->currentVariables->get($left->code), $right, 'DEFAULT');
         }
 
-        $operator->fullcode  = $left->fullcode . ' ' . $this->tokens[$current][1] . ' ' . $right->fullcode;
-        $operator->ws->operator = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $operator->fullcode  = $left->fullcode . ' ' . $this->tokens[$current]->code . ' ' . $right->fullcode;
+        $operator->ws->operator = $this->tokens[$current]->toWs();
 
         $extras = array($links[0] => $left, $links[1] => $right);
         $this->runPlugins($operator, $extras);
@@ -7149,8 +7347,12 @@ $this->phptokens::T_YIELD,
             $right = $this->processCurlyExpression();
         } elseif ($this->nextIs(array($this->phptokens::T_VARIABLE))) {
             $this->moveToNext();
-            $right = $this->processSingle('Variable');
-            $right->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+            if ($this->tokens[$this->id]->code === '$this') {
+	            $right = $this->processSingle('This');
+            } else {
+	            $right = $this->processSingle('Variable');
+            }
+            $right->ws->opening = $this->tokens[$this->id]->toWs();
             $right->ws->closing = '';
         } elseif ($this->nextIs(array($this->phptokens::T_DOLLAR))) {
             $this->moveToNext();
@@ -7179,7 +7381,13 @@ $this->phptokens::T_YIELD,
                               'Block',
                               'Boolean',
                               'Null',
+                              'This',
                               ))) {
+
+	        if ($right->isA(array('Variable', 'This'))) {
+		        $this->variableUsages->followup($right);
+        	}
+
             $static = $this->addAtom('Member', $current);
             $links = 'MEMBER';
             $static->enclosing = self::NO_ENCLOSING;
@@ -7196,12 +7404,13 @@ $this->phptokens::T_YIELD,
             throw new LoadError('Unprocessed atom in object call (right) : ' . $right->atom . ':' . $this->filename . ':' . __LINE__);
         }
 
-        $this->addLink($static, $left, 'OBJECT');
-        $this->addLink($static, $right, $links);
+        $this->links->addLink($static, $left, 'OBJECT');
+        $this->variableUsages->followup($left);
+        $this->links->addLink($static, $right, $links);
 
-        $static->fullcode     = $left->fullcode . $this->tokens[$current][1] . $right->fullcode;
+        $static->fullcode     = $left->fullcode . $this->tokens[$current]->code . $right->fullcode;
         $static->ws->opening  = '';
-        $static->ws->operator = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $static->ws->operator = $this->tokens[$current]->toWs();
 
         if ($left->atom === 'This' ) {
             if ($static->atom === 'Methodcall') {
@@ -7214,6 +7423,8 @@ $this->phptokens::T_YIELD,
                 $this->currentProperties->addCall($right->code, $static);
             }
         }
+
+        $this->links->addLink($this->currentFunction->current(), $static, 'CALLED');
         $this->runPlugins($static, array('OBJECT' => $left,
                                          $links   => $right,
                                          ));
@@ -7229,14 +7440,14 @@ $this->phptokens::T_YIELD,
     }
 
     private function processAssignation(): AtomInterface {
-        $finals = $this->precedence->get($this->tokens[$this->id][0]);
+        $finals = $this->precedence->get($this->tokens[$this->id]->token);
         $finals = array_merge($finals, $this->assignations);
 
         return $this->processOperator('Assignation', $finals);
     }
 
     private function processCoalesce(): AtomInterface {
-        return $this->processOperator('Coalesce', $this->precedence->get($this->tokens[$this->id][0], Precedence::WITH_SELF));
+        return $this->processOperator('Coalesce', $this->precedence->get($this->tokens[$this->id]->token, Precedence::WITH_SELF));
     }
 
     private function processEllipsis(): AtomInterface {
@@ -7250,7 +7461,7 @@ $this->phptokens::T_YIELD,
         $this->popExpression();
         $operand->fullcode     = '...' . $operand->fullcode;
         $operand->variadic     = self::VARIADIC;
-        $operand->ws->ellipsis =  $this->tokens[$current][1] . $this->tokens[$current][4];
+        $operand->ws->ellipsis =  $this->tokens[$current]->toWs();
 
         $this->pushExpression($operand);
 
@@ -7259,7 +7470,7 @@ $this->phptokens::T_YIELD,
 
     private function processAnd(): AtomInterface {
         if ($this->hasExpression()) {
-            return $this->processOperator('Bitoperation', $this->precedence->get($this->tokens[$this->id][0]));
+            return $this->processOperator('Bitoperation', $this->precedence->get($this->tokens[$this->id]->token));
         }
 
         $current = $this->id;
@@ -7274,7 +7485,7 @@ $this->phptokens::T_YIELD,
         $this->popExpression();
         $operand->fullcode  = '&' . $operand->fullcode;
         $operand->reference = self::REFERENCE;
-        $operand->ws->reference = '&' . $this->tokens[$current][4];
+        $operand->ws->reference = '&' . $this->tokens[$current]->ws;
 
         $this->pushExpression($operand);
 
@@ -7282,27 +7493,27 @@ $this->phptokens::T_YIELD,
     }
 
     private function processLogical(): AtomInterface {
-        return $this->processOperator('Logical', $this->precedence->get($this->tokens[$this->id][0]));
+        return $this->processOperator('Logical', $this->precedence->get($this->tokens[$this->id]->token));
     }
 
     private function processBitoperation(): AtomInterface {
-        return $this->processOperator('Bitoperation', $this->precedence->get($this->tokens[$this->id][0]));
+        return $this->processOperator('Bitoperation', $this->precedence->get($this->tokens[$this->id]->token));
     }
 
     private function processMultiplication(): AtomInterface {
-        return $this->processOperator('Multiplication', $this->precedence->get($this->tokens[$this->id][0], Precedence::WITH_SELF));
+        return $this->processOperator('Multiplication', $this->precedence->get($this->tokens[$this->id]->token, Precedence::WITH_SELF));
     }
 
     private function processPower(): AtomInterface {
-        return $this->processOperator('Power', $this->precedence->get($this->tokens[$this->id][0], Precedence::WITH_SELF));
+        return $this->processOperator('Power', $this->precedence->get($this->tokens[$this->id]->token, Precedence::WITH_SELF));
     }
 
     private function processSpaceship(): AtomInterface {
-        return $this->processOperator('Spaceship', $this->precedence->get($this->tokens[$this->id][0]));
+        return $this->processOperator('Spaceship', $this->precedence->get($this->tokens[$this->id]->token));
     }
 
     private function processComparison(): AtomInterface {
-        return $this->processOperator('Comparison', $this->precedence->get($this->tokens[$this->id][0]));
+        return $this->processOperator('Comparison', $this->precedence->get($this->tokens[$this->id]->token));
     }
 
     private function processDot(): AtomInterface {
@@ -7316,16 +7527,18 @@ $this->phptokens::T_YIELD,
         $contains->rank = ++$rank;
         $fullcode[]     = $contains->fullcode;
         $concat[]       = $contains;
+        $previous       = $contains;
         $noDelimiter   .= $contains->noDelimiter;
-        $this->addLink($concatenation, $contains, 'CONCAT');
+        $this->variableUsages->followup($contains);
+        $this->links->addLink($concatenation, $contains, 'CONCAT');
         $concatenation->ws->opening = '';
-        $concatenation->ws->separators[] = '.' . $this->tokens[$this->id][4];
+        $concatenation->ws->separators[] = '.' . $this->tokens[$this->id]->ws;
         $concatenation->ws->closing = '';
 
         $this->contexts->nestContext(Context::CONTEXT_NOSEQUENCE);
         $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
 
-        $finals = $this->precedence->get($this->tokens[$this->id][0]);
+        $finals = $this->precedence->get($this->tokens[$this->id]->token);
         $finals = array_diff($finals, array($this->phptokens::T_REQUIRE,
                                             $this->phptokens::T_REQUIRE_ONCE,
                                             $this->phptokens::T_INCLUDE,
@@ -7345,21 +7558,27 @@ $this->phptokens::T_YIELD,
 
             if ($this->nextIs(array($this->phptokens::T_DOT))) {
                 $this->popExpression();
-                $this->addLink($concatenation, $contains, 'CONCAT');
+                $this->links->addLink($concatenation, $contains, 'CONCAT');
+                $this->addNextLink($previous, $contains);
+                $previous = $contains;
                 $fullcode[]     = $contains->fullcode;
                 $concat[]       = $contains;
                 $noDelimiter   .= $contains->noDelimiter;
                 $contains->rank = ++$rank;
 
                 $this->moveToNext();
-                $concatenation->ws->separators[] = '.' . $this->tokens[$this->id][4];
+                $concatenation->ws->separators[] = '.' . $this->tokens[$this->id]->ws;
             }
+            $this->variableUsages->followup($contains);
         }
 
         $this->contexts->exitContext(Context::CONTEXT_NOSEQUENCE);
 
         $this->popExpression();
-        $this->addLink($concatenation, $contains, 'CONCAT');
+        $this->links->addLink($concatenation, $contains, 'CONCAT');
+        $this->addNextLink($previous, $contains);
+        $previous = $contains;
+
         $fullcode[]     = $contains->fullcode;
         $concat[]       = $contains;
         $noDelimiter   .= $contains->noDelimiter;
@@ -7384,21 +7603,21 @@ $this->phptokens::T_YIELD,
 
         $left = $this->popExpression();
         assert($left->atom !== 'Void', 'Poping a void expression!');
-        $this->addLink($instanceof, $left, 'VARIABLE');
+        $this->links->addLink($instanceof, $left, 'VARIABLE');
 
-        $finals = $this->precedence->get($this->tokens[$this->id][0]);
+        $finals = $this->precedence->get($this->tokens[$this->id]->token);
         do {
             $right = $this->processNext();
         } while (!$this->nextIs($finals));
         $this->popExpression();
 
-        $this->addLink($instanceof, $right, 'CLASS');
+        $this->links->addLink($instanceof, $right, 'CLASS');
 
         $this->getFullnspath($right, 'class', $right);
         $this->calls->addCall(Calls::A_CLASS, $right->fullnspath, $right);
 
-        $instanceof->fullcode = $left->fullcode . ' ' . $this->tokens[$current][1] . ' ' . $right->fullcode;
-        $instanceof->ws->opening  = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $instanceof->fullcode = $left->fullcode . ' ' . $this->tokens[$current]->code . ' ' . $right->fullcode;
+        $instanceof->ws->opening  = $this->tokens[$current]->toWs();
 
         $this->runPlugins($instanceof, array('VARIABLE' => $left,
                                              'CLASS'    => $right));
@@ -7408,25 +7627,24 @@ $this->phptokens::T_YIELD,
     }
 
     private function processKeyvalue(): AtomInterface {
-        return $this->processOperator('Keyvalue', $this->precedence->get($this->tokens[$this->id][0]), array('INDEX', 'VALUE'));
+        return $this->processOperator('Keyvalue', $this->precedence->get($this->tokens[$this->id]->token), array('INDEX', 'VALUE'));
     }
 
     private function processPhpdoc(): AtomInterface {
         $id = count($this->phpDocs);
         $this->phpDocs[$id] = $this->tokens[$this->id];
-        $this->phpDocs[$id]['id'] = $this->id;
 
         return $this->atomVoid;
     }
 
     private function makePhpdoc(AtomInterface $node): void {
         foreach ($this->phpDocs as $rank => $phpDoc) {
-            $atom = $this->addAtom('Phpdoc', $phpDoc['id']);
-            $atom->code = $phpDoc[1];
-            $atom->fullcode = $phpDoc[1];
+            $atom = $this->addAtom('Phpdoc', $rank);
+            $atom->code = $phpDoc->code;
+            $atom->fullcode = $phpDoc->code;
             $atom->rank = $rank;
-            $atom->ws->closing = $phpDoc[4];
-            $this->addLink($node, $atom, 'PHPDOC');
+            $atom->ws->closing = $phpDoc->ws;
+            $this->links->addLink($node, $atom, 'PHPDOC');
         }
 
         $this->phpDocs = array();
@@ -7447,19 +7665,17 @@ $this->phptokens::T_YIELD,
             $this->runPlugins($attribute, array());
 
             $this->contexts->toggleContext(Context::CONTEXT_NEW);
-            $attribute->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+            $attribute->ws->opening = $this->tokens[$current]->toWs();
 
-            // @todo : currently handled as a 'new'
-            // This may be a methodcall, with a wrongly build fullnspath.
             if (($id = strpos($attribute->fullnspath, '(')) !== false) {
                 $attribute->fullnspath = substr($attribute->fullnspath, 0, $id);
             }
             $this->calls->addCall(Calls::A_CLASS, $attribute->fullnspath, $attribute);
 
             $this->popExpression();
-            $attribute->ws->closing .= $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4];
+            $attribute->ws->closing .= $this->tokens[$this->id + 1]->toWs();
 
-			$attribute->rank = count($this->attributes);
+            $attribute->rank = count($this->attributes);
             $this->attributes[] = $attribute;
             $this->moveToNext(); // skip ]
         } while ($this->nextIs(array($this->phptokens::T_COMMA), 0));
@@ -7469,13 +7685,13 @@ $this->phptokens::T_YIELD,
 
     private function processBitshift(): AtomInterface {
         // Classic bitshift expression
-        return $this->processOperator('Bitshift', $this->precedence->get($this->tokens[$this->id][0]));
+        return $this->processOperator('Bitshift', $this->precedence->get($this->tokens[$this->id]->token));
     }
 
     private function processIsset(): AtomInterface {
         $current = $this->id;
 
-        $atom = ucfirst(mb_strtolower($this->tokens[$current][1]));
+        $atom = ucfirst(mb_strtolower($this->tokens[$current]->code));
         $this->moveToNext();
         $argumentsList = array();
         $functioncall = $this->processArguments($atom, array(), $argumentsList);
@@ -7483,12 +7699,12 @@ $this->phptokens::T_YIELD,
 
         $argumentsFullcode = $functioncall->fullcode;
 
-        $functioncall->code       = $this->tokens[$current][1];
-        $functioncall->fullcode   = $this->tokens[$current][1] . '(' . $argumentsFullcode . ')';
-        $functioncall->token      = $this->getToken($this->tokens[$current][0]);
-        $functioncall->fullnspath = '\\' . mb_strtolower($this->tokens[$current][1]);
-        $functioncall->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4] . $this->tokens[$current + 1][1] . $this->tokens[$current + 1][4];
-        $functioncall->ws->closing = $this->tokens[$this->id][1] . $this->tokens[$this->id][4];
+        $functioncall->code       = $this->tokens[$current]->code;
+        $functioncall->fullcode   = $this->tokens[$current]->code . '(' . $argumentsFullcode . ')';
+        $functioncall->token      = $this->getToken($this->tokens[$current]->token);
+        $functioncall->fullnspath = '\\' . mb_strtolower($this->tokens[$current]->code);
+        $functioncall->ws->opening = $this->tokens[$current]->toWs() . $this->tokens[$current + 1]->toWs();
+        $functioncall->ws->closing = $this->tokens[$this->id]->toWs();
 
         $this->runPlugins($functioncall, $argumentsList);
 
@@ -7511,11 +7727,11 @@ $this->phptokens::T_YIELD,
             $argumentsList);
         $argumentsFullcode = $functioncall->fullcode;
 
-        $functioncall->code        = $this->tokens[$current][1];
-        $functioncall->fullcode    = $this->tokens[$current][1] . ' ' . $argumentsFullcode;
-        $functioncall->token       = $this->getToken($this->tokens[$current][0]);
-        $functioncall->fullnspath  = '\\' . mb_strtolower($this->tokens[$current][1]);
-        $functioncall->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $functioncall->code        = $this->tokens[$current]->code;
+        $functioncall->fullcode    = $this->tokens[$current]->code . ' ' . $argumentsFullcode;
+        $functioncall->token       = $this->getToken($this->tokens[$current]->token);
+        $functioncall->fullnspath  = '\\' . mb_strtolower($this->tokens[$current]->code);
+        $functioncall->ws->opening = $this->tokens[$current]->toWs();
         $functioncall->ws->closing = '';
 
         $this->pushExpression($functioncall);
@@ -7534,11 +7750,11 @@ $this->phptokens::T_YIELD,
 
     private function processHalt(): AtomInterface {
         $halt = $this->addAtom('Halt', $this->id);
-        $halt->fullcode = $this->tokens[$this->id][1];
-        $halt->ws->opening = $this->tokens[$this->id][1] . $this->tokens[$this->id][4] .
-                             $this->tokens[$this->id + 1][1] . $this->tokens[$this->id + 1][4] .  // (
-                             $this->tokens[$this->id + 2][1] . $this->tokens[$this->id + 2][4] .  // )
-                             $this->tokens[$this->id + 3][1] . $this->tokens[$this->id + 3][4] ;  // ;
+        $halt->fullcode = $this->tokens[$this->id]->code;
+        $halt->ws->opening = $this->tokens[$this->id]->toWs() .
+                             $this->tokens[$this->id + 1]->toWs() .  // (
+                             $this->tokens[$this->id + 2]->toWs() .  // )
+                             $this->tokens[$this->id + 3]->toWs() ;  // ;
 
 
         $this->moveToNext(); // skip halt
@@ -7571,7 +7787,7 @@ $this->phptokens::T_YIELD,
             $this->contexts->toggleContext(Context::CONTEXT_NOSEQUENCE);
         }
 
-        $finals = $this->precedence->get($this->tokens[$this->id][0]);
+        $finals = $this->precedence->get($this->tokens[$this->id]->token);
         while (!$this->nextIs($finals)) {
             $this->processNext();
         }
@@ -7581,12 +7797,12 @@ $this->phptokens::T_YIELD,
 
         $index = $this->popExpression();
         $index->rank = 0;
-        $this->addLink($functioncall, $index, 'ARGUMENT');
+        $this->links->addLink($functioncall, $index, 'ARGUMENT');
 
-        $functioncall->fullcode   = $this->tokens[$current][1] . ' ' . $index->fullcode;
+        $functioncall->fullcode   = $this->tokens[$current]->code . ' ' . $index->fullcode;
         $functioncall->count      = 1; // Only one argument for print
-        $functioncall->fullnspath = '\\' . mb_strtolower($this->tokens[$current][1]);
-        $functioncall->ws->opening = $this->tokens[$current][1] . $this->tokens[$current][4];
+        $functioncall->fullnspath = '\\' . mb_strtolower($this->tokens[$current]->code);
+        $functioncall->ws->opening = $this->tokens[$current]->toWs();
         $functioncall->ws->closing = '';
 
         $this->pushExpression($functioncall);
@@ -7600,17 +7816,17 @@ $this->phptokens::T_YIELD,
     //////////////////////////////////////////////////////
     /// generic methods
     //////////////////////////////////////////////////////
-    private function addAtom(string $atomName, int $id = null): AtomInterface {
+    private function addAtom(string $atomName, ?int $id = null): AtomInterface {
         if (!in_array($atomName, GraphElements::$ATOMS, STRICT_COMPARISON)) {
             throw new LoadError('Undefined atom ' . $atomName . ':' . $this->filename . ':' . __LINE__);
         }
 
-        $line = $this->tokens[$this->id][2] ?? $this->tokens[$this->id - 1][2] ?? $this->tokens[$this->id - 2][2] ?? -1;
-        $atom = $this->atomGroup->factory($atomName, $line, $this->tokens[$this->id][4] ?? '');
+        $line = $this->tokens[$this->id]->line ?? $this->tokens[$this->id - 1]->line ?? $this->tokens[$this->id - 2]->line ?? self::NO_LINE;
+        $atom = $this->atomGroup->factory($atomName, $line, $this->tokens[$this->id]->ws ?? '');
 
         if ($id !== null) {
-            $atom->code  = $this->tokens[$id][1];
-            $atom->token = $this->getToken($this->tokens[$id][0]);
+            $atom->code  = $this->tokens[$id]->code;
+            $atom->token = $this->getToken($this->tokens[$id]->token);
         }
 
         $this->atoms[$atom->id] = $atom;
@@ -7622,6 +7838,10 @@ $this->phptokens::T_YIELD,
     }
 
     private function addAtomVoid(): AtomInterface {
+        if (isset($this->atomVoid)) {
+            return $this->atomVoid;
+        }
+
         $void = $this->addAtom('Void');
         $void->code        = 'Void';
         $void->fullcode    = self::FULLCODE_VOID;
@@ -7630,26 +7850,29 @@ $this->phptokens::T_YIELD,
 
         $this->runPlugins($void);
 
+        $this->atomVoid = $void;
+
         return $void;
     }
 
-    private function addLink(AtomInterface $origin, AtomInterface $destination, string $label): void {
-        if (!in_array($label, array_merge(GraphElements::$LINKS, GraphElements::$LINKS_EXAKAT), STRICT_COMPARISON)) {
-            debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-            throw new LoadError('Undefined link ' . $label . ' for atom ' . $origin->atom . ' : ' . $this->filename . ':' . $origin->line);
+    private function addAtomScalartype(string $type): AtomInterface {
+    	assert(in_array($type, $this->SCALAR_TYPE), "Unsupported type of $type in addAtomScalartype");
+        if (isset($this->scalarTypes[$type])) { 
+        	return $this->scalarTypes[$type];
         }
 
-        if ($origin->id === 2) {
-            print_r($origin);
-            print_r($this->filename . PHP_EOL);
-            die(o);
-        }
-        if ($destination->id === 2) {
-            print_r($origin);
-            print_r($this->filename . PHP_EOL);
-            die(d);
-        }
-        $this->links[] = array($label, $origin->id, $destination->id);
+        $scalar = $this->addAtom('Scalartypehint');
+        $scalar->code        = $type;
+        $scalar->fullcode    = $type;
+        $scalar->fullnspath  = '\\' . $type;
+        $scalar->token       = (string) $this->phptokens::T_STRING;
+        $this->makePhpdoc($scalar);
+
+        $this->runPlugins($scalar);
+
+		$this->scalarTypes[$type] = $scalar;
+		
+        return $scalar;
     }
 
     private function pushExpression(AtomInterface $atom): void {
@@ -7690,6 +7913,10 @@ $this->phptokens::T_YIELD,
 
         if ($this->contexts->getCount(Context::CONTEXT_CLASS) !== false) {
             throw new LoadError( "Warning : context for class is not back to 0 in $filename\n");
+        }
+
+        if ($this->variableUsages->checkContext() !== false) {
+            throw new LoadError( "Warning : variable usage context is not back to 0 in $filename\n");
         }
     }
 
@@ -7755,13 +7982,13 @@ $this->phptokens::T_YIELD,
         $this->calls->addDefinition(Calls::CONST, $fullnspath, $const);
         $name->fullnspath = $fullnspath;
 
-        if ($caseInsensitive === true) {
+        if ($caseInsensitive === self::CASE_INSENSITIVE) {
             $this->calls->addDefinition(Calls::CONST, mb_strtolower($fullnspath), $const);
         }
     }
 
     private function saveFiles(): void {
-        $this->loader->saveFiles($this->config->tmp_dir, $this->atoms, $this->links);
+        $this->loader->saveFiles($this->config->tmp_dir, $this->atoms, $this->links->toArray());
         $this->reset();
     }
 
@@ -7773,18 +8000,49 @@ $this->phptokens::T_YIELD,
         $this->sequence->bracket     = self::NOT_BRACKET;
         $this->sequence->ws->closing = '';
 
+        $this->previousStack[] = $this->previous;
+        $this->previous = null;
+
         $this->sequences->start($this->sequence);
     }
 
     private function addToSequence(AtomInterface $element): void {
-        $this->addLink($this->sequence, $element, 'EXPRESSION');
+        $this->links->addLink($this->sequence, $element, 'EXPRESSION');
+
+        $this->addNextLink($this->previous, $element);
+        if ($element->atom !== 'Void') {
+            $this->previous = $element;
+        }
 
         $this->sequences->add($element);
+    }
+
+    private function addNextLink(?AtomInterface $previous, AtomInterface $element): void {
+        if (!$previous instanceof AtomInterface) {
+            return;
+        }
+
+        if ($element->atom === 'Void') {
+            return;
+        }
+
+        if ($previous->atom === 'Void') {
+            return;
+        }
+
+        if ($this->previous === $element) {
+            return;
+        }
+
+        $this->links->addLink($previous, $element, 'NEXT');
     }
 
     private function endSequence(): void {
         $elements = $this->sequences->getElements();
         $this->runPlugins($this->sequence, $elements);
+
+        assert(!empty($this->previousStack), 'Stack of previous is empty');
+        $this->previous = array_pop($this->previousStack);
 
         $this->sequence = $this->sequences->end();
     }
@@ -7794,7 +8052,7 @@ $this->phptokens::T_YIELD,
         return $this->php->getTokenName($token);
     }
 
-    private function getFullnspath(AtomInterface $name, string $type = 'class', AtomInterface $apply = null): void {
+    private function getFullnspath(AtomInterface $name, string $type = 'class', ?AtomInterface $apply = null): void {
         assert($apply !== null, "\$apply can't be null in " . __METHOD__);
 
         // Handle static, self, parent and PHP natives function
@@ -7881,23 +8139,23 @@ $this->phptokens::T_YIELD,
 
             // This is an identifier, self or parent
             if ($type === 'class' && ($use = $this->uses->get('class',mb_strtolower($fnp) )) instanceof AtomInterface) {
-                $this->addLink($name, $use, 'USED');
+                $this->links->addLink($name, $use, 'USED');
                 $apply->fullnspath = $use->fullnspath;
                 return;
             } elseif ($type === 'class' && ($use = $this->uses->get('class', $prefix)) instanceof AtomInterface) {
-                $this->addLink($name, $use, 'USED');
+                $this->links->addLink($name, $use, 'USED');
                 $apply->fullnspath = $use->fullnspath . '\\' . preg_replace('/^' . $prefix . '\\\\/', '', $fnp);
                 return;
             } elseif ($type === 'const' && ($use = $this->uses->get('const', $name->code)) instanceof AtomInterface) {
-                $this->addLink($name, $use, 'USED');
+                $this->links->addLink($name, $use, 'USED');
                 $apply->fullnspath = $use->fullnspath;
                 return;
             } elseif ($type === 'const' && ($use = $this->uses->get('class', mb_strtolower($name->fullnspath))) instanceof AtomInterface) {
-                $this->addLink($name, $use, 'USED');
+                $this->links->addLink($name, $use, 'USED');
                 $apply->fullnspath = mb_strtolower($name->fullnspath);
                 return;
             } elseif ($type === 'function' && ($use = $this->uses->get('function', $prefix)) instanceof AtomInterface) {
-                $this->addLink($name, $use, 'USED');
+                $this->links->addLink($name, $use, 'USED');
                 $apply->fullnspath = $use->fullnspath;
                 return;
             } elseif ($type === 'const') {
@@ -7926,7 +8184,7 @@ $this->phptokens::T_YIELD,
             $prefix = mb_strtolower( substr($name->code, 0, strpos($name->code . '\\', '\\')) );
 
             if (($use = $this->uses->get($type, $prefix)) instanceof AtomInterface) {
-                $this->addLink( $name, $use, 'USED');
+                $this->links->addLink( $name, $use, 'USED');
                 $apply->fullnspath = $use->fullnspath . mb_strtolower( substr($name->fullcode, strlen($prefix)) );
                 return;
             } elseif ($type === 'const') {
@@ -8008,13 +8266,14 @@ $this->phptokens::T_YIELD,
     private function checkExpression(): void {
         $this->checkPhpdoc();
 
-        if ( !$this->contexts->isContext(Context::CONTEXT_NOSEQUENCE) && $this->nextIs(array($this->phptokens::T_CLOSE_TAG))) {
+        if ( !$this->contexts->isContext(Context::CONTEXT_NOSEQUENCE) &&
+              $this->nextIs(array($this->phptokens::T_CLOSE_TAG))) {
             $this->processSemicolon();
         }
     }
 
     private function whichSyntax(int $current, int $colon): bool {
-        return in_array($this->tokens[$current][0], array($this->phptokens::T_FOR,
+        return in_array($this->tokens[$current]->token, array($this->phptokens::T_FOR,
                                                           $this->phptokens::T_FOREACH,
                                                           $this->phptokens::T_WHILE,
                                                           $this->phptokens::T_DO,
@@ -8023,7 +8282,7 @@ $this->phptokens::T_YIELD,
                                                           $this->phptokens::T_IF,
                                                           $this->phptokens::T_ELSEIF,
                                                          ), STRICT_COMPARISON) &&
-               ($this->tokens[$colon][0] === $this->phptokens::T_COLON) ?
+               ($this->tokens[$colon]->token === $this->phptokens::T_COLON) ?
                 self::ALTERNATIVE_SYNTAX :
                 self::NORMAL_SYNTAX;
     }
@@ -8039,7 +8298,7 @@ $this->phptokens::T_YIELD,
     private function moveToNext(int $token = 0): int {
         ++$this->id; // Skip default
         if (!empty($token)) {
-            assert($this->tokens[$this->id][0] === $token, 'Not the expected token when moving : found ' . $this->tokens[$this->id][1]);
+            assert($this->tokens[$this->id]->token === $token, 'Not the expected token when moving : found ' . $this->tokens[$this->id]->code);
         }
 
         return $this->id;

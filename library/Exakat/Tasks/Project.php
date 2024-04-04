@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -39,6 +39,7 @@ use Exception;
 use Symfony\Component\Process\Process;
 use Exakat\Vcs\Vcs;
 use Exakat\Log;
+use Sqlite3;
 use const PARALLEL_WAIT_MS;
 
 class Project extends Tasks {
@@ -88,8 +89,8 @@ class Project extends Tasks {
             throw new MissingGremlin();
         }
 
-        if (!file_exists($this->config->project_dir) && 
-        	!$this->config->inside_code) {
+        if (!file_exists($this->config->project_dir) &&
+            !$this->config->inside_code) {
             throw new NoSuchProject((string) $this->config->project);
         }
 
@@ -116,7 +117,8 @@ class Project extends Tasks {
                                                'exakat_version'   => Exakat::VERSION,
                                                'exakat_build'     => Exakat::BUILD,
                                                'php_version'      => $this->config->phpversion,
-                                               'audit_name'       => $this->generateName()
+                                               'audit_name'       => $this->generateName(),
+                                               'audit_id'         => hash('sha256', (string) microtime(true)),
                                          ));
 
         $info = array();
@@ -126,7 +128,7 @@ class Project extends Tasks {
             $info['vcs_type'] = strtolower($vcsClass->getName());
             $info['vcs_url']  = $this->config->project_url;
 
-            $vcs = new $vcsClass((string) $this->config->project, $this->config->code_dir);
+            $vcs = Vcs::getVcs($this->config);
             if (method_exists($vcs, 'getBranch')) {
                 $info['vcs_branch']      = $vcs->getBranch();
             }
@@ -248,12 +250,12 @@ class Project extends Tasks {
                                 '-collect'
                                 );
 
-		if (!$this->config->inside_code) {
-			$processCommand [] = '-p';
-			$processCommand [] = $this->config->project;
-		}
+        if (!$this->config->inside_code) {
+            $processCommand [] = '-p';
+            $processCommand [] = $this->config->project;
+        }
 
-		$process = new Process($processCommand);
+        $process = new Process($processCommand);
         $process->start();
         $this->process = $process;
         // Cheap synchrone run
@@ -293,11 +295,12 @@ class Project extends Tasks {
         }
         display('Reported project' . PHP_EOL);
 
-		$audit_end = time();
-        $this->datastore->addRow('hash', array('audit_end'       => $audit_end,
-                                               'audit_length'    => $audit_end - $audit_start,
-                                               )
-                                    );
+        $audit_end = time();
+        $sqlite = new Sqlite3($this->config->dump);
+        $sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
+
+        $values = "(NULL, 'audit_end', $audit_end), (NULL, 'audit_length', " . ($audit_end - $audit_start) . ')';
+        $sqlite->query('INSERT INTO hash VALUES ' . $values);
 
         // Reset cache from Rulesets
         Rulesets::resetCache();
@@ -333,8 +336,7 @@ class Project extends Tasks {
 
             $analyze = new Analyze(self::IS_SUBTASK);
             $analyze->run();
-            unset($analyze);
-            unset($analyzeConfig);
+            unset($analyze, $analyzeConfig);
             $this->logTime('Analyze : ' . makeList($analyzers, ''));
 
             $dumpConfig = $this->config->duplicate(array('update'    => true,
@@ -364,8 +366,7 @@ class Project extends Tasks {
 
             $dump = new Dump(self::IS_SUBTASK);
             $dump->run();
-            unset($dump);
-            unset($dumpConfig);
+            unset($dump, $dumpConfig);
         } catch (Exception $e) {
             echo "Error while running the Analyzer {$this->config->project}.\nTrying next analysis.\n";
             file_put_contents("{$this->config->log_dir}/analyze.final.log", $e->getMessage());
@@ -403,8 +404,7 @@ class Project extends Tasks {
                 $analyze = new Analyze(self::IS_SUBTASK);
                 $analyze->setConfig($analyzeConfig);
                 $analyze->run();
-                unset($analyze);
-                unset($analyzeConfig);
+                unset($analyze, $analyzeConfig);
                 $this->logTime("Analyze : $ruleset");
 
                 $audit_end = time();
@@ -427,7 +427,7 @@ class Project extends Tasks {
                 $this->finishProcess();
 
                 if ($this->mode === 'parallel') {
-        			$processCommand = array('php',
+                    $processCommand = array('php',
                                 $_SERVER['PATH_TRANSLATED'], // exakat, but where it is called and how
                                 'dump',
                                 '-T',
@@ -435,17 +435,17 @@ class Project extends Tasks {
                                 '-u'
                                 );
 
-					if (!$this->config->inside_code) {
-						$processCommand [] = '-p';
-						$processCommand [] = $this->config->project;
-					}
-		
-		            $process = new Process($processCommand);
+                    if (!$this->config->inside_code) {
+                        $processCommand [] = '-p';
+                        $processCommand [] = $this->config->project;
+                    }
+
+                    $process = new Process($processCommand);
                     $process->start();
                     $this->process = $process;
-                    
+
                     // Finish this process before going on.
-	                $this->finishProcess();
+                    $this->finishProcess();
                 } else {
                     // Skip Dump, as it is auto-saving itself.
                     $dumpConfig = $this->config->duplicate(array('update'               => true,
@@ -458,8 +458,7 @@ class Project extends Tasks {
                     $dump = new Dump(self::IS_SUBTASK);
                     $dump->setConfig($dumpConfig);
                     $dump->run();
-                    unset($dump);
-                    unset($dumpConfig);
+                    unset($dump, $dumpConfig);
 
                     gc_collect_cycles();
                     $this->logTime("Dumped : $ruleset");
@@ -516,7 +515,7 @@ class Project extends Tasks {
         return ucfirst($adjective) . ' ' . $name;
     }
 
-    private function getLineDiff(string $current, VCS $vcs): void {
+    private function getLineDiff(string $current, Vcs $vcs): void {
         if ($this->config->dump_previous === null) {
             return ;
         }
@@ -525,7 +524,7 @@ class Project extends Tasks {
             return ;
         }
 
-        $sqlite = new \Sqlite3($this->config->dump_previous);
+        $sqlite = new Sqlite3($this->config->dump_previous);
         $res = $sqlite->query('SELECT name FROM sqlite_master WHERE type="table" AND name="hash"');
         if ($res === false || !$res->numColumns() || $res->columnType(0) == SQLITE3_NULL) {
             return;

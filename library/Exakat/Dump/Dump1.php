@@ -575,7 +575,7 @@ SELECT
      JOIN namespaces
         ON namespaces.id = cit.namespaceId
      JOIN files
-       ON cit.file = files.id
+       ON cit.file = files.file
 SQL;
         $res = $this->sqlite->query($query);
 
@@ -608,7 +608,7 @@ SELECT COUNT(DISTINCT results.file)
                                   results.file LIKE '/%'               AND 
                                   analyzer IN ($list)
 SQL;
-        $result = $this->sqlite->querySingle($query) ?? '';
+        $result = (int) $this->sqlite->querySingle($query) ?? 0;
 
         return $result;
     }

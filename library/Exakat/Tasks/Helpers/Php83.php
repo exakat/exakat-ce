@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -172,5 +172,6 @@ class Php83 extends Php {
     public const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG          = 404;
     public const T_BAD_CHARACTER                                    = 405;
     public const T_DOUBLE_COLON                                     = 397;
+    public const T_CHARACTER                                        = 1000;
 }
 ?>

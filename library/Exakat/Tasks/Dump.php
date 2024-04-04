@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy - Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy - Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -22,20 +22,23 @@
 
 namespace Exakat\Tasks;
 
-use Exakat\Analyzer\Analyzer;
-use Exakat\Analyzer\Dump\AnalyzerDump;
+use Sqlite3;
+use Exakat\Log;
 use Exakat\Config;
-use Exakat\Exceptions\MissingGremlin;
-use Exakat\Exceptions\NoSuchAnalyzer;
+use Exakat\Query\Query;
+use Exakat\Helpers\Timer;
+use Exakat\GraphElements;
+use Exakat\Analyzer\Analyzer;
+use Exakat\Dump\Dump 					as DumpDb;
+use Exakat\Query\DSL\InitVariable;
 use Exakat\Exceptions\NoSuchProject;
 use Exakat\Exceptions\NoSuchRuleset;
 use Exakat\Exceptions\ProjectNeeded;
-use Exakat\GraphElements;
-use Exakat\Log;
-use Exakat\Query\Query;
-use Exakat\Dump\Dump as DumpDb;
-use Exakat\Helpers\Timer;
-use Exakat\Query\DSL\InitVariable;
+use Exakat\Exceptions\MissingGremlin;
+use Exakat\Exceptions\NoSuchAnalyzer;
+use Exakat\Analyzer\Dump\AnalyzerDump;
+use Exakat\Tasks\Helpers\BaselineStash;
+use const STRICT_COMPARISON;
 
 class Dump extends Tasks {
     public const CONCURENCE = self::DUMP;
@@ -66,12 +69,12 @@ class Dump extends Tasks {
         $this->log = new Log('dump',
             $this->config->project_dir);
 
-        $this->linksDown = GraphElements::linksAsList();
+        $this->linksDown = GraphElements::linksdownAsList();
     }
 
     public function run(): void {
-        if (!file_exists($this->config->project_dir) && 
-        	!$this->config->inside_code) {
+        if (!file_exists($this->config->project_dir) &&
+            !$this->config->inside_code) {
             throw new NoSuchProject((string) $this->config->project);
         }
 
@@ -100,7 +103,10 @@ class Dump extends Tasks {
         if ($this->config->update !== true && file_exists($this->config->dump)) {
             unlink($this->config->dump);
         }
-        $this->dump = DumpDb::factory($this->config->dump, DumpDb::INIT);
+        $baselineStash = new BaselineStash($this->config);
+        $baseline = $baselineStash->getLastStash();
+
+        $this->dump = DumpDb::factory($this->config->dump, DumpDb::INIT, $baseline);
 
         if ($this->config->collect === true) {
             display('Collecting data');
@@ -111,7 +117,7 @@ class Dump extends Tasks {
         $this->loadSqlDump();
 
         $counts = array();
-        $datastore = new \Sqlite3($this->config->datastore, \SQLITE3_OPEN_READONLY);
+        $datastore = new Sqlite3($this->config->datastore, \SQLITE3_OPEN_READONLY);
         $datastore->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
         $res = $datastore->query('SELECT * FROM analyzed');
         while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
@@ -139,6 +145,7 @@ class Dump extends Tasks {
 
                 $this->log->log('Processing Ruleset ' . join(', ', $ruleset));
                 $missing = $this->processResultsRuleset($ruleset, $counts);
+
                 $this->log->log('expandRulesets');
                 $this->expandRulesets();
                 $this->log->log('collectHashAnalyzer');
@@ -199,7 +206,7 @@ class Dump extends Tasks {
     }
 
     public function finalMark(array $finalMark): void {
-        $sqlite = new \Sqlite3($this->config->dump);
+        $sqlite = new Sqlite3($this->config->dump);
         $sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
 
         $values = array();
@@ -231,7 +238,7 @@ class Dump extends Tasks {
         if (!empty($diff)) {
             $this->dump->removeResults($diff);
             foreach ($diff as $d) {
-                $this->processResults($d, $counts[$d] ?? -3);
+                $this->processResults($d, $counts[$d] ?? Analyzer::CONFIGURATION_INCOMPATIBLE);
             }
             $analyzers = array_diff($analyzers, $diff);
         }
@@ -286,50 +293,58 @@ class Dump extends Tasks {
         }
         $this->dump->removeResults($analyzers);
         $filters = array_merge(...$filters);
-        
+
         $chunk = $analyzers;
-        $query = $this->newQuery('processMultipleResults ' . $id);
+        $query = $this->newQuery('processMultipleResults');
         $query->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS)
               ->is('analyzer', $chunk)
-              ->values(array("analysis" => "analyzer",
-              				 "count"    => "count",
-              				 ));
+              ->values(array('analysis' => 'analyzer',
+                             'count'    => 'count',
+                               ));
         $query->prepareRawQuery();
         $res = $this->gremlin->query($query->getQuery(), $query->getArguments())->toArray();
-        
+
         $empties  = array();
         $unconfig = array();
         $list     = array();
-        foreach($res as $analysis) {
-        	if ($analysis[0]['valuescount'] == -1 || $analysis[0]['valuescount'] == -2) { 
-        		$unconfig[] = $analysis[0]['valuesanalysis'];
-        	} elseif ($analysis[0]['valuescount'] == 0) { 
-        		$empties[] = $analysis[0]['valuesanalysis'];
-        	} else  {
-        		$list[$analysis[0]['valuesanalysis']] = $analysis[0]['valuescount'];
-        	}
+        foreach ($res as $analysis) {
+            if (in_array($analysis[0]['valuescount'], array(Analyzer::UNKNOWN_COMPATIBILITY, Analyzer::VERSION_INCOMPATIBLE), STRICT_COMPARISON)) {
+                $unconfig[] = $analysis[0]['valuesanalysis'];
+            } elseif ($analysis[0]['valuescount'] == 0) {
+                $empties[] = $analysis[0]['valuesanalysis'];
+            } else {
+                $list[$analysis[0]['valuesanalysis']] = $analysis[0]['valuescount'];
+            }
         }
 
-		// @todo : this could be optimized by limiting the expected number of results to ~10k each query. 
+        // @todo : this could be optimized by limiting the expected number of results to ~10k each query.
         $chunks = array_chunk(array_keys($list), 50);
         // Gremlin only accepts chunks of 255 maximum
 
         $this->log->log('Processing ' . count($chunks) . " of 50\n");
-        
+
         foreach ($chunks as $id => $chunk) {
-            $query = $this->newQuery('processMultipleResults ' . $id);
-            $query->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS)
-                  ->is('analyzer', $chunk)
-                  ->savePropertyAs('analyzer', 'analyzer')
-                  ->outIs('ANALYZED')
-                  ->atomIsNot('Noresult')
-                  ->initVariable('ligne',        'it.get().value("line")')
-                  ->initVariable('fullcode_',    'it.get().label() == "Sequence" ? "/**/" : it.get().value("fullcode") ', InitVariable::TYPE_CODE)
-                  ->initVariable('file',         '"None"')
-                  ->initVariable('theFunction',  '""')
-                  ->initVariable('theClass',     '""')
-                  ->initVariable('theNamespace', '""')
-            ->raw(<<<GREMLIN
+            $begin1 = hrtime(true);
+
+            $offset = 0;
+            $dumpSize = 10000;
+            do {
+                $begin = hrtime(true);
+
+                $query = $this->newQuery('processMultipleResults ' . $id);
+                $query->atomIs('Analysis', Analyzer::WITHOUT_CONSTANTS)
+                      ->is('analyzer', $chunk)
+                      ->savePropertyAs('analyzer', 'analyzer')
+                      ->outIs('ANALYZED')
+                      ->raw('range(' . $offset . ', ' . $offset + $dumpSize . ')')
+                      ->atomIsNot('Noresult')
+                      ->initVariable('ligne',        'it.get().value("line")')
+                      ->initVariable('fullcode_',    'it.get().label() == "Sequence" ? "/**/" : it.get().value("fullcode") ', InitVariable::TYPE_CODE)
+                      ->initVariable('file',         '"None"')
+                      ->initVariable('theFunction',  '""')
+                      ->initVariable('theClass',     '""')
+                      ->initVariable('theNamespace', '""')
+                ->raw(<<<GREMLIN
 where( __.until( hasLabel("Project") ).repeat( 
     __.in($this->linksDown)
       .sideEffect( __.hasLabel("Function", "Closure", "Arrowfunction", "Magicmethod", "Method").sideEffect{ theFunction = it.get().value("fullcode")} )
@@ -339,66 +354,71 @@ where( __.until( hasLabel("Project") ).repeat(
        ).fold()
 )
 GREMLIN
-            )
-            ->getVariable(array('fullcode_', 'file', 'ligne', 'theNamespace', 'theClass', 'theFunction', 'analyzer'),
-                array('fullcode',  'file', 'line' , 'namespace',    'class',    'function',    'analyzer'));
-            $query->prepareRawQuery();
-            try {
-                $this->log->log("Starts gremlin query\n");
-                $res = $this->gremlin->query($query->getQuery(), $query->getArguments())->toArray();
-                $this->log->log("Ends gremlin query\n");
-            } catch (\Throwable $e) {
-                $rows = explode(PHP_EOL, $e->getMessage());
-                $this->log->log('error while dumping data' . PHP_EOL . $rows[0]);
+                )
+                ->getVariable(array('fullcode_', 'file', 'ligne', 'theNamespace', 'theClass', 'theFunction', 'analyzer'),
+                    array('fullcode',  'file', 'line' , 'namespace',    'class',    'function',    'analyzer'));
+                $query->prepareRawQuery();
 
-                continue;
-            }
+                try {
+                    $this->log->log("Starts gremlin query\n");
+                    $res = $this->gremlin->query($query->getQuery(), $query->getArguments())->toArray();
+                    $this->log->log("Ends gremlin query\n");
+                } catch (\Throwable $e) {
+                    $rows = explode(PHP_EOL, $e->getMessage(), 1);
+                    $this->log->log('error while dumping data' . PHP_EOL . $rows[0]);
 
-            $this->log->log('Dumping ' . count($res) . ' results');
-            $toDump = array();
-            foreach ($res as $result) {
-                if (empty($result)) {
                     continue;
                 }
+                $end = hrtime(true);
 
-                foreach ($filters as $filter) {
-                    if (!$filter->filterFile($result)) {
-                        display ('Skipping ' . $result['file'] . ' (' . $filter::class . ') ' . PHP_EOL);
-                        --$counts[$result['analyzer']];
-                        continue 2;
+                $this->log->log('Dumping ' . count($res) . ' results');
+                $toDump = array();
+                foreach ($res as $result) {
+                    if (empty($result)) {
+                        continue;
                     }
+
+                    foreach ($filters as $filter) {
+                        if (!$filter->filterFile($result)) {
+                            display ('Skipping ' . $result['file'] . ' (' . $filter::class . ') ' . PHP_EOL);
+                            --$counts[$result['analyzer']];
+                            continue 2;
+                        }
+                    }
+
+                    if (isset($severities[$result['analyzer']])) {
+                        $severity = $severities[$result['analyzer']];
+                    } else {
+                        $severity = $docs->getDocs($result['analyzer'])['severity'];
+                        $severities[$result['analyzer']] = $severity;
+                    }
+
+                    ++$saved;
+                    $toDump[] = array($result['fullcode'],
+                                      $result['file'],
+                                      $result['line'],
+                                      $result['namespace'],
+                                      $result['class'],
+                                      $result['function'],
+                                      $result['analyzer'],
+                                      $severity,
+                                      );
                 }
 
-                if (isset($severities[$result['analyzer']])) {
-                    $severity = $severities[$result['analyzer']];
-                } else {
-                    $severity = $docs->getDocs($result['analyzer'])['severity'];
-                    $severities[$result['analyzer']] = $severity;
-                }
-
-                ++$saved;
-                $toDump[] = array($result['fullcode'],
-                                  $result['file'],
-                                  $result['line'],
-                                  $result['namespace'],
-                                  $result['class'],
-                                  $result['function'],
-                                  $result['analyzer'],
-                                  $severity,
-                                  );
-            }
-
-            $readCounts[] = $this->dump->addResults($toDump);
+                $readCounts[] = $this->dump->addResults($toDump);
+                $offset += $dumpSize;
+            } while (count($res) === $dumpSize);
+            $end1 = hrtime(true);
         }
-        $readCounts = array_merge(...$readCounts);
+
+        $readCounts = array_add_by_keys($readCounts);
 
         $this->log->log(implode(', ', $analyzers) . "\ndumped results $saved");
 
         $error = 0;
-        // @todo : we are loosing the -1 here (in $unconfig). 
+        // @todo : we are loosing the -1 here (in $unconfig).
         $emptyResults = array_merge($skipAnalysis, $empties, $unconfig);
-        foreach(array_keys($list) as $class) {
-
+        foreach (array_keys($list) as $class) {
             if ($counts[$class] === 0 && !isset($readCounts[$class])) {
                 display("No results saved for $class\n");
                 $emptyResults[] = $class;
@@ -745,7 +765,7 @@ GREMLIN
     public function checkRulesets(string $ruleset, array $analyzers): void {
         $sqliteFile = $this->config->dump;
 
-        $sqlite = new \Sqlite3($sqliteFile);
+        $sqlite = new Sqlite3($sqliteFile);
         $sqlite->busyTimeout(\SQLITE3_BUSY_TIMEOUT);
 
         $query = 'SELECT analyzer FROM resultsCounts WHERE analyzer IN (' . makeList($analyzers) . ')';

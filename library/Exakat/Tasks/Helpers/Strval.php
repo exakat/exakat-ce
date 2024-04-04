@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@ class Strval extends Plugin {
         $this->php = $php;
     }
 
-    public function run(Atom $atom, array $extras): void {
+    public function run(AtomInterface $atom, array $extras): void {
         if (isset($this->skipAtoms[$atom->atom])) {
             return;
         }
@@ -99,7 +99,7 @@ class Strval extends Plugin {
                 if (empty($extras)) {
                     $atom->noDelimiter = trimOnce($atom->code);
                 } else {
-                    $fullcodes = array_column($extras, 'fullcode');
+                    $fullcodes = array_column($extras, 'noDelimiter');
                     $atom->noDelimiter = implode('', $fullcodes);
                 }
                 break;
@@ -272,8 +272,8 @@ class Strval extends Plugin {
             case 'Identifier':
                 // PHP 8+, no value
                 // PHP 7-, the eponynous value
-                if (version_compare($this->php->getVersion(), '8.0.0') <= 0 &&
-                    $atom->noDelimiter === null
+                if (version_compare($this->php->getVersion(), '8.0.0') >= 0 &&
+                    isset($atom->noDelimiter)
                 ) {
                     $atom->noDelimiter = $atom->fullcode;
                 }

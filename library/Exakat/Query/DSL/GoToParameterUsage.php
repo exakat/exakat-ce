@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -36,6 +36,7 @@ sideEffect{
 .out('DEFINITION')
 .optional( __.out("METHOD"))
 .out('ARGUMENT')
+.has("rank")
 .filter{it.get().value("rank") == ranked || ("rankName" in it.get().keys() && it.get().value("rankName") == rankedName) || (variadic == true && it.get().value("rank") >= ranked);}
 .not(hasLabel("Void"))
 GREMLIN

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -33,21 +33,16 @@ class EnvironnementVariables extends AnalyzerHashHashResults {
               ->inIs('VARIABLE')
               ->outIs('INDEX')
               ->has('noDelimiter')
-              ->raw(<<<'GREMLIN'
-groupCount("m").by("noDelimiter").cap("m")
-GREMLIN
-              );
+              ->groupCount('noDelimiter');
         $this->analyzerName = 'Environment Variables';
         $this->prepareQuery();
 
-        //$_ENV['name']
+        //getenv('name')
         $this->atomFunctionIs(array('\\putenv', '\\getenv'))
               ->outWithRank('ARGUMENT', 0)
               ->has('noDelimiter')
-              ->raw(<<<'GREMLIN'
-groupCount("m").by("noDelimiter").cap("m")
-GREMLIN
-              );
+              ->groupCount('noDelimiter');
+        $this->prepareQuery();
     }
 }
 

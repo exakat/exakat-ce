@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2021 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -254,7 +254,7 @@ class IsStubStructure extends Analyzer {
         //static methodcall
         $traitsStaticMethods = array_values(array_filter($stubStaticMethods, function (string $a) use ($list): bool {
             list($a ) = explode('::', $a, 2);
-            return in_array($a, $list);
+            return in_array($a, $list, STRICT_COMPARISON);
         }));
         if (!empty($traitsStaticMethods)) {
             $this->atomIs('Staticmethodcall')

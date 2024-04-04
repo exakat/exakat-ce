@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -128,7 +128,7 @@ SQL;
         } else {
             $globalpath = $this->makeGlobalPath($fullnspath);
         }
-        
+
         $fullnspath = Sqlite3::escapeString($fullnspath);
         $globalpath = Sqlite3::escapeString($globalpath);
 
@@ -183,8 +183,8 @@ SQL;
         foreach ($types as $type) {
             $globalpath = $this->makeGlobalPath($fullnspath);
 
-			$quotedFullnspath = sqlite3::escapeString($fullnspath);
-			$quotedGlobalpath = sqlite3::escapeString($globalpath);
+            $quotedFullnspath = Sqlite3::escapeString($fullnspath);
+            $quotedGlobalpath = Sqlite3::escapeString($globalpath);
             $this->calls[] = "('$type',
                                '{$quotedFullnspath}',
                                '{$quotedGlobalpath}',
@@ -201,8 +201,8 @@ SQL;
 
         $globalpath = $this->makeGlobalPath($fullnspath);
 
-		$quotedFullnspath = sqlite3::escapeString($fullnspath);
-		$quotedGlobalpath = sqlite3::escapeString($globalpath);
+        $quotedFullnspath = Sqlite3::escapeString($fullnspath);
+        $quotedGlobalpath = Sqlite3::escapeString($globalpath);
         $this->definitions[] = "('{$type}',
                                  '{$quotedFullnspath}',
                                  '{$quotedGlobalpath}',

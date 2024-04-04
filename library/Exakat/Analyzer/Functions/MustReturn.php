@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -76,16 +76,15 @@ class MustReturn extends Analyzer {
              ->isNot('abstract', true)
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
-             ->fullnspathIsNot('\\void')
+             ->fullnspathIsNot(array('\\void', '\\generator'))
              ->back('first')
              ->outIs('RETURNED')
              ->atomIs('Void')
              ->not(
                  $this->side()
                       ->outIs('BLOCK')
-                      ->is('count', 1)
                       ->outIs('EXPRESSION')
-                      ->atomIs('Throw')
+                      ->atomIs(array('Throw', 'Exit'))
              )
              ->back('first');
         $this->prepareQuery();
@@ -94,7 +93,7 @@ class MustReturn extends Analyzer {
              ->isNot('abstract', true)
              ->outIs('RETURNTYPE')
              ->atomIsNot('Void')
-             ->fullnspathIsNot('\\void')
+             ->fullnspathIsNot(array('\\void', '\\generator'))
              ->back('first')
              ->hasNoOut('RETURNED');
         $this->prepareQuery();

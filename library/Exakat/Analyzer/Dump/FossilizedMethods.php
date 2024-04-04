@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -32,16 +32,16 @@ class FossilizedMethods extends AnalyzerHashResults {
     }
 
     public function analyze(): void {
-        $MAX_LOOPING = self::MAX_LOOPING;
+        // class a { function foo() {} }
+        // class b extends a { function foo() {} }
+        // class c extends b { function foo() {} }  : 3
         $this->atomIs(self::FUNCTIONS_METHOD)
              ->hasNoOut('OVERWRITE')
              ->hasIn('OVERWRITE')
-             ->raw(<<<GREMLIN
- project("fm").by( __.emit().repeat(__.in("OVERWRITE") ).times($MAX_LOOPING).not(hasLabel("Virtualmethod")).count())
-.select("fm").as("b").where(is(gt(1)))
-.select("first", "b").by("fullcode").by()
-GREMLIN
-             );
+             ->countAllOverwrite('count')
+             ->select(array('first' => 'fullcode',
+                             'count' => '',
+                             ));
         $this->prepareQuery();
     }
 }

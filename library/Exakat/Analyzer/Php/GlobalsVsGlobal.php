@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ class GlobalsVsGlobal extends Analyzer {
         if (empty($globals)) {
             return;
         }
-        
+
         $globals = (int) $globals[0];
 
         $mapping = <<<GREMLIN
@@ -71,7 +71,7 @@ GREMLIN;
         }
 
         $this->atomIs(self::VARIABLES_ALL)
-             ->raw('or( has("code", ' . $globals. '), __.in("GLOBAL")) ')
+             ->raw('or( has("code", ' . $globals . '), __.in("GLOBAL")) ')
              ->raw($mapping)
              ->isEqual(array_keys($types))
              ->back('first');

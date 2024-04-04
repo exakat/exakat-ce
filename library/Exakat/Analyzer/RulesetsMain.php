@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ namespace Exakat\Analyzer;
 use SQLite3;
 
 class RulesetsMain implements RulesetsInterface {
-    private static sqlite3 $sqlite;
+    private static SQLite3 $sqlite;
     private ?string $phar_tmp   = null;
 
     public function __construct(string $path) {

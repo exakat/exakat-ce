@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -98,7 +98,10 @@ class CouldBeString extends CouldBeType {
         $this->checkCastArgument('T_STRING_CAST', array('\\strval'));
 
         // foo('a'); function foo($a) {}
-        $this->checkCallingArgumentType(array('String', 'Heredoc', 'Concatenation'));
+        $this->checkCallingArgumentType($stringAtoms);
+
+        // class constant type
+        $this->checkConstantType($stringAtoms);
 
         // argument because used in a specific operation
         // $arg . ''

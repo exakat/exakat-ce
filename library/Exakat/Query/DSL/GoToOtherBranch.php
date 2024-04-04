@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -23,6 +23,8 @@
 
 namespace Exakat\Query\DSL;
 
+use Exakat\Exceptions\WrongNumberOfArguments;
+
 class GoToOtherBranch extends DSL {
     public function run(): Command {
         switch (func_num_args()) {
@@ -43,7 +45,7 @@ class GoToOtherBranch extends DSL {
                 break;
 
             default:
-                throw new Exception('Wrong number of arguments for goToOtherBranch : ' . func_num_args() . ' provided, 1 or 2 expected.');
+                throw new WrongNumberOfArguments('Wrong number of arguments for goToOtherBranch : ' . func_num_args() . ' provided, 1 or 2 expected.');
         }
 
         return new Command('inE().hasLabel(within(***)).as("b1").outV()' . $as . '.outE().hasLabel(within(***)).as("b2").where("b1", neq("b2")).by(label).inV()',

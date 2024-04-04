@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 /*
- * Copyright 2012-2022 Damien Seguy – Exakat SAS <contact(at)exakat.io>
+ * Copyright 2012-2024 Damien Seguy – Exakat SAS <contact(at)exakat.io>
  * This file is part of Exakat.
  *
  * Exakat is free software: you can redistribute it and/or modify
@@ -29,23 +29,20 @@ class ConstantComparisonConsistance extends Analyzer {
     public function analyze(): void {
         $literalsList = makeList(self::LITERALS);
         $mapping = <<<GREMLIN
-if (it.get().vertices(OUT, "LEFT").next().label() in [$literalsList]) { 
-    x2 = "left"; 
-} else if (it.get().vertices(OUT, "RIGHT").next().label() in [$literalsList]) { 
-    x2 = "right"; 
-} else {
-    x2 = it.get().value("fullcode");
-}
-
+choose( __.out("LEFT").hasLabel($literalsList), constant("left"), 
+											    constant("right")
+)
 GREMLIN;
         $storage = array('To the left'  => 'left',
                          'To the right' => 'right');
 
         $this->atomIs('Comparison')
-             ->outIs(array('LEFT', 'RIGHT'))
-             ->atomIs(self::LITERALS)
-             ->back('first')
-             ->raw('map{ ' . $mapping . ' }')
+             ->filter(
+                 $this->side()
+                      ->outIs(array('LEFT', 'RIGHT'))
+                      ->atomIs(self::LITERALS)
+             )
+             ->raw($mapping)
              ->groupCount();
         $types = $this->rawQuery()->toArray();
 
@@ -78,10 +75,12 @@ GREMLIN;
         $types = array_keys($types);
 
         $this->atomIs('Comparison')
-             ->outIs(array('LEFT', 'RIGHT'))
-             ->atomIs(self::LITERALS)
-             ->back('first')
-             ->raw('sideEffect{ ' . $mapping . '; }')
+             ->filter(
+                 $this->side()
+                      ->outIs(array('LEFT', 'RIGHT'))
+                      ->atomIs(self::LITERALS)
+             )
+             ->raw($mapping)
              ->isEqual($types)
              ->back('first');
         $this->prepareQuery();
